@@ -9,42 +9,92 @@ import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 import { ref } from 'vue'
 
-const email = ref('')
-const password = ref('')
-
-const iniciarSesion = () => {
-  console.log(email.value, password.value)
+const initialValues = ref({
+  email: '',
+  password: '',
+})
+const resolver = zodResolver(
+  z.object({
+    email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
+    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+  }),
+)
+const iniciarSesion = ({ valid, values }) => {
+  if (valid) {
+    console.log('Iniciar sesión')
+  } else {
+    console.log('Formulario inválido')
+  }
 }
 </script>
 
 <template>
-  <div class="h-screen w-full flex justify-center items-center bg-zinc-900">
-    <Card class="shadow-2xl p-8 w-full max-w-md !bg-zinc-800">
+  <div class="min-h-screen flex items-center justify-center bg-zinc-950 p-4 font-sans">
+    <Card class="w-full max-w-md !bg-zinc-800 rounded">
       <template #title>
-        <h1 class="mb-8 text-4xl font-bold text-white text-center">
-          ¡Bienvenido a Formula 1 Fantasy!
-        </h1>
+        <div class="flex flex-col items-center -mt-12 mb-4">
+          <img src="../assets/icon.png" alt="F1 Logo" class="mx-auto" />
+          <div class="text-center -mt-10">
+            <h1 class="text-3xl font-black italic tracking-tight text-red-600 uppercase">
+              F1 Fantasy
+            </h1>
+          </div>
+        </div>
       </template>
       <template #content>
-        <div class="flex flex-col gap-4">
-          <div class="flex flex-col gap-2">
-            <label for="email" class="text-white">Email</label>
+        <Form
+          v-slot="$form"
+          :resolver="resolver"
+          :initial-values="initialValues"
+          @submit="iniciarSesion"
+          class="flex flex-col gap-4 mt-4"
+        >
+          <div class="flex flex-col gap-1">
+            <label for="email" class="font-bold text-white uppercase">Email</label>
             <InputText
               id="email"
+              name="email"
               type="email"
-              class="w-full"
-              v-model="email"
-              placeholder="ejemplo@gmail.com"
+              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
+              placeholder="piloto@escuderia.com"
+            />
+            <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
+              {{ $form.email.error.message }}
+            </Message>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="password" class="font-bold text-white uppercase">Contraseña</label>
+            <InputText
+              id="password"
+              name="password"
+              type="password"
+              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
+              placeholder="********"
+            />
+            <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
+              {{ $form.password.error.message }}
+            </Message>
+            <div class="flex flex-col gap-1">
+              <a href="#" class="font-bold text-white mt-2">¿Olvidaste tu contraseña?</a>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-2 mt-4">
+            <Button
+              type="submit"
+              label="Iniciar Sesión"
+              class="w-full !bg-red-600 !border-red-600 font-bold text-white uppercase"
             />
           </div>
+
           <div class="flex flex-col gap-2">
-            <label for="password" class="text-white">Password</label>
-            <InputText id="password" type="password" placeholder="********" />
+            <Button
+              type="button"
+              label="Crear Cuenta"
+              class="w-full !bg-zinc-700 !border-zinc-700 font-bold text-white uppercase"
+            />
           </div>
-        </div>
-        <div class="flex justify-center mt-8">
-          <Button label="Iniciar sesión" class="w-full" @click="iniciarSesion" />
-        </div>
+        </Form>
       </template>
     </Card>
   </div>
