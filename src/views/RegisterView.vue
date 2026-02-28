@@ -137,6 +137,7 @@ const crearCuenta = ({ valid, values }) => {
             <Button
               type="button"
               label="VOLVER"
+              @click="$router.push('/')"
               class="w-full !bg-zinc-700 !border-zinc-700 font-bold !text-white hover:!bg-zinc-600 hover:!border-zinc-600 transition-colors"
             />
           </div>

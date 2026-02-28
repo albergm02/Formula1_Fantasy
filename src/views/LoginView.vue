@@ -95,6 +95,7 @@ const iniciarSesion = ({ valid, values }) => {
             <Button
               type="button"
               label="CREAR CUENTA"
+              @click="$router.push('/register')"
               class="w-full !bg-zinc-700 !border-zinc-700 font-bold !text-white hover:!bg-zinc-600 hover:!border-zinc-600 transition-colors"
             />
           </div>
