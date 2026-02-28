@@ -13,12 +13,14 @@ const initialValues = ref({
   email: '',
   password: '',
 })
+
 const resolver = zodResolver(
   z.object({
     email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
     password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   }),
 )
+
 const iniciarSesion = ({ valid, values }) => {
   if (valid) {
     console.log('Iniciar sesión')
@@ -30,68 +32,70 @@ const iniciarSesion = ({ valid, values }) => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-zinc-950 p-4 font-sans">
-    <Card class="w-full max-w-md !bg-zinc-800 rounded">
+    <Card class="w-full max-w-md !bg-zinc-800 rounded !shadow-red-600/50">
       <template #title>
-        <div class="flex flex-col items-center -mt-12 mb-4">
-          <img src="../assets/icon.png" alt="F1 Logo" class="mx-auto" />
-          <div class="text-center -mt-10">
-            <h1 class="text-3xl font-black italic tracking-tight text-red-600 uppercase">
-              F1 Fantasy
-            </h1>
+        <div class="flex flex-col items-center gap-4">
+          <img src="../assets/logo_final.png" alt="F1 Fantasy Logo" class="w-32 h-32" />
+          <div class="text-center">
+            <h1 class="text-3xl font-black italic text-red-600">F1 FANTASY</h1>
           </div>
         </div>
       </template>
       <template #content>
         <Form
           v-slot="$form"
-          :resolver="resolver"
-          :initial-values="initialValues"
-          @submit="iniciarSesion"
           class="flex flex-col gap-4 mt-4"
+          :initial-values="initialValues"
+          :resolver="resolver"
+          @submit="iniciarSesion"
         >
           <div class="flex flex-col gap-1">
-            <label for="email" class="font-bold text-white uppercase">Email</label>
+            <label for="email" class="font-bold text-white">EMAIL</label>
             <InputText
               id="email"
-              name="email"
               type="email"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
+              name="email"
               placeholder="piloto@escuderia.com"
+              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
+              fluid
             />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
           </div>
           <div class="flex flex-col gap-1">
-            <label for="password" class="font-bold text-white uppercase">Contraseña</label>
+            <label for="password" class="font-bold text-white">CONTRASEÑA</label>
             <InputText
               id="password"
-              name="password"
               type="password"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
+              name="password"
               placeholder="********"
+              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
+              fluid
             />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
-            <div class="flex flex-col gap-1">
-              <a href="#" class="font-bold text-white mt-2">¿Olvidaste tu contraseña?</a>
+            <div class="flex justify-end mt-1">
+              <a href="#" class="font-bold text-zinc-400 hover:text-zinc-200 transition-colors"
+                >¿Olvidaste tu contraseña?</a
+              >
             </div>
           </div>
 
-          <div class="flex flex-col gap-2 mt-4">
+          <div class="flex flex-col gap-2">
             <Button
               type="submit"
-              label="Iniciar Sesión"
-              class="w-full !bg-red-600 !border-red-600 font-bold text-white uppercase"
+              label="INICIAR SESIÓN"
+              class="w-full !bg-red-600 !border-red-600 font-bold !text-white hover:!bg-red-700 hover:!border-red-700 transition-colors"
             />
           </div>
 
           <div class="flex flex-col gap-2">
             <Button
               type="button"
-              label="Crear Cuenta"
-              class="w-full !bg-zinc-700 !border-zinc-700 font-bold text-white uppercase"
+              label="CREAR CUENTA"
+              class="w-full !bg-zinc-700 !border-zinc-700 font-bold !text-white hover:!bg-zinc-600 hover:!border-zinc-600 transition-colors"
             />
           </div>
         </Form>
