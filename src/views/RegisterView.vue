@@ -8,6 +8,12 @@ import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { signUp } from '@/services/authService'
+
+const router = useRouter()
+const loading = ref(false)
+const firebaseError = ref('')
 
 const initialValues = ref({
   name: '',
@@ -33,11 +39,22 @@ const resolver = zodResolver(
     }),
 )
 
-const crearCuenta = ({ valid, values }) => {
-  if (valid) {
-    console.log('Crear cuenta')
-  } else {
-    console.log('Formulario inválido')
+const crearCuenta = async ({ valid, values }) => {
+  if (!valid) return
+  loading.value = true
+  firebaseError.value = ''
+
+  try {
+    await signUp(values.email, values.password)
+    router.push('/dashboard')
+  } catch (error) {
+    if (error.code === 'auth/email-already-in-use') {
+      firebaseError.value = 'El correo electrónico ya está registrado'
+    } else {
+      firebaseError.value = error.message
+    }
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -129,6 +146,7 @@ const crearCuenta = ({ valid, values }) => {
             <Button
               type="submit"
               label="CREAR CUENTA"
+              :loading="loading"
               class="w-full !bg-red-600 !border-red-600 font-bold !text-white hover:!bg-red-700 hover:!border-red-700 transition-colors"
             />
           </div>

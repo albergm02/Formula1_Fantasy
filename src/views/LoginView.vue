@@ -9,6 +9,13 @@ import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 import { ref } from 'vue'
 
+import { useRouter } from 'vue-router'
+import { signIn } from '@/services/authService'
+
+const router = useRouter()
+const loading = ref(false)
+const firebaseError = ref('')
+
 const initialValues = ref({
   email: '',
   password: '',
@@ -21,11 +28,18 @@ const resolver = zodResolver(
   }),
 )
 
-const iniciarSesion = ({ valid, values }) => {
-  if (valid) {
-    console.log('Iniciar sesión')
-  } else {
-    console.log('Formulario inválido')
+const iniciarSesion = async ({ valid, values }) => {
+  if (!valid) return
+  loading.value = true
+  firebaseError.value = ''
+
+  try {
+    await signIn(values.email, values.password)
+    router.push('/dashboard')
+  } catch (error) {
+    firebaseError.value = error.message
+  } finally {
+    loading.value = false
   }
 }
 </script>
