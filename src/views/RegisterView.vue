@@ -99,6 +99,7 @@ const crearCuenta = async ({ valid, values }) => {
               id="email"
               type="email"
               name="email"
+              autocomplete="email"
               placeholder="piloto@escuderia.com"
               class="w-full !bg-zinc-700 !text-white !border-zinc-700"
               fluid
@@ -111,8 +112,9 @@ const crearCuenta = async ({ valid, values }) => {
           <div class="flex flex-col gap-1">
             <label for="password" class="font-bold text-white">CONTRASEÑA</label>
             <Password
-              id="password"
+              inputId="password"
               name="password"
+              autocomplete="current-password"
               placeholder="********"
               toggle-mask
               :feedback="false"
@@ -126,10 +128,10 @@ const crearCuenta = async ({ valid, values }) => {
 
           <div class="flex flex-col gap-1">
             <label for="confirmPassword" class="font-bold text-white">CONFIRMAR CONTRASEÑA</label>
-            <InputText
-              id="confirmPassword"
-              type="password"
+            <Password
+              inputId="confirmPassword"
               name="confirmPassword"
+              autocomplete="current-password"
               placeholder="********"
               toggle-mask
               :feedback="false"
