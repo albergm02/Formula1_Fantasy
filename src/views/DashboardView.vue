@@ -1,9 +1,17 @@
 <script setup>
+import Card from 'primevue/card'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import { signOut } from '@/services/authService'
 
 const router = useRouter()
+
+const usuario = {
+  name: 'Alberto',
+  iniciales: 'AF',
+  puntos: '1200',
+  presupuesto: '50M',
+}
 
 const cerrarSesion = async () => {
   try {
@@ -17,16 +25,25 @@ const cerrarSesion = async () => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-zinc-950 p-4 font-sans">
-    <div class="w-full max-w-md !bg-zinc-800 rounded !shadow-red-600/50 p-6">
-      <h1 class="text-3xl font-black italic text-red-600 mb-6 text-center">DASHBOARD</h1>
-      <p class="text-center text-gray-300 mb-6">¡Bienvenido al Dashboard de F1 Fantasy!</p>
-      <div class="flex justify-center">
-        <Button
-          label="Cerrar Sesión"
-          class="!bg-red-600 !border-red-600 font-bold !text-white hover:!bg-red-700 hover:!border-red-700 transition-colors"
-          @click="cerrarSesion"
-        />
+    <header class="w-full max-w-4xl flex items-center justify-between mb-8">
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white font-bold"
+        >
+          {{ usuario.iniciales }}
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">{{ usuario.name }}</h2>
+          <p class="text-sm text-zinc-400">
+            Puntos: {{ usuario.puntos }} | Presupuesto: {{ usuario.presupuesto }}
+          </p>
+        </div>
       </div>
-    </div>
+      <Button
+        label="Cerrar Sesión"
+        class="p-button-sm p-button-outlined p-button-secondary"
+        @click="cerrarSesion"
+      />
+    </header>
   </div>
 </template>
