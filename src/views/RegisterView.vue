@@ -3,6 +3,7 @@ import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
+import Password from 'primevue/password'
 
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
@@ -109,11 +110,12 @@ const crearCuenta = async ({ valid, values }) => {
 
           <div class="flex flex-col gap-1">
             <label for="password" class="font-bold text-white">CONTRASEÑA</label>
-            <InputText
+            <Password
               id="password"
-              type="password"
               name="password"
               placeholder="********"
+              toggle-mask
+              :feedback="false"
               class="w-full !bg-zinc-700 !text-white !border-zinc-700"
               fluid
             />
@@ -129,6 +131,8 @@ const crearCuenta = async ({ valid, values }) => {
               type="password"
               name="confirmPassword"
               placeholder="********"
+              toggle-mask
+              :feedback="false"
               class="w-full !bg-zinc-700 !text-white !border-zinc-700"
               fluid
             />

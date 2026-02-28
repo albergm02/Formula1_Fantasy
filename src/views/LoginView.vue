@@ -3,6 +3,7 @@ import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
+import Password from 'primevue/password'
 
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
@@ -79,18 +80,19 @@ const iniciarSesion = async ({ valid, values }) => {
           </div>
           <div class="flex flex-col gap-1">
             <label for="password" class="font-bold text-white">CONTRASEÑA</label>
-            <InputText
+            <Password
               id="password"
-              type="password"
               name="password"
               placeholder="********"
+              toggle-mask
+              :feedback="false"
               class="w-full !bg-zinc-700 !text-white !border-zinc-700"
               fluid
             />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
-            <div class="flex justify-end mt-1">
+            <div class="flex justify-end mt-2">
               <a href="#" class="font-bold text-zinc-400 hover:text-zinc-200 transition-colors"
                 >¿Olvidaste tu contraseña?</a
               >
