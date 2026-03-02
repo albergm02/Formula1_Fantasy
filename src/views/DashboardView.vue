@@ -51,5 +51,14 @@ const cerrarSesion = async () => {
       />
     </header>
     // TODO
+    <nav
+      class="fixed bottom-0 left-0 w-full bg-zinc-800 border-t border-zinc-700 p-4 flex justify-center gap-8"
+    >
+      <Button label="Inicio" class="p-button-sm p-button-outlined p-button-secondary" />
+      <Button label="Mi Equipo" class="p-button-sm p-button-outlined p-button-secondary" />
+      <Button label="Clasificación" class="p-button-sm p-button-outlined p-button-secondary" />
+      <Button label="Noticias" class="p-button-sm p-button-outlined p-button-secondary" />
+      <Button label="Notificaciones" class="p-button-sm p-button-outlined p-button-secondary" />
+    </nav>
   </div>
 </template>
