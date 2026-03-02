@@ -52,13 +52,28 @@ const cerrarSesion = async () => {
     </header>
     // TODO
     <nav
-      class="fixed bottom-0 left-0 w-full bg-zinc-800 border-t border-zinc-700 p-4 flex justify-center gap-8"
+      class="fixed bottom-0 left-0 w-full bg-black border-t border-zinc-700 p-4 flex justify-center gap-8"
     >
-      <Button label="Inicio" class="p-button-sm p-button-outlined p-button-secondary" />
-      <Button label="Mi Equipo" class="p-button-sm p-button-outlined p-button-secondary" />
-      <Button label="Clasificación" class="p-button-sm p-button-outlined p-button-secondary" />
-      <Button label="Noticias" class="p-button-sm p-button-outlined p-button-secondary" />
-      <Button label="Notificaciones" class="p-button-sm p-button-outlined p-button-secondary" />
+      <Button class="flex flex-col items-center w-16 h-16 rounded-full !bg-black !border-none">
+        <i class="pi pi-home" style="font-size: 1.5rem; color: white"></i>
+        <span class="text-xs text-white mt-1 font-bold tracking-wider">INICIO</span>
+      </Button>
+      <Button class="flex flex-col items-center w-16 h-16 rounded-full !bg-black !border-none">
+        <i class="pi pi-chart-bar" style="font-size: 1.5rem; color: white"></i>
+        <span class="text-xs text-white mt-1 font-bold tracking-wider">RANKING</span>
+      </Button>
+      <Button class="flex flex-col items-center w-16 h-16 rounded-full !bg-black !border-none">
+        <i class="pi pi-warehouse" style="font-size: 1.5rem; color: white"></i>
+        <span class="text-xs text-white mt-1 font-bold tracking-wider">GARAJE</span>
+      </Button>
+      <Button class="flex flex-col items-center w-16 h-16 rounded-full !bg-black !border-none">
+        <i class="pi pi-bell" style="font-size: 1.5rem; color: white"></i>
+        <span class="text-xs text-white mt-1 font-bold tracking-wider">AVISOS</span>
+      </Button>
+      <Button class="flex flex-col items-center w-16 h-16 rounded-full !bg-black !border-none">
+        <i class="pi pi-cog" style="font-size: 1.5rem; color: white"></i>
+        <span class="text-xs text-white mt-1 font-bold tracking-wider">AJUSTES</span>
+      </Button>
     </nav>
   </div>
 </template>
