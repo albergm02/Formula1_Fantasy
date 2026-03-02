@@ -25,7 +25,7 @@ const initialValues = ref({
 const resolver = zodResolver(
   z.object({
     email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
-    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    password: z.string().min(1, 'Contraseña requerida'),
   }),
 )
 
