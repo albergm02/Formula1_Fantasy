@@ -4,7 +4,7 @@ defineProps({
     type: Object,
     required: true,
   },
-  modoMercado: {
+  marketMode: {
     type: Boolean,
     required: true,
   },
@@ -22,19 +22,19 @@ defineProps({
       <div class="flex justify-between items-center px-1">
         <span class="text-xs font-bold text-zinc-400">
           <i class="pi pi-star-fill text-yellow-400 text-[10px] mr-1"></i>
-          {{ pilot.rating }} pts
+          {{ pilot.points }} pts
         </span>
         <span class="text-sm font-semibold text-gray-800">{{ pilot.price }} M</span>
       </div>
       <button
-        v-if="modoMercado"
-        class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors duration-300"
+        v-if="marketMode"
+        class="px-3 py-1 bg-green-500 text-white text-sm font-bold uppercase rounded hover:bg-green-600 transition-colors duration-300"
       >
         Fichar
       </button>
       <button
-        v-if="modoMercado"
-        class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-300"
+        v-else
+        class="px-3 py-1 bg-red-500 text-white text-sm font-bold uppercase rounded hover:bg-red-600 transition-colors duration-300"
       >
         Vender
       </button>

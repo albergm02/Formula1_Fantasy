@@ -6,7 +6,7 @@ export const pilotsMarket = [
     tier: 'Q1',
     price: 15.0,
     points: 120,
-    image: '../assets/pilots_cards/alo_q1.png',
+    image: '/pilots_cards/alo_q1.png',
   },
   {
     id: 'ver_q1',
@@ -15,6 +15,6 @@ export const pilotsMarket = [
     tier: 'Q1',
     price: 16.0,
     points: 130,
-    image: '../assets/pilots_cards/ver_q1.png',
+    image: '/pilots_cards/ver_q1.png',
   },
 ]
