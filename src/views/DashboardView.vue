@@ -82,7 +82,11 @@ const cerrarSesion = async () => {
         <Button
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
-          <i class="pi pi-shopping-cart" style="font-size: 1.5rem; color: white"></i>
+          <i
+            class="pi pi-shopping-cart"
+            style="font-size: 1.5rem; color: white"
+            @click="router.push('/mercado')"
+          ></i>
           <span class="text-[10px] text-white mt-1 font-medium tracking-w idest whitespace-nowrap"
             >MERCADO</span
           >
