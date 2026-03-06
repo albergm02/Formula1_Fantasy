@@ -82,6 +82,14 @@ const cerrarSesion = async () => {
         <Button
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
+          <i class="pi pi-shopping-cart" style="font-size: 1.5rem; color: white"></i>
+          <span class="text-[10px] text-white mt-1 font-medium tracking-w idest whitespace-nowrap"
+            >MERCADO</span
+          >
+        </Button>
+        <Button
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
           <i class="pi pi-bell" style="font-size: 1.5rem; color: white"></i>
           <span class="text-[10px] text-white mt-1 font-medium tracking-widest whitespace-nowrap"
             >AVISOS</span

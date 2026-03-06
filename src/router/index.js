@@ -22,6 +22,12 @@ const routes = [
     meta: { requiresAuth: true }, // Protege la ruta del dashboard para usuarios autenticados
   },
   {
+    path: '/market',
+    name: 'market',
+    component: () => import('../views/MarketView.vue'),
+    meta: { requiresAuth: true }, // Protege la ruta del mercado para usuarios autenticados
+  },
+  {
     path: '/:pathMatch(.*)*', // Redirecciona todas las rutas no definidas a la página de inicio
     redirect: '/',
   },
