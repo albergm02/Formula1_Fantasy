@@ -1,5 +1,4 @@
 <script setup>
-import Card from 'primevue/card'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import { signOut } from '@/services/authService'
@@ -24,16 +23,10 @@ const cerrarSesion = async () => {
 </script>
 
 <template>
-  <div
-    class="min-h-screen flex flex-col justify-start bg-zinc-900 p-4 pb-24 items-center font-sans"
-  >
-    <header
-      class="flex w-full max-w-4xl flex items-center justify-between mb-8 mt-4 border-b border-zinc-700 pb-4"
-    >
+  <div class="min-h-screen flex flex-col justify-start bg-zinc-900 p-4 pb-24 items-center font-sans">
+    <header class="flex w-full max-w-4xl flex items-center justify-between mb-8 mt-4 border-b border-zinc-700 pb-4">
       <div class="flex items-center gap-4">
-        <div
-          class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white font-bold"
-        >
+        <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
           {{ usuario.iniciales }}
         </div>
         <div class="flex flex-col justify-center">

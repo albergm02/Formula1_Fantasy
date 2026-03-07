@@ -1,9 +1,9 @@
 // prettier-ignore
 export const mercadoPilotos = [
 
-  { id: 'alb_q1', nombre: 'Alex Albon', equipo: 'Williams', tier: 'Q1', precio: 7.5, puntos: 80, imagen: '/Pilotos/alb_q1.png' },
-  { id: 'alb_q2', nombre: 'Alex Albon', equipo: 'Williams', tier: 'Q2', precio: 10.0, puntos: 100, imagen: '/Pilotos/alb_q2.png' },
-  { id: 'alb_q3', nombre: 'Alex Albon', equipo: 'Williams', tier: 'Q3', precio: 12.5, puntos: 120, imagen: '/Pilotos/alb_q3.png' },
+  { id: 'alb_q1', nombre: 'Alex Albon', equipo: 'Williams', tier: 'Q1', precio: 7.5, puntos: 80, imagen: '/Pilotos/alb_q1.png',  },
+  { id: 'alb_q2', nombre: 'Alex Albon', equipo: 'Williams', tier: 'Q2', precio: 10.0, puntos: 100, imagen: '/Pilotos/alb_q2.png',  },
+  { id: 'alb_q3', nombre: 'Alex Albon', equipo: 'Williams', tier: 'Q3', precio: 12.5, puntos: 120, imagen: '/Pilotos/alb_q3.png',  },
 
   { id: 'alo_q1', nombre: 'Fernando Alonso', equipo: 'Aston Martin', tier: 'Q1', precio: 9.0, puntos: 90, imagen: '/Pilotos/alo_q1.png' },
   { id: 'alo_q2', nombre: 'Fernando Alonso', equipo: 'Aston Martin', tier: 'Q2', precio: 12.0, puntos: 120, imagen: '/Pilotos/alo_q2.png' },

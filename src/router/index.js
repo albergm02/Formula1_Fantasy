@@ -6,25 +6,25 @@ const routes = [
   {
     path: '/',
     name: 'login',
-    component: () => import('../views/LoginView.vue'),
+    component: () => import('../views/VistaLogin.vue'),
     meta: { requiresGuest: true }, // Protege la ruta de inicio de sesión para usuarios no autenticados
   },
   {
-    path: '/register',
-    name: 'register',
-    component: () => import('../views/RegisterView.vue'),
+    path: '/registro',
+    name: 'registro',
+    component: () => import('../views/VistaRegistro.vue'),
     meta: { requiresGuest: true }, // Protege la ruta de registro para usuarios no autenticados
   },
   {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: () => import('../views/DashboardView.vue'),
+    path: '/inicio',
+    name: 'inicio',
+    component: () => import('../views/VistaInicio.vue'),
     meta: { requiresAuth: true }, // Protege la ruta del dashboard para usuarios autenticados
   },
   {
     path: '/mercado',
     name: 'mercado',
-    component: () => import('../views/MarketView.vue'),
+    component: () => import('../views/VistaMercado.vue'),
     meta: { requiresAuth: true }, // Protege la ruta del mercado para usuarios autenticados
   },
   {
