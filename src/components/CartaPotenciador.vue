@@ -33,12 +33,15 @@ const mostrarInfo = ref(false)
         </span>
       </div>
 
-      <div class="relative flex-1 min-h-0 w-full bg-zinc-800">
+      <div
+        class="relative flex-1 min-h-0 w-full bg-zinc-950 cursor-pointer overflow-hidden"
+        @click="mostrarInfo = !mostrarInfo"
+      >
         <img
           :src="potenciador.imagen || 'https://via.placeholder.com/150'"
-          alt="Pieza"
-          class="absolute inset-0 w-full h-full object-cover object-center opacity-90 transition-opacity duration-300"
-          :class="{ 'opacity-10 blur-sm': mostrarInfo }"
+          alt="Foto"
+          class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300"
+          :class="mostrarInfo ? 'opacity-20 blur-md scale-105' : 'opacity-90'"
         />
 
         <span
@@ -48,27 +51,35 @@ const mostrarInfo = ref(false)
           {{ potenciador.tier }}
         </span>
 
-        <button
-          @click="mostrarInfo = !mostrarInfo"
-          class="absolute bottom-2 right-2 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md text-white/80 hover:bg-black/70 hover:text-white transition-colors z-20"
+        <div
+          class="absolute top-2 right-2 px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-colors z-20 border border-white/10 shadow-sm"
+          :class="
+            mostrarInfo ? 'bg-zinc-800/90 text-white' : 'bg-black/50 backdrop-blur-sm text-zinc-200'
+          "
         >
           <i
-            class="pi font-bold text-[10px] md:text-xs"
-            :class="mostrarInfo ? 'pi-times' : 'pi-info'"
+            class="pi font-bold text-[8px] md:text-[9px]"
+            :class="mostrarInfo ? 'pi-times' : 'pi-search'"
           ></i>
-        </button>
+          <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest">
+            {{ mostrarInfo ? 'Cerrar' : 'Detalles' }}
+          </span>
+        </div>
 
         <div
           v-if="mostrarInfo"
-          class="absolute inset-0 bg-black/80 p-2 flex flex-col justify-center text-center z-10 overflow-y-auto"
+          class="absolute inset-0 p-3 flex flex-col justify-center text-center z-10 overflow-y-auto"
         >
           <h4
-            class="text-[10px] md:text-xs font-black text-zinc-400 uppercase border-b border-zinc-600/50 pb-1 mb-2"
+            class="text-[10px] md:text-xs font-black text-zinc-300 uppercase border-b border-zinc-600/50 pb-1 mb-2 tracking-widest"
           >
             Mejora Técnica
           </h4>
-          <p class="text-[9px] md:text-[10px] text-zinc-300 leading-snug">
-            {{ potenciador.descripcion || 'Pieza de rendimiento. Instálala en tu garaje.' }}
+          <p class="text-[9px] md:text-[10px] text-zinc-200 leading-snug">
+            {{
+              potenciador.descripcion ||
+              'Pieza de rendimiento. Instálala en tu garaje para aumentar los puntos base de tu monoplaza.'
+            }}
           </p>
         </div>
       </div>
