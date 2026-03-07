@@ -36,7 +36,7 @@ const iniciarSesion = async ({ valid, values }) => {
 
   try {
     await signIn(values.email, values.password)
-    router.push('/dashboard')
+    router.push('/inicio')
   } catch (error) {
     firebaseError.value = error.message
   } finally {

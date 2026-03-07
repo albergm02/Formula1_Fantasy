@@ -2,9 +2,11 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
+import Button from 'primevue/button'
 
 import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
+import CartaCoche from '@/components/CartaCoche.vue'
 
 const router = useRouter()
 
@@ -17,7 +19,10 @@ const pilotos = computed(() => {
 
   return [
     pilotosPorTier.Q1[Math.floor(Math.random() * pilotosPorTier.Q1.length)],
+    pilotosPorTier.Q1[Math.floor(Math.random() * pilotosPorTier.Q1.length)],
     pilotosPorTier.Q2[Math.floor(Math.random() * pilotosPorTier.Q2.length)],
+    pilotosPorTier.Q2[Math.floor(Math.random() * pilotosPorTier.Q2.length)],
+    pilotosPorTier.Q3[Math.floor(Math.random() * pilotosPorTier.Q3.length)],
     pilotosPorTier.Q3[Math.floor(Math.random() * pilotosPorTier.Q3.length)],
   ]
 })
@@ -32,70 +37,146 @@ const potenciadores = computed(() => {
 </script>
 
 <template>
-  <div class="h-[100dvh] w-full overflow-hidden bg-zinc-950 p-2 md:p-3 font-sans flex flex-col">
-    <header class="shrink-0 flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
-      <button
-        @click="router.push('/dashboard')"
-        class="w-8 h-8 rounded bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition"
-      >
-        <i class="pi pi-arrow-left text-xs"></i>
-      </button>
-
-      <div class="flex flex-col items-end">
-        <h1 class="text-xl md:text-2xl font-black italic text-white tracking-tight leading-none">
-          MERCADO
-        </h1>
-        <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider"
-          >Refresca: 4d 12h</span
+  <div class="min-h-screen w-full bg-zinc-950 p-4 md:p-6 font-sans pb-32 relative">
+    <div class="mx-auto w-full max-w-5xl flex flex-col gap-10">
+      <header class="flex items-center justify-between border-b border-zinc-800 pb-4 mt-2">
+        <button
+          @click="router.push('/dashboard')"
+          class="w-10 h-10 rounded-lg bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition"
         >
-      </div>
-    </header>
+          <i class="pi pi-arrow-left text-sm"></i>
+        </button>
 
-    <main class="flex-1 flex flex-col gap-3 min-h-0 w-full max-w-4xl mx-auto">
-      <section class="flex flex-col flex-[0.20] min-h-0">
-        <h2
-          class="text-[10px] md:text-xs font-black italic text-zinc-400 uppercase mb-1 ml-1 shrink-0"
-        >
-          🏎️ Chasis
-        </h2>
-        <div class="flex-1 min-h-0">
-          <CartaPotenciador :potenciador="coche" :modoMercado="true" class="h-full w-full" />
+        <div class="flex flex-col items-end">
+          <h1 class="text-2xl md:text-3xl font-black italic text-white tracking-tight leading-none">
+            MERCADO
+          </h1>
+          <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider mt-1">
+            Refresca: 4d 12h
+          </span>
+        </div>
+      </header>
+
+      <section>
+        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
+          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+            🏎️ Chasis Semanal
+          </h2>
+        </div>
+        <div class="h-64 md:h-72 w-full md:w-2/3 lg:w-1/2">
+          <CartaCoche :coche="coche" :modoMercado="true" />
         </div>
       </section>
 
-      <section class="flex flex-col flex-[0.40] min-h-0">
-        <h2
-          class="text-[10px] md:text-xs font-black italic text-zinc-400 uppercase mb-1 ml-1 shrink-0"
+      <section>
+        <div class="mb-4 border-l-4 border-zinc-500 pl-2 flex justify-between items-end">
+          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+            👤 Pilotos Disponibles
+          </h2>
+        </div>
+        <div
+          class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
         >
-          👤 Pilotos
-        </h2>
-        <div class="grid grid-cols-3 gap-2 flex-1 min-h-0">
           <CartaPiloto
             v-for="piloto in pilotos"
             :key="piloto.id"
             :piloto="piloto"
             :modoMercado="true"
-            class="h-full"
           />
         </div>
       </section>
 
-      <section class="flex flex-col flex-[0.40] min-h-0">
-        <h2
-          class="text-[10px] md:text-xs font-black italic text-zinc-400 uppercase mb-1 ml-1 shrink-0"
+      <section>
+        <div class="mb-4 border-l-4 border-zinc-500 pl-2 flex justify-between items-end">
+          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+            ⚙️ Piezas y Mejoras
+          </h2>
+        </div>
+        <div
+          class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 auto-rows-[250px] md:auto-rows-[300px]"
         >
-          ⚙️ Piezas y Mejoras
-        </h2>
-        <div class="grid grid-cols-2 gap-2 flex-1 min-h-0">
           <CartaPotenciador
             v-for="potenciador in potenciadores"
             :key="potenciador.id"
             :potenciador="potenciador"
             :modoMercado="true"
-            class="h-full w-full"
           />
         </div>
       </section>
-    </main>
+    </div>
+
+    <nav
+      class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-zinc-800 p-2 md:p-4 flex justify-center z-50"
+    >
+      <div class="w-full max-w-4xl flex justify-around items-center gap-2">
+        <Button
+          @click="router.push('/inicio')"
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
+          <i class="pi pi-home" style="font-size: 1.3rem; color: #a1a1aa"></i>
+          <span
+            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+            >INICIO</span
+          >
+        </Button>
+
+        <Button
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
+          <i class="pi pi-chart-bar" style="font-size: 1.3rem; color: #a1a1aa"></i>
+          <span
+            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+            >RANKING</span
+          >
+        </Button>
+
+        <Button
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
+          <i class="pi pi-warehouse" style="font-size: 1.3rem; color: #a1a1aa"></i>
+          <span
+            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+            >GARAJE</span
+          >
+        </Button>
+
+        <Button
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
+          <i class="pi pi-shopping-cart" style="font-size: 1.3rem; color: #e10600"></i>
+          <span
+            class="text-[9px] md:text-[10px] text-[#e10600] mt-1 font-black tracking-widest whitespace-nowrap"
+            >MERCADO</span
+          >
+        </Button>
+
+        <Button
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
+          <i class="pi pi-bell" style="font-size: 1.3rem; color: #a1a1aa"></i>
+          <span
+            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+            >AVISOS</span
+          >
+        </Button>
+
+        <Button
+          class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+        >
+          <i class="pi pi-cog" style="font-size: 1.3rem; color: #a1a1aa"></i>
+          <span
+            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+            >AJUSTES</span
+          >
+        </Button>
+      </div>
+    </nav>
   </div>
 </template>
+
+<style>
+/* Forzamos el fondo negro en toda la app para evitar bordes blancos al hacer scroll en móviles */
+body {
+  background-color: #09090b !important;
+}
+</style>

@@ -39,7 +39,7 @@ const router = createRouter({
 })
 
 /* Protege las rutas que requieren autenticación y redirige a la página de inicio de sesión si el usuario no está autenticado. 
-También redirige a la página del dashboard si el usuario ya está autenticado y trata de acceder a las rutas de inicio de sesión o registro. */
+También redirige a la página de inicio si el usuario ya está autenticado y trata de acceder a las rutas de inicio de sesión o registro. */
 
 router.beforeEach(async (to) => {
   const user = await getCurrentUser()
@@ -47,7 +47,7 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.meta.requiresGuest && user) {
-    return { name: 'dashboard' }
+    return { name: 'inicio' }
   }
   return true
 })

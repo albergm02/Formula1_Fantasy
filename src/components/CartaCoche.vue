@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 
 defineProps({
-  potenciador: {
+  coche: {
     type: Object,
     required: true,
   },
@@ -26,27 +26,20 @@ const mostrarInfo = ref(false)
         <span
           class="text-[10px] md:text-xs font-black text-white uppercase truncate pr-2 tracking-wide"
         >
-          {{ potenciador.nombre }}
+          {{ coche.nombre }}
         </span>
         <span class="text-[10px] md:text-xs font-black text-emerald-400 shrink-0">
-          {{ potenciador.precio }}M
+          {{ coche.precio }}M
         </span>
       </div>
 
       <div class="relative flex-1 min-h-0 w-full bg-zinc-800">
         <img
-          :src="potenciador.imagen || 'https://via.placeholder.com/150'"
-          alt="Pieza"
+          :src="coche.imagen || 'https://via.placeholder.com/150'"
+          alt="Chasis"
           class="absolute inset-0 w-full h-full object-cover object-center opacity-90 transition-opacity duration-300"
           :class="{ 'opacity-10 blur-sm': mostrarInfo }"
         />
-
-        <span
-          v-if="potenciador.tier && !mostrarInfo"
-          class="absolute bottom-2 left-2 bg-black/80 text-white text-[8px] md:text-[10px] font-black px-1.5 py-0.5 rounded shadow"
-        >
-          {{ potenciador.tier }}
-        </span>
 
         <button
           @click="mostrarInfo = !mostrarInfo"
@@ -65,10 +58,13 @@ const mostrarInfo = ref(false)
           <h4
             class="text-[10px] md:text-xs font-black text-zinc-400 uppercase border-b border-zinc-600/50 pb-1 mb-2"
           >
-            Mejora Técnica
+            Especificaciones
           </h4>
           <p class="text-[9px] md:text-[10px] text-zinc-300 leading-snug">
-            {{ potenciador.descripcion || 'Pieza de rendimiento. Instálala en tu garaje.' }}
+            {{
+              coche.descripcion ||
+              'Chasis principal del equipo. Define la base aerodinámica de tu monoplaza.'
+            }}
           </p>
         </div>
       </div>
