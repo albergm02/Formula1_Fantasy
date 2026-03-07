@@ -58,22 +58,12 @@ const potenciadores = computed(() => {
       </header>
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
-            🏎️ Chasis Semanal
-          </h2>
-        </div>
         <div class="h-64 md:h-72 w-full md:w-2/3 lg:w-1/2">
           <CartaCoche :coche="coche" :modoMercado="true" />
         </div>
       </section>
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2 flex justify-between items-end">
-          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
-            👤 Pilotos Disponibles
-          </h2>
-        </div>
         <div
           class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
         >
@@ -87,11 +77,6 @@ const potenciadores = computed(() => {
       </section>
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2 flex justify-between items-end">
-          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
-            ⚙️ Piezas y Mejoras
-          </h2>
-        </div>
         <div
           class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 auto-rows-[250px] md:auto-rows-[300px]"
         >

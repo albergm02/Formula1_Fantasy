@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 
+// Propiedades recibidas del componente padre
 defineProps({
   piloto: {
     type: Object,
@@ -12,6 +13,7 @@ defineProps({
   },
 })
 
+// Estado para alternar entre la foto del piloto y su información
 const mostrarInfo = ref(false)
 </script>
 
@@ -41,28 +43,22 @@ const mostrarInfo = ref(false)
           :src="piloto.imagen || 'https://via.placeholder.com/150'"
           alt="Foto"
           class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300"
-          :class="mostrarInfo ? 'opacity-20 blur-md scale-105' : 'opacity-90'"
+          :class="mostrarInfo ? 'opacity-20 blur-md' : 'opacity-90'"
         />
 
         <span
           v-if="piloto.tier && !mostrarInfo"
-          class="absolute bottom-2 left-2 bg-black/80 text-white text-[8px] md:text-[10px] font-black px-1.5 py-0.5 rounded shadow"
+          class="absolute top-2 left-2 bg-black/80 text-white text-[8px] md:text-[10px] font-black px-1.5 py-0.5 rounded shadow z-20"
         >
           {{ piloto.tier }}
         </span>
 
         <div
-          class="absolute top-2 right-2 px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-colors z-20 border border-white/10 shadow-sm"
-          :class="
-            mostrarInfo ? 'bg-zinc-800/90 text-white' : 'bg-black/50 backdrop-blur-sm text-zinc-200'
-          "
+          v-if="!mostrarInfo"
+          class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 flex justify-center items-end h-1/2"
         >
-          <i
-            class="pi font-bold text-[8px] md:text-[9px]"
-            :class="mostrarInfo ? 'pi-times' : 'pi-search'"
-          ></i>
-          <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest">
-            {{ mostrarInfo ? 'Cerrar' : 'Detalles' }}
+          <span class="text-[9px] font-bold text-zinc-300 uppercase tracking-[0.2em] animate-pulse">
+            Toca para ver detalles
           </span>
         </div>
 
@@ -81,13 +77,16 @@ const mostrarInfo = ref(false)
               'Piloto de parrilla. Otorga puntos regulares y bonus (' + piloto.tier + ').'
             }}
           </p>
+          <span class="mt-4 text-[8px] font-bold text-zinc-500 uppercase tracking-widest">
+            Toca para volver
+          </span>
         </div>
       </div>
     </div>
 
     <button
       v-if="modoMercado"
-      class="shrink-0 w-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-lg py-2 md:py-2.5 flex items-center justify-center gap-2 transition-colors shadow-sm"
+      class="shrink-0 w-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-lg py-2 md:py-2.5 flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
     >
       <i class="pi pi-money-bill text-[11px] md:text-sm text-emerald-400"></i>
       <span class="text-[10px] md:text-xs font-black uppercase tracking-widest">Pujar</span>
