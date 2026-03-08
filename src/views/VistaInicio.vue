@@ -25,40 +25,44 @@ const cerrarSesion = async () => {
 <template>
   <div class="min-h-screen w-full bg-zinc-950 p-4 md:p-6 font-sans pb-32 relative">
     <div class="mx-auto w-full max-w-5xl flex flex-col gap-10">
-      <header class="flex w-full items-center justify-between border-b border-zinc-800 pb-4 mt-2">
-        <div class="flex items-center gap-4">
-          <div
-            class="w-12 h-12 rounded-full bg-[#e10600] flex items-center justify-center text-white font-bold shadow-lg"
-          >
-            {{ usuario.iniciales }}
-          </div>
+      <header
+        class="fixed top-0 left-0 w-full bg-zinc-950 border-b border-zinc-800 p-4 md:p-6 z-40 flex items-center justify-between"
+      >
+        <div class="mx-auto w-full max-w-5xl flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 rounded-full bg-[#e10600] flex items-center justify-center text-white font-bold shadow-lg"
+            >
+              {{ usuario.iniciales }}
+            </div>
 
-          <div class="flex flex-col justify-center">
-            <h2 class="text-xl font-black text-white uppercase italic tracking-wide">
-              {{ usuario.name }}
-            </h2>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-xs text-zinc-400 font-medium">
-                Puntos: <strong class="text-white">{{ usuario.puntos }}</strong>
-              </span>
-              <span class="text-xs text-zinc-600">|</span>
-              <span class="text-xs text-emerald-400 font-bold">
-                {{ usuario.presupuesto }}
-              </span>
+            <div class="flex flex-col justify-center">
+              <h2 class="text-xl font-black text-white uppercase italic tracking-wide">
+                {{ usuario.name }}
+              </h2>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs text-zinc-400 font-medium">
+                  Puntos: <strong class="text-white">{{ usuario.puntos }}</strong>
+                </span>
+                <span class="text-xs text-zinc-600">|</span>
+                <span class="text-xs text-emerald-400 font-bold">
+                  {{ usuario.presupuesto }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <button
-          @click="cerrarSesion"
-          class="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition"
-          title="Cerrar Sesión"
-        >
-          <i class="pi pi-sign-out text-sm"></i>
-        </button>
+          <button
+            @click="cerrarSesion"
+            class="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition"
+            title="Cerrar Sesión"
+          >
+            <i class="pi pi-sign-out text-sm"></i>
+          </button>
+        </div>
       </header>
 
-      <main class="flex-1 w-full text-center py-20 text-zinc-500">
+      <main class="mt-24 flex-1 w-full text-center py-20 text-zinc-500">
         <i class="pi pi-flag text-4xl mb-4 opacity-50"></i>
         <p class="font-bold tracking-widest uppercase">Bienvenido al Paddock</p>
       </main>
@@ -69,6 +73,7 @@ const cerrarSesion = async () => {
     >
       <div class="w-full max-w-4xl flex justify-around items-center gap-2">
         <Button
+          @click="router.push('/inicio')"
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-home" style="font-size: 1.3rem; color: #e10600"></i>
@@ -99,10 +104,13 @@ const cerrarSesion = async () => {
         </Button>
 
         <Button
-          @click="router.push('/mercado')"
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
-          <i class="pi pi-shopping-cart" style="font-size: 1.3rem; color: #a1a1aa"></i>
+          <i
+            class="pi pi-shopping-cart"
+            style="font-size: 1.3rem; color: #a1a1aa"
+            @click="router.push('/mercado')"
+          ></i>
           <span
             class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
             >MERCADO</span

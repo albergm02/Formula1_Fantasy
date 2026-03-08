@@ -4,11 +4,31 @@ import { useRouter } from 'vue-router'
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
 import Button from 'primevue/button'
 
+// OJO: Asegúrate de tener esta ruta o ajustarla a tu servicio de autenticación
+import { signOut } from '@/services/authService'
+
 import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
 
 const router = useRouter()
+
+// Datos del usuario (Igual que en Inicio)
+const usuario = {
+  name: 'Alberto',
+  iniciales: 'AF',
+  puntos: '1200',
+  presupuesto: '50M',
+}
+
+const cerrarSesion = async () => {
+  try {
+    await signOut()
+    router.push('/')
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error)
+  }
+}
 
 const pilotos = computed(() => {
   const pilotosPorTier = {
@@ -38,26 +58,59 @@ const potenciadores = computed(() => {
 
 <template>
   <div class="min-h-screen w-full bg-zinc-950 p-4 md:p-6 font-sans pb-32 relative">
-    <div class="mx-auto w-full max-w-5xl flex flex-col gap-10">
-      <header class="flex items-center justify-between border-b border-zinc-800 pb-4 mt-2">
-        <button
-          @click="router.push('/dashboard')"
-          class="w-10 h-10 rounded-lg bg-zinc-800 text-white flex items-center justify-center hover:bg-zinc-700 transition"
-        >
-          <i class="pi pi-arrow-left text-sm"></i>
-        </button>
+    <div class="mx-auto w-full max-w-5xl flex flex-col gap-8">
+      <header
+        class="fixed top-0 left-0 w-full bg-zinc-950 border-b border-zinc-800 p-4 md:p-6 z-40 flex items-center justify-between"
+      >
+        <div class="mx-auto w-full max-w-5xl flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 rounded-full bg-[#e10600] flex items-center justify-center text-white font-bold shadow-lg"
+            >
+              {{ usuario.iniciales }}
+            </div>
 
-        <div class="flex flex-col items-end">
-          <h1 class="text-2xl md:text-3xl font-black italic text-white tracking-tight leading-none">
-            MERCADO
-          </h1>
-          <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider mt-1">
-            Refresca: 4d 12h
-          </span>
+            <div class="flex flex-col justify-center">
+              <h2 class="text-xl font-black text-white uppercase italic tracking-wide">
+                {{ usuario.name }}
+              </h2>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs text-zinc-400 font-medium">
+                  Puntos: <strong class="text-white">{{ usuario.puntos }}</strong>
+                </span>
+                <span class="text-xs text-zinc-600">|</span>
+                <span class="text-xs text-emerald-400 font-bold">
+                  {{ usuario.presupuesto }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            @click="cerrarSesion"
+            class="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-400 flex items-center justify-center hover:bg-zinc-700 hover:text-white transition"
+            title="Cerrar Sesión"
+          >
+            <i class="pi pi-sign-out text-sm"></i>
+          </button>
         </div>
       </header>
 
+      <div class="mt-24 flex items-end justify-between">
+        <h1 class="text-2xl md:text-3xl font-black italic text-white tracking-tight leading-none">
+          MERCADO
+        </h1>
+        <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider mb-1">
+          Refresca: 4d 12h
+        </span>
+      </div>
+
       <section>
+        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
+          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+            🏎️ Coches de la semana
+          </h2>
+        </div>
         <div
           class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
         >
@@ -66,6 +119,11 @@ const potenciadores = computed(() => {
       </section>
 
       <section>
+        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
+          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+            Pilotos Disponibles
+          </h2>
+        </div>
         <div
           class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
         >
@@ -78,9 +136,14 @@ const potenciadores = computed(() => {
         </div>
       </section>
 
-      <section>
+      <section class="mb-32">
+        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
+          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+            Piezas y Mejoras
+          </h2>
+        </div>
         <div
-          class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 auto-rows-[250px] md:auto-rows-[300px]"
+          class="grid grid-cols-2 md:grid-cols-4 gap-3 object-fill auto-rows-[250px] md:auto-rows-[300px]"
         >
           <CartaPotenciador
             v-for="potenciador in potenciadores"
