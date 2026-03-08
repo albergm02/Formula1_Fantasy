@@ -28,7 +28,7 @@ const pilotos = computed(() => {
 })
 
 const coche = computed(() => {
-  return mercadoCoches[Math.floor(Math.random() * mercadoCoches.length)]
+  return mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 2)
 })
 
 const potenciadores = computed(() => {
@@ -58,8 +58,10 @@ const potenciadores = computed(() => {
       </header>
 
       <section>
-        <div class="h-64 md:h-72 w-full md:w-2/3 lg:w-1/2">
-          <CartaCoche :coche="coche" :modoMercado="true" />
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
+        >
+          <CartaCoche v-for="coche in coche" :key="coche.id" :coche="coche" :modoMercado="true" />
         </div>
       </section>
 

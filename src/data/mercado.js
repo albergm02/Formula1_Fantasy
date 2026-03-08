@@ -91,8 +91,8 @@ export const mercadoPilotos = [
 
 // prettier-ignore
 export const mercadoPotenciadores = [
-  { id: 'aleron_delantero', nombre: 'Alerón Delantero', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Delantero.png' },
-  { id: 'aleron_trasero', nombre: 'Alerón Trasero', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Aleron_Trasero.png' },
+  { id: 'aleron_delantero', nombre: 'Ala Delantera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Delantero.png' },
+  { id: 'aleron_trasero', nombre: 'Ala Trasera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Trasero.png' },
   { id: 'bateria', nombre: 'Batería', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Batería.png' },
   { id: 'caja_de_cambios', nombre: 'Caja de Cambios', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Caja_de_Cambios.png' },
   { id: 'chasis', nombre: 'Chasis', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Chasis.png' },
@@ -103,7 +103,7 @@ export const mercadoPotenciadores = [
   { id: 'pontones', nombre: 'Pontones', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Pontones.png' },
   { id: 'suspension', nombre: 'Suspensión', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Suspensión.png' },
   { id: 'tubo_de_escape', nombre: 'Tubo de Escape', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Tubo_de_Escape.png' },
-  { id: 'turbocompresor', nombre: 'Turbocompresor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Turbocompresor.png' },
+  { id: 'turbocompresor', nombre: 'Compresor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Turbocompresor.png' },
   { id: 'volante', nombre: 'Volante', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Volante.png' }
 ]
 

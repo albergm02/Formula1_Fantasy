@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue'
 
-// Recibimos las propiedades del coche y el modo desde el componente padre
 defineProps({
   coche: {
     type: Object,
@@ -13,74 +12,61 @@ defineProps({
   },
 })
 
-// Controlamos si se ve la imagen o la información
 const mostrarInfo = ref(false)
 </script>
 
 <template>
   <div class="flex flex-col gap-2 h-full w-full">
     <div
-      class="flex flex-col bg-zinc-900 rounded-xl overflow-hidden relative shadow-md flex-1 min-h-0"
+      class="flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden relative flex-1 min-h-0"
     >
-      <div class="shrink-0 flex justify-between items-center p-2 bg-zinc-950 z-20">
-        <span
-          class="text-sm md:text-base font-black text-white uppercase truncate pr-2 tracking-wide"
-        >
+      <div class="shrink-0 flex justify-between items-center p-2 bg-red-800 z-20">
+        <span class="text-xs font-black text-white uppercase truncate pr-2">
           {{ coche.nombre }}
         </span>
-        <span class="text-sm md:text-base font-black text-emerald-400 shrink-0">
-          {{ coche.precio }}M
-        </span>
+        <span class="text-xs font-black">{{ coche.precio }}M</span>
       </div>
 
-      <div
-        class="relative flex-1 min-h-0 w-full bg-zinc-950 cursor-pointer overflow-hidden"
-        @click="mostrarInfo = !mostrarInfo"
-      >
+      <div class="relative flex-1 min-h-0 w-full" @click="mostrarInfo = !mostrarInfo">
         <img
           :src="coche.imagen"
-          alt="Coche"
           class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300"
-          :class="mostrarInfo ? 'opacity-20 blur-md' : 'opacity-90'"
+          :class="mostrarInfo ? 'opacity-20' : 'opacity-90'"
         />
 
         <div
           v-if="!mostrarInfo"
-          class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex justify-center items-end h-1/2"
+          class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 flex"
         >
-          <span class="text-[9px] font-bold text-zinc-300 tracking-[0.2em] animate-pulse">
+          <span class="text-xs font-black text-zinc-200 animate-pulse">
             TOCA PARA VER LOS DETALLES
           </span>
         </div>
 
         <div
           v-if="mostrarInfo"
-          class="absolute inset-0 p-3 flex flex-col justify-center text-center z-10 overflow-y-auto"
+          class="p-4 flex flex-col justify-center text-center items-center h-full bg-zinc-950/60"
         >
           <h4
-            class="text-xs md:text-sm font-black text-zinc-300 border-b border-zinc-600/50 pb-1 mb-2 tracking-widest"
+            class="text-xs md:text-xs font-black text-zinc-300 border-b border-zinc-200 pb-1 mb-2"
           >
             ESPECIFICACIONES
           </h4>
-          <p class="text-[10px] md:text-xs text-zinc-200 leading-snug">
+          <p class="text-xs text-zinc-200">
             {{
               coche.descripcion ||
               'Chasis principal del equipo. Define la base aerodinámica de tu monoplaza.'
             }}
           </p>
-          <span class="mt-4 text-[8px] font-bold text-zinc-500 tracking-widest">
-            TOCA PARA VOLVER
-          </span>
         </div>
       </div>
+      <button
+        v-if="modoMercado"
+        class="shrink-0 w-full bg-zinc-950 text-white py-3 flex items-center justify-center gap-2 transition-all active:scale-90"
+      >
+        <i class="pi pi-money-bill text-xs"></i>
+        <span class="text-xs font-black">PUJAR</span>
+      </button>
     </div>
-
-    <button
-      v-if="modoMercado"
-      class="shrink-0 w-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-lg py-2 md:py-2.5 flex items-center justify-center gap-2 transition-colors shadow-sm active:scale-95"
-    >
-      <i class="pi pi-money-bill text-[12px] md:text-sm text-emerald-400"></i>
-      <span class="text-[11px] md:text-xs font-black uppercase tracking-widest">Pujar</span>
-    </button>
   </div>
 </template>
