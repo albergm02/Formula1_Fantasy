@@ -18,7 +18,7 @@ const mostrarInfo = ref(false)
 <template>
   <div class="flex flex-col gap-2 h-full w-full">
     <div
-      class="flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden relative flex-1 min-h-0"
+      class="flex flex-col border border-zinc-800 rounded-xl overflow-hidden relative flex-1 min-h-0"
     >
       <div class="shrink-0 flex justify-between items-center p-2 bg-red-800 z-20">
         <span class="text-xs font-black text-white uppercase truncate pr-2">
