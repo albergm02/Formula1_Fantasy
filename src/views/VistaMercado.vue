@@ -2,9 +2,9 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
+
 import Button from 'primevue/button'
 
-// OJO: Asegúrate de tener esta ruta o ajustarla a tu servicio de autenticación
 import { signOut } from '@/services/authService'
 
 import CartaPiloto from '@/components/CartaPiloto.vue'
@@ -97,18 +97,15 @@ const potenciadores = computed(() => {
       </header>
 
       <div class="mt-24 flex items-end justify-between">
-        <h1 class="text-2xl md:text-3xl font-black italic text-white tracking-tight leading-none">
-          MERCADO
-        </h1>
         <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider mb-1">
-          Refresca: 4d 12h
+          El mercado refresca en: 4d 12h
         </span>
       </div>
 
       <section>
         <div class="mb-4 border-l-4 border-zinc-500 pl-2">
           <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
-            🏎️ Coches de la semana
+            Coches de la semana
           </h2>
         </div>
         <div

@@ -1,7 +1,13 @@
-<script setup></script>
+<script setup>
+import { RouterView } from 'vue-router'
+import Toast from 'primevue/toast'
+import ConfirmDialog from 'primevue/confirmdialog'
+</script>
 
 <template>
-  <router-view></router-view>
+  <Toast position="top-center" />
+  <ConfirmDialog />
+  <RouterView />
 </template>
 
 <style scoped></style>

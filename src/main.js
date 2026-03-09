@@ -4,6 +4,8 @@ import App from './App.vue'
 import router from './router'
 
 import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
+import ConfirmationService from 'primevue/confirmationservice'
 import Aura from '@primevue/themes/aura'
 
 import 'primeicons/primeicons.css'
@@ -18,6 +20,8 @@ const pinia = createPinia()
 app.use(PrimeVue, { theme: { preset: Aura } })
 app.use(pinia)
 app.use(router)
+app.use(ToastService)
+app.use(ConfirmationService)
 
 let appMounted = false
 
