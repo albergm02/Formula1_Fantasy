@@ -18,6 +18,7 @@ const props = defineProps({
 // Estado local
 const mostrarInfo = ref(false)
 const toast = useToast()
+const confirm = useConfirm()
 
 // Maneja la puja del piloto
 const realizarPuja = () => {
@@ -26,6 +27,20 @@ const realizarPuja = () => {
     summary: 'Puja realizada',
     detail: `Has pujado por ${props.piloto.nombre} por ${props.piloto.precio}M`,
     life: 3000,
+  })
+}
+
+// Función para confirmar la compra (puede ser llamada desde realizarPuja o un botón específico)
+const confirmarCompra = () => {
+  confirm.require({
+    message: `¿Estás seguro de que quieres pujar por ${props.piloto.nombre} por ${props.piloto.precio}M?`,
+    header: 'Confirmar Puja',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Sí, pujar',
+    rejectLabel: 'No, cancelar',
+    accept() {
+      realizarPuja()
+    },
   })
 }
 
@@ -102,7 +117,7 @@ const toggleInfo = () => {
       <!-- Botón de puja (solo en modo mercado) -->
       <button
         v-if="modoMercado"
-        @click="realizarPuja"
+        @click="confirmarCompra"
         class="shrink-0 w-full bg-zinc-950 text-white py-3 flex items-center justify-center gap-2 transition-all active:scale-90 hover:bg-zinc-900"
       >
         <i class="pi pi-money-bill text-xs"></i>
