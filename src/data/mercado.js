@@ -115,7 +115,7 @@ export const mercadoCoches = [
   { id: 'ferrari', nombre: 'Ferrari', precio: 20.0, puntos: 200, imagen: '/Coches/Ferrari.png' },
   { id: 'haas', nombre: 'Haas', precio: 20.0, puntos: 200, imagen: '/Coches/Hass.png' },
   { id: 'mclaren', nombre: 'McLaren', precio: 20.0, puntos: 200, imagen: '/Coches/Mclaren.png' },
-  { id: 'mercedes', Mercedes: 'Mercedes', precio: 20.0, puntos: 200, imagen: '/Coches/Mercedes.png' },
+  { id: 'mercedes', nombre: 'Mercedes', precio: 20.0, puntos: 200, imagen: '/Coches/Mercedes.png' },
   { id: 'racing_bulls', nombre: 'Racing Bulls', precio: 20.0, puntos: 200, imagen: '/Coches/RacingBulls.png' },
   { id: 'red_bull', nombre: 'Red Bull', precio: 20.0, puntos: 200, imagen: '/Coches/RedBull.png' },
   { id: 'williams', nombre: 'Williams', precio: 20.0, puntos: 200, imagen: '/Coches/Williams.png' }

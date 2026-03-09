@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
+import { useFantasyStore } from '@/stores/tiendaFantasy'
 
 import Button from 'primevue/button'
 
@@ -12,14 +13,7 @@ import CartaPotenciador from '@/components/CartaPotenciador.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
 
 const router = useRouter()
-
-// Datos del usuario (Igual que en Inicio)
-const usuario = {
-  name: 'Alberto',
-  iniciales: 'AF',
-  puntos: '1200',
-  presupuesto: '50M',
-}
+const fantasyStore = useFantasyStore()
 
 const cerrarSesion = async () => {
   try {
@@ -67,20 +61,20 @@ const potenciadores = computed(() => {
             <div
               class="w-12 h-12 rounded-full bg-[#e10600] flex items-center justify-center text-white font-bold shadow-lg"
             >
-              {{ usuario.iniciales }}
+              {{ fantasyStore.usuario.name.charAt(0) }}
             </div>
 
             <div class="flex flex-col justify-center">
               <h2 class="text-xl font-black text-white uppercase italic tracking-wide">
-                {{ usuario.name }}
+                {{ fantasyStore.usuario.name }}
               </h2>
               <div class="flex items-center gap-2 mt-1">
                 <span class="text-xs text-zinc-400 font-medium">
-                  Puntos: <strong class="text-white">{{ usuario.puntos }}</strong>
+                  Puntos: <strong class="text-white">{{ fantasyStore.usuario.puntos }}</strong>
                 </span>
                 <span class="text-xs text-zinc-600">|</span>
                 <span class="text-xs text-emerald-400 font-bold">
-                  {{ usuario.presupuesto }}
+                  {{ fantasyStore.usuario.presupuesto }}
                 </span>
               </div>
             </div>

@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
+import { useFantasyStore } from '@/stores/tiendaFantasy'
 
 // Props del componente
 const props = defineProps({
@@ -19,18 +20,9 @@ const props = defineProps({
 const mostrarInfo = ref(false)
 const toast = useToast()
 const confirm = useConfirm()
+const fantasyStore = useFantasyStore()
 
-// Maneja la puja del piloto
-const realizarPuja = () => {
-  toast.add({
-    severity: 'success',
-    summary: 'Puja realizada',
-    detail: `Has pujado por ${props.piloto.nombre} por ${props.piloto.precio}M`,
-    life: 3000,
-  })
-}
-
-// Función para confirmar la compra (puede ser llamada desde realizarPuja o un botón específico)
+// Función para confirmar la compra con la tienda fantasy
 const confirmarCompra = () => {
   confirm.require({
     message: `¿Estás seguro de que quieres pujar por ${props.piloto.nombre} por ${props.piloto.precio}M?`,
@@ -39,7 +31,22 @@ const confirmarCompra = () => {
     acceptLabel: 'Sí, pujar',
     rejectLabel: 'No, cancelar',
     accept() {
-      realizarPuja()
+      const exito = fantasyStore.pujarPorElemento(props.piloto)
+      if (exito) {
+        toast.add({
+          severity: 'success',
+          summary: 'Puja realizada',
+          detail: `Has pujado por ${props.piloto.nombre} por ${props.piloto.precio}M`,
+          life: 3000,
+        })
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Puja fallida',
+          detail: 'No tienes presupuesto suficiente',
+          life: 3000,
+        })
+      }
     },
   })
 }

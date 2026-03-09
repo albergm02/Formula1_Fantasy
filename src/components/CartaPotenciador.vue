@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
+import { useFantasyStore } from '@/stores/tiendaFantasy'
 
-defineProps({
+const props = defineProps({
   potenciador: {
     type: Object,
     required: true,
@@ -13,6 +16,37 @@ defineProps({
 })
 
 const mostrarInfo = ref(false)
+const toast = useToast()
+const confirm = useConfirm()
+const fantasyStore = useFantasyStore()
+
+const confirmarCompra = () => {
+  confirm.require({
+    message: `¿Estás seguro de que quieres pujar por ${props.potenciador.nombre} por ${props.potenciador.precio}M?`,
+    header: 'Confirmar Puja',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'Sí, pujar',
+    rejectLabel: 'No, cancelar',
+    accept() {
+      const exito = fantasyStore.pujarPorElemento(props.potenciador)
+      if (exito) {
+        toast.add({
+          severity: 'success',
+          summary: 'Puja realizada',
+          detail: `Has pujado por ${props.potenciador.nombre} por ${props.potenciador.precio}M`,
+          life: 3000,
+        })
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Puja fallida',
+          detail: 'No tienes presupuesto suficiente',
+          life: 3000,
+        })
+      }
+    },
+  })
+}
 </script>
 
 <template>
@@ -27,7 +61,10 @@ const mostrarInfo = ref(false)
         <span class="text-xs font-black"> {{ potenciador.precio }}M </span>
       </div>
 
-      <div class="relative flex-1 min-h-0 w-full" @click="mostrarInfo = !mostrarInfo">
+      <div
+        class="relative flex-1 min-h-0 w-full cursor-pointer"
+        @click="mostrarInfo = !mostrarInfo"
+      >
         <img
           :src="potenciador.imagen"
           class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300"
@@ -62,7 +99,8 @@ const mostrarInfo = ref(false)
       </div>
       <button
         v-if="modoMercado"
-        class="shrink-0 w-full bg-zinc-950 text-white py-3 flex items-center justify-center gap-2 transition-all active:scale-90"
+        @click="confirmarCompra"
+        class="shrink-0 w-full bg-zinc-950 text-white py-3 flex items-center justify-center gap-2 transition-all active:scale-90 hover:bg-zinc-900"
       >
         <i class="pi pi-money-bill text-xs"></i>
         <span class="text-xs font-black">PUJAR</span>
