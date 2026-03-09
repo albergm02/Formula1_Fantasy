@@ -31,10 +31,10 @@ const misPotenciadores = computed(() =>
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-zinc-950 p-4 md:p-6 font-sans pb-32 relative">
+  <div class="min-h-screen w-full bg-zinc-950 p-4 font-sans pb-32 relative">
     <div class="mx-auto w-full max-w-5xl flex flex-col gap-8">
       <header
-        class="fixed top-0 left-0 w-full bg-zinc-950 border-b border-zinc-800 p-4 md:p-6 z-40 flex items-center justify-between"
+        class="fixed top-0 left-0 w-full bg-zinc-950 border-b border-zinc-800 p-4 z-40 flex items-center justify-between"
       >
         <div class="mx-auto w-full max-w-5xl flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -82,10 +82,7 @@ const misPotenciadores = computed(() =>
           <h2 class="text-lg font-black italic text-zinc-200">MI COCHE</h2>
         </div>
 
-        <div
-          v-if="misCoches.length > 0"
-          class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
-        >
+        <div v-if="misCoches.length > 0" class="grid grid-cols-1 gap-5 auto-rows-[360px]">
           <CartaCoche v-for="coche in misCoches" :key="coche.id" :coche="coche" />
         </div>
 
@@ -99,10 +96,7 @@ const misPotenciadores = computed(() =>
           <h2 class="text-lg font-black italic text-zinc-200 uppercase">Mis Pilotos</h2>
         </div>
 
-        <div
-          v-if="misPilotos.length > 0"
-          class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
-        >
+        <div v-if="misPilotos.length > 0" class="grid grid-cols-3 gap-5 auto-rows-[360px]">
           <CartaPiloto v-for="piloto in misPilotos" :key="piloto.id" :piloto="piloto" />
         </div>
 
@@ -118,7 +112,7 @@ const misPotenciadores = computed(() =>
 
         <div
           v-if="misPotenciadores.length > 0"
-          class="grid grid-cols-2 md:grid-cols-4 gap-3 object-fill auto-rows-[250px] md:auto-rows-[300px]"
+          class="grid grid-cols-4 gap-3 object-fill auto-rows-[250px]"
         >
           <CartaPotenciador
             v-for="potenciador in misPotenciadores"
@@ -134,7 +128,7 @@ const misPotenciadores = computed(() =>
     </div>
 
     <nav
-      class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-zinc-800 p-2 md:p-4 flex justify-center z-50"
+      class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-zinc-800 p-4 flex justify-center z-50"
     >
       <div class="w-full max-w-4xl flex justify-around items-center gap-2">
         <Button

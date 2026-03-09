@@ -51,10 +51,10 @@ const potenciadores = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-zinc-950 p-4 md:p-6 font-sans pb-32 relative">
+  <div class="min-h-screen w-full bg-zinc-950 p-4 pb-32 relative">
     <div class="mx-auto w-full max-w-5xl flex flex-col gap-8">
       <header
-        class="fixed top-0 left-0 w-full bg-zinc-950 border-b border-zinc-800 p-4 md:p-6 z-40 flex items-center justify-between"
+        class="fixed top-0 left-0 w-full bg-zinc-950 border-b border-zinc-800 p-4 z-40 flex items-center justify-between"
       >
         <div class="mx-auto w-full max-w-5xl flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -98,26 +98,22 @@ const potenciadores = computed(() => {
 
       <section>
         <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+          <h2 class="text-lg font-black italic text-zinc-200 uppercase tracking-wide">
             Coches de la semana
           </h2>
         </div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
-        >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 auto-rows-[300px] md:auto-rows-[360px]">
           <CartaCoche v-for="coche in coche" :key="coche.id" :coche="coche" :modoMercado="true" />
         </div>
       </section>
 
       <section>
         <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+          <h2 class="text-lg font-black italic text-zinc-200 uppercase tracking-wide">
             Pilotos Disponibles
           </h2>
         </div>
-        <div
-          class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 auto-rows-[300px] md:auto-rows-[360px]"
-        >
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 auto-rows-[300px] md:auto-rows-[360px]">
           <CartaPiloto
             v-for="piloto in pilotos"
             :key="piloto.id"
@@ -129,7 +125,7 @@ const potenciadores = computed(() => {
 
       <section class="mb-32">
         <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-base md:text-lg font-black italic text-zinc-200 uppercase tracking-wide">
+          <h2 class="text-lg font-black italic text-zinc-200 uppercase tracking-wide">
             Piezas y Mejoras
           </h2>
         </div>
@@ -147,7 +143,7 @@ const potenciadores = computed(() => {
     </div>
 
     <nav
-      class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-zinc-800 p-2 md:p-4 flex justify-center z-50"
+      class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-zinc-800 p-2 flex justify-center z-50"
     >
       <div class="w-full max-w-4xl flex justify-around items-center gap-2">
         <Button
@@ -155,8 +151,7 @@ const potenciadores = computed(() => {
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-home" style="font-size: 1.3rem; color: #a1a1aa"></i>
-          <span
-            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+          <span class="text-[9px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
             >INICIO</span
           >
         </Button>
@@ -165,8 +160,7 @@ const potenciadores = computed(() => {
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-chart-bar" style="font-size: 1.3rem; color: #a1a1aa"></i>
-          <span
-            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+          <span class="text-[9px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
             >RANKING</span
           >
         </Button>
@@ -176,8 +170,7 @@ const potenciadores = computed(() => {
           @click="router.push('/garaje')"
         >
           <i class="pi pi-warehouse" style="font-size: 1.3rem; color: #a1a1aa"></i>
-          <span
-            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+          <span class="text-[9px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
             >GARAJE</span
           >
         </Button>
@@ -186,8 +179,7 @@ const potenciadores = computed(() => {
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-shopping-cart" style="font-size: 1.3rem; color: #e10600"></i>
-          <span
-            class="text-[9px] md:text-[10px] text-[#e10600] mt-1 font-black tracking-widest whitespace-nowrap"
+          <span class="text-[9px] text-[#e10600] mt-1 font-black tracking-widest whitespace-nowrap"
             >MERCADO</span
           >
         </Button>
@@ -196,8 +188,7 @@ const potenciadores = computed(() => {
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-bell" style="font-size: 1.3rem; color: #a1a1aa"></i>
-          <span
-            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+          <span class="text-[9px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
             >AVISOS</span
           >
         </Button>
@@ -206,8 +197,7 @@ const potenciadores = computed(() => {
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-cog" style="font-size: 1.3rem; color: #a1a1aa"></i>
-          <span
-            class="text-[9px] md:text-[10px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
+          <span class="text-[9px] text-zinc-400 mt-1 font-medium tracking-widest whitespace-nowrap"
             >AJUSTES</span
           >
         </Button>
