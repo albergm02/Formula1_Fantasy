@@ -173,6 +173,7 @@ const potenciadores = computed(() => {
 
         <Button
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+          @click="router.push('/garaje')"
         >
           <i class="pi pi-warehouse" style="font-size: 1.3rem; color: #a1a1aa"></i>
           <span
@@ -214,10 +215,3 @@ const potenciadores = computed(() => {
     </nav>
   </div>
 </template>
-
-<style>
-/* Forzamos el fondo negro en toda la app para evitar bordes blancos al hacer scroll en móviles */
-body {
-  background-color: #09090b !important;
-}
-</style>

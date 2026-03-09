@@ -73,7 +73,6 @@ const cerrarSesion = async () => {
     >
       <div class="w-full max-w-4xl flex justify-around items-center gap-2">
         <Button
-          @click="router.push('/inicio')"
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
         >
           <i class="pi pi-home" style="font-size: 1.3rem; color: #e10600"></i>
@@ -95,6 +94,7 @@ const cerrarSesion = async () => {
 
         <Button
           class="flex-1 flex-col items-center !p-2 !bg-transparent !border-none hover:!bg-zinc-800 !transition-colors"
+          @click="router.push('/garaje')"
         >
           <i class="pi pi-warehouse" style="font-size: 1.3rem; color: #a1a1aa"></i>
           <span
@@ -140,9 +140,3 @@ const cerrarSesion = async () => {
     </nav>
   </div>
 </template>
-
-<style>
-body {
-  background-color: #09090b !important;
-}
-</style>

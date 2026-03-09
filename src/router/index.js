@@ -28,6 +28,12 @@ const routes = [
     meta: { requiresAuth: true }, // Protege la ruta del mercado para usuarios autenticados
   },
   {
+    path: '/garaje',
+    name: 'garaje',
+    component: () => import('../views/VistaGaraje.vue'),
+    meta: { requiresAuth: true }, // Protege la ruta del garaje para usuarios autenticados
+  },
+  {
     path: '/:pathMatch(.*)*', // Redirecciona todas las rutas no definidas a la página de inicio
     redirect: '/',
   },

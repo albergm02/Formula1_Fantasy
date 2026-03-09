@@ -50,7 +50,7 @@ const iniciarSesion = async ({ valid, values }) => {
     <Card class="w-full max-w-md !bg-zinc-800 rounded !shadow-red-600/50">
       <template #title>
         <div class="flex flex-col items-center gap-4">
-          <img src="../assets/logo_final.png" alt="F1 Fantasy Logo" class="w-32 h-32" />
+          <img src="/logo_final.png" alt="F1 Fantasy Logo" class="w-32 h-32" />
           <div class="text-center">
             <h1 class="text-3xl font-black italic text-red-600">F1 FANTASY</h1>
           </div>
@@ -113,7 +113,7 @@ const iniciarSesion = async ({ valid, values }) => {
             <Button
               type="button"
               label="CREAR CUENTA"
-              @click="$router.push('/register')"
+              @click="$router.push('/registro')"
               class="w-full !bg-zinc-700 !border-zinc-700 font-bold !text-white hover:!bg-zinc-600 hover:!border-zinc-600 transition-colors"
             />
           </div>
