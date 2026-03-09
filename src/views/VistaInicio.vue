@@ -31,7 +31,7 @@ const cerrarSesion = async () => {
         <div class="mx-auto w-full max-w-5xl flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div
-              class="w-12 h-12 rounded-full bg-[#e10600] flex items-center justify-center text-white font-bold shadow-lg"
+              class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white font-bold shadow-lg"
             >
               {{ usuario.iniciales }}
             </div>
