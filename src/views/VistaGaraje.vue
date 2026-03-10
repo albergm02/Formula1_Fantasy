@@ -41,6 +41,19 @@ const confirmarVenta = (elemento, tipo) => {
   })
 }
 
+const intentarEquiparPieza = (idInstancia) => {
+  const respuesta = fantasyStore.toggleEquiparPieza(idInstancia)
+  
+  // Si el Store nos bloquea (porque no hay coche), mostramos la alerta
+  if (respuesta && !respuesta.exito) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Acción denegada',
+      detail: respuesta.mensaje,
+      life: 3000,
+    })
+  }
+}
 </script>
 
 <template>
@@ -132,7 +145,7 @@ const confirmarVenta = (elemento, tipo) => {
                 <img :src="pieza.imagen" class="w-full h-full object-contain drop-shadow-lg transition-all" :class="!pieza.equipado && 'opacity-50 grayscale'" />
                 
                 <Button 
-                  @click="fantasyStore.toggleEquiparPieza(pieza.idInstancia)"
+                  @click="intentarEquiparPieza(pieza.idInstancia)"
                   :icon="pieza.equipado ? 'pi pi-minus' : 'pi pi-plus'" 
                   class="!absolute !top-2 !right-2 !w-8 !h-8 !rounded-full !p-0 !text-white transition-colors"
                   :class="pieza.equipado ? '!bg-[#e10600] !border-none' : '!bg-[#2e2e38] !border-none'"

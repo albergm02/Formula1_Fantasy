@@ -74,14 +74,18 @@ export const useFantasyStore = defineStore('fantasy', {
     },
 
     toggleEquiparPieza(idInstancia) {
-      // 1. Buscamos la pieza exacta que el usuario ha tocado
       const pieza = this.garaje.potenciadores.find(p => p.idInstancia === idInstancia)
       
-      // 2. Si la encuentra, invierte su estado (si era true pasa a false, y viceversa)
       if (pieza) {
+        // REGLA: Si se intenta equipar pero no hay coche, no se permite
+        if (!pieza.equipado && this.garaje.coche === null) {
+          return { exito: false, mensaje: 'Necesitas un monoplaza para instalar mejoras.' }
+        }
+
+        // Si pasa la regla (o si lo está desequipando), cambia el estado
         pieza.equipado = !pieza.equipado
-        // 3. Guardamos en el localStorage para que recuerde que está instalada
         this.guardarPartida()
+        return { exito: true }
       }
     },
 
@@ -89,6 +93,6 @@ export const useFantasyStore = defineStore('fantasy', {
       localStorage.removeItem('miFantasyF1')
       location.reload()
     },
-    
+
   }
 })
