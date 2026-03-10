@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export const useFantasyStore = defineStore('fantasy', {
   state: () => ({
     usuario: {
-      name: 'Alberto',
+      nombre: 'Alberto',
       iniciales: 'AF',
       puntos: 1200,
       presupuesto: 50,
