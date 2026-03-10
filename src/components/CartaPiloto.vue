@@ -31,20 +31,22 @@ const confirmarCompra = () => {
     acceptLabel: 'Sí, pujar',
     rejectLabel: 'No, cancelar',
     accept() {
-      const exito = fantasyStore.pujarPorElemento(props.piloto)
-      if (exito) {
+      // 1. Guardamos la respuesta completa del store
+      const respuesta = fantasyStore.pujarPorElemento(props.piloto) 
+      
+      if (respuesta.exito) {
         toast.add({
           severity: 'success',
-          summary: 'Puja realizada',
-          detail: `Has pujado por ${props.piloto.nombre} por ${props.piloto.precio}M`,
+          summary: 'Operación completada',
+          detail: respuesta.mensaje, // 2. Usamos el mensaje inteligente
           life: 3000,
         })
       } else {
         toast.add({
           severity: 'error',
-          summary: 'Puja fallida',
-          detail: 'No tienes presupuesto suficiente',
-          life: 3000,
+          summary: 'Operación denegada',
+          detail: respuesta.mensaje, // 3. Nos dirá si falta dinero o si no hay hueco
+          life: 4000,
         })
       }
     },
@@ -94,7 +96,7 @@ const toggleInfo = () => {
           v-show="!mostrarInfo"
           class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#15151e] to-transparent p-4 flex justify-center"
         >
-          <span class="text-[10px] font-black text-[#8a8a9d] animate-pulse">
+          <span class="text-[10px] font-black text-white animate-pulse">
             TOCA PARA VER DETALLES
           </span>
         </div>

@@ -38,7 +38,7 @@ const pilotos = computed(() => {
     Q3: mercadoPilotos.filter((p) => p.tier === 'Q3'),
   }
 
-  return [
+  const seleccion = [
     pilotosPorTier.Q1[Math.floor(Math.random() * pilotosPorTier.Q1.length)],
     pilotosPorTier.Q1[Math.floor(Math.random() * pilotosPorTier.Q1.length)],
     pilotosPorTier.Q2[Math.floor(Math.random() * pilotosPorTier.Q2.length)],
@@ -46,14 +46,20 @@ const pilotos = computed(() => {
     pilotosPorTier.Q3[Math.floor(Math.random() * pilotosPorTier.Q3.length)],
     pilotosPorTier.Q3[Math.floor(Math.random() * pilotosPorTier.Q3.length)],
   ]
+  
+  return seleccion.map(p => ({ ...p, tipo: 'piloto' }))
 })
 
 const coches = computed(() => {
-  return mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 2)
+  // Aseguramos que el tipo sea 'coche'
+  const seleccion = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 2)
+  return seleccion.map(c => ({ ...c, tipo: 'coche' }))
 })
 
 const potenciadores = computed(() => {
-  return mercadoPotenciadores.sort(() => 0.5 - Math.random()).slice(0, 4)
+  // Aseguramos que el tipo sea 'potenciador'
+  const seleccion = mercadoPotenciadores.sort(() => 0.5 - Math.random()).slice(0, 4)
+  return seleccion.map(pot => ({ ...pot, tipo: 'potenciador' }))
 })
 </script>
 
@@ -91,7 +97,7 @@ const potenciadores = computed(() => {
             class="w-10 h-10 rounded-lg !bg-[#2e2e38] !text-[#8a8a9d] !border-none flex items-center justify-center hover:!bg-[#e10600] hover:!text-white !transition-colors"
             title="Cerrar Sesión"
           >
-            <i class="pi pi-sign-out" style="font-size: 1.2rem"></i>
+            <i class="pi pi-sign-out"></i>
           </Button>
            
         </div>

@@ -28,25 +28,28 @@ const confirmarCompra = () => {
     acceptLabel: 'Sí, pujar',
     rejectLabel: 'No, cancelar',
     accept() {
-      const exito = fantasyStore.pujarPorElemento(props.potenciador)
-      if (exito) {
+      // 1. Guardamos la respuesta completa del store
+      const respuesta = fantasyStore.pujarPorElemento(props.potenciador) 
+      
+      if (respuesta.exito) {
         toast.add({
           severity: 'success',
-          summary: 'Puja realizada',
-          detail: `Has pujado por ${props.potenciador.nombre} por ${props.potenciador.precio}M`,
+          summary: 'Operación completada',
+          detail: respuesta.mensaje, // 2. Usamos el mensaje inteligente
           life: 3000,
         })
       } else {
         toast.add({
           severity: 'error',
-          summary: 'Puja fallida',
-          detail: 'No tienes presupuesto suficiente',
-          life: 3000,
+          summary: 'Operación denegada',
+          detail: respuesta.mensaje, // 3. Nos dirá si falta dinero o si no hay hueco
+          life: 4000,
         })
       }
     },
   })
 }
+
 </script>
 
 <template>
@@ -70,7 +73,7 @@ const confirmarCompra = () => {
 
         <!-- Oculto el texto al tocar. -->
         <div v-show="!mostrarInfo" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 flex">
-          <span class="text-xs font-black text-zinc-200 animate-pulse">
+          <span class="text-xs font-black text-white animate-pulse">
             TOCA PARA VER LOS DETALLES
           </span>
         </div>

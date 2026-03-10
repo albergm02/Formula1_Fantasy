@@ -10,7 +10,7 @@ import { useFantasyStore } from '@/stores/storeFantasy'
 /* ============================================================================
 /* ESTADOS Y VARIABLES */
 const router = useRouter()
-const almacenFantasy = useFantasyStore()
+const fantasyStore = useFantasyStore()
 
 /* ============================================================================
 /* FUNCIONES */
@@ -36,21 +36,21 @@ const cerrarSesion = async () => {
           <!-- Información del usuario -->
           <div class="flex items-center gap-2">
             <div class="w-12 h-12 rounded bg-[#e10600] flex items-center justify-center text-white font-black shadow-lg shadow-red-900/20">
-              {{ almacenFantasy.usuario.iniciales }}
+              {{ fantasyStore.usuario.iniciales }}
             </div>
             
             <div class="flex flex-col justify-center">
               <h2 class="text-xl font-black text-white uppercase">
-                {{ almacenFantasy.usuario.nombre }}
+                {{ fantasyStore.usuario.nombre }}
               </h2>
               
               <div class="flex items-center gap-2 mt-1">
                 <span class="text-xs text-[#8a8a9d] font-medium">
-                  Puntos: <strong class="text-[#ffb800]">{{ almacenFantasy.usuario.puntos }}</strong>
+                  Puntos: <strong class="text-[#ffb800]">{{ fantasyStore.usuario.puntos }}</strong>
                 </span>
                 <span class="text-xs text-[#2e2e38]">|</span>
                 <span class="text-xs text-[#10b981] font-bold tracking-wide">
-                  {{ almacenFantasy.usuario.presupuesto }}M
+                  {{ fantasyStore.usuario.presupuesto }}M
                 </span>
               </div>
             </div>
@@ -61,7 +61,7 @@ const cerrarSesion = async () => {
             @click="cerrarSesion"
             class="w-10 h-10 rounded-lg !bg-[#2e2e38] !text-[#8a8a9d] !border-none flex items-center justify-center hover:!bg-[#e10600] hover:!text-white !transition-colors"
           >
-            <i class="pi pi-sign-out" style="font-size: 1.2rem"></i>
+            <i class="pi pi-sign-out"></i>
           </Button>
            
         </div>
@@ -88,6 +88,14 @@ const cerrarSesion = async () => {
           </template>
         </Card>
         <!-- Fin tarjeta de próxima carrera -->
+
+        <!-- Botón de resetear partida (solo para pruebas) -->
+        <Button 
+          @click="fantasyStore.resetearCuenta()" 
+          label="RESETEAR PARTIDA" 
+          icon="pi pi-trash" 
+          class="!bg-red-600 !text-white !border-none !mt-24 !mx-auto !block" 
+        />  
 
 
       </main>
