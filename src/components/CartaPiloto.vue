@@ -1,10 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-import { useFantasyStore } from '@/stores/storeFantasy'
 
-// Props del componente
 const props = defineProps({
   piloto: {
     type: Object,
@@ -16,46 +13,23 @@ const props = defineProps({
   },
 })
 
-// Estado local
-const mostrarInfo = ref(false)
-const toast = useToast()
-const confirm = useConfirm()
-const fantasyStore = useFantasyStore()
+// Igual que CartaCoche: avisamos al padre
+const emit = defineEmits(['fichar'])
 
-// Función para confirmar la compra con la tienda fantasy
+const mostrarInfo = ref(false)
+const confirm = useConfirm()
+
 const confirmarCompra = () => {
   confirm.require({
-    message: `¿Estás seguro de que quieres pujar por ${props.piloto.nombre} por ${props.piloto.precio}M?`,
-    header: 'Confirmar Puja',
+    message: `¿Estás seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
+    header: 'Confirmar Fichaje',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Sí, pujar',
+    acceptLabel: 'Sí, fichar',
     rejectLabel: 'No, cancelar',
     accept() {
-      // 1. Guardamos la respuesta completa del store
-      const respuesta = fantasyStore.pujarPorElemento(props.piloto)
-
-      if (respuesta.exito) {
-        toast.add({
-          severity: 'success',
-          summary: 'Operación completada',
-          detail: respuesta.mensaje, // 2. Usamos el mensaje inteligente
-          life: 3000,
-        })
-      } else {
-        toast.add({
-          severity: 'error',
-          summary: 'Operación denegada',
-          detail: respuesta.mensaje, // 3. Nos dirá si falta dinero o si no hay hueco
-          life: 4000,
-        })
-      }
+      emit('fichar', props.piloto)
     },
   })
-}
-
-// Alterna la visibilidad de información
-const toggleInfo = () => {
-  mostrarInfo.value = !mostrarInfo.value
 }
 </script>
 
@@ -69,8 +43,8 @@ const toggleInfo = () => {
         <span class="text-xs font-black text-[#10b981]">{{ props.piloto.precio }}M</span>
       </div>
 
-      <div class="relative flex-1 min-h-0 w-full cursor-pointer touch-manipulation select-none" @click="toggleInfo">
-
+      <div class="relative flex-1 min-h-0 w-full cursor-pointer touch-manipulation select-none"
+        @click="mostrarInfo = !mostrarInfo">
         <img :src="props.piloto.imagen || 'https://via.placeholder.com/150'"
           class="absolute inset-0 w-full h-full object-cover object-center"
           :class="mostrarInfo ? 'opacity-20' : 'opacity-90'" :alt="props.piloto.nombre" />
@@ -108,8 +82,8 @@ const toggleInfo = () => {
 
       <button v-if="modoMercado" @click="confirmarCompra"
         class="shrink-0 w-full bg-[#2e2e38] text-white py-3 flex items-center justify-center gap-2 touch-manipulation hover:bg-[#e10600] group transition-colors border-t border-[#2e2e38]">
-        <i class="pi pi-money-bill text-xs text-[#10b981] group-hover:text-white transition-colors"></i>
-        <span class="text-xs font-black text-[#10b981] group-hover:text-white transition-colors">PUJAR</span>
+        <i class="pi pi-cart-plus text-xs text-[#10b981] group-hover:text-white transition-colors"></i>
+        <span class="text-xs font-black text-[#10b981] group-hover:text-white transition-colors">FICHAR</span>
       </button>
     </div>
   </div>

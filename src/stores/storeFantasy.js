@@ -14,7 +14,7 @@ const crearEstadoInicial = () => ({
   },
 })
 
-export const usarEstadoPartida = defineStore('fantasy', {
+export const useFantasyStore = defineStore('fantasy', {
   state: () => {
     const partidaGuardada = localStorage.getItem('miFantasyF1')
     return partidaGuardada ? JSON.parse(partidaGuardada) : crearEstadoInicial()
@@ -31,7 +31,7 @@ export const usarEstadoPartida = defineStore('fantasy', {
       )
     },
 
-    ficharElemento(elemento) {
+    fichar(elemento) {
       if (this.usuario.presupuesto < elemento.precio) {
         return { exito: false, mensaje: 'Presupuesto insuficiente.' }
       }

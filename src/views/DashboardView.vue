@@ -3,11 +3,11 @@ import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import { signOut } from '@/services/authService'
 
-import { usarEstadoPartida } from '@/stores/storeFantasy.js'
+import { useFantasyStore } from '@/stores/storeFantasy.js'
 import Navbar from '@/components/Navbar.vue'
 
 const router = useRouter()
-const fantasyStore = usarEstadoPartida()
+const fantasyStore = useFantasyStore()
 
 const cerrarSesion = async () => {
   try {
