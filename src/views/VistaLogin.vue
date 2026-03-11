@@ -57,65 +57,37 @@ const iniciarSesion = async ({ valid, values }) => {
         </div>
       </template>
       <template #content>
-        <Form
-          v-slot="$form"
-          class="flex flex-col gap-4 mt-4"
-          :initial-values="initialValues"
-          :resolver="resolver"
-          @submit="iniciarSesion"
-        >
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues" :resolver="resolver"
+          @submit="iniciarSesion">
           <div class="flex flex-col gap-1">
             <label for="email" class="font-bold text-white">EMAIL</label>
-            <InputText
-              id="email"
-              type="email"
-              name="email"
-              autocomplete="email"
-              placeholder="piloto@escuderia.com"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
-              fluid
-            />
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
+              class="w-full !bg-zinc-700 !text-white !border-zinc-700" fluid />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
           </div>
           <div class="flex flex-col gap-1">
             <label for="password" class="font-bold text-white">CONTRASEÑA</label>
-            <Password
-              inputId="password"
-              name="password"
-              autocomplete="current-password"
-              placeholder="********"
-              toggle-mask
-              :feedback="false"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700"
-              fluid
-            />
+            <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
+              toggle-mask :feedback="false" class="w-full !bg-zinc-700 !text-white !border-zinc-700" fluid />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
             <div class="flex justify-end mt-2">
-              <a href="#" class="font-bold text-zinc-400 hover:text-zinc-200 transition-colors"
-                >¿Olvidaste tu contraseña?</a
-              >
+              <a href="#" class="font-bold text-zinc-400 hover:text-zinc-200 transition-colors">¿Olvidaste tu
+                contraseña?</a>
             </div>
           </div>
 
           <div class="flex flex-col gap-2">
-            <Button
-              type="submit"
-              label="INICIAR SESIÓN"
-              class="w-full !bg-red-600 !border-red-600 font-bold !text-white hover:!bg-red-700 hover:!border-red-700 transition-colors"
-            />
+            <Button type="submit" label="INICIAR SESIÓN"
+              class="w-full !bg-red-600 !border-red-600 font-bold !text-white hover:!bg-red-700 hover:!border-red-700 transition-colors" />
           </div>
 
           <div class="flex flex-col gap-2">
-            <Button
-              type="button"
-              label="CREAR CUENTA"
-              @click="$router.push('/registro')"
-              class="w-full !bg-zinc-700 !border-zinc-700 font-bold !text-white hover:!bg-zinc-600 hover:!border-zinc-600 transition-colors"
-            />
+            <Button type="button" label="CREAR CUENTA" @click="$router.push('/registro')"
+              class="w-full !bg-zinc-700 !border-zinc-700 font-bold !text-white hover:!bg-zinc-600 hover:!border-zinc-600 transition-colors" />
           </div>
         </Form>
       </template>
