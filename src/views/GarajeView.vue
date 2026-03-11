@@ -4,17 +4,19 @@ import { useFantasyStore } from '@/stores/storeFantasy'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import Button from 'primevue/button'
-import Card from 'primevue/card'
-import Navbar from '@/components/Navbar.vue'
+// Importamos la cabecera, la barra inferior y NUESTRAS CARTAS
 import Header from '@/components/Header.vue'
+import Navbar from '@/components/Navbar.vue'
+import CartaCoche from '@/components/CartaCoche.vue'
+import CartaPiloto from '@/components/CartaPiloto.vue'
+import CartaPotenciador from '@/components/CartaPotenciador.vue'
 
 const router = useRouter()
 const partida = useFantasyStore()
 const toast = useToast()
 const confirm = useConfirm()
 
-
+// Lógica de ventas y despidos
 const confirmarVentaCoche = (coche) => {
   confirm.require({
     message: `¿Estás seguro de que quieres vender a ${coche.nombre} por ${coche.precio}M?`,
@@ -29,7 +31,6 @@ const confirmarVentaCoche = (coche) => {
   })
 }
 
-// 2. Separamos el despido de pilotos
 const confirmarDespido = (piloto) => {
   confirm.require({
     message: `¿Estás seguro de que quieres despedir a ${piloto.nombre} por ${piloto.precio}M?`,
@@ -44,7 +45,6 @@ const confirmarDespido = (piloto) => {
   })
 }
 
-// 3. Conectamos con el nuevo nombre de la función de piezas
 const intentarEquiparPieza = (idInstancia) => {
   const respuesta = partida.instalarMejora(idInstancia)
 
@@ -62,102 +62,78 @@ const intentarEquiparPieza = (idInstancia) => {
     <main class="mx-auto w-full max-w-5xl p-4 flex flex-col gap-8 mt-4">
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Mi Monoplaza (1/1)</h2>
+        <div v-if="partida.garaje.coche" class="flex flex-col gap-2 w-full max-w-2xl mx-auto">
+          <div class="w-full min-h-[250px]">
+            <CartaCoche :coche="partida.garaje.coche" :modoMercado="false" />
+          </div>
+          <button @click="confirmarVentaCoche(partida.garaje.coche)"
+            class="w-full bg-zinc-800 py-3 flex items-center justify-center gap-2 hover:bg-red-600 group transition-colors">
+            <i class="pi pi-shopping-bag text-xs text-red-500 group-hover:text-white transition-colors"></i>
+            <span class="text-xs font-black text-red-500 group-hover:text-white transition-colors">VENDER POR {{
+              partida.garaje.coche.precio }}M</span>
+          </button>
         </div>
 
-        <Card v-if="partida.garaje.coche"
-          class="!bg-zinc-900 !border !border-zinc-800 !shadow-none w-full md:w-1/2 overflow-hidden">
-          <template #header>
-            <div class="relative aspect-[4/3] bg-zinc-800/30">
-              <img :src="partida.garaje.coche.imagen" class="absolute inset-0 w-full h-full object-cover" />
-              <div
-                class="absolute top-2 left-2 bg-zinc-900/80 backdrop-blur-sm px-2 py-1 rounded text-xs font-black text-white">
-                {{ partida.garaje.coche.nombre }} <span class="text-emerald-500 ml-1">{{ partida.garaje.coche.precio
-                }}M</span>
-              </div>
-            </div>
-          </template>
-          <template #footer>
-            <Button @click="confirmarVentaCoche(partida.garaje.coche)" label="VENDER" icon="pi pi-shopping-bag"
-              class="!w-full !bg-transparent !text-zinc-400 !border !border-zinc-800 hover:!border-red-500 hover:!text-red-500 !text-xs !font-black" />
-          </template>
-        </Card>
-
-        <div v-else
-          class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-400">
-          <i class="pi pi-car text-3xl mb-2"></i>
-          <span class="text-xs font-bold uppercase">Sin Chasis</span>
+        <div v-else class="flex flex-col items-center justify-center p-12">
+          <i class="pi pi-car text-4xl mb-3"></i>
+          <span class="text-sm font-bold uppercase tracking-widest">Sin Chasis</span>
         </div>
       </section>
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Mis Asientos ({{
-            partida.garaje.pilotos.length }}/2)</h2>
-        </div>
+        <div v-if="partida.garaje.pilotos.length > 0" class="flex flex-wrap justify-center gap-4">
+          <div v-for="piloto in partida.garaje.pilotos" :key="piloto.idInstancia"
+            class="flex flex-col gap-2 w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1rem)]">
 
-        <div v-if="partida.garaje.pilotos.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Card v-for="piloto in partida.garaje.pilotos" :key="piloto.idInstancia"
-            class="!bg-zinc-900 !border !border-zinc-800 !shadow-none overflow-hidden flex flex-col h-full">
-            <template #header>
-              <div class="relative aspect-[3/4] bg-zinc-800/30">
-                <img :src="piloto.imagen" class="absolute inset-0 w-full h-full object-cover" />
-                <div
-                  class="absolute bottom-2 left-2 right-2 bg-zinc-900/80 backdrop-blur-sm px-2 py-1 rounded text-xs font-black text-white truncate text-center">
-                  {{ piloto.nombre }}
-                </div>
-              </div>
-            </template>
-            <template #footer>
-              <Button @click="confirmarDespido(piloto)" label="DESPEDIR" icon="pi pi-user-minus"
-                class="!w-full !p-2 !bg-transparent !text-zinc-400 !border !border-zinc-800 hover:!border-red-500 hover:!text-red-500 !text-xs !font-black" />
-            </template>
-          </Card>
+            <div class="aspect-[3/4] w-full">
+              <CartaPiloto :piloto="piloto" :modoMercado="false" />
+            </div>
+
+            <button @click="confirmarDespido(piloto)"
+              class="w-full bg-zinc-800 py-3 flex items-center justify-center gap-2 hover:bg-red-600 group transition-colors rounded-xl border border-zinc-800 shadow-lg">
+              <i class="pi pi-user-minus text-xs text-red-500 group-hover:text-white transition-colors"></i>
+              <span class="text-xs font-black text-red-500 group-hover:text-white transition-colors">DESPEDIR ({{
+                piloto.precio }}M)</span>
+            </button>
+
+          </div>
         </div>
 
         <div v-else
-          class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-400">
-          <i class="pi pi-users text-3xl mb-2"></i>
-          <span class="text-xs font-bold uppercase">Asientos Vacíos</span>
+          class="flex flex-col items-center justify-center p-10 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-500 bg-zinc-900/30">
+          <i class="pi pi-users text-4xl mb-3"></i>
+          <span class="text-xs font-bold uppercase tracking-widest">Asientos Vacíos</span>
         </div>
       </section>
 
       <section class="mb-10">
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Inventario de Piezas</h2>
-        </div>
 
-        <div v-if="partida.garaje.potenciadores.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card v-for="pieza in partida.garaje.potenciadores" :key="pieza.idInstancia"
-            class="!bg-zinc-900 !border !shadow-none overflow-hidden transition-colors"
-            :class="pieza.equipado ? '!border-red-600' : '!border-zinc-800'">
-            <template #header>
-              <div class="relative aspect-square p-4 bg-zinc-800/10 flex items-center justify-center">
-                <img :src="pieza.imagen" class="w-full h-full object-contain drop-shadow-lg transition-all"
-                  :class="!pieza.equipado && 'opacity-50 grayscale'" />
+        <div v-if="partida.garaje.potenciadores.length > 0" class="flex flex-wrap justify-center gap-4">
+          <div v-for="pieza in partida.garaje.potenciadores" :key="pieza.idInstancia"
+            class="flex flex-col gap-2 relative w-[calc(50%-0.5rem)] md:w-[calc(25%-1rem)]">
 
-                <Button @click="intentarEquiparPieza(pieza.idInstancia)"
-                  :icon="pieza.equipado ? 'pi pi-minus' : 'pi pi-plus'"
-                  class="!absolute !top-2 !right-2 !w-8 !h-8 !rounded-full !p-0 !text-white transition-colors"
-                  :class="pieza.equipado ? '!bg-red-600 !border-none' : '!bg-zinc-800 !border-none hover:!bg-zinc-700'" />
-              </div>
-            </template>
-            <template #content>
-              <div class="text-center pt-2">
-                <p class="text-[10px] font-black uppercase text-white truncate">{{ pieza.nombre }}</p>
-                <span class="text-[9px] font-bold" :class="pieza.equipado ? 'text-emerald-500' : 'text-zinc-400'">
-                  {{ pieza.equipado ? 'INSTALADO' : 'EN LA CAJA' }}
-                </span>
-              </div>
-            </template>
-          </Card>
+            <div class="aspect-square w-full">
+              <CartaPotenciador :potenciador="pieza" :modoMercado="false" />
+            </div>
+
+            <button @click="intentarEquiparPieza(pieza.idInstancia)"
+              class="w-full py-3 flex items-center justify-center gap-2 group transition-colors rounded-xl border shadow-lg"
+              :class="pieza.equipado ? 'bg-emerald-600 border-emerald-500 hover:bg-emerald-500' : 'bg-zinc-800 border-zinc-800 hover:bg-emerald-600'">
+              <i class="text-xs transition-colors"
+                :class="pieza.equipado ? 'pi pi-check-circle text-white' : 'pi pi-cog text-emerald-500 group-hover:text-white'"></i>
+              <span class="text-xs font-black transition-colors"
+                :class="pieza.equipado ? 'text-white' : 'text-emerald-500 group-hover:text-white'">
+                {{ pieza.equipado ? 'INSTALADO' : 'INSTALAR' }}
+              </span>
+            </button>
+
+          </div>
         </div>
 
         <div v-else
-          class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-400">
-          <i class="pi pi-cog text-3xl mb-2"></i>
-          <span class="text-xs font-bold uppercase">Sin Mejoras Compradas</span>
+          class="flex flex-col items-center justify-center p-10 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-500 bg-zinc-900/30">
+          <i class="pi pi-box text-4xl mb-3"></i>
+          <span class="text-xs font-bold uppercase tracking-widest">Sin Mejoras Compradas</span>
         </div>
       </section>
 
