@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-import { useFantasyStore } from '@/estado/partida'
+import { useFantasyStore } from '@/stores/storeFantasy'
 
 const props = defineProps({
   potenciador: {

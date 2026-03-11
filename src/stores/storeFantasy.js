@@ -1,10 +1,3 @@
-/*====================================================================================================== 
-PARTIDA.JS
-- Este archivo define el estado global de la partida utilizando Pinia.
-- Contiene la estructura de datos para el usuario, su garaje y las acciones para modificar ese estado.
-- Se encarga de guardar y cargar el estado desde localStorage para persistencia entre sesiones.
-======================================================================================================*/
-
 import { defineStore } from 'pinia'
 
 const crearEstadoInicial = () => ({
@@ -21,7 +14,7 @@ const crearEstadoInicial = () => ({
   },
 })
 
-export const usarEstadoPartida = defineStore('partida', {
+export const usarEstadoPartida = defineStore('fantasy', {
   state: () => {
     const partidaGuardada = localStorage.getItem('miFantasyF1')
     return partidaGuardada ? JSON.parse(partidaGuardada) : crearEstadoInicial()
@@ -51,7 +44,6 @@ export const usarEstadoPartida = defineStore('partida', {
         return { exito: false, mensaje: 'Asientos ocupados. Despide a un piloto primero.' }
       }
 
-      // Si pasamos los bloqueos, procedemos con la compra
       this.usuario.presupuesto = Number((this.usuario.presupuesto - elemento.precio).toFixed(1))
 
       const adquisicion = { ...elemento, idInstancia: Date.now() }

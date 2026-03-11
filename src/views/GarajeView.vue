@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { useFantasyStore } from '@/estado/partida'
+import { useFantasyStore } from '@/stores/storeFantasy'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 

@@ -6,35 +6,35 @@ const routes = [
   {
     path: '/',
     name: 'login',
-    component: () => import('../views/VistaLogin.vue'),
-    meta: { requiresGuest: true }, // Protege la ruta de inicio de sesión para usuarios no autenticados
+    component: () => import('../views/LoginView.vue'),
+    meta: { requiresGuest: true },
   },
   {
     path: '/registro',
     name: 'registro',
-    component: () => import('../views/VistaRegistro.vue'),
-    meta: { requiresGuest: true }, // Protege la ruta de registro para usuarios no autenticados
+    component: () => import('../views/RegistroView.vue'),
+    meta: { requiresGuest: true },
   },
   {
     path: '/inicio',
     name: 'inicio',
-    component: () => import('../views/VistaInicio.vue'),
-    meta: { requiresAuth: true }, // Protege la ruta del dashboard para usuarios autenticados
+    component: () => import('../views/DashboardView.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/mercado',
     name: 'mercado',
-    component: () => import('../views/VistaMercado.vue'),
-    meta: { requiresAuth: true }, // Protege la ruta del mercado para usuarios autenticados
+    component: () => import('../views/MercadoView.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/garaje',
     name: 'garaje',
-    component: () => import('../views/VistaGaraje.vue'),
-    meta: { requiresAuth: true }, // Protege la ruta del garaje para usuarios autenticados
+    component: () => import('../views/GarajeView.vue'),
+    meta: { requiresAuth: true },
   },
   {
-    path: '/:pathMatch(.*)*', // Redirecciona todas las rutas no definidas a la página de inicio
+    path: '/:pathMatch(.*)*',
     redirect: '/',
   },
 ]
