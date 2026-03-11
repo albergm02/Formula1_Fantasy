@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { useFantasyStore } from '@/stores/storeFantasy'
+import { useFantasyStore } from '@/estado/partida'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
@@ -57,7 +57,7 @@ const intentarEquiparPieza = (idInstancia) => {
 </script>
 
 <template>
-  <div class="mt-20 min-h-screen w-full bg-[#15151e] p-4 pb-32 relative font-sans">
+  <div class="mt-20 min-h-screen w-full p-4 pb-32 relative font-sans">
     <div class="mx-auto w-full max-w-5xl flex flex-col gap-8">
 
       <header

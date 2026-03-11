@@ -1,10 +1,8 @@
 <script setup>
-/* ============================================================================
-/* IMPORTACIONES */
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
-import { useFantasyStore } from '@/stores/storeFantasy'
+import { useFantasyStore } from '@/estado/partida'
 
 import Button from 'primevue/button'
 import { signOut } from '@/services/authService'
@@ -13,13 +11,13 @@ import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
 
-/* ============================================================================
-/* ESTADOS Y VARIABLES */
 const router = useRouter()
 const fantasyStore = useFantasyStore()
 
-/* ============================================================================
-/* FUNCIONES */
+/**
+ * Función para cerrar sesión. 
+ * Llama al servicio de autenticación para cerrar la sesión del usuario y luego redirige a la página de inicio de sesión.
+ */
 const cerrarSesion = async () => {
   try {
     await signOut()
@@ -29,8 +27,10 @@ const cerrarSesion = async () => {
   }
 }
 
-/* ============================================================================
-/* COMPUTADAS (Datos del mercado) */
+/**
+ * Generamos la selección aleatoria de pilotos, coches y potenciadores para mostrar en el mercado.
+ * Para los pilotos, agrupamos por tier y luego seleccionamos aleatoriamente de cada grupo
+ */
 const pilotos = computed(() => {
   const pilotosPorTier = {
     Q1: mercadoPilotos.filter((p) => p.tier === 'Q1'),
@@ -51,20 +51,18 @@ const pilotos = computed(() => {
 })
 
 const coches = computed(() => {
-  // Aseguramos que el tipo sea 'coche'
   const seleccion = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 2)
   return seleccion.map(c => ({ ...c, tipo: 'coche' }))
 })
 
 const potenciadores = computed(() => {
-  // Aseguramos que el tipo sea 'potenciador'
   const seleccion = mercadoPotenciadores.sort(() => 0.5 - Math.random()).slice(0, 4)
   return seleccion.map(pot => ({ ...pot, tipo: 'potenciador' }))
 })
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-[#15151e] p-4 pb-32 relative font-sans">
+  <div class="min-h-screen w-full p-4 pb-32 relative font-sans">
     <div class="mx-auto w-full max-w-5xl flex flex-col gap-8">
 
       <header

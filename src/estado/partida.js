@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useFantasyStore = defineStore('fantasy', {
+export const usarEstadoPartida = defineStore('partida', {
   state: () => {
     const datosGuardados = localStorage.getItem('miFantasyF1')
     if (datosGuardados) {
@@ -12,22 +12,25 @@ export const useFantasyStore = defineStore('fantasy', {
         nombre: 'Alberto',
         iniciales: 'AL',
         puntos: 1200,
-        presupuesto: 50.0
+        presupuesto: 50.0,
       },
-      garaje: {   
+      garaje: {
         coche: null,
         pilotos: [],
-        potenciadores: []
-      }
+        potenciadores: [],
+      },
     }
   },
 
   actions: {
     guardarPartida() {
-      localStorage.setItem('miFantasyF1', JSON.stringify({
-        usuario: this.usuario,
-        garaje: this.garaje
-      }))
+      localStorage.setItem(
+        'miFantasyF1',
+        JSON.stringify({
+          usuario: this.usuario,
+          garaje: this.garaje,
+        }),
+      )
     },
 
     pujarPorElemento(elemento) {
@@ -35,7 +38,10 @@ export const useFantasyStore = defineStore('fantasy', {
         return { exito: false, mensaje: 'Ya tienes un coche. Véndelo primero en el garaje.' }
       }
       if (elemento.tipo === 'piloto' && this.garaje.pilotos.length >= 2) {
-        return { exito: false, mensaje: 'Tus 2 asientos están ocupados. Despide a un piloto primero.' }
+        return {
+          exito: false,
+          mensaje: 'Tus 2 asientos están ocupados. Despide a un piloto primero.',
+        }
       }
 
       if (this.usuario.presupuesto >= elemento.precio) {
@@ -55,18 +61,22 @@ export const useFantasyStore = defineStore('fantasy', {
         this.guardarPartida()
         return { exito: true, mensaje: `Fichaje de ${elemento.nombre} completado.` }
       }
-      
+
       return { exito: false, mensaje: 'Fondos insuficientes para esta operación.' }
     },
 
     venderElemento(tipo, idInstancia = null) {
       if (tipo === 'coche' && this.garaje.coche) {
-        this.usuario.presupuesto = Number((this.usuario.presupuesto + this.garaje.coche.precio).toFixed(1))
+        this.usuario.presupuesto = Number(
+          (this.usuario.presupuesto + this.garaje.coche.precio).toFixed(1),
+        )
         this.garaje.coche = null
       } else if (tipo === 'piloto') {
-        const index = this.garaje.pilotos.findIndex(p => p.idInstancia === idInstancia)
+        const index = this.garaje.pilotos.findIndex((p) => p.idInstancia === idInstancia)
         if (index > -1) {
-          this.usuario.presupuesto = Number((this.usuario.presupuesto + this.garaje.pilotos[index].precio).toFixed(1))
+          this.usuario.presupuesto = Number(
+            (this.usuario.presupuesto + this.garaje.pilotos[index].precio).toFixed(1),
+          )
           this.garaje.pilotos.splice(index, 1)
         }
       }
@@ -74,8 +84,8 @@ export const useFantasyStore = defineStore('fantasy', {
     },
 
     toggleEquiparPieza(idInstancia) {
-      const pieza = this.garaje.potenciadores.find(p => p.idInstancia === idInstancia)
-      
+      const pieza = this.garaje.potenciadores.find((p) => p.idInstancia === idInstancia)
+
       if (pieza) {
         // REGLA: Si se intenta equipar pero no hay coche, no se permite
         if (!pieza.equipado && this.garaje.coche === null) {
@@ -93,6 +103,5 @@ export const useFantasyStore = defineStore('fantasy', {
       localStorage.removeItem('miFantasyF1')
       location.reload()
     },
-
-  }
+  },
 })
