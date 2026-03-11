@@ -13,7 +13,7 @@ const props = defineProps({
   },
 })
 
-// Igual que CartaCoche: avisamos al padre
+/* Emit: Se emite el evento 'fichar' con el piloto seleccionado cuando el usuario confirma la compra en modo mercado. */
 const emit = defineEmits(['fichar'])
 
 const mostrarInfo = ref(false)
@@ -26,6 +26,8 @@ const confirmarCompra = () => {
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'Sí, fichar',
     rejectLabel: 'No, cancelar',
+    /* Emitimos el evento 'fichar' con el objeto del piloto como payload para que 
+    el componente padre pueda manejar la lógica de compra. */
     accept() {
       emit('fichar', props.piloto)
     },
@@ -34,57 +36,45 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 h-full w-full min-h-[400px]">
-    <div class="flex flex-col border border-[#2e2e38] rounded-xl overflow-hidden relative flex-1 min-h-0 bg-[#15151e]">
-      <div class="shrink-0 flex justify-between items-center p-3 bg-[#15151e] z-20 border-b border-[#2e2e38]">
-        <span class="text-xs font-black text-white uppercase truncate pr-2">
-          {{ props.piloto.nombre }}
-        </span>
-        <span class="text-xs font-black text-[#10b981]">{{ props.piloto.precio }}M</span>
+  <!-- Overflow Hidden corta la imagen para no sobrepasar el cuadro -->
+  <div class="flex flex-col h-full w-full min-h-[400px] overflow-hidden">
+
+    <!-- Header con precio y nombre del coche -->
+    <header class="flex justify-between items-center p-3 bg-[#15151E] z-20 shrink-0">
+      <span class="text-xs font-black text-white">
+        {{ props.piloto.nombre.toUpperCase() }}
+      </span>
+      <span class="text-xs font-black text-emerald-500">{{ props.piloto.precio }}M</span>
+    </header>
+
+    <!-- Main con imagen y detalles del piloto -->
+    <main class="relative flex-1 w-full cursor-pointer touch-manipulation select-none"
+      @click="mostrarInfo = !mostrarInfo">
+
+      <!-- Imagen del coche -->
+      <img :src="props.piloto.imagen" class="absolute w-full h-full object-cover object-center" />
+
+      <!-- Overlay para mostrar el mensaje para ver detalles -->
+      <div v-show="!mostrarInfo" class="p-4 text-center">
+        <span class="text-xs font-black text-white animate-pulse">TOCA PARA VER DETALLES</span>
       </div>
 
-      <div class="relative flex-1 min-h-0 w-full cursor-pointer touch-manipulation select-none"
-        @click="mostrarInfo = !mostrarInfo">
-        <img :src="props.piloto.imagen || 'https://via.placeholder.com/150'"
-          class="absolute inset-0 w-full h-full object-cover object-center"
-          :class="mostrarInfo ? 'opacity-20' : 'opacity-90'" :alt="props.piloto.nombre" />
-
-        <span v-show="props.piloto.tier && !mostrarInfo"
-          class="absolute top-2 left-2 text-[10px] font-black px-2 py-1 rounded z-20 border bg-[#15151e]/80 backdrop-blur-sm"
-          :class="{
-            'text-[#8a8a9d] border-[#8a8a9d]/30': props.piloto.tier === 'Q1',
-            'text-[#e10600] border-[#e10600]/30': props.piloto.tier === 'Q2',
-            'text-purple-400 border-purple-400/30': props.piloto.tier === 'Q3',
-          }">
-          {{ props.piloto.tier }}
-        </span>
-
-        <div v-show="!mostrarInfo"
-          class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#15151e] to-transparent p-4 flex justify-center">
-          <span class="text-[10px] font-black text-white animate-pulse">
-            TOCA PARA VER DETALLES
-          </span>
-        </div>
-
-        <div v-show="mostrarInfo"
-          class="absolute inset-0 p-4 flex flex-col justify-center text-center items-center h-full bg-[#15151e]/80 backdrop-blur-sm">
-          <h4 class="text-xs font-black text-white border-b border-[#2e2e38] pb-1 mb-2">
-            HABILIDADES
-          </h4>
-          <p class="text-xs text-[#8a8a9d] leading-relaxed">
-            {{
-              props.piloto.descripcion ||
-              `Piloto de parrilla. Otorga puntos regulares y bonus (${props.piloto.tier}).`
-            }}
-          </p>
-        </div>
+      <!-- Overlay con fondo semitransparente para mostrar las habilidades del piloto -->
+      <div v-show="mostrarInfo" class="absolute inset-0 p-10 flex flex-col justify-center text-center bg-[#15151E]/80">
+        <h4 class="text-xs font-black border-b text-white pb-1 mb-2">HABILIDADES</h4>
+        <p class="text-xs text-white leading-relaxed">
+          {{ props.piloto.descripcion || `Piloto de parrilla. Otorga puntos regulares y bonus.` }}
+        </p>
       </div>
 
-      <button v-if="modoMercado" @click="confirmarCompra"
-        class="shrink-0 w-full bg-[#2e2e38] text-white py-3 flex items-center justify-center gap-2 touch-manipulation hover:bg-[#e10600] group transition-colors border-t border-[#2e2e38]">
-        <i class="pi pi-cart-plus text-xs text-[#10b981] group-hover:text-white transition-colors"></i>
-        <span class="text-xs font-black text-[#10b981] group-hover:text-white transition-colors">FICHAR</span>
-      </button>
-    </div>
+    </main>
+
+    <!-- Footer con botón de fichar, solo visible en modo mercado -->
+    <button v-if="modoMercado" @click="confirmarCompra"
+      class="shrink-0 w-full bg-[#15151E] text-white py-3 group transition-colors cursor-pointer">
+      <i class="pi pi-cart-plus text-xs text-emerald-500 group-hover:text-emerald-200 transition-colors mr-2"></i>
+      <span class="text-xs font-black text-emerald-500 group-hover:text-emerald-200 transition-colors">FICHAR</span>
+    </button>
+
   </div>
 </template>
