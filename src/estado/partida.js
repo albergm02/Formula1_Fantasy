@@ -1,29 +1,34 @@
+/*====================================================================================================== 
+PARTIDA.JS
+- Este archivo define el estado global de la partida utilizando Pinia.
+- Contiene la estructura de datos para el usuario, su garaje y las acciones para modificar ese estado.
+- Se encarga de guardar y cargar el estado desde localStorage para persistencia entre sesiones.
+======================================================================================================*/
+
 import { defineStore } from 'pinia'
+
+const crearEstadoInicial = () => ({
+  usuario: {
+    nombre: 'Alberto',
+    iniciales: 'AL',
+    puntos: 1200,
+    presupuesto: 50.0,
+  },
+  garaje: {
+    coche: null,
+    pilotos: [],
+    potenciadores: [],
+  },
+})
 
 export const usarEstadoPartida = defineStore('partida', {
   state: () => {
-    const datosGuardados = localStorage.getItem('miFantasyF1')
-    if (datosGuardados) {
-      return JSON.parse(datosGuardados)
-    }
-
-    return {
-      usuario: {
-        nombre: 'Alberto',
-        iniciales: 'AL',
-        puntos: 1200,
-        presupuesto: 50.0,
-      },
-      garaje: {
-        coche: null,
-        pilotos: [],
-        potenciadores: [],
-      },
-    }
+    const partidaGuardada = localStorage.getItem('miFantasyF1')
+    return partidaGuardada ? JSON.parse(partidaGuardada) : crearEstadoInicial()
   },
 
   actions: {
-    guardarPartida() {
+    guardar() {
       localStorage.setItem(
         'miFantasyF1',
         JSON.stringify({
@@ -33,70 +38,67 @@ export const usarEstadoPartida = defineStore('partida', {
       )
     },
 
-    pujarPorElemento(elemento) {
-      if (elemento.tipo === 'coche' && this.garaje.coche !== null) {
-        return { exito: false, mensaje: 'Ya tienes un coche. Véndelo primero en el garaje.' }
+    ficharElemento(elemento) {
+      if (this.usuario.presupuesto < elemento.precio) {
+        return { exito: false, mensaje: 'Presupuesto insuficiente.' }
       }
+
+      if (elemento.tipo === 'coche' && this.garaje.coche) {
+        return { exito: false, mensaje: 'Ya tienes un coche. Véndelo primero.' }
+      }
+
       if (elemento.tipo === 'piloto' && this.garaje.pilotos.length >= 2) {
-        return {
-          exito: false,
-          mensaje: 'Tus 2 asientos están ocupados. Despide a un piloto primero.',
-        }
+        return { exito: false, mensaje: 'Asientos ocupados. Despide a un piloto primero.' }
       }
 
-      if (this.usuario.presupuesto >= elemento.precio) {
-        this.usuario.presupuesto = Number((this.usuario.presupuesto - elemento.precio).toFixed(1))
-        const nuevaCarta = { ...elemento, idInstancia: Date.now() }
+      // Si pasamos los bloqueos, procedemos con la compra
+      this.usuario.presupuesto = Number((this.usuario.presupuesto - elemento.precio).toFixed(1))
 
-        if (elemento.tipo === 'coche') {
-          this.garaje.coche = nuevaCarta
-        } else if (elemento.tipo === 'piloto') {
-          this.garaje.pilotos.push(nuevaCarta)
-        } else if (elemento.tipo === 'potenciador') {
-          // Inicialmente la pieza viene desequipada (falsa)
-          nuevaCarta.equipado = false
-          this.garaje.potenciadores.push(nuevaCarta)
-        }
+      const adquisicion = { ...elemento, idInstancia: Date.now() }
 
-        this.guardarPartida()
-        return { exito: true, mensaje: `Fichaje de ${elemento.nombre} completado.` }
+      if (elemento.tipo === 'coche') this.garaje.coche = adquisicion
+      if (elemento.tipo === 'piloto') this.garaje.pilotos.push(adquisicion)
+      if (elemento.tipo === 'potenciador') {
+        adquisicion.equipado = false
+        this.garaje.potenciadores.push(adquisicion)
       }
 
-      return { exito: false, mensaje: 'Fondos insuficientes para esta operación.' }
+      this.guardar()
+      return { exito: true, mensaje: `Fichaje de ${elemento.nombre} completado.` }
     },
 
-    venderElemento(tipo, idInstancia = null) {
-      if (tipo === 'coche' && this.garaje.coche) {
-        this.usuario.presupuesto = Number(
-          (this.usuario.presupuesto + this.garaje.coche.precio).toFixed(1),
-        )
-        this.garaje.coche = null
-      } else if (tipo === 'piloto') {
-        const index = this.garaje.pilotos.findIndex((p) => p.idInstancia === idInstancia)
-        if (index > -1) {
-          this.usuario.presupuesto = Number(
-            (this.usuario.presupuesto + this.garaje.pilotos[index].precio).toFixed(1),
-          )
-          this.garaje.pilotos.splice(index, 1)
-        }
-      }
-      this.guardarPartida()
+    venderCoche() {
+      if (!this.garaje.coche) return
+
+      this.usuario.presupuesto = Number(
+        (this.usuario.presupuesto + this.garaje.coche.precio).toFixed(1),
+      )
+      this.garaje.coche = null
+      this.guardar()
     },
 
-    toggleEquiparPieza(idInstancia) {
+    despedirPiloto(idInstancia) {
+      const index = this.garaje.pilotos.findIndex((p) => p.idInstancia === idInstancia)
+      if (index === -1) return
+
+      this.usuario.presupuesto = Number(
+        (this.usuario.presupuesto + this.garaje.pilotos[index].precio).toFixed(1),
+      )
+      this.garaje.pilotos.splice(index, 1)
+      this.guardar()
+    },
+
+    instalarMejora(idInstancia) {
       const pieza = this.garaje.potenciadores.find((p) => p.idInstancia === idInstancia)
+      if (!pieza) return { exito: false, mensaje: 'Pieza no encontrada.' }
 
-      if (pieza) {
-        // REGLA: Si se intenta equipar pero no hay coche, no se permite
-        if (!pieza.equipado && this.garaje.coche === null) {
-          return { exito: false, mensaje: 'Necesitas un monoplaza para instalar mejoras.' }
-        }
-
-        // Si pasa la regla (o si lo está desequipando), cambia el estado
-        pieza.equipado = !pieza.equipado
-        this.guardarPartida()
-        return { exito: true }
+      if (!pieza.equipado && !this.garaje.coche) {
+        return { exito: false, mensaje: 'Necesitas un monoplaza para instalar mejoras.' }
       }
+
+      pieza.equipado = !pieza.equipado
+      this.guardar()
+      return { exito: true }
     },
 
     resetearCuenta() {
