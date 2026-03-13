@@ -6,6 +6,7 @@ import { db } from '../services/firebase'
 
 const crearEstadoInicial = () => ({
   usuario: {
+    emailAuth: '', // Este campo se llenará con el email del usuario autenticado, y se usará como ID en Firebase
     nombre: 'ALBERTO',
     iniciales: 'AM',
     puntos: 0,
@@ -33,9 +34,9 @@ export const useFantasyStore = defineStore('fantasy', {
 
     /* COMIENZO DE CONEXIÓN CON FIREBASE */
 
-    async inicializarDatos() {
+    async inicializarDatos(emailUsuario) {
       try{
-        const idUsuario = 'ALBERTO' // Aqui tengo que poner el email del usuario.
+        const idUsuario = emailUsuario 
         const docRef = doc(db, 'usuarios_fantasy', idUsuario)
         const docSnap = await getDoc(docRef)
 
@@ -58,7 +59,7 @@ export const useFantasyStore = defineStore('fantasy', {
 
     async guardarDatosEnFirebase() {
       try {
-        const idUsuario = 'ALBERTO' // Aqui tengo que poner el email del usuario.
+        const idUsuario = this.usuario.emailAuth // Aqui tengo que poner el email del usuario.
         const docRef = doc(db, 'usuarios_fantasy', idUsuario)
 
         await setDoc(docRef, {
@@ -123,7 +124,7 @@ export const useFantasyStore = defineStore('fantasy', {
         (this.usuario.presupuesto + this.garaje.coche.precio).toFixed(1),
       )
       this.garaje.coche = null
-      
+
       this.garaje.potenciadores.forEach((p) => (p.equipado = false))
       await this.guardarDatosEnFirebase()
     },

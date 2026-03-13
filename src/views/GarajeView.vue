@@ -165,7 +165,7 @@ const intentarEquiparPieza = async (idInstancia) => {
       >
         <div class="mb-4 mt-4 w-full flex justify-center">
           <h2 class="text-lg font-black text-white text-center">
-        MIS POTENCIADORES ({{ partida.garaje.potenciadores.length }}/4)
+        MIS PIEZAS ({{ partida.garaje.potenciadores.length }}/4)
           </h2>
         </div>
 

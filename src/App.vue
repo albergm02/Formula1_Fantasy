@@ -1,15 +1,34 @@
 <script setup>
+import { useRouter } from 'vue-router'
 import { onMounted } from 'vue';
 import { RouterView } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 
 import { useFantasyStore } from '@/stores/storeFantasy'
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const partida = useFantasyStore()
+const auth = getAuth()
+const router = useRouter()
 
 onMounted(() => {
-  partida.inicializarDatos()
+  /* Observo cambios de sesión */
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      /* 1. SI HAY USUARIO: Guardamos su email en el store para usarlo como ID en Firebase, 
+      inicializamos los datos del usuario desde Firebase y lo mandamos al inicio */
+      partida.usuario.emailAuth = user.email
+      await partida.inicializarDatos(user.email)
+    } else {
+      /* 2. SI NO HAY USUARIO: Limpiamos el email del store, 
+      marcamos los datos como cargados para evitar el bucle de carga, 
+      y redirigimos al login */
+      partida.usuario.emailAuth = ''
+      partida.datosCargados = true
+      router.push('/') 
+    }
+  })
 })
 </script>
 
@@ -26,12 +45,7 @@ onMounted(() => {
 
   <!-- Sección de carga para cuando esté cargando -->
   <div v-if="!partida.datosCargados" class="flex h-screen w-full items-center justify-center">
-    <div class="flex flex-col items-center gap-4 bg-zinc-900/80 p-8 rounded-2xl border border-zinc-800 shadow-2xl backdrop-blur-sm">
-      <i class="pi pi-spin pi-spinner text-4xl text-red-600"></i>
-      <span class="text-xs font-black text-white uppercase tracking-widest animate-pulse">
-        Conectando con la pista...
-      </span>
-    </div>
+    <p class="text-sm font-bold text-white">Cargando...</p>
   </div>
 
   <!-- v-else para mostrar el contenido principal cuando no se está cargando -->
