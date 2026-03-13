@@ -35,15 +35,26 @@ onMounted(() => {
   generarMercado()
 })
 
-/* TODO: RESTAR ESTA CARTA DE LA BASE DE DATOS */
-const realizarFichaje = (elemento) => {
-  const resultado = partida.fichar(elemento)
+/* TODO: RESTAR ESTA CARTA DE LA BASE DE DATOS GLOBAL DE CARTAS Y AÑADIRLA A LA BASE DE DATOS DEL USUARIO */
+const realizarFichaje = async (elemento) => {
+  const resultado = await partida.fichar(elemento)
 
   if (resultado.exito) {
-    toast.add({ severity: 'success', summary: '¡Fichaje Confirmado!', detail: resultado.mensaje, life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: 'Fichaje exitoso',
+      detail: `Has fichado a ${elemento.nombre} por ${elemento.precio}M`,
+      life: 3000,
+    })
   } else {
-    toast.add({ severity: 'error', summary: 'Operación denegada', detail: resultado.mensaje, life: 3000 })
+    toast.add({
+      severity: 'error',
+      summary: 'Fichaje fallido',
+      detail: resultado.mensaje,
+      life: 3000,
+    })
   }
+  
 }
 </script>
 

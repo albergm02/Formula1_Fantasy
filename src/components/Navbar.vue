@@ -36,6 +36,5 @@ const isActive = (path) => {
                 :class="isActive('/mercado') ? 'text-[#FF1E00]' : 'text-[#808080]'">MERCADO</span>
         </router-link>
         
-
     </nav>
 </template>

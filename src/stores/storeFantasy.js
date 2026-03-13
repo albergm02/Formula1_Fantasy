@@ -6,10 +6,10 @@ import { db } from '../services/firebase'
 
 const crearEstadoInicial = () => ({
   usuario: {
-    nombre: 'ALBERTO GARCÍA MARTÍN',
+    nombre: 'Alberto',
     iniciales: 'AM',
     puntos: 0,
-    presupuesto: 50.0,
+    presupuesto: 0.0,
   },
   garaje: {
     coche: null,
@@ -58,7 +58,7 @@ export const useFantasyStore = defineStore('fantasy', {
 
     async guardarDatosEnFirebase() {
       try {
-        const idUsuario = 'albertogarciamartin14@gmail.com'
+        const idUsuario = 'albetogarciamartin14@gmail.com'
         const docRef = doc(db, 'usuarios_fantasy', idUsuario)
 
         await setDoc(docRef, {
