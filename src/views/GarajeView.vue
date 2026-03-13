@@ -9,7 +9,6 @@ import Navbar from '@/components/Navbar.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
 import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
-import Card from 'primevue/card'
 
 const partida = useFantasyStore()
 const toast = useToast()
@@ -58,8 +57,8 @@ const confirmarDespido = (piloto) => {
 
 /* La función intentarEquiparPieza se encarga de intentar equipar una pieza de mejora en el coche.
 Recibe como parámetro el id de instancia de la pieza que se desea equipar. */
-const intentarEquiparPieza = (idInstancia) => {
-  const respuesta = partida.instalarMejora(idInstancia)
+const intentarEquiparPieza = async (idInstancia) => {
+  const respuesta = await partida.instalarMejora(idInstancia)
 
   if (respuesta && !respuesta.exito) {
     toast.add({
@@ -78,7 +77,7 @@ const intentarEquiparPieza = (idInstancia) => {
 
     <main class="mx-auto w-full p-4 mt-4 flex flex-col gap-8">
       <!-- Carta para colocar el coche -->
-      <Card
+      <div
         class="!bg-[#15151E]/20 !border-[#FF1E00] flex flex-col items-center max-w-2xl mx-auto w-full"
       >
         <div class="mb-4 mt-4 w-full flex justify-center">
@@ -106,15 +105,15 @@ const intentarEquiparPieza = (idInstancia) => {
 
         <div
           v-else
-          class="items-center justify-center p-12 mb-4 border-5 border-dashed border-zinc-800 text-zinc-500"
+          class="items-center justify-center p-12 mb-4 text-zinc-500"
         >
           <i class="pi pi-car text-4xl mb-4 mr-4"></i>
           <span class="text-sm font-bold">SIN MONOPLAZA</span>
         </div>
-      </Card>
+      </div>
 
       <!-- Cartas para colocar los pilotos -->
-      <Card
+      <div
         class="!bg-[#15151E]/20 !border-[#FF1E00] flex flex-col items-center max-w-2xl mx-auto w-full"
       >
         <div class="mb-4 mt-4 w-full flex justify-center">
@@ -151,17 +150,17 @@ const intentarEquiparPieza = (idInstancia) => {
             </div>
             <div
               v-else
-              class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-zinc-800 text-zinc-500 bg-zinc-900/30"
+              class="flex flex-col items-center justify-center p-12 text-zinc-500"
             >
               <i class="pi pi-user text-4xl mb-3"></i>
               <span class="text-sm font-bold uppercase tracking-widest">Asiento Vacío</span>
             </div>
           </template>
         </div>
-      </Card>
+      </div>
 
       <!-- Cartas para colocar los potenciadores -->
-      <Card
+      <div
         class="!bg-[#15151E]/20 !border-[#FF1E00] flex flex-col items-center max-w-2xl mx-auto w-full"
       >
         <div class="mb-4 mt-4 w-full flex justify-center">
@@ -210,7 +209,7 @@ const intentarEquiparPieza = (idInstancia) => {
         </div>
         <div
           v-else
-          class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#15151E] text-zinc-500 bg-[#15151E]/30"
+          class="flex flex-col items-center justify-center p-12 text-zinc-500"
         >
           <i class="pi pi-box text-4xl mb-3"></i>
           <span class="text-sm font-bold uppercase tracking-widest"
@@ -219,7 +218,7 @@ const intentarEquiparPieza = (idInstancia) => {
         </div>
           </template>
         </div>
-      </Card>
+      </div>
     </main>
 
     <Navbar />

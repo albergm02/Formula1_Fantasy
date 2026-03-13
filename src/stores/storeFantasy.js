@@ -6,10 +6,10 @@ import { db } from '../services/firebase'
 
 const crearEstadoInicial = () => ({
   usuario: {
-    nombre: 'Alberto',
+    nombre: 'ALBERTO',
     iniciales: 'AM',
     puntos: 0,
-    presupuesto: 0.0,
+    presupuesto: 50.0,
   },
   garaje: {
     coche: null,
@@ -35,7 +35,7 @@ export const useFantasyStore = defineStore('fantasy', {
 
     async inicializarDatos() {
       try{
-        const idUsuario = 'albertogarciamartin14@gmail.com' // Aqui tengo que poner el email del usuario.
+        const idUsuario = 'ALBERTO' // Aqui tengo que poner el email del usuario.
         const docRef = doc(db, 'usuarios_fantasy', idUsuario)
         const docSnap = await getDoc(docRef)
 
@@ -58,7 +58,7 @@ export const useFantasyStore = defineStore('fantasy', {
 
     async guardarDatosEnFirebase() {
       try {
-        const idUsuario = 'albetogarciamartin14@gmail.com'
+        const idUsuario = 'ALBERTO' // Aqui tengo que poner el email del usuario.
         const docRef = doc(db, 'usuarios_fantasy', idUsuario)
 
         await setDoc(docRef, {
@@ -114,6 +114,7 @@ export const useFantasyStore = defineStore('fantasy', {
      * - Se suma el precio del coche al presupuesto del usuario
      * - Se elimina el coche del garaje
      * - Se guardan los datos en Firebase
+     * - Se desequipan las mejoras equipadas (si las hubiera), ya que no se pueden mantener sin un coche
      */
     async venderCoche() {
       if (!this.garaje.coche) return
@@ -122,6 +123,8 @@ export const useFantasyStore = defineStore('fantasy', {
         (this.usuario.presupuesto + this.garaje.coche.precio).toFixed(1),
       )
       this.garaje.coche = null
+      
+      this.garaje.potenciadores.forEach((p) => (p.equipado = false))
       await this.guardarDatosEnFirebase()
     },
 
