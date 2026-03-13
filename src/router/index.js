@@ -36,6 +36,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/clasificacion',
+    name: 'clasificacion',
+    component: () => import('../views/RankingView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },

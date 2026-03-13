@@ -17,10 +17,10 @@ const isActive = (path) => {
                 :class="isActive('/inicio') ? 'text-[#FF1E00]' : 'text-[#808080]'">INICIO</span>
         </router-link>
 
-        <router-link to="/ranking" class="flex flex-col items-center p-2">
-            <i class="pi pi-chart-bar text-xl" :class="isActive('/ranking') ? 'text-[#FF1E00]' : 'text-[#808080]'"></i>
+        <router-link to="/clasificacion" class="flex flex-col items-center p-2">
+            <i class="pi pi-chart-bar text-xl" :class="isActive('/clasificacion') ? 'text-[#FF1E00]' : 'text-[#808080]'"></i>
             <span class="text-[10px] mt-1 font-bold"
-                :class="isActive('/ranking') ? 'text-[#FF1E00]' : 'text-[#808080]'">RANKING</span>
+                :class="isActive('/clasificacion') ? 'text-[#FF1E00]' : 'text-[#808080]'">RANKING</span>
         </router-link>
 
         <router-link to="/garaje" class="flex flex-col items-center p-2">
@@ -35,6 +35,7 @@ const isActive = (path) => {
             <span class="text-[10px] mt-1 font-bold"
                 :class="isActive('/mercado') ? 'text-[#FF1E00]' : 'text-[#808080]'">MERCADO</span>
         </router-link>
+        
 
     </nav>
 </template>
