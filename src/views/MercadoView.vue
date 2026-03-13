@@ -22,9 +22,11 @@ const potenciadoresSemanales = ref([])
 
 /* TODO: QUITAR ESTO Y AGREGAR UNA GENERACIÓN DIARIA DE CARTAS PERSISTENTES AL CAMBIO */
 const generarMercado = () => {
-  const q1 = mercadoPilotos.filter(p => p.tier === 'Q1').sort(() => 0.5 - Math.random()).slice(0, 2)
-  const q2 = mercadoPilotos.filter(p => p.tier === 'Q2').sort(() => 0.5 - Math.random()).slice(0, 2)
-  const q3 = mercadoPilotos.filter(p => p.tier === 'Q3').sort(() => 0.5 - Math.random()).slice(0, 2)
+  /* PRINCIPIO DE NEGOCIO: Reducimos el slice a 1 para asegurar la exclusividad en el mercado.
+     Ahora el array pilotosSemanales tendrá exactamente 3 elementos (1 de cada Tier). */
+  const q1 = mercadoPilotos.filter(p => p.tier === 'Q1').sort(() => 0.5 - Math.random()).slice(0, 1)
+  const q2 = mercadoPilotos.filter(p => p.tier === 'Q2').sort(() => 0.5 - Math.random()).slice(0, 1)
+  const q3 = mercadoPilotos.filter(p => p.tier === 'Q3').sort(() => 0.5 - Math.random()).slice(0, 1)
 
   pilotosSemanales.value = [...q1, ...q2, ...q3].map(p => ({ ...p, tipo: 'piloto' }))
   cochesSemanales.value = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 2).map(c => ({ ...c, tipo: 'coche' }))
@@ -54,7 +56,7 @@ const realizarFichaje = async (elemento) => {
       life: 3000,
     })
   }
-  
+
 }
 </script>
 
@@ -66,13 +68,13 @@ const realizarFichaje = async (elemento) => {
     <main class="mx-auto w-full max-w-5xl p-4 flex flex-col gap-8 mt-4">
 
       <StickTiempoMercado />
+
       <section>
         <div class="mb-4 border-l-4 border-zinc-500 pl-2">
           <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Coches de la semana</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div v-for="coche in cochesSemanales" :key="coche.id" class="aspect-[4/3]">
-            <!-- evento @fichar: realiza el fichaje si escucha el evento "fichar" por parte de su componente -->
             <CartaCoche :coche="coche" :modoMercado="true" @fichar="realizarFichaje" />
           </div>
         </div>
@@ -82,8 +84,8 @@ const realizarFichaje = async (elemento) => {
         <div class="mb-4 border-l-4 border-zinc-500 pl-2">
           <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Pilotos Disponibles</h2>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div v-for="piloto in pilotosSemanales" :key="piloto.id" class="aspect-[3/4]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div v-for="piloto in pilotosSemanales" :key="piloto.id" class="w-full">
             <CartaPiloto :piloto="piloto" :modoMercado="true" @fichar="realizarFichaje" />
           </div>
         </div>
