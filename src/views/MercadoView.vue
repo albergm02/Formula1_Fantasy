@@ -24,12 +24,12 @@ const potenciadoresSemanales = ref([])
 const generarMercado = () => {
   /* PRINCIPIO DE NEGOCIO: Reducimos el slice a 1 para asegurar la exclusividad en el mercado.
      Ahora el array pilotosSemanales tendrá exactamente 3 elementos (1 de cada Tier). */
-  const q1 = mercadoPilotos.filter(p => p.tier === 'Q1').sort(() => 0.5 - Math.random()).slice(0, 1)
-  const q2 = mercadoPilotos.filter(p => p.tier === 'Q2').sort(() => 0.5 - Math.random()).slice(0, 1)
-  const q3 = mercadoPilotos.filter(p => p.tier === 'Q3').sort(() => 0.5 - Math.random()).slice(0, 1)
+  const q1 = mercadoPilotos.filter(p => p.tier === '1').sort(() => 0.5 - Math.random()).slice(0, 1)
+  const q2 = mercadoPilotos.filter(p => p.tier === '2').sort(() => 0.5 - Math.random()).slice(0, 1)
+  const q3 = mercadoPilotos.filter(p => p.tier === '3').sort(() => 0.5 - Math.random()).slice(0, 1)
 
   pilotosSemanales.value = [...q1, ...q2, ...q3].map(p => ({ ...p, tipo: 'piloto' }))
-  cochesSemanales.value = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 2).map(c => ({ ...c, tipo: 'coche' }))
+  cochesSemanales.value = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 1).map(c => ({ ...c, tipo: 'coche' }))
   potenciadoresSemanales.value = mercadoPotenciadores.sort(() => 0.5 - Math.random()).slice(0, 4).map(p => ({ ...p, tipo: 'potenciador' }))
 }
 
@@ -70,10 +70,7 @@ const realizarFichaje = async (elemento) => {
       <StickTiempoMercado />
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Coches de la semana</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4">
           <div v-for="coche in cochesSemanales" :key="coche.id" class="aspect-[4/3]">
             <CartaCoche :coche="coche" :modoMercado="true" @fichar="realizarFichaje" />
           </div>
@@ -81,23 +78,17 @@ const realizarFichaje = async (elemento) => {
       </section>
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Pilotos Disponibles</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div v-for="piloto in pilotosSemanales" :key="piloto.id" class="w-full">
-            <CartaPiloto :piloto="piloto" :modoMercado="true" @fichar="realizarFichaje" />
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
+            <CartaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="realizarFichaje" />
           </div>
         </div>
       </section>
 
       <section>
-        <div class="mb-4 border-l-4 border-zinc-500 pl-2">
-          <h2 class="text-lg font-black italic text-white uppercase tracking-wide">Piezas y Mejoras</h2>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
-            <CartaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="realizarFichaje" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div v-for="piloto in pilotosSemanales" :key="piloto.id" class="w-full">
+            <CartaPiloto :piloto="piloto" :modoMercado="true" @fichar="realizarFichaje" />
           </div>
         </div>
       </section>

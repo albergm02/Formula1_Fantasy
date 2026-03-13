@@ -19,17 +19,48 @@ const emit = defineEmits(['fichar'])
 const mostrarInfo = ref(false)
 const confirm = useConfirm()
 
-/* PRINCIPIO VUE: Usamos una propiedad computada para determinar las clases dinámicas.
-   Esto mantiene el template limpio y concentra la lógica de negocio en el script. */
+/* Determinar el color del borde según el nivel del piloto */
 const colorBordeDinamico = computed(() => {
   const nivel = props.piloto.tier
 
-  if (nivel === 'Q3' || nivel === 'leyenda') {
+  if (nivel === '3') {
     return 'border-amber-400'
-  } else if (nivel === 'Q2' || nivel === 'avanzado') {
+  } else if (nivel === '2') {
     return 'border-fuchsia-500'
   } else {
     return 'border-zinc-800'
+  }
+})
+
+/* Switch para determinar el color de fondo según la escudería */
+const colorFondoEscuderia = computed(() => {
+  const escuderia = props.piloto.equipo.toLowerCase()
+
+  switch (escuderia) {
+    case 'mclaren':
+      return 'bg-[#EF8733]/50'
+    case 'mercedes':
+      return 'bg-[#75F1D3]/50'
+    case 'red bull':
+      return 'bg-[#4570C0]/50'
+    case 'ferrari':
+      return 'bg-[#D52E37]/50'
+    case 'williams':
+      return 'bg-[#3267D4]/50'
+    case 'racing bulls':
+      return 'bg-[#7091F8]/50'
+    case 'aston martin':
+      return 'bg-[#4B9774]/50'
+    case 'haas':
+      return 'bg-[#DFE1E2]/50'
+    case 'audi':
+      return 'bg-[#EB4526]/50'
+    case 'alpine':
+      return 'bg-[#479FE2]/50'
+    case 'cadillac':
+      return 'bg-[#AAAADD]/50'
+    default:
+      return 'bg-[#27272a]/50'
   }
 })
 
@@ -50,23 +81,21 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full w-full overflow-hidden rounded-xl border bg-[#15151E] transition-colors aspect-[3/4]"
+  <div class="flex flex-col h-full w-full overflow-hidden border bg-transparent transition-colors aspect-[3/4]"
     :class="colorBordeDinamico">
 
-    <header class="flex justify-between items-center p-3 bg-[#15151E] border-b z-20 shrink-0"
-      :class="colorBordeDinamico">
+    <header class="flex justify-between items-center p-3 bg-[#15151E] z-20 shrink-0" :class="colorBordeDinamico">
       <span class="text-xs font-black text-white">
         {{ props.piloto.nombre.toUpperCase() }}
       </span>
       <span class="text-xs font-black text-emerald-500">{{ props.piloto.precio }}M</span>
     </header>
 
-    <main
-      class="relative flex-1 w-full cursor-pointer touch-manipulation select-none bg-gradient-to-t from-black via-zinc-900 to-zinc-800"
+    <main class="relative flex-1 w-full cursor-pointer" :class="colorFondoEscuderia"
       @click="mostrarInfo = !mostrarInfo">
 
       <img :src="props.piloto.imagen"
-        class="absolute w-full h-full object-cover object-top z-10 transition-transform hover:scale-105" />
+        class="absolute w-full h-full object-cover object-top z-10 transition-transform hover:scale-120" />
 
       <div v-show="!mostrarInfo" class="absolute bottom-4 left-0 w-full text-center z-20">
         <span
