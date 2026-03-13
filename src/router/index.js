@@ -6,7 +6,6 @@ const routes = [
   {
     path: '/',
     name: 'login',
-    // 1. OJO AQUÍ: La raíz (/) TIENE que ser el LoginView, no el Dashboard.
     component: () => import('../views/LoginView.vue'),
     meta: { requiresGuest: true },
   },
@@ -52,16 +51,13 @@ const router = createRouter({
   routes,
 })
 
-// 3. El Guardia de Seguridad (Guard)
 router.beforeEach(async (to) => {
   const user = await getCurrentUser()
 
-  // Si la ruta requiere estar logueado y NO hay usuario, patada al login
   if (to.meta.requiresAuth && !user) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // Si la ruta es para invitados (Login/Registro) y YA estás logueado, patada al Dashboard
   if (to.meta.requiresGuest && user) {
     return { name: 'inicio' }
   }

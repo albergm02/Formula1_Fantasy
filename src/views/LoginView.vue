@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { signIn } from '@/services/authService'
 
-// PrimeVue & Validaciones
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -22,7 +21,6 @@ const initialValues = ref({
   password: ''
 })
 
-// Clean Code: Validación de Zod
 const resolver = zodResolver(
   z.object({
     email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
@@ -38,10 +36,8 @@ const iniciarSesion = async ({ valid, values }) => {
 
   try {
     await signIn(values.email, values.password)
-    // Redirigimos al inicio real (Dashboard)
     router.push('/inicio')
   } catch (error) {
-    // Manejo de errores de Firebase en español para mejor UX
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
       firebaseError.value = 'Correo o contraseña incorrectos.'
     } else {

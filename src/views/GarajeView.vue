@@ -1,5 +1,4 @@
 <script setup>
-import { useRouter } from 'vue-router'
 import { useFantasyStore } from '@/stores/storeFantasy'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -10,8 +9,8 @@ import Navbar from '@/components/Navbar.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
 import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
+import Card from 'primevue/card'
 
-const router = useRouter()
 const partida = useFantasyStore()
 const toast = useToast()
 const confirm = useConfirm()
