@@ -36,13 +36,13 @@ const router = useRouter()
 /* Cargamos la escudería al montar el componente, obteniendo la liga actual de la query o del store */
 onMounted(async () => {
   const ligaId = route.query.liga || null
-  if (ligaId) {
-    escuderiaStore.setLigaActual(ligaId)
-  } else {
+
+  if (!ligaId) {
     router.push('/ligas')
     return
   }
-  await escuderiaStore.cargarEscuderia()
+
+  await escuderiaStore.cargarEscuderia(ligaId)
 })
 
 </script>

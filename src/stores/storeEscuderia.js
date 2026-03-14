@@ -37,7 +37,7 @@ export const useEscuderiaStore = defineStore('escuderia', {
         // Busca el participante que corresponde al usuario actual y la liga activa
         const q = query(
           participantesRef,
-          where('liga_id', '==', ligaId),
+          where('id_liga', '==', ligaId),
           where('email_usuario', '==', authStore.usuarioGlobal.emailAuth),
         )
         const querySnapshot = await getDocs(q)
