@@ -19,51 +19,6 @@ const emit = defineEmits(['fichar'])
 const mostrarInfo = ref(false)
 const confirm = useConfirm()
 
-/* Determinar el color del borde según el nivel del piloto */
-const colorBordeDinamico = computed(() => {
-  const nivel = props.piloto.tier
-
-  if (nivel === '3') {
-    return 'border-amber-400'
-  } else if (nivel === '2') {
-    return 'border-fuchsia-500'
-  } else {
-    return 'border-zinc-800'
-  }
-})
-
-/* Switch para determinar el color de fondo según la escudería */
-const colorFondoEscuderia = computed(() => {
-  const escuderia = props.piloto.equipo.toLowerCase()
-
-  switch (escuderia) {
-    case 'mclaren':
-      return 'bg-[#EF8733]/50'
-    case 'mercedes':
-      return 'bg-[#75F1D3]/50'
-    case 'red bull':
-      return 'bg-[#4570C0]/50'
-    case 'ferrari':
-      return 'bg-[#D52E37]/50'
-    case 'williams':
-      return 'bg-[#3267D4]/50'
-    case 'racing bulls':
-      return 'bg-[#7091F8]/50'
-    case 'aston martin':
-      return 'bg-[#4B9774]/50'
-    case 'haas':
-      return 'bg-[#DFE1E2]/50'
-    case 'audi':
-      return 'bg-[#EB4526]/50'
-    case 'alpine':
-      return 'bg-[#479FE2]/50'
-    case 'cadillac':
-      return 'bg-[#AAAADD]/50'
-    default:
-      return 'bg-[#27272a]/50'
-  }
-})
-
 const confirmarCompra = () => {
   confirm.require({
     message: `¿Estás seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
@@ -81,25 +36,21 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full w-full overflow-hidden border bg-transparent transition-colors aspect-[3/4]"
-    :class="colorBordeDinamico">
+  <div class="flex flex-col h-full w-full bg-transparent transition-colors min-h-[400px]">
 
-    <header class="flex justify-between items-center p-3 bg-[#15151E] z-20 shrink-0" :class="colorBordeDinamico">
+    <header class="flex justify-between border-b border-zinc-800 items-center p-3 z-20 shrink-0">
       <span class="text-xs font-black text-white">
         {{ props.piloto.nombre.toUpperCase() }}
       </span>
       <span class="text-xs font-black text-emerald-500">{{ props.piloto.precio }}M</span>
     </header>
 
-    <main class="relative flex-1 w-full cursor-pointer" :class="colorFondoEscuderia"
-      @click="mostrarInfo = !mostrarInfo">
+    <main class="relative flex-1 w-full cursor-pointer" @click="mostrarInfo = !mostrarInfo">
 
-      <img :src="props.piloto.imagen"
-        class="absolute w-full h-full object-cover object-top z-10 transition-transform hover:scale-120" />
+      <img :src="props.piloto.imagen" class="absolute w-full h-full object-cover object-top" />
 
-      <div v-show="!mostrarInfo" class="absolute bottom-4 left-0 w-full text-center z-20">
-        <span
-          class="text-[10px] font-black text-white/80 bg-black/60 px-3 py-1 rounded-full animate-pulse tracking-widest backdrop-blur-sm">
+      <div v-show="!mostrarInfo" class="absolute bottom-4 w-full text-center z-20">
+        <span class="text-xs font-black text-white bg-black/60 px-3 py-1 animate-pulse">
           TOCA PARA VER DETALLES
         </span>
       </div>
@@ -115,9 +66,9 @@ const confirmarCompra = () => {
     </main>
 
     <button v-if="modoMercado" @click="confirmarCompra"
-      class="shrink-0 w-full bg-[#15151E] border-t border-zinc-800 text-white py-3 group transition-colors cursor-pointer hover:bg-zinc-900 z-20">
-      <i class="pi pi-cart-plus text-xs text-emerald-500 group-hover:text-emerald-400 transition-colors mr-2"></i>
-      <span class="text-xs font-black text-emerald-500 group-hover:text-emerald-400 transition-colors">FICHAR</span>
+      class="w-full border-t border-zinc-800 text-white py-2 cursor-pointer hover:bg-zinc-900 z-20">
+      <i class="pi pi-cart-plus text-xs text-emerald-500 mr-2"></i>
+      <span class="text-xs font-black text-emerald-500">PUJAR</span>
     </button>
 
   </div>

@@ -26,7 +26,7 @@ onMounted(() => {
       y redirigimos al login */
       partida.usuario.emailAuth = ''
       partida.datosCargados = true
-      router.push('/') 
+      router.push('/')
     }
   })
 })
@@ -34,9 +34,7 @@ onMounted(() => {
 
 <template>
   <!-- Fondo de pantalla fijo con overlay oscuro para mejorar la legibilidad -->
-  <div
-    class="fixed inset-0 -z-10 h-full w-full bg-[url('/background.jpg')] bg-cover bg-center bg-no-repeat"
-  >
+  <div class="fixed inset-0 -z-10 h-full w-full bg-[#0c0c12]">
     <div class="absolute inset-0 bg-zinc-900/70"></div>
   </div>
 

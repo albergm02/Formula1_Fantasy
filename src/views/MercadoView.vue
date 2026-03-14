@@ -11,25 +11,27 @@ import Header from '@/components/Header.vue'
 import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
-import StickTiempoMercado from '@/components/StickTiempoMercado.vue'
+import TiempoMercado from '@/components/TiempoMercado.vue'
 
 const partida = useFantasyStore()
 const toast = useToast()
 
-const pilotosSemanales = ref([])
-const cochesSemanales = ref([])
+/* Variables simplificadas: 1 piloto, 1 coche y 4 potenciadores */
+const pilotoSemanal = ref(null)
+const cocheSemanal = ref(null)
 const potenciadoresSemanales = ref([])
 
-/* TODO: QUITAR ESTO Y AGREGAR UNA GENERACIÓN DIARIA DE CARTAS PERSISTENTES AL CAMBIO */
 const generarMercado = () => {
-  /* PRINCIPIO DE NEGOCIO: Reducimos el slice a 1 para asegurar la exclusividad en el mercado.
-     Ahora el array pilotosSemanales tendrá exactamente 3 elementos (1 de cada Tier). */
-  const q1 = mercadoPilotos.filter(p => p.tier === '1').sort(() => 0.5 - Math.random()).slice(0, 1)
-  const q2 = mercadoPilotos.filter(p => p.tier === '2').sort(() => 0.5 - Math.random()).slice(0, 1)
-  const q3 = mercadoPilotos.filter(p => p.tier === '3').sort(() => 0.5 - Math.random()).slice(0, 1)
+  // Obtenemos 1 único piloto tier 1 al azar
+  const pilotosTier1 = mercadoPilotos.filter(p => p.tier === 1)
+  const pilotosBarajados = pilotosTier1.sort(() => 0.5 - Math.random()).slice(0, 1).map(p => ({ ...p, tipo: 'piloto' }))
+  pilotoSemanal.value = pilotosBarajados[0]
 
-  pilotosSemanales.value = [...q1, ...q2, ...q3].map(p => ({ ...p, tipo: 'piloto' }))
-  cochesSemanales.value = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 1).map(c => ({ ...c, tipo: 'coche' }))
+  // Obtenemos 1 único coche al azar
+  const cochesBarajados = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 1).map(c => ({ ...c, tipo: 'coche' }))
+  cocheSemanal.value = cochesBarajados[0]
+
+  // Obtenemos 4 potenciadores
   potenciadoresSemanales.value = mercadoPotenciadores.sort(() => 0.5 - Math.random()).slice(0, 4).map(p => ({ ...p, tipo: 'potenciador' }))
 }
 
@@ -37,7 +39,6 @@ onMounted(() => {
   generarMercado()
 })
 
-/* TODO: RESTAR ESTA CARTA DE LA BASE DE DATOS GLOBAL DE CARTAS Y AÑADIRLA A LA BASE DE DATOS DEL USUARIO */
 const realizarFichaje = async (elemento) => {
   const resultado = await partida.fichar(elemento)
 
@@ -56,24 +57,25 @@ const realizarFichaje = async (elemento) => {
       life: 3000,
     })
   }
-
 }
 </script>
 
 <template>
-  <div class="min-h-screen w-full font-sans pb-28">
+  <div class="min-h-screen w-full font-sans pb-28 bg-[#0c0c12]">
 
     <Header />
 
-    <main class="mx-auto w-full max-w-5xl p-4 flex flex-col gap-8 mt-4">
+    <main class="p-4 mx-auto w-full max-w-5xl flex flex-col gap-6">
 
-      <StickTiempoMercado />
+      <TiempoMercado />
 
       <section>
-        <div class="grid grid-cols-1 gap-4">
-          <div v-for="coche in cochesSemanales" :key="coche.id" class="aspect-[4/3]">
-            <CartaCoche :coche="coche" :modoMercado="true" @fichar="realizarFichaje" />
-          </div>
+        <CartaCoche v-if="cocheSemanal" :coche="cocheSemanal" :modoMercado="true" @fichar="realizarFichaje" />
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-3">
+        <div class="w-full">
+          <CartaPiloto v-if="pilotoSemanal" :piloto="pilotoSemanal" :modoMercado="true" @fichar="realizarFichaje" />
         </div>
       </section>
 
@@ -81,14 +83,6 @@ const realizarFichaje = async (elemento) => {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
             <CartaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="realizarFichaje" />
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div v-for="piloto in pilotosSemanales" :key="piloto.id" class="w-full">
-            <CartaPiloto :piloto="piloto" :modoMercado="true" @fichar="realizarFichaje" />
           </div>
         </div>
       </section>

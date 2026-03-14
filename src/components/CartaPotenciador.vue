@@ -38,9 +38,9 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full w-full min-h-[250px] overflow-hidden">
+  <div class="flex flex-col h-full w-full bg-transparent transition-colors min-h-[250px]">
 
-    <header class="flex justify-between items-center p-3 bg-[#15151E] z-20 shrink-0">
+    <header class="flex justify-between items-center p-3 border-b border-zinc-700 z-20 shrink-0">
       <span class="text-xs font-black text-white">
         {{ props.potenciador.nombre.toUpperCase() }}
       </span>
@@ -52,8 +52,16 @@ const confirmarCompra = () => {
 
       <img :src="props.potenciador.imagen" class="absolute w-full h-full object-cover object-center" />
 
-      <div v-show="!mostrarInfo" class="p-4 text-center">
-        <span class="text-xs font-black text-white animate-pulse">TOCA PARA VER DETALLES</span>
+      <div v-show="!mostrarInfo"
+        class="absolute left-0 w-full text-center z-20 flex flex-col items-center justify-center h-full">
+        <span
+          class="text-xs font-black text-white px-3 py-1 rounded-full animate-pulse tracking-widest backdrop-blur-sm mb-12">
+          TOCA PARA
+        </span>
+        <span
+          class="text-xs font-black text-white px-3 py-1 rounded-full animate-pulse tracking-widest backdrop-blur-sm mt-12">
+          VER DETALLES
+        </span>
       </div>
 
       <div v-show="mostrarInfo" class="absolute inset-0 p-10 flex flex-col justify-center text-center bg-[#15151E]/80">
@@ -66,9 +74,9 @@ const confirmarCompra = () => {
     </main>
 
     <button v-if="modoMercado" @click="confirmarCompra"
-      class="shrink-0 w-full bg-[#15151E] text-white py-3 group transition-colors cursor-pointer">
-      <i class="pi pi-cart-plus text-xs text-emerald-500 group-hover:text-emerald-200 transition-colors mr-2"></i>
-      <span class="text-xs font-black text-emerald-500 group-hover:text-emerald-200 transition-colors">FICHAR</span>
+      class="w-full border-t border-zinc-800 text-white py-2 cursor-pointer hover:bg-zinc-900 z-20">
+      <i class="pi pi-cart-plus text-xs text-emerald-500 mr-2"></i>
+      <span class="text-xs font-black text-emerald-500">PUJAR</span>
     </button>
 
   </div>
