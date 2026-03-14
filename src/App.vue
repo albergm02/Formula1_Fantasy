@@ -1,38 +1,3 @@
-<script setup>
-import { useRouter } from 'vue-router'
-import { onMounted } from 'vue';
-import { RouterView } from 'vue-router'
-import Toast from 'primevue/toast'
-import ConfirmDialog from 'primevue/confirmdialog'
-
-import { useFantasyStore } from '@/stores/storeFantasy'
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-
-const partida = useFantasyStore()
-const auth = getAuth()
-const router = useRouter()
-
-onMounted(() => {
-  /* Observo cambios de sesión */
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      /* 1. SI HAY USUARIO: Guardamos su email en el store para usarlo como ID en Firebase, 
-      inicializamos los datos del usuario desde Firebase y lo mandamos al inicio */
-      await partida.inicializarDatosGlobales(user.email, user.displayName || 'Anónimo')
-    } else {
-      /* 2. SI NO HAY USUARIO: Limpiamos el email del store, 
-      marcamos los datos como cargados para evitar el bucle de carga, 
-      y redirigimos al login */
-      partida.usuarioGlobal.emailAuth = ''
-      partida.usuarioGlobal.ligasIds = []
-      partida.ligaActivaId = null
-      partida.datosCargados = true
-      router.push('/')
-    }
-  })
-})
-</script>
-
 <template>
   <div class="fixed inset-0 -z-10 h-full w-full bg-[#0c0c12]">
     <div class="absolute inset-0 bg-zinc-900/70"></div>
@@ -43,10 +8,38 @@ onMounted(() => {
 
   <!-- Sección de carga para cuando esté cargando -->
   <div v-if="!partida.datosCargados" class="flex h-screen w-full items-center justify-center">
-    <p class="text-sm font-bold text-white">Cargando...</p>
+    <i class="pi pi-spin pi-spinner text-3xl text-emerald-500"></i>
+    <p class="text-sm font-bold text-white uppercase">Verificando credenciales...</p>
   </div>
 
   <!-- v-else para mostrar el contenido principal cuando no se está cargando -->
   <RouterView v-else />
 
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+import { onMounted } from 'vue';
+import Toast from 'primevue/toast'
+import ConfirmDialog from 'primevue/confirmdialog'
+
+import { useAuthStore } from './stores/storeAuth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
+const authStore = useAuthStore()
+const auth = getAuth()
+const router = useRouter()
+
+
+onMounted(() => {
+  /* Observa cambios de sesión */
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      await authStore.iniciarDatosGlobales(user.email, user.displayName)
+    } else {
+      authStore.cerrarSesion()
+      router.push('/')
+    }
+  })
+})
+</script>
