@@ -7,12 +7,11 @@
   <ConfirmDialog />
 
   <!-- Sección de carga para cuando esté cargando -->
-  <div v-if="!partida.datosCargados" class="flex h-screen w-full items-center justify-center">
+  <div v-if="!authStore.datosCargados" class="flex h-screen w-full items-center justify-center">
     <i class="pi pi-spin pi-spinner text-3xl text-emerald-500"></i>
     <p class="text-sm font-bold text-white uppercase">Verificando credenciales...</p>
   </div>
 
-  <!-- v-else para mostrar el contenido principal cuando no se está cargando -->
   <RouterView v-else />
 
 </template>

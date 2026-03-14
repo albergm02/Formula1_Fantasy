@@ -46,7 +46,7 @@ export const useLigasStore = defineStore('ligas', {
 
         // Crea el participante para el creador de la liga
         const participante = {
-          id_liga: ligaId,
+          liga_id: ligaId,
           email_usuario: authStore.usuarioGlobal.emailAuth,
           rol: 'admin',
           presupuesto: 50.0,
@@ -67,13 +67,13 @@ export const useLigasStore = defineStore('ligas', {
 
         return { exito: true, mensaje: `Liga creada. Código: ${codigoInvitacion}` }
       } catch (error) {
-        console.error('Error al crear la liga:', error)
+        console.error('Error en crearLiga (storeLigas.js):', error)
         return { exito: false, mensaje: 'Error al crear la liga. Inténtalo de nuevo.' }
       }
     },
 
     /* Carga las ligas a las que el usuario pertenece */
-    async cargarLigas() {
+    async cargarMisLigas() {
       const authStore = useAuthStore()
       if (!authStore.usuarioGlobal.ligasIds.length) {
         this.ligasDetalles = []
@@ -90,7 +90,7 @@ export const useLigasStore = defineStore('ligas', {
           authStore.usuarioGlobal.ligasIds.includes(liga.id),
         )
       } catch (error) {
-        console.error('Error al cargar las ligas:', error)
+        console.error('Error en cargarMisLigas (storeLigas.js):', error)
         this.ligasDetalles = []
       }
     },
@@ -120,7 +120,7 @@ export const useLigasStore = defineStore('ligas', {
         }
 
         const participante = {
-          id_liga: ligaId,
+          liga_id: ligaId,
           email_usuario: authStore.usuarioGlobal.emailAuth,
           rol: 'miembro',
           presupuesto: 50.0,

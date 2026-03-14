@@ -1,187 +1,133 @@
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useFantasyStore } from '@/stores/storeFantasy'
-import { useToast } from 'primevue/usetoast'
-import Header from '@/components/Header.vue'
-
-const router = useRouter()
-const store = useFantasyStore()
-const toast = useToast()
-
-const mostrarModalCrear = ref(false)
-const mostrarModalUnirse = ref(false)
-
-const nombreNuevaLiga = ref('')
-const codigoUnirse = ref('')
-const procesando = ref(false)
-
-const entrarLiga = async (idLiga) => {
-    await store.entrarALiga(idLiga)
-    router.push('/dashboard')
-}
-
-const ejecutarCrearLiga = async () => {
-    if (nombreNuevaLiga.value.trim().length < 3) {
-        toast.add({ severity: 'warn', summary: 'Nombre corto', detail: 'El nombre debe tener al menos 3 letras', life: 3000 })
-        return
-    }
-
-    procesando.value = true
-    const resultado = await store.crearLiga(nombreNuevaLiga.value)
-    procesando.value = false
-
-    if (resultado.exito) {
-        toast.add({ severity: 'success', summary: '¡Liga Creada!', detail: resultado.mensaje, life: 5000 })
-        mostrarModalCrear.value = false
-        nombreNuevaLiga.value = ''
-    } else {
-        toast.add({ severity: 'error', summary: 'Error', detail: resultado.mensaje, life: 3000 })
-    }
-}
-
-const ejecutarUnirseLiga = async () => {
-    if (codigoUnirse.value.trim().length < 5) {
-        toast.add({ severity: 'warn', summary: 'Código inválido', detail: 'Revisa el código de invitación', life: 3000 })
-        return
-    }
-
-    procesando.value = true
-    const resultado = await store.unirseLiga(codigoUnirse.value)
-    procesando.value = false
-
-    if (resultado.exito) {
-        toast.add({ severity: 'success', summary: '¡Fichaje completado!', detail: resultado.mensaje, life: 3000 })
-        mostrarModalUnirse.value = false
-        codigoUnirse.value = ''
-    } else {
-        toast.add({ severity: 'error', summary: 'Acceso Denegado', detail: resultado.mensaje, life: 3000 })
-    }
-}
-</script>
-
 <template>
-    <div class="min-h-screen w-full font-sans bg-[#0c0c12] relative">
+    <Header />
 
-        <Header />
+    <div class="p-6 max-w-5xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">Bienvenido, {{ authStore.usuarioGlobal.nombre }}</h1>
+            <p class="text-zinc-400">Gestiona tus competiciones y escuderías.</p>
+        </header>
 
-        <main class="p-4 mx-auto w-full max-w-3xl flex flex-col gap-8 mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <header class="text-center md:text-left">
-                <h1 class="text-3xl font-black italic text-white uppercase tracking-wider">
-                    Tus <span class="text-emerald-500">Ligas</span>
-                </h1>
-                <p class="text-zinc-500 text-sm tracking-widest uppercase mt-1">Selecciona tu paddock para continuar</p>
-            </header>
+            <section class="md:col-span-2 space-y-4">
+                <h2 class="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+                    <i class="pi pi-flag-fill text-emerald-500"></i> Tus Ligas
+                </h2>
 
-            <div class="flex flex-col sm:flex-row gap-4">
-                <button @click="mostrarModalCrear = true"
-                    class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest py-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                    <i class="pi pi-plus-circle text-lg"></i>
-                    Crear Nueva Liga
-                </button>
-                <button @click="mostrarModalUnirse = true"
-                    class="flex-1 bg-[#15151E] hover:bg-zinc-800 border border-zinc-700 text-white font-black uppercase tracking-widest py-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                    <i class="pi pi-sign-in text-lg"></i>
-                    Unirse con Código
-                </button>
-            </div>
-
-            <section v-if="store.ligasDetalles && store.ligasDetalles.length > 0" class="flex flex-col gap-4">
-                <h2
-                    class="text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2 mb-2">
-                    Ligas Activas</h2>
-
-                <div v-for="liga in store.ligasDetalles" :key="liga.id" @click="entrarLiga(liga.id)"
-                    class="bg-[#15151E] border border-zinc-800 hover:border-emerald-500/50 rounded-xl p-5 cursor-pointer group transition-all duration-300 relative overflow-hidden">
-                    <div
-                        class="absolute inset-0 bg-gradient-to-r from-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    </div>
-
-                    <div class="flex items-center justify-between relative z-10">
-                        <div class="flex flex-col gap-1">
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-xl font-black text-white italic uppercase">{{ liga.nombre }}</h3>
+                <div v-if="ligasStore.ligasDetalles.length > 0" class="grid gap-4">
+                    <Card v-for="liga in ligasStore.ligasDetalles" :key="liga.id"
+                        class="overflow-hidden border border-zinc-800 bg-zinc-900/50">
+                        <template #content>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-xl font-bold text-white">{{ liga.nombre }}</h3>
+                                    <div class="flex gap-4 mt-1 text-sm text-zinc-500">
+                                        <span><i class="pi pi-users mr-1"></i> {{ liga.participantes }}
+                                            pilotos</span>
+                                        <span><i class="pi pi-key mr-1"></i> {{ liga.codigo_invitacion }}</span>
+                                    </div>
+                                </div>
+                                <Button label="ENTRAR" icon="pi pi-external-link" severity="success" raised
+                                    @click="entrarEnLiga(liga.id)" />
                             </div>
-                            <span class="text-xs text-zinc-400 font-medium">
-                                <i class="pi pi-users text-[10px] mr-1"></i> {{ liga.participantes }} Participantes
-                            </span>
+                        </template>
+                    </Card>
+                </div>
+
+                <Message v-else severity="secondary" :closable="false" icon="pi pi-info-circle">
+                    No perteneces a ninguna liga todavía. ¡Crea una o únete a tus amigos!
+                </Message>
+            </section>
+
+            <section class="space-y-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Acciones</h2>
+
+                <Card class="border border-zinc-800 bg-zinc-900/50">
+                    <template #title><span class="text-sm uppercase tracking-wider text-emerald-500">Nueva
+                            Liga</span></template>
+                    <template #content>
+                        <div class="flex flex-col gap-3">
+                            <InputText v-model="nombreNuevaLiga" placeholder="Nombre de la liga" class="w-full" />
+                            <Button label="Crear Campeonato" icon="pi pi-plus" class="w-full" @click="crearLiga" />
                         </div>
-                        <i
-                            class="pi pi-chevron-right text-zinc-600 group-hover:text-emerald-500 transition-colors ml-2"></i>
-                    </div>
-                </div>
+                    </template>
+                </Card>
+
+                <Card class="border border-zinc-800 bg-zinc-900/50">
+                    <template #title><span
+                            class="text-sm uppercase tracking-wider text-blue-500">Unirse</span></template>
+                    <template #content>
+                        <div class="flex flex-col gap-3">
+                            <InputText v-model="codigoUnion" placeholder="Código de invitación"
+                                class="w-full uppercase" />
+                            <Button label="Unirse a Liga" icon="pi pi-sign-in" severity="secondary" outlined
+                                class="w-full" @click="unirseALiga" />
+                        </div>
+                    </template>
+                </Card>
             </section>
-
-            <section v-else class="text-center py-12 border border-dashed border-zinc-800 rounded-xl bg-[#15151E]/50">
-                <i class="pi pi-flag text-4xl text-zinc-700 mb-4"></i>
-                <h3 class="text-lg font-black text-white uppercase italic mb-1">Aún no tienes equipo</h3>
-                <p class="text-xs text-zinc-500 tracking-widest max-w-xs mx-auto">Crea una liga para invitar a tus
-                    amigos o únete a una existente con un código.</p>
-            </section>
-        </main>
-
-        <div v-if="mostrarModalCrear"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div
-                class="bg-[#15151E] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-[fade-in_0.2s_ease-out]">
-                <div class="p-6">
-                    <h3
-                        class="text-xl font-black text-white italic uppercase tracking-wider mb-4 border-b border-zinc-800 pb-3">
-                        <i class="pi pi-trophy text-emerald-500 mr-2"></i> Fundar Escudería
-                    </h3>
-                    <p class="text-sm text-zinc-400 mb-4">Serás el administrador de esta liga. Podrás invitar a tus
-                        amigos pasándoles el código secreto.</p>
-
-                    <div class="flex flex-col gap-2 mb-6">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Nombre de la
-                            Liga</label>
-                        <input v-model="nombreNuevaLiga" type="text" placeholder="Ej: Amigos de la Uni"
-                            class="bg-zinc-900 border border-zinc-700 text-white rounded-lg p-3 outline-none focus:border-emerald-500 transition-colors"
-                            @keyup.enter="ejecutarCrearLiga" />
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button @click="mostrarModalCrear = false"
-                            class="flex-1 bg-transparent border border-zinc-700 hover:bg-zinc-800 text-white font-bold py-3 rounded-lg transition-colors">Cancelar</button>
-                        <button @click="ejecutarCrearLiga" :disabled="procesando"
-                            class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black font-black py-3 rounded-lg transition-colors disabled:opacity-50">
-                            <i v-if="procesando" class="pi pi-spin pi-spinner mr-2"></i> Crear
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
-
-        <div v-if="mostrarModalUnirse"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div
-                class="bg-[#15151E] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-[fade-in_0.2s_ease-out]">
-                <div class="p-6">
-                    <h3
-                        class="text-xl font-black text-white italic uppercase tracking-wider mb-4 border-b border-zinc-800 pb-3">
-                        <i class="pi pi-key text-emerald-500 mr-2"></i> Código de Acceso
-                    </h3>
-
-                    <div class="flex flex-col gap-2 mb-6">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Introduce el código
-                            de 6 caracteres</label>
-                        <input v-model="codigoUnirse" type="text" maxlength="6" placeholder="Ej: A8F3X9"
-                            class="bg-zinc-900 border border-zinc-700 text-white rounded-lg p-3 outline-none focus:border-emerald-500 transition-colors uppercase text-center font-mono text-xl tracking-widest"
-                            @keyup.enter="ejecutarUnirseLiga" />
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button @click="mostrarModalUnirse = false"
-                            class="flex-1 bg-transparent border border-zinc-700 hover:bg-zinc-800 text-white font-bold py-3 rounded-lg transition-colors">Cancelar</button>
-                        <button @click="ejecutarUnirseLiga" :disabled="procesando"
-                            class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-black font-black py-3 rounded-lg transition-colors disabled:opacity-50">
-                            <i v-if="procesando" class="pi pi-spin pi-spinner mr-2"></i> Entrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+
+import { useLigasStore } from '@/stores/storeLigas'
+import { useAuthStore } from '@/stores/storeAuth'
+import Header from '@/components/Header.vue'
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Message from 'primevue/message'
+
+const authStore = useAuthStore()
+const ligasStore = useLigasStore()
+
+const router = useRouter()
+const toast = useToast()
+
+const nombreNuevaLiga = ref('')
+const codigoUnion = ref('')
+const cargando = ref(false)
+
+
+onMounted(async () => {
+    cargando.value = true
+    await ligasStore.cargarMisLigas()
+    cargando.value = false
+})
+
+const crearLiga = async (nombre) => {
+    if (nombreNuevaLiga.value.trim().length < 3) {
+        toast.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres', life: 3000 })
+        return
+    }
+
+    const resultado = await ligasStore.crearLiga(nombreNuevaLiga.value)
+    if (resultado.exito) {
+        toast.add({ severity: 'success', summary: '¡Liga creada!', detail: resultado.mensaje, life: 3000 })
+        nombreNuevaLiga.value = ''
+    } else {
+        toast.add({ severity: 'error', summary: 'Error al crear liga', detail: resultado.mensaje, life: 3000 })
+    }
+}
+
+const unirseALiga = async () => {
+    if (!codigoUnion.value) return
+    const resultado = await ligasStore.unirseALiga(codigoUnion.value)
+    console.log('Resultado de unirseALiga:', resultado)
+    if (resultado.exito) {
+        toast.add({ severity: 'success', summary: '¡Bienvenido a la liga!', detail: resultado.mensaje, life: 3000 })
+        codigoUnion.value = ''
+    } else {
+        toast.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.mensaje, life: 3000 })
+    }
+}
+
+const entrarEnLiga = (ligaId) => {
+    router.push({ name: 'inicio', query: { liga: ligaId } })
+}
+</script>

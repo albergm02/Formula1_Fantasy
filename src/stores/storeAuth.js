@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', {
     /* Iniciar sesión y traer datos de perfil de Firebase */
     async iniciarDatosGlobales(emailUsuario, nombreUsuario) {
       try {
+        this.datosCargados = false
         this.usuarioGlobal.emailAuth = emailUsuario
         const docRef = doc(db, 'usuarios', emailUsuario)
         const docSnap = await getDoc(docRef)
@@ -40,6 +41,7 @@ export const useAuthStore = defineStore('auth', {
 
     /* Cerrar sesión y limpiar datos */
     cerrarSesion() {
+      this.datosCargados = false
       this.usuarioGlobal = {
         emailAuth: '',
         nombre: '',

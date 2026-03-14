@@ -1,23 +1,35 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { useFantasyStore } from '@/stores/storeFantasy'
+import { useAuthStore } from '@/stores/storeAuth'
+import { useEscuderiaStore } from '@/stores/storeEscuderia'
 import { signOut } from '@/services/authService'
 import Button from 'primevue/button'
+import { useRoute } from 'vue-router'
+
 
 const router = useRouter()
-const partida = useFantasyStore()
+const route = useRoute()
+const authStore = useAuthStore()
+const escuderiaStore = useEscuderiaStore()
+
 
 const cerrarSesion = async () => {
     try {
         await signOut()
         router.push('/')
     } catch (error) {
-        console.error('Error al cerrar sesión:', error)
+        console.error('Error en cerrar sesión (Header.vue):', error)
     }
 }
 
 const volverADashboard = () => {
-    router.push('/inicio')
+    const ligaId = escuderiaStore.ligaActualId || route.query.liga || null
+    if (ligaId) {
+        router.push({ name: '/inicio', query: { liga: ligaId } })
+    } else {
+        router.push({ name: '/ligas' })
+    }
+
 }
 </script>
 
@@ -32,10 +44,10 @@ const volverADashboard = () => {
 
         <div class="flex items-center gap-3">
             <div class="text-right">
-                <p class="text text-white font-bold uppercase">{{ partida.usuario.nombre }}</p>
+                <p class="text text-white font-bold uppercase">{{ authStore.usuarioGlobal.nombre }}</p>
                 <p class="text-xs text-white">
-                    Pts: <strong class="text-yellow-500">{{ partida.usuario.puntos }}</strong>
-                    | <span class="text-emerald-500 font-bold">{{ partida.usuario.presupuesto }}M</span>
+                    Pts: <strong class="text-yellow-500">{{ escuderiaStore.puntos }}</strong>
+                    | <span class="text-emerald-500 font-bold">{{ escuderiaStore.presupuesto }}M</span>
                 </p>
             </div>
             <!-- hover es utilizado para cambiar el color al clickear -->
