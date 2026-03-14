@@ -11,7 +11,6 @@ import Header from '@/components/Header.vue'
 import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
-import TiempoMercado from '@/components/TiempoMercado.vue'
 
 const partida = useFantasyStore()
 const toast = useToast()
@@ -61,35 +60,31 @@ const realizarFichaje = async (elemento) => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full font-sans pb-28 bg-[#0c0c12]">
 
-    <Header />
+  <Header />
 
-    <main class="p-4 mx-auto w-full max-w-5xl flex flex-col gap-6">
+  <main class="p-4 flex flex-col gap-6 mt-4 mb-20">
 
-      <TiempoMercado />
+    <section>
+      <CartaCoche v-if="cocheSemanal" :coche="cocheSemanal" :modoMercado="true" @fichar="realizarFichaje" />
+    </section>
 
-      <section>
-        <CartaCoche v-if="cocheSemanal" :coche="cocheSemanal" :modoMercado="true" @fichar="realizarFichaje" />
-      </section>
+    <section class="grid grid-cols-1">
+      <div class="w-full">
+        <CartaPiloto v-if="pilotoSemanal" :piloto="pilotoSemanal" :modoMercado="true" @fichar="realizarFichaje" />
+      </div>
+    </section>
 
-      <section class="grid grid-cols-1 md:grid-cols-3">
-        <div class="w-full">
-          <CartaPiloto v-if="pilotoSemanal" :piloto="pilotoSemanal" :modoMercado="true" @fichar="realizarFichaje" />
+    <section>
+      <div class="grid grid-cols-2 gap-4">
+        <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
+          <CartaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="realizarFichaje" />
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
-            <CartaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="realizarFichaje" />
-          </div>
-        </div>
-      </section>
+  </main>
 
-    </main>
+  <Navbar />
 
-    <Navbar />
-
-  </div>
 </template>

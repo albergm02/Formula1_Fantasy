@@ -33,7 +33,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Fondo de pantalla fijo con overlay oscuro para mejorar la legibilidad -->
   <div class="fixed inset-0 -z-10 h-full w-full bg-[#0c0c12]">
     <div class="absolute inset-0 bg-zinc-900/70"></div>
   </div>
@@ -50,5 +49,3 @@ onMounted(() => {
   <RouterView v-else />
 
 </template>
-
-<style scoped></style>

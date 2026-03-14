@@ -51,7 +51,7 @@ const iniciarSesion = async ({ valid, values }) => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <Card class="w-full max-w-md !bg-zinc-800 rounded !shadow-red-600/50">
+    <Card class="w-full max-w-md rounded">
 
       <template #title>
         <div class="flex flex-col items-center gap-4">

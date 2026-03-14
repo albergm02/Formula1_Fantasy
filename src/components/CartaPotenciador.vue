@@ -40,17 +40,17 @@ const confirmarCompra = () => {
 <template>
   <div class="flex flex-col h-full w-full bg-transparent transition-colors min-h-[250px]">
 
-    <header class="flex justify-between items-center p-3 border-b border-zinc-700 z-20 shrink-0">
+    <header class="flex justify-between items-center p-3 border border-zinc-800 z-20 shrink-0">
       <span class="text-xs font-black text-white">
         {{ props.potenciador.nombre.toUpperCase() }}
       </span>
       <span class="text-xs font-black text-emerald-500">{{ props.potenciador.precio }}M</span>
     </header>
 
-    <main class="relative flex-1 w-full cursor-pointer touch-manipulation select-none"
-      @click="mostrarInfo = !mostrarInfo">
+    <main class="relative flex-1 w-full" @click="mostrarInfo = !mostrarInfo">
 
-      <img :src="props.potenciador.imagen" class="absolute w-full h-full object-cover object-center" />
+      <img :src="props.potenciador.imagen"
+        class="absolute w-full h-full object-cover object-center border-r border-l border-zinc-800" />
 
       <div v-show="!mostrarInfo"
         class="absolute left-0 w-full text-center z-20 flex flex-col items-center justify-center h-full">
@@ -64,7 +64,8 @@ const confirmarCompra = () => {
         </span>
       </div>
 
-      <div v-show="mostrarInfo" class="absolute inset-0 p-10 flex flex-col justify-center text-center bg-[#15151E]/80">
+      <div v-show="mostrarInfo"
+        class="absolute inset-0 p-10 flex flex-col justify-center text-center bg-[#15151E]/80 border-r border-l border-zinc-800 z-30 backdrop-blur-sm">
         <h4 class="text-xs font-black border-b text-white pb-1 mb-2">MEJORA</h4>
         <p class="text-xs text-white leading-relaxed">
           {{ props.potenciador.descripcion || 'Pieza de rendimiento. Instálala en tu monoplaza.' }}
@@ -74,7 +75,7 @@ const confirmarCompra = () => {
     </main>
 
     <button v-if="modoMercado" @click="confirmarCompra"
-      class="w-full border-t border-zinc-800 text-white py-2 cursor-pointer hover:bg-zinc-900 z-20">
+      class="w-full border border-zinc-800 text-white py-2 cursor-pointer z-20">
       <i class="pi pi-cart-plus text-xs text-emerald-500 mr-2"></i>
       <span class="text-xs font-black text-emerald-500">PUJAR</span>
     </button>
