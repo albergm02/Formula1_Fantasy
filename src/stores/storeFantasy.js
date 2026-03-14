@@ -1,78 +1,213 @@
 import { defineStore } from 'pinia'
 
 /* Comenzamos con importaciones a Firebase */
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, query, setDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 
-const crearEstadoInicial = () => ({
-  usuario: {
-    emailAuth: '', // Este campo se llenará con el email del usuario autenticado, y se usará como ID en Firebase
-    nombre: 'ALBERTO',
-    iniciales: 'AM',
-    puntos: 0,
-    presupuesto: 50.0,
-  },
-  garaje: {
-    coche: null,
-    pilotos: [],
-    potenciadores: [],
-  },
+const crearGarajeVacio = () => ({
+  coche: null,
+  pilotos: [],
+  potenciadores: [],
 })
 
-/* TODO: COMIENZO DE LÓGICA DE JUEGO */
-
 export const useFantasyStore = defineStore('fantasy', {
-  state: () => {
-    return {
-      /* Arrancamos primero con el estado base, que es el mismo para todos los usuarios */
-      ...crearEstadoInicial(),
-      datosCargados: false,
-    }
-  },
+  state: () => ({
+    usuarioGlobal: {
+      emailAuth: '',
+      nombre: '',
+      ligasIds: [],
+    },
+
+    /* Información de las ligas */
+    ligasDetalles: [],
+
+    /* Liga en la que el usuario ha entrado */
+    ligaActivaId: null,
+    participacionActivaId: null,
+
+    usuario: {
+      presupuesto: 100.0,
+      puntos: 0,
+    },
+    garaje: crearGarajeVacio(),
+
+    datosCargados: false,
+  }),
 
   actions: {
-
-    /* COMIENZO DE CONEXIÓN CON FIREBASE */
-
-    async inicializarDatos(emailUsuario) {
-      try{
-        const idUsuario = emailUsuario 
-        const docRef = doc(db, 'usuarios_fantasy', idUsuario)
+    /* Comienzo de conexión con Firebase global */
+    async inicializarDatosGlobales(emailUsuario, nombreUsuario = 'Piloto') {
+      try {
+        this.usuarioGlobal.emailAuth = emailUsuario
+        const idUsuario = emailUsuario
+        const docRef = doc(db, 'usuarios', idUsuario)
         const docSnap = await getDoc(docRef)
 
         /* Si el usuario existe */
         if (docSnap.exists()) {
-          const data = docSnap.data()
-          this.usuario = data.usuario
-          this.garaje = data.garaje
+          this.usuarioGlobal = docSnap.data()
         } else {
-          /* En caso de que no exista se crea un nuevo estado inicial */
-          await setDoc(docRef, crearEstadoInicial())
+          this.usuarioGlobal.nombre = nombreUsuario
+          this.usuarioGlobal.ligasIds = []
+          await setDoc(docRef, this.usuarioGlobal)
         }
+        await this.cargarLigas()
+        this.datosCargados = true
       } catch (error) {
         console.error('Error al inicializar los datos:', error)
       }
       this.datosCargados = true
     },
 
-    /* GUARDADO DE DATOS EN FIREBASE */
+    /* Cargar nombres y participantes de las ligas a las que el usuario pertenece */
+    async cargarLigas() {
+      if (!this.usuarioGlobal.ligasIds.length) {
+        this.ligasDetalles = []
+        return
+      }
 
-    async guardarDatosEnFirebase() {
       try {
-        const idUsuario = this.usuario.emailAuth // Aqui tengo que poner el email del usuario.
-        const docRef = doc(db, 'usuarios_fantasy', idUsuario)
-
-        await setDoc(docRef, {
-          usuario: this.usuario,
-          garaje: this.garaje,
-        })
+        const ligasRef = collection(db, 'ligas')
+        const ligasSnapshot = await getDocs(ligasRef)
+        const ligasData = ligasSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+        this.ligasDetalles = ligasData.filter((liga) =>
+          this.usuarioGlobal.ligasIds.includes(liga.id),
+        )
       } catch (error) {
-        console.error('Error al guardar los datos:', error)
+        console.error('Error al cargar las ligas:', error)
       }
     },
 
-    /** 
-     * Fichar un elemento (coche, piloto o potenciador) 
+    /* GUARDADO DE DATOS EN FIREBASE */
+
+    async guardarDatosEnFirebase() {
+      if (!this.ligaActivaId || !this.participacionActivaId) return
+
+      try {
+        const participacionRef = doc(db, 'participaciones', this.participacionActivaId)
+        await updateDoc(participacionRef, {
+          presupuesto: this.usuario.presupuesto,
+          puntos: this.usuario.puntos,
+          garaje: this.garaje,
+        })
+      } catch (error) {
+        console.error('Error al guardar los datos en Firebase:', error)
+      }
+    },
+
+    async crearLiga(nombreLiga) {
+      try {
+        const codigoInv = Math.random().toString(36).substring(2, 8).toUpperCase()
+        const nuevaLiga = {
+          nombre: nombreLiga,
+          admin: this.usuarioGlobal.emailAuth,
+          codigoInvitacion: codigoInv,
+          participantes: 1,
+          fecha_Creacion: new Date(),
+        }
+        const ligaDocRef = await addDoc(collection(db, 'ligas'), nuevaLiga)
+        const ligaId = ligaDocRef.id
+
+        const participacionAdministrador = {
+          id_liga: ligaId,
+          email_usuario: this.usuarioGlobal.emailAuth,
+          rol: 'admin',
+          presupuesto: 50.0,
+          puntos: 0,
+          garaje: this.garaje,
+        }
+        await addDoc(collection(db, 'participaciones'), participacionAdministrador)
+
+        const userRef = doc(db, 'usuarios', this.usuarioGlobal.emailAuth)
+        await updateDoc(userRef, {
+          ligasIds: [...this.usuarioGlobal.ligasIds, ligaId],
+        })
+
+        this.usuarioGlobal.ligasIds.push(ligaId)
+        await this.cargarLigas()
+        return { exito: true, mensaje: 'Liga creada exitosamente.' }
+      } catch (error) {
+        console.error('Error al crear la liga:', error)
+        return { exito: false, mensaje: 'Error al crear la liga. Inténtalo de nuevo.' }
+      }
+    },
+
+    async unirseLiga(codigoInvitacion) {
+      try {
+        const codigoMayus = codigoInvitacion.toUpperCase()
+
+        const ligasRef = collection(db, 'ligas')
+        const q = query(ligasRef, where('codigo_invitacion', '==', codigoMayus))
+        const snapshot = await getDocs(q)
+
+        if (snapshot.empty) {
+          return { exito: false, mensaje: 'Código de liga no válido o caducado.' }
+        }
+
+        const docLiga = snapshot.docs[0]
+        const idLiga = docLiga.id
+
+        if (this.usuarioGlobal.ligasIds.includes(idLiga)) {
+          return { exito: false, mensaje: 'Ya perteneces a esta liga.' }
+        }
+
+        const nuevaParticipacion = {
+          id_liga: idLiga,
+          email_usuario: this.usuarioGlobal.emailAuth,
+          rol: 'miembro',
+          presupuesto: 50.0,
+          puntos: 0,
+          garaje: crearGarajeInicial(),
+        }
+        await addDoc(collection(db, 'participaciones'), nuevaParticipacion)
+
+        const ligaRef = doc(db, 'ligas', idLiga)
+        await updateDoc(ligaRef, {
+          participantes: docLiga.data().participantes + 1,
+        })
+
+        const userRef = doc(db, 'usuarios', this.usuarioGlobal.emailAuth)
+        await updateDoc(userRef, {
+          ligasIds: arrayUnion(idLiga),
+        })
+
+        this.usuarioGlobal.ligasIds.push(idLiga)
+        await this.cargarMisLigas()
+
+        return { exito: true, mensaje: `¡Bienvenido a la liga ${docLiga.data().nombre}!` }
+      } catch (error) {
+        console.error('Error al unirse a la liga:', error)
+        return { exito: false, mensaje: 'Error en los servidores de telemetría.' }
+      }
+    },
+
+    /* entrar en una liga */
+    async entrarALiga(ligaId) {
+      try {
+        this.ligaActivaId = ligaId
+        const participacionesRef = collection(db, 'participaciones')
+
+        const q = query(
+          participacionesRef,
+          where('id_liga', '==', ligaId),
+          where('email_usuario', '==', this.usuarioGlobal.emailAuth),
+        )
+        const querySnapshot = await getDocs(q)
+
+        if (!querySnapshot.empty) {
+          const participacionDoc = querySnapshot.docs[0]
+          this.participacionActivaId = participacionDoc.id
+          const datosParticipacion = participacionDoc.data()
+          this.usuario = datosParticipacion.usuario
+          this.garaje = datosParticipacion.garaje
+        }
+      } catch (error) {
+        console.error('Error al entrar en la liga:', error)
+      }
+    },
+
+    /**
+     * Fichar un elemento (coche, piloto o potenciador)
      * Antes de fichar, se realizan varias comprobaciones:
      * - Presupuesto suficiente
      * - No tener ya un coche (si el elemento es un coche)
@@ -165,20 +300,6 @@ export const useFantasyStore = defineStore('fantasy', {
       pieza.equipado = !pieza.equipado
       await this.guardarDatosEnFirebase()
       return { exito: true }
-    },
-
-    /**
-     * Resetear la cuenta:
-     * - Elimina los datos almacenados en localStorage
-     * - Recarga la página para iniciar sesión nuevamente
-     */
-    async resetearCuenta() {
-      const estadoVacio = crearEstadoInicial()
-      this.usuario = estadoVacio.usuario
-      this.garaje = estadoVacio.garaje
-      
-      await this.guardarDatosEnFirebase()
-      location.reload()
     },
   },
 })

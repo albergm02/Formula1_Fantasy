@@ -16,29 +16,36 @@ const routes = [
     meta: { requiresGuest: true },
   },
   {
-    path: '/inicio',
-    name: 'inicio',
-    // 2. OJO AQUÍ: /inicio carga tu DashboardView
-    component: () => import('../views/DashboardView.vue'),
+    path: '/ligas',
+    name: 'ligas',
+    component: () => import('../views/MisLigasView.vue'),
     meta: { requiresAuth: true },
+  },
+
+  /* ZONA DE ENTRADA AL JUEGO */
+  {
+    path: '/dashboard',
+    name: 'inicio',
+    component: () => import('../views/DashboardView.vue'),
+    meta: { requiresAuth: true, requiresLiga: true },
   },
   {
     path: '/mercado',
     name: 'mercado',
     component: () => import('../views/MercadoView.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresLiga: true },
   },
   {
     path: '/garaje',
     name: 'garaje',
     component: () => import('../views/GarajeView.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresLiga: true },
   },
   {
     path: '/clasificacion',
     name: 'clasificacion',
     component: () => import('../views/RankingView.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresLiga: true },
   },
   {
     path: '/:pathMatch(.*)*',
@@ -59,7 +66,14 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresGuest && user) {
-    return { name: 'inicio' }
+    return { name: 'ligas' }
+  }
+
+  if (to.meta.requiresLiga) {
+    const store = useFantasyStore()
+    if (!store.usuarioGlobal || store.usuarioGlobal.ligasIds.length === 0) {
+      return { name: 'ligas' }
+    }
   }
 
   return true
