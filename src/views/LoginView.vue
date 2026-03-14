@@ -36,7 +36,7 @@ const iniciarSesion = async ({ valid, values }) => {
 
   try {
     await signIn(values.email, values.password)
-    router.push('/inicio')
+    router.push('/ligas')
   } catch (error) {
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
       firebaseError.value = 'Correo o contraseña incorrectos.'

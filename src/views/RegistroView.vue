@@ -57,7 +57,7 @@ const crearCuenta = async ({ valid, values }) => {
 
   try {
     await signUp(values.email, values.password)
-    router.push('/inicio')
+    router.push('/ligas')
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
       firebaseError.value = 'El correo electrónico ya está registrado.'

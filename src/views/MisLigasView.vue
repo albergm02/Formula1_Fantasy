@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFantasyStore } from '@/stores/storeFantasy'
 import { useToast } from 'primevue/usetoast'

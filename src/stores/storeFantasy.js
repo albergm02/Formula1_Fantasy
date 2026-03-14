@@ -1,7 +1,16 @@
 import { defineStore } from 'pinia'
 
 /* Comenzamos con importaciones a Firebase */
-import { collection, doc, getDoc, query, setDoc } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  addDoc,
+  updateDoc,
+} from 'firebase/firestore'
 import { db } from '../services/firebase'
 
 const crearGarajeVacio = () => ({
@@ -51,7 +60,7 @@ export const useFantasyStore = defineStore('fantasy', {
           this.usuarioGlobal.ligasIds = []
           await setDoc(docRef, this.usuarioGlobal)
         }
-        await this.cargarLigas()
+        await this.cargarMisLigas()
         this.datosCargados = true
       } catch (error) {
         console.error('Error al inicializar los datos:', error)
@@ -60,7 +69,7 @@ export const useFantasyStore = defineStore('fantasy', {
     },
 
     /* Cargar nombres y participantes de las ligas a las que el usuario pertenece */
-    async cargarLigas() {
+    async cargarMisLigas() {
       if (!this.usuarioGlobal.ligasIds.length) {
         this.ligasDetalles = []
         return
@@ -97,14 +106,17 @@ export const useFantasyStore = defineStore('fantasy', {
 
     async crearLiga(nombreLiga) {
       try {
+        // Generamos un código aleatorio de 6 letras/números
         const codigoInv = Math.random().toString(36).substring(2, 8).toUpperCase()
+
         const nuevaLiga = {
           nombre: nombreLiga,
           admin: this.usuarioGlobal.emailAuth,
-          codigoInvitacion: codigoInv,
+          codigo_invitacion: codigoInv, // CORREGIDO: Guión bajo para que coincida con la búsqueda
           participantes: 1,
-          fecha_Creacion: new Date(),
+          fecha_creacion: new Date(),
         }
+
         const ligaDocRef = await addDoc(collection(db, 'ligas'), nuevaLiga)
         const ligaId = ligaDocRef.id
 
@@ -114,7 +126,12 @@ export const useFantasyStore = defineStore('fantasy', {
           rol: 'admin',
           presupuesto: 50.0,
           puntos: 0,
-          garaje: this.garaje,
+
+          garaje: {
+            coche: null,
+            pilotos: [],
+            potenciadores: [],
+          },
         }
         await addDoc(collection(db, 'participaciones'), participacionAdministrador)
 
@@ -124,8 +141,10 @@ export const useFantasyStore = defineStore('fantasy', {
         })
 
         this.usuarioGlobal.ligasIds.push(ligaId)
-        await this.cargarLigas()
-        return { exito: true, mensaje: 'Liga creada exitosamente.' }
+
+        await this.cargarMisLigas()
+
+        return { exito: true, mensaje: `Liga creada. Código: ${codigoInv}` }
       } catch (error) {
         console.error('Error al crear la liga:', error)
         return { exito: false, mensaje: 'Error al crear la liga. Inténtalo de nuevo.' }
@@ -137,7 +156,7 @@ export const useFantasyStore = defineStore('fantasy', {
         const codigoMayus = codigoInvitacion.toUpperCase()
 
         const ligasRef = collection(db, 'ligas')
-        const q = query(ligasRef, where('codigo_invitacion', '==', codigoMayus))
+        const q = query(ligasRef, where('codigoInvitacion', '==', codigoMayus))
         const snapshot = await getDocs(q)
 
         if (snapshot.empty) {

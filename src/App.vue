@@ -18,13 +18,14 @@ onMounted(() => {
     if (user) {
       /* 1. SI HAY USUARIO: Guardamos su email en el store para usarlo como ID en Firebase, 
       inicializamos los datos del usuario desde Firebase y lo mandamos al inicio */
-      partida.usuario.emailAuth = user.email
-      await partida.inicializarDatos(user.email)
+      await partida.inicializarDatosGlobales(user.email, user.displayName || 'Anónimo')
     } else {
       /* 2. SI NO HAY USUARIO: Limpiamos el email del store, 
       marcamos los datos como cargados para evitar el bucle de carga, 
       y redirigimos al login */
-      partida.usuario.emailAuth = ''
+      partida.usuarioGlobal.emailAuth = ''
+      partida.usuarioGlobal.ligasIds = []
+      partida.ligaActivaId = null
       partida.datosCargados = true
       router.push('/')
     }
