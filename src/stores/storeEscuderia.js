@@ -32,7 +32,7 @@ export const useEscuderiaStore = defineStore('escuderia', {
       try {
         // Consulta para obtener el participante activo en la liga
         this.ligaActivaId = ligaId
-        const participantesRef = collection(db, 'participantes')
+        const participantesRef = collection(db, 'participaciones')
 
         // Busca el participante que corresponde al usuario actual y la liga activa
         const q = query(
@@ -81,7 +81,7 @@ export const useEscuderiaStore = defineStore('escuderia', {
         return
       }
       try {
-        const participanteRef = doc(db, 'participantes', this.participanteActivoId)
+        const participanteRef = doc(db, 'participaciones', this.participanteActivoId)
         // Actualiza los datos de la escudería en Firestore
         await updateDoc(participanteRef, {
           presupuesto: this.presupuesto,

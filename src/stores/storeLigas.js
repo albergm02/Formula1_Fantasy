@@ -38,7 +38,6 @@ export const useLigasStore = defineStore('ligas', {
           codigo_invitacion: codigoInvitacion,
           participantes: 1,
           fecha_creacion: new Date(),
-          garaje: crearGaraje(),
         }
 
         const ligaDocRef = await addDoc(collection(db, 'ligas'), nuevaLiga)
@@ -46,19 +45,19 @@ export const useLigasStore = defineStore('ligas', {
 
         // Crea el participante para el creador de la liga
         const participante = {
-          liga_id: ligaId,
+          id_liga: ligaId,
           email_usuario: authStore.usuarioGlobal.emailAuth,
           rol: 'admin',
           presupuesto: 50.0,
           puntos: 0,
           garaje: crearGaraje(),
         }
-        await addDoc(collection(db, 'participantes'), participante)
+        await addDoc(collection(db, 'participaciones'), participante)
 
         // Actualiza el array de IDs del usuario en Firestore
         const userRef = doc(db, 'usuarios', authStore.usuarioGlobal.emailAuth)
         await updateDoc(userRef, {
-          ligas: arrayUnion(ligaId),
+          ligasIds: arrayUnion(ligaId),
         })
 
         // Actualiza la memoria local de Pinia
@@ -119,20 +118,25 @@ export const useLigasStore = defineStore('ligas', {
           return { exito: false, mensaje: 'Ya perteneces a esta liga.' }
         }
 
-        const participante = {
-          liga_id: ligaId,
+        const participacion = {
+          id_liga: ligaId,
           email_usuario: authStore.usuarioGlobal.emailAuth,
           rol: 'miembro',
           presupuesto: 50.0,
           puntos: 0,
           garaje: crearGaraje(),
         }
-        await addDoc(collection(db, 'participantes'), participante)
+        await addDoc(collection(db, 'participaciones'), participacion)
+
+        const ligaRef = doc(db, 'ligas', ligaId)
+        await updateDoc(ligaRef, {
+          participantes: ligaDoc.data().participantes + 1,
+        })
 
         // Añadimos la liga al array de IDs del usuario en Firestore
         const userRef = doc(db, 'usuarios', authStore.usuarioGlobal.emailAuth)
         await updateDoc(userRef, {
-          ligas: arrayUnion(ligaId),
+          ligasIds: arrayUnion(ligaId),
         })
 
         // Actualizamos la memoria local de Pinia
