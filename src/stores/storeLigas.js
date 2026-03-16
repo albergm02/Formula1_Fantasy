@@ -28,8 +28,24 @@ export const useLigasStore = defineStore('ligas', {
     /* Crea una nueva liga y agrega al creador como participante */
     async crearLiga(nombreLiga) {
       const authStore = useAuthStore()
+      const emailUsuario = authStore.usuarioGlobal.emailAuth
 
       try {
+        const participacionesRef = collection(db, 'participaciones')
+        // Busca cuántas participaciones tiene este usuario con el rol de 'admin'
+        const qAdmin = query(
+          participacionesRef,
+          where('email_usuario', '==', emailUsuario),
+          where('rol', '==', 'admin'),
+        )
+        const snapAdmin = await getDocs(qAdmin)
+
+        if (snapAdmin.size >= 2) {
+          return {
+            exito: false,
+            mensaje: 'Reglamento FIA: Has alcanzado el límite máximo de 2 ligas creadas.',
+          }
+        }
         // Crea un código de invitación único para la liga
         const codigoInvitacion = Math.random().toString(36).substring(2, 8).toUpperCase()
         const nuevaLiga = {

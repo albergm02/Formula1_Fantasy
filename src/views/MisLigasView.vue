@@ -60,8 +60,8 @@
       closeButton: { class: 'hover:!bg-[#D9D9D9] !text-[#D9D9D9]' }
     }">
       <div class="flex flex-col gap-4">
-        <span class="text-[#D9D9D9] text-sm">Escoge un nombre para la nueva competición.</span>
-        <InputText v-model="nombreNuevaLiga" placeholder="Ej: Campeonato-2026"
+        <span class="pi pi-exclamation-triangle text-[#D9D9D9]"> Máximo de 3 ligas por usuario</span>
+        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre"
           class="w-full !bg-[#15151E] !text-[#D9D9D9] focus:!border-[#FF1E00]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="mostrarDialogoCrear = false"
@@ -127,31 +127,18 @@ onMounted(async () => {
 
 const crearLiga = async () => {
   if (nombreNuevaLiga.value.trim().length < 3) {
-    toast.add({
-      severity: 'warn',
-      summary: 'Nombre inválido',
-      detail: 'El nombre debe tener al menos 3 caracteres',
-      life: 3000,
-    })
+    toast.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres', life: 3000 })
     return
   }
 
   const resultado = await ligasStore.crearLiga(nombreNuevaLiga.value)
   if (resultado.exito) {
-    toast.add({
-      severity: 'success',
-      summary: '¡Liga creada!',
-      detail: resultado.mensaje,
-      life: 3000,
-    })
+    toast.add({ severity: 'success', summary: '¡Liga creada!', detail: resultado.mensaje, life: 3000 })
     nombreNuevaLiga.value = ''
+    mostrarDialogoCrear.value = false
+
   } else {
-    toast.add({
-      severity: 'error',
-      summary: 'Error al crear',
-      detail: resultado.mensaje,
-      life: 3000,
-    })
+    toast.add({ severity: 'error', summary: 'Error', detail: resultado.mensaje, life: 3000 })
   }
 }
 
@@ -160,20 +147,12 @@ const unirseALiga = async () => {
   const resultado = await ligasStore.unirseALiga(codigoUnion.value)
 
   if (resultado.exito) {
-    toast.add({
-      severity: 'success',
-      summary: '¡Bienvenido!',
-      detail: resultado.mensaje,
-      life: 3000,
-    })
+    toast.add({ severity: 'success', summary: '¡Bienvenido!', detail: resultado.mensaje, life: 3000 })
     codigoUnion.value = ''
+    mostrarDialogoUnirse.value = false
+
   } else {
-    toast.add({
-      severity: 'error',
-      summary: 'Error al unirse',
-      detail: resultado.mensaje,
-      life: 3000,
-    })
+    toast.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.mensaje, life: 3000 })
   }
 }
 
