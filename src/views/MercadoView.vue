@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
-import { useFantasyStore } from '@/stores/storeFantasy.js'
+import { useEscuderiaStore } from '@/stores/storeEscuderia'
 
 import { useToast } from 'primevue/usetoast'
 import Navbar from '@/components/Navbar.vue'
@@ -12,7 +12,7 @@ import CartaPiloto from '@/components/CartaPiloto.vue'
 import CartaPotenciador from '@/components/CartaPotenciador.vue'
 import CartaCoche from '@/components/CartaCoche.vue'
 
-const partida = useFantasyStore()
+const escuderiaStore = useEscuderiaStore()
 const toast = useToast()
 
 /* Variables simplificadas: 1 piloto, 1 coche y 4 potenciadores */
@@ -39,7 +39,7 @@ onMounted(() => {
 })
 
 const realizarFichaje = async (elemento) => {
-  const resultado = await partida.fichar(elemento)
+  const resultado = await escuderiaStore.fichar(elemento)
 
   if (resultado.exito) {
     toast.add({
