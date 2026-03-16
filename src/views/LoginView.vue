@@ -1,54 +1,3 @@
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { signIn } from '@/services/authService'
-
-import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Button from 'primevue/button'
-import Message from 'primevue/message'
-import { Form } from '@primevue/forms'
-import { zodResolver } from '@primevue/forms/resolvers/zod'
-import { z } from 'zod'
-
-const router = useRouter()
-const loading = ref(false)
-const firebaseError = ref('')
-
-const initialValues = ref({
-  email: '',
-  password: ''
-})
-
-const resolver = zodResolver(
-  z.object({
-    email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
-    password: z.string().min(1, 'La contraseña es obligatoria')
-  })
-)
-
-const iniciarSesion = async ({ valid, values }) => {
-  if (!valid) return
-
-  loading.value = true
-  firebaseError.value = ''
-
-  try {
-    await signIn(values.email, values.password)
-    router.push('/ligas')
-  } catch (error) {
-    if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-      firebaseError.value = 'Correo o contraseña incorrectos.'
-    } else {
-      firebaseError.value = 'Error al iniciar sesión: ' + error.message
-    }
-  } finally {
-    loading.value = false
-  }
-}
-</script>
-
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
     <Card class="w-full max-w-md rounded !bg-[#15151E] !text-[#FFFFFF]">
@@ -108,3 +57,58 @@ const iniciarSesion = async ({ valid, values }) => {
     </Card>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { signIn } from '@/services/authService'
+
+import Card from 'primevue/card'
+import InputText from 'primevue/inputtext'
+import Password from 'primevue/password'
+import Button from 'primevue/button'
+import Message from 'primevue/message'
+import { Form } from '@primevue/forms'
+import { zodResolver } from '@primevue/forms/resolvers/zod'
+import { z } from 'zod'
+
+import { useAuthStore } from '@/stores/storeAuth'
+
+const router = useRouter()
+const loading = ref(false)
+const firebaseError = ref('')
+const authStore = useAuthStore()
+
+const initialValues = ref({
+  email: '',
+  password: ''
+})
+
+const resolver = zodResolver(
+  z.object({
+    email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
+    password: z.string().min(1, 'La contraseña es obligatoria')
+  })
+)
+
+const iniciarSesion = async ({ valid, values }) => {
+  if (!valid) return
+
+  loading.value = true
+  firebaseError.value = ''
+
+  try {
+    await signIn(values.email, values.password)
+    await authStore.iniciarDatosGlobales(values.email, values.displayName)
+    router.push('/ligas')
+  } catch (error) {
+    if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+      firebaseError.value = 'Correo o contraseña incorrectos.'
+    } else {
+      firebaseError.value = 'Error al iniciar sesión: ' + error.message
+    }
+  } finally {
+    loading.value = false
+  }
+}
+</script>

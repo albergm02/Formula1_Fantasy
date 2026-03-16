@@ -32,10 +32,12 @@ onMounted(() => {
   /* Observa cambios de sesión */
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      await authStore.iniciarDatosGlobales(user.email, user.displayName)
+      if (!authStore.usuarioGlobal.emailAuth) {
+        await authStore.iniciarDatosGlobales(user.email, user.displayName)
+      }
     } else {
       authStore.cerrarSesion()
-      router.push('/')
+      if (router.currentRoute.value.path !== '/' && router.currentRoute.value.path !== 'registro') router.push('/')
     }
   })
 })

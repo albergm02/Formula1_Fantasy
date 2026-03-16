@@ -4,6 +4,7 @@ import { db } from '../services/firebase'
 
 /* Definición del almacén de autenticación */
 export const useAuthStore = defineStore('auth', {
+
   state: () => ({
     usuarioGlobal: {
       emailAuth: '',
@@ -25,12 +26,18 @@ export const useAuthStore = defineStore('auth', {
         const docSnap = await getDoc(docRef)
         // Caso de un login
         if (docSnap.exists()) {
-          this.usuarioGlobal = docSnap.data()
+          const data = docSnap.data()
+          this.usuarioGlobal.nombre = data.nombre || 'Piloto'
+          this.usuarioGlobal.ligasIds = data.ligasIds || []
           // Caso de que sea un registro
         } else {
           this.usuarioGlobal.nombre = nombreUsuario
           this.usuarioGlobal.ligasIds = []
-          await setDoc(docRef, this.usuarioGlobal)
+          await setDoc(docRef, {
+            emailAuth: emailUsuario,
+            nombre: nombreUsuario,
+            ligasIds: [],
+          })
         }
       } catch (error) {
         console.error('Error en iniciarDatosGlobales (storeAuth.js):', error)
