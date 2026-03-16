@@ -16,7 +16,7 @@ const escuderiaStore = useEscuderiaStore()
 const cerrarSesion = async () => {
     try {
         await signOut()
-        router.push('/')
+        router.push({ name: 'login' })
     } catch (error) {
         console.error('Error en cerrar sesión (Header.vue):', error)
     }
@@ -25,9 +25,9 @@ const cerrarSesion = async () => {
 const volverADashboard = () => {
     const ligaId = escuderiaStore.ligaActualId || route.query.liga || null
     if (ligaId) {
-        router.push({ name: '/inicio', query: { liga: ligaId } })
+        router.push({ name: 'inicio', query: { liga: ligaId } })
     } else {
-        router.push({ name: '/ligas' })
+        router.push({ name: 'ligas' })
     }
 
 }
@@ -45,7 +45,7 @@ const volverADashboard = () => {
         <div class="flex items-center gap-3">
             <div class="text-right">
                 <p class="text text-white font-bold uppercase">{{ authStore.usuarioGlobal.nombre }}</p>
-                <p class="text-xs text-white">
+                <p v-if="route.name !== 'ligas'" class="text-xs text-white mt-0.5">
                     Pts: <strong class="text-yellow-500">{{ escuderiaStore.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ escuderiaStore.presupuesto }}M</span>
                 </p>

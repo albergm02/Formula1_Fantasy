@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <Card class="w-full max-w-md rounded !bg-[#15151E] !text-[#FFFFFF]">
+    <Card class="w-full max-w-md !bg-[#15151E] !text-[#FFFFFF] !shadow-lg">
 
       <template #title>
         <div class="flex flex-col items-center gap-4">
@@ -18,7 +18,7 @@
           <div class="flex flex-col gap-1">
             <label for="email" class="font-bold text-[#D9D9D9] text-xs">EMAIL</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
-              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]"/>
+              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
@@ -41,9 +41,9 @@
           <div class="flex flex-col gap-4 mt-4">
             <Button type="submit" label="ENTRAR AL PADDOCK" :loading="loading"
               class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#FFFFFF] hover:!bg-[#3C6E71]" />
-              <Button type="button" label="¿Olvidaste tu contraseña?" text
-                class="w-full !text-[#3C6E71] hover:!text-[#FFFFFF] !bg-transparent !border-none font-bold"
-                @click="router.push('/recuperar')" />
+            <Button type="button" label="¿Olvidaste tu contraseña?" text
+              class="w-full !text-[#3C6E71] hover:!text-[#FFFFFF] !bg-transparent !border-none font-bold"
+              @click="router.push('/recuperar')" />
             <div class="text-center mt-2">
               <span class="text-[#D9D9D9] text-sm">¿No tienes equipo? </span>
               <router-link to="/registro" class="text-[#3C6E71] font-bold !text-sm hover:!text-[#FFFFFF]">
