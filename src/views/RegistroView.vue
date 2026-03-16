@@ -154,7 +154,7 @@ const resolver = zodResolver(
         .string()
         .min(1, 'Nombre requerido')
         .min(3, 'El nombre debe tener al menos 3 caracteres')
-        .max(10, 'El nombre no debe exceder los 10 caracteres'),
+        .max(8, 'El nombre no debe exceder los 8 caracteres'),
       email: z.string().min(1, 'Correo electrónico requerido').email('Correo electrónico inválido'),
       password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
       confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
