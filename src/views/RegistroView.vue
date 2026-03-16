@@ -105,7 +105,7 @@ const crearCuenta = async ({ valid, values }) => {
           <div class="flex flex-col gap-1">
             <label for="password" class="font-bold text-white text-sm">CONTRASEÑA</label>
             <Password inputId="password" name="password" autocomplete="new-password" placeholder="********" toggle-mask
-              :feedback="false" class="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600" fluid />
+              :feedback="false" inputClass="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600" fluid />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
@@ -115,7 +115,7 @@ const crearCuenta = async ({ valid, values }) => {
             <label for="confirmPassword" class="font-bold text-white text-sm">CONFIRMAR CONTRASEÑA</label>
             <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
               placeholder="********" toggle-mask :feedback="false"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600" fluid />
+              inputClass="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600" fluid />
             <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" variant="simple">
               {{ $form.confirmPassword.error.message }}
             </Message>

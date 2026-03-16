@@ -51,7 +51,7 @@ const iniciarSesion = async ({ valid, values }) => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <Card class="w-full max-w-md rounded">
+    <Card class="w-full max-w-md rounded !bg-zinc-800">
 
       <template #title>
         <div class="flex flex-col items-center gap-4">
@@ -79,7 +79,7 @@ const iniciarSesion = async ({ valid, values }) => {
             <label for="password" class="font-bold text-white text-sm">CONTRASEÑA</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
               toggle-mask :feedback="false"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600 transition-colors" fluid />
+              inputClass="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600 transition-colors" fluid />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
