@@ -21,16 +21,16 @@ const cocheSemanal = ref(null)
 const potenciadoresSemanales = ref([])
 
 const generarMercado = () => {
-  // Obtenemos 1 único piloto tier 1 al azar
+  // Obtiene 1 único piloto tier 1 al azar
   const pilotosTier1 = mercadoPilotos.filter(p => p.tier === 1)
   const pilotosBarajados = pilotosTier1.sort(() => 0.5 - Math.random()).slice(0, 1).map(p => ({ ...p, tipo: 'piloto' }))
   pilotoSemanal.value = pilotosBarajados[0]
 
-  // Obtenemos 1 único coche al azar
+  // Obtiene 1 único coche al azar
   const cochesBarajados = mercadoCoches.sort(() => 0.5 - Math.random()).slice(0, 1).map(c => ({ ...c, tipo: 'coche' }))
   cocheSemanal.value = cochesBarajados[0]
 
-  // Obtenemos 4 potenciadores
+  // Obtiene 4 potenciadores
   potenciadoresSemanales.value = mercadoPotenciadores.sort(() => 0.5 - Math.random()).slice(0, 4).map(p => ({ ...p, tipo: 'potenciador' }))
 }
 

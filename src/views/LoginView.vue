@@ -51,13 +51,13 @@ const iniciarSesion = async ({ valid, values }) => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <Card class="w-full max-w-md rounded !bg-zinc-800">
+    <Card class="w-full max-w-md rounded !bg-[#15151E] !text-[#FFFFFF]">
 
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-3xl font-black italic text-red-600">INICIAR SESIÓN</h1>
+            <h1 class="text-2xl font-black text-[#FF1E00]">F1 FANTASY</h1>
           </div>
         </div>
       </template>
@@ -67,19 +67,19 @@ const iniciarSesion = async ({ valid, values }) => {
           @submit="iniciarSesion">
 
           <div class="flex flex-col gap-1">
-            <label for="email" class="font-bold text-white text-sm">EMAIL</label>
-            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
-              class="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600 transition-colors" fluid />
+            <label for="email" class="font-bold text-[#D9D9D9] text-xs">EMAIL</label>
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
+              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]"/>
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="password" class="font-bold text-white text-sm">CONTRASEÑA</label>
+            <label for="password" class="font-bold text-[#D9D9D9] text-xs">CONTRASEÑA</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
               toggle-mask :feedback="false"
-              inputClass="w-full !bg-zinc-700 !text-white !border-zinc-700 focus:!border-red-600 transition-colors" fluid />
+              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
@@ -89,13 +89,15 @@ const iniciarSesion = async ({ valid, values }) => {
             {{ firebaseError }}
           </Message>
 
-          <div class="flex flex-col gap-3 mt-4">
+          <div class="flex flex-col gap-4 mt-4">
             <Button type="submit" label="ENTRAR AL PADDOCK" :loading="loading"
-              class="w-full !bg-red-600 !border-red-600 font-bold !text-white hover:!bg-red-700 hover:!border-red-700 transition-colors shadow-lg" />
-
+              class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#FFFFFF] hover:!bg-[#3C6E71]" />
+              <Button type="button" label="¿Olvidaste tu contraseña?" text
+                class="w-full !text-[#3C6E71] hover:!text-[#FFFFFF] !bg-transparent !border-none font-bold"
+                @click="router.push('/recuperar')" />
             <div class="text-center mt-2">
-              <span class="text-zinc-400 text-sm">¿No tienes equipo? </span>
-              <router-link to="/registro" class="text-red-500 hover:text-red-400 font-bold transition-colors">
+              <span class="text-[#D9D9D9] text-sm">¿No tienes equipo? </span>
+              <router-link to="/registro" class="text-[#3C6E71] font-bold !text-sm hover:!text-[#FFFFFF]">
                 Regístrate aquí
               </router-link>
             </div>
