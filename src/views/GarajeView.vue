@@ -21,9 +21,13 @@ const confirmarVentaCoche = (coche) => {
     icon: 'pi pi-shopping-bag',
     acceptLabel: 'Sí, vender',
     rejectLabel: 'Cancelar',
-    accept() {
-      escuderiaStore.vender(coche)
-      toast.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${Math.floor(coche.precio / 2)}M`, life: 3000 })
+    accept: async () => {
+      const respuesta = await escuderiaStore.vender(coche)
+      if (respuesta && !respuesta.exito) {
+        toast.add({ severity: 'warn', summary: 'Venta denegada', detail: respuesta.mensaje, life: 3000 })
+      } else {
+        toast.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${Math.floor(coche.precio / 2)}M`, life: 3000 })
+      }
     }
   })
 }
@@ -35,20 +39,26 @@ const confirmarDespido = (piloto) => {
     icon: 'pi pi-user-minus',
     acceptLabel: 'Sí, despedir',
     rejectLabel: 'Cancelar',
-    accept() {
-      escuderiaStore.vender(piloto)
-      toast.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${Math.floor(piloto.precio / 2)}M`, life: 3000 })
+    accept: async () => {
+      const respuesta = await escuderiaStore.vender(piloto)
+      if (respuesta && !respuesta.exito) {
+        toast.add({ severity: 'warn', summary: 'Despido denegado', detail: respuesta.mensaje, life: 3000 })
+      } else {
+        toast.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${Math.floor(piloto.precio / 2)}M`, life: 3000 })
+      }
     }
   })
 }
 
-const intentarEquiparPieza = (idInstancia) => {
-  const respuesta = escuderiaStore.togglePotenciador(idInstancia)
-
+const intentarEquiparPieza = async (idInstancia) => {
+  const respuesta = await escuderiaStore.togglePotenciador(idInstancia)
   if (respuesta && !respuesta.exito) {
     toast.add({ severity: 'warn', summary: 'Acción denegada', detail: respuesta.mensaje, life: 3000 })
+  } else {
+    toast.add({ severity: 'success', summary: 'Acción completada', detail: respuesta.mensaje, life: 3000 })
   }
 }
+
 </script>
 
 <template>

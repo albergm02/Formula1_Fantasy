@@ -3,9 +3,9 @@
 
         <router-link :to="{ path: '/inicio', query: { liga: route.query.liga || null } }"
             class="flex flex-col items-center p-2">
-            <i class="pi pi-home text-xl" :class="isActive('/inicio') ? 'text-[#FF1E00]' : 'text-[#808080]'"></i>
+            <i class="pi pi-trophy text-xl" :class="isActive('/inicio') ? 'text-[#FF1E00]' : 'text-[#808080]'"></i>
             <span class="text-[10px] mt-1 font-bold"
-                :class="isActive('/inicio') ? 'text-[#FF1E00]' : 'text-[#808080]'">INICIO</span>
+                :class="isActive('/inicio') ? 'text-[#FF1E00]' : 'text-[#808080]'">LIGAS</span>
         </router-link>
 
         <router-link :to="{ path: '/clasificacion', query: { liga: route.query.liga || null } }"
