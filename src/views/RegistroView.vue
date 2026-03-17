@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
     <MagicRings class="absolute inset-0 -z-30" color="#FFFFFF" colorTwo="#FFFFFF" :ringCount="2" />
-    <Card class="w-full max-w-md rounded !bg-[#15151E]/50 !text-[#FFFFFF]">
+    <Card class="w-full max-w-md rounded !bg-transparent !text-[#FFFFFF]">
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
