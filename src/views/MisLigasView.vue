@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-[#15151E] font-sans pb-10">
+  <div class="h-screen bg-[#15151E] font-sans pb-10 overflow-hidden">
     <Header />
 
-    <div class="p-4 mt-4 max-w-4xl mx-auto">
+    <div class="p-4 mt-4 max-w-4xl mx-auto overflow-hidden">
       <div class="flex flex-col gap-6">
         <section class="grid grid-cols-2 gap-4">
           <Button
@@ -21,10 +21,13 @@
 
         <!-- SECCIÓN DE LIGAS -->
         <section>
-          <div v-if="ligasStore.ligasDetalles.length > 0" class="flex flex-col justify-center w-full">
-             <div class="text-center text-[#D9D9D9] font-bold uppercase tracking-wider"> Ligas disponibles:
-            {{ ligasStore.ligasDetalles.length }}/8
-          </div>
+          <div
+            v-if="ligasStore.ligasDetalles.length > 0"
+            class="flex flex-col justify-center w-full"
+          >
+            <div class="text-center text-[#D9D9D9] font-bold uppercase tracking-wider">
+              Ligas disponibles: {{ ligasStore.ligasDetalles.length }}/8
+            </div>
             <!-- Componente Carrusel sacado de Primevue -->
             <Carousel
               :value="ligasStore.ligasDetalles"
@@ -33,7 +36,6 @@
               orientation="vertical"
               verticalViewPortHeight="200px"
               containerClass="flex items-center w-full"
-              :autoplayInterval="10000"
             >
               <!-- Slots mostrando detalles de las participaciones del usuario en cada liga -->
               <template #item="slotProps">
@@ -51,10 +53,12 @@
                     <div class="flex justify-center gap-4 text-xs text-[#D9D9D9] mx-auto">
                       <span class="flex items-center gap-1">
                         <i class="pi pi-users text-[#3C6E71]"></i>
+                        Participantes:
                         {{ slotProps.data.participantes }}
                       </span>
                       <span class="flex items-center gap-1">
                         <i class="pi pi-key text-[#3C6E71]"></i>
+                        Código:
                         {{ slotProps.data.codigo_invitacion }}
                       </span>
                     </div>
