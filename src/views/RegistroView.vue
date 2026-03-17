@@ -1,11 +1,12 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <Card class="w-full max-w-md rounded !bg-[#15151E] !text-[#FFFFFF]">
+    <MagicRings class="absolute inset-0 -z-30" color="#FFFFFF" colorTwo="#FFFFFF" :ringCount="2" />
+    <Card class="w-full max-w-md rounded !bg-[#15151E]/50 !text-[#FFFFFF]">
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-2xl font-black text-[#FF1E00]">REGÍSTRATE</h1>
+            <h1 class="text-2xl font-black text-[#FFFFFF]">REGÍSTRATE</h1>
           </div>
         </div>
       </template>
@@ -122,6 +123,8 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
+
+import MagicRings from '@/components/MagicRings.vue'
 
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'

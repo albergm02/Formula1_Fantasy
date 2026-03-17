@@ -18,6 +18,7 @@
     "prettier": "^3.8.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",
+    "three": "^0.183.2",
     "vue": "^3.5.29",
     "vue-router": "^5.0.3",
     "zod": "^4.3.6"

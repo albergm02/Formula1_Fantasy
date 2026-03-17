@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <Card class="w-full max-w-md !bg-[#15151E] !text-[#FFFFFF] !shadow-lg">
-
+    <MagicRings class="absolute inset-0 -z-30" color="#FF1E00" colorTwo="#FF1E00" :ringCount="2" />
+    <Card class="w-full max-w-md !bg-[#15151E]/30 !text-[#FFFFFF] !shadow-lg">
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
@@ -62,6 +62,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { signIn } from '@/services/authService'
+
+import MagicRings from '@/components/MagicRings.vue'
 
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
