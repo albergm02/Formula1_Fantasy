@@ -30,6 +30,13 @@ export const useLigasStore = defineStore('ligas', {
       const authStore = useAuthStore()
       const emailUsuario = authStore.usuarioGlobal.emailAuth
 
+      if (authStore.usuarioGlobal.ligasIds && authStore.usuarioGlobal.ligasIds.length >= 7) {
+        return {
+          exito: false,
+          mensaje: 'Solo puedes pertenecer o crear un máximo de 7 ligas.',
+        }
+      }
+
       try {
         const participacionesRef = collection(db, 'participaciones')
         // Busca cuántas participaciones tiene este usuario con el rol de 'admin'
@@ -113,6 +120,14 @@ export const useLigasStore = defineStore('ligas', {
     /* Unirse a una liga existente usando el código de invitación */
     async unirseALiga(codigoInvitacion) {
       const authStore = useAuthStore()
+
+      if (authStore.usuarioGlobal.ligasIds && authStore.usuarioGlobal.ligasIds.length >= 7) {
+        return {
+          exito: false,
+          mensaje: 'Solo puedes pertenecer o crear un máximo de 7 ligas.',
+        }
+      }
+    
       try {
         const codigoMayusculas = codigoInvitacion.toUpperCase()
         const ligasRef = collection(db, 'ligas')
