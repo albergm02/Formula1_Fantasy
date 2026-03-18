@@ -8,6 +8,7 @@ import {
   query,
   where,
   arrayUnion,
+  arrayRemove,
   getDoc,
   deleteDoc,
 } from 'firebase/firestore'

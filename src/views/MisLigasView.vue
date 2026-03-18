@@ -20,10 +20,10 @@
             </div>
             <!-- Componente Carrusel sacado de Primevue -->
             <Carousel :value="ligasStore.ligasDetalles" :numVisible="1" :numScroll="1" orientation="vertical"
-              verticalViewPortHeight="200px" containerClass="flex items-center w-full ">
+              verticalViewPortHeight="150px" containerClass="flex items-center w-full ">
               <!-- Slots mostrando detalles de las participaciones del usuario en cada liga -->
               <template #item="slotProps">
-                <div class="p-6 bg-[#15151E] rounded-2xl border-4 border-[#3C6E71] flex flex-col items-center gap-4">
+                <div class="p-6 bg-[#15151E] rounded-2xl flex flex-col items-center gap-4">
                   <div class="text-center w-full">
                     <h3 class="text-2xl font-black text-[#FF1E00] uppercase mb-2 w-full truncate px-10"
                       :title="slotProps.data.nombre">
@@ -44,8 +44,12 @@
                     </div>
                   </div>
 
-                  <Button label="ENTRAR" class="w-full mt-2 !bg-[#FF1E00] !border-none !text-[#FFFFFF]"
-                    @click="entrarEnLiga(slotProps.data.id)" />
+                  <div class="flex gap-2 w-full">
+                    <Button label="OPCIONES" class="flex-1 !bg-[#3C6E71] !border-none !text-[#FFFFFF]"
+                      @click="abrirOpciones(slotProps.data)" />
+                    <Button label="ENTRAR" class="flex-1 !bg-[#FF1E00] !border-none !text-[#FFFFFF]"
+                      @click="entrarEnLiga(slotProps.data.id)" />
+                  </div>
                 </div>
               </template>
             </Carousel>
@@ -102,6 +106,31 @@
         </div>
       </div>
     </Dialog>
+
+    <!-- DIALOGO OPCIONES DE LIGA -->
+    <Dialog v-model:visible="mostrarDialogoOpciones" modal header="AJUSTES DE LIGA" :pt="{
+      root: { class: '!bg-[#15151E] !border-none mx-4 w-full max-w-sm' },
+      header: { class: '!bg-[#15151E] !rounded' },
+      title: { class: 'font-bold tracking-widest text-[#D9D9D9]' },
+      content: { class: '!bg-[#15151E] pt-4 pb-6' },
+      closeButton: { class: 'hover:!bg-[#D9D9D9] !text-[#D9D9D9]' },
+    }">
+      <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
+
+        <p class="text-center text-[#D9D9D9] text-sm mb-2">
+          ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
+        </p>
+
+        <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
+          class="w-full !bg-yellow-600 !border-none !text-white font-bold hover:!bg-yellow-700"
+          @click="ejecutarAbandonar" :loading="cargandoAccion" />
+
+        <Button v-if="ligaSeleccionada.admin === authStore.usuarioGlobal.emailAuth" label="DESTRUIR CAMPEONATO"
+          icon="pi pi-trash" class="w-full !bg-red-700 !border-none !text-white font-bold hover:!bg-red-800"
+          @click="ejecutarEliminar" :loading="cargandoAccion" />
+
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -109,8 +138,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import { useConfirm } from "primevue/useconfirm";
 
 import { useLigasStore } from '@/stores/storeLigas'
+import { useAuthStore } from '@/stores/storeAuth'
 import Header from '@/components/Header.vue'
 
 import Button from 'primevue/button'
@@ -120,14 +151,24 @@ import Dialog from 'primevue/dialog'
 import Carousel from 'primevue/carousel'
 
 const ligasStore = useLigasStore()
+const authStore = useAuthStore()
 const router = useRouter()
 const toast = useToast()
+const confirm = useConfirm();
 
 const nombreNuevaLiga = ref('')
 const codigoUnion = ref('')
 const cargando = ref(false)
 const mostrarDialogoCrear = ref(false)
 const mostrarDialogoUnirse = ref(false)
+
+const mostrarDialogoOpciones = ref(false)
+const ligaSeleccionada = ref(null)
+const cargandoAccion = ref(false)
+const abrirOpciones = (liga) => {
+  ligaSeleccionada.value = liga
+  mostrarDialogoOpciones.value = true
+}
 
 /* Carga los detalles de las ligas al montar el componente */
 onMounted(async () => {
@@ -144,6 +185,14 @@ const crearLiga = async () => {
       severity: 'warn',
       summary: 'Nombre inválido',
       detail: 'El nombre debe tener al menos 3 caracteres',
+      life: 3000,
+    })
+    return
+  } else if (nombreNuevaLiga.value.trim().length > 15) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Límite alcanzado',
+      detail: 'El nombre no puede exceder los 15 caracteres',
       life: 3000,
     })
     return
@@ -194,4 +243,49 @@ const unirseALiga = async () => {
 const entrarEnLiga = (ligaId) => {
   router.push({ name: 'inicio', query: { liga: ligaId } })
 }
+
+const ejecutarAbandonar = () => {
+  confirm.require({
+    message: `¿Estás seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
+    header: 'CONFIRMACIÓN DE SALIDA',
+    icon: 'pi pi-exclamation-triangle',
+    rejectLabel: 'Cancelar',
+    acceptLabel: 'Abandonar',
+    rejectClass: '!bg-transparent !border-none !text-white',
+    acceptClass: '!bg-yellow-600 !border-none',
+    accept: async () => {
+      // Aquí va tu lógica de antes
+      cargandoAccion.value = true;
+      const resultado = await ligasStore.abandonarLiga(ligaSeleccionada.value.id);
+      cargandoAccion.value = false;
+
+      if (resultado.exito) {
+        toast.add({ severity: 'success', summary: 'Coche fuera de pista', detail: resultado.mensaje, life: 3000 });
+        mostrarDialogoOpciones.value = false;
+      }
+    }
+  });
+};
+
+const ejecutarEliminar = () => {
+  confirm.require({
+    message: '¡ATENCIÓN! Vas a disolver la liga. Todos los participantes serán expulsados y los datos borrados permanentemente.',
+    header: 'BANDERA ROJA: ELIMINAR LIGA',
+    icon: 'pi pi-trash',
+    rejectLabel: 'Abortar',
+    acceptLabel: 'Eliminar para todos',
+    rejectClass: '!bg-transparent !border-none !text-white',
+    acceptClass: '!bg-red-700 !border-none',
+    accept: async () => {
+      cargandoAccion.value = true;
+      const resultado = await ligasStore.eliminarLiga(ligaSeleccionada.value.id);
+      cargandoAccion.value = false;
+
+      if (resultado.exito) {
+        toast.add({ severity: 'success', summary: 'Campeonato finalizado', detail: resultado.mensaje, life: 3000 });
+        mostrarDialogoOpciones.value = false;
+      }
+    }
+  });
+};
 </script>
