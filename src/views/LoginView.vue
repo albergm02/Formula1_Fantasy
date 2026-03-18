@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4 font-sans">
-    <MagicRings class="absolute inset-0 -z-30" color="#FF1E00" colorTwo="#FF1E00" :ringCount="2" />
-    <Card class="w-full max-w-md !text-[#FFFFFF] !bg-transparent !shadow-lg">
+  <div class="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <MagicRings class="absolute inset-0 -z-10" color="#FF1E00" :ringCount="1" />
+    <Card class="w-full max-w-md !bg-transparent">
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-2xl font-black text-[#FF1E00]">F1 FANTASY</h1>
+            <h1 class="text-3xl font-black text-[#FF1E00] uppercase">F1 Fantasy</h1>
           </div>
         </div>
       </template>
@@ -14,21 +14,20 @@
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues" :resolver="resolver"
           @submit="iniciarSesion">
-
           <div class="flex flex-col gap-1">
-            <label for="email" class="font-bold text-[#D9D9D9] text-xs">EMAIL</label>
+            <label for="email" class="font-bold text-[#D9D9D9] text-xs uppercase">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
-              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]" />
+              class="w-full !bg-[#15151E] !text-[#D9D9D9] !border-[#D9D9D9] focus:!border-[#00E5E5]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="password" class="font-bold text-[#D9D9D9] text-xs">CONTRASEÑA</label>
+            <label for="password" class="font-bold text-[#D9D9D9] text-xs uppercase">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
               toggle-mask :feedback="false"
-              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]" />
+              inputClass="w-full !bg-[#15151E] !text-[#D9D9D9] !border-[#D9D9D9] focus:!border-[#00E5E5]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
@@ -38,15 +37,15 @@
             {{ firebaseError }}
           </Message>
 
-          <div class="flex flex-col gap-4 mt-4">
+          <div class="flex flex-col gap-2 mt-4">
             <Button type="submit" label="ENTRAR AL PADDOCK" :loading="loading"
-              class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#FFFFFF] hover:!bg-[#3C6E71]" />
+              class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#D9D9D9]" />
             <Button type="button" label="¿Olvidaste tu contraseña?" text
-              class="w-full !text-[#3C6E71] hover:!text-[#FFFFFF] !bg-transparent !border-none font-bold"
+              class="w-full !text-[#00E5E5] !bg-transparent !border-none font-bold"
               @click="router.push('/recuperar')" />
-            <div class="text-center mt-2">
+            <div class="text-center">
               <span class="text-[#D9D9D9] text-sm">¿No tienes equipo? </span>
-              <router-link to="/registro" class="text-[#3C6E71] font-bold !text-sm hover:!text-[#FFFFFF]">
+              <router-link to="/registro" class="text-[#00E5E5] font-bold !text-sm">
                 Regístrate aquí
               </router-link>
             </div>

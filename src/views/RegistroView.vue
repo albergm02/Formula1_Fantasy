@@ -1,48 +1,27 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4 font-sans">
+  <div class="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden">
     <MagicRings class="absolute inset-0 -z-30" color="#FFFFFF" colorTwo="#FFFFFF" :ringCount="2" />
     <Card class="w-full max-w-md rounded !bg-transparent !text-[#FFFFFF]">
       <template #title>
-        <div class="flex flex-col items-center gap-4">
-          <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
-          <div class="text-center">
-            <h1 class="text-2xl font-black text-[#FFFFFF]">REGÍSTRATE</h1>
-          </div>
+        <div class="text-center">
+          <h1 class="text-2xl font-black text-[#FF1E00] uppercase">Regístrate</h1>
         </div>
       </template>
       <template #content>
-        <Form
-          v-slot="$form"
-          class="flex flex-col gap-4 mt-4"
-          :initial-values="initialValues"
-          :resolver="resolver"
-          @submit="crearCuenta"
-        >
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues" :resolver="resolver"
+          @submit="crearCuenta">
           <div class="flex flex-col gap-1">
-            <label for="username" class="font-bold text-[#D9D9D9] text-xs">NOMBRE DE USUARIO</label>
-            <InputText
-              id="username"
-              type="text"
-              name="username"
-              placeholder="Tu nombre de usuario"
-              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]"
-              fluid
-            />
+            <label for="username" class="font-bold text-[#D9D9D9] text-xs uppercase">Nombre de usuario</label>
+            <InputText id="username" type="text" name="username" placeholder="Tu nombre de usuario"
+              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple">
               {{ $form.username.error.message }}
             </Message>
           </div>
           <div class="flex flex-col gap-1">
-            <label for="email" class="font-bold text-[#D9D9D9] text-xs">EMAIL</label>
-            <InputText
-              id="email"
-              type="email"
-              name="email"
-              autocomplete="email"
-              placeholder="piloto@escuderia.com"
-              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]"
-              fluid
-            />
+            <label for="email" class="font-bold text-[#D9D9D9] text-xs uppercase">Email</label>
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
+              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
@@ -50,16 +29,9 @@
 
           <div class="flex flex-col gap-1">
             <label for="password" class="font-bold text-[#D9D9D9] text-xs">CONTRASEÑA</label>
-            <Password
-              inputId="password"
-              name="password"
-              autocomplete="new-password"
-              placeholder="********"
-              toggle-mask
+            <Password inputId="password" name="password" autocomplete="new-password" placeholder="********" toggle-mask
               :feedback="false"
-              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]"
-              fluid
-            />
+              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
@@ -67,22 +39,10 @@
 
           <div class="flex flex-col gap-1">
             <label for="confirmPassword" class="font-bold text-[#D9D9D9] text-xs">CONFIRMAR CONTRASEÑA</label>
-            <Password
-              inputId="confirmPassword"
-              name="confirmPassword"
-              autocomplete="new-password"
-              placeholder="********"
-              toggle-mask
-              :feedback="false"
-              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#3C6E71]"
-              fluid
-            />
-            <Message
-              v-if="$form.confirmPassword?.invalid"
-              severity="error"
-              size="small"
-              variant="simple"
-            >
+            <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
+              placeholder="********" toggle-mask :feedback="false"
+              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
+            <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" variant="simple">
               {{ $form.confirmPassword.error.message }}
             </Message>
           </div>
@@ -92,21 +52,13 @@
           </Message>
 
           <div class="flex flex-col gap-4 mt-4">
-            <Button
-              type="submit"
-              label="CREAR CUENTA"
-              :loading="loading"
-              class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#FFFFFF] hover:!bg-[#3C6E71]"
-            />
-            <Button
-              type="button"
-              label="VOLVER"
-              @click="router.push('/')"
-              class="w-full !bg-transparent !border-none font-bold !text-[#3C6E71] hover:!text-[#FFFFFF] transition-colors"
-            />
+            <Button type="submit" label="CREAR CUENTA" :loading="loading"
+              class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#FFFFFF] hover:!bg-[#D01800]" />
+            <Button type="button" label="VOLVER" @click="router.push('/')"
+              class="w-full !bg-transparent !border-none font-bold !text-[#00E5E5] hover:!text-[#FFFFFF] transition-colors" />
             <div class="text-center mt-2">
               <span class="text-[#D9D9D9] text-sm">¿Ya tienes equipo? </span>
-              <router-link to="/" class="text-[#3C6E71] font-bold !text-sm hover:!text-[#FFFFFF]">
+              <router-link to="/" class="text-[#00E5E5] font-bold !text-sm hover:!text-[#FFFFFF]">
                 Inicia sesión aquí
               </router-link>
             </div>
