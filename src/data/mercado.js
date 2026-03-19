@@ -1,93 +1,272 @@
+// src/data/mercado.js
 // prettier-ignore
+// src/data/mercado.js
+
 export const mercadoPilotos = [
-  { id: 'alb_q1', nombre: 'Albon', equipo: 'Williams', tier: 1, precio: 7.5, puntos: 80, imagen: '/Pilotos/albon.png' },
-  { id: 'alb_q2', nombre: 'Albon Estrella', equipo: 'Williams', tier: 2, precio: 10.0, puntos: 100, imagen: '/Pilotos/albon.png' },
-  { id: 'alb_q3', nombre: 'Albon Campeón', equipo: 'Williams', tier: 3, precio: 12.5, puntos: 120, imagen: '/Pilotos/albon.png' },
+  // --- MCLAREN (Los Campeones) ---
+  { 
+    id: 'norris_t1', numero: 1, nombre: 'Lando Norris', equipo: 'McLaren', tier: 1, precio: 26.0, 
+    imagen: '/Pilotos/norris.png',
+    habilidad_1: { nombre: 'Ritmo Papaya', puntos: 6, descripcion: 'Registra 5 o más vueltas con el Sector 2 en Púrpura absoluto.' }
+  },
+  { 
+    id: 'norris_t2', numero: 1, nombre: 'Lando Norris (Pro)', equipo: 'McLaren', tier: 2, precio: 36.0, 
+    imagen: '/Pilotos/norris.png',
+    habilidad_1: { nombre: 'Ritmo Papaya', puntos: 6, descripcion: 'Registra 5 o más vueltas con el Sector 2 en Púrpura absoluto.' },
+    habilidad_2: { nombre: 'Tiroteo Final', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Su vuelta más rápida ocurre en las últimas 5 vueltas.' }
+  },
+  { 
+    id: 'piastri_t1', numero: 81, nombre: 'Oscar Piastri', equipo: 'McLaren', tier: 1, precio: 24.0, 
+    imagen: '/Pilotos/piastri.png',
+    habilidad_1: { nombre: 'Sangre Fría', puntos: 6, descripcion: 'No pierde posición durante su outlap (vuelta de salida de boxes).' }
+  },
+  { 
+    id: 'piastri_t2', numero: 81, nombre: 'Oscar Piastri (Pro)', equipo: 'McLaren', tier: 2, precio: 34.0, 
+    imagen: '/Pilotos/piastri.png',
+    habilidad_1: { nombre: 'Sangre Fría', puntos: 6, descripcion: 'No pierde posición durante su outlap (vuelta de salida de boxes).' },
+    habilidad_2: { nombre: 'Cazador de Aire', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Su ritmo mejora al estar a más de 2s del coche de delante.' }
+  },
 
-  { id: 'alo_q1', nombre: 'Alonso', equipo: 'Aston Martin', tier: 1, precio: 9.0, puntos: 90, imagen: '/Pilotos/alonso.png' },
-  { id: 'alo_q2', nombre: 'Alonso Estrella', equipo: 'Aston Martin', tier: 2, precio: 12.0, puntos: 120, imagen: '/Pilotos/alonso.png' },
-  { id: 'alo_q3', nombre: 'Alonso Campeón', equipo: 'Aston Martin', tier: 3, precio: 15.0, puntos: 150, imagen: '/Pilotos/alonso.png' },
+  // --- RED BULL RACING ---
+  { 
+    id: 'verstappen_t1', numero: 3, nombre: 'Max Verstappen', equipo: 'Red Bull', tier: 1, precio: 25.0, 
+    imagen: '/Pilotos/verstappen.png',
+    habilidad_1: { nombre: 'Maximizar Daños', puntos: 6, descripcion: 'Termina en el podio (Top 3) sin marcar Vuelta Rápida.' }
+  },
+  { 
+    id: 'verstappen_t2', numero: 3, nombre: 'Max Verstappen (Pro)', equipo: 'Red Bull', tier: 2, precio: 35.0, 
+    imagen: '/Pilotos/verstappen.png',
+    habilidad_1: { nombre: 'Maximizar Daños', puntos: 6, descripcion: 'Termina en el podio (Top 3) sin marcar Vuelta Rápida.' },
+    habilidad_2: { nombre: 'Defensa Numantina', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Pasa 3 vueltas seguidas con rival en DRS sin ceder posición.' }
+  },
+  { 
+    id: 'hadjar_t1', numero: 6, nombre: 'Isack Hadjar', equipo: 'Red Bull', tier: 1, precio: 15.0, 
+    imagen: '/Pilotos/hadjar.png',
+    habilidad_1: { nombre: 'Reflejos', puntos: 6, descripcion: 'Su Sector 1 en la Vuelta 1 está dentro del Top 5 global de la carrera.' }
+  },
+  { 
+    id: 'hadjar_t2', numero: 6, nombre: 'Isack Hadjar (Pro)', equipo: 'Red Bull', tier: 2, precio: 25.0, 
+    imagen: '/Pilotos/hadjar.png',
+    habilidad_1: { nombre: 'Reflejos', puntos: 6, descripcion: 'Su Sector 1 en la Vuelta 1 está dentro del Top 5 global de la carrera.' },
+    habilidad_2: { nombre: 'Protector', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Termina la carrera en el Top 6.' }
+  },
 
-  { id: 'ant_q1', nombre: 'Antonelli', equipo: 'Mercedes', tier: 1, precio: 8.0, puntos: 85, imagen: '/Pilotos/antonelli.png' },
-  { id: 'ant_q2', nombre: 'Antonelli Estrella', equipo: 'Mercedes', tier: 2, precio: 10.5, puntos: 105, imagen: '/Pilotos/antonelli.png' },
-  { id: 'ant_q3', nombre: 'Antonelli Campeón', equipo: 'Mercedes', tier: 3, precio: 13.0, puntos: 130, imagen: '/Pilotos/antonelli.png' },
+  // --- FERRARI ---
+  { 
+    id: 'leclerc_t1', numero: 16, nombre: 'Charles Leclerc', equipo: 'Ferrari', tier: 1, precio: 24.0, 
+    imagen: '/Pilotos/leclerc.png',
+    habilidad_1: { nombre: 'Príncipe de la Pole', puntos: 6, descripcion: 'Sale 1º o 2º en la parrilla.' }
+  },
+  { 
+    id: 'leclerc_t2', numero: 16, nombre: 'Charles Leclerc (Pro)', equipo: 'Ferrari', tier: 2, precio: 34.0, 
+    imagen: '/Pilotos/leclerc.png',
+    habilidad_1: { nombre: 'Príncipe de la Pole', puntos: 6, descripcion: 'Sale 1º o 2º en la parrilla.' },
+    habilidad_2: { nombre: 'Susurro de Gomas', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Su stint con Blandos dura más que la media.' }
+  },
+  { 
+    id: 'hamilton_t1', numero: 44, nombre: 'Lewis Hamilton', equipo: 'Ferrari', tier: 1, precio: 23.0, 
+    imagen: '/Pilotos/hamilton.png',
+    habilidad_1: { nombre: 'Sunday Rey', puntos: 6, descripcion: 'Gana 3 o más posiciones respecto a su salida.' }
+  },
+  { 
+    id: 'hamilton_t2', numero: 44, nombre: 'Lewis Hamilton (Pro)', equipo: 'Ferrari', tier: 2, precio: 33.0, 
+    imagen: '/Pilotos/hamilton.png',
+    habilidad_1: { nombre: 'Sunday Rey', puntos: 6, descripcion: 'Gana 3 o más posiciones respecto a su salida.' },
+    habilidad_2: { nombre: 'Hammer Time', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): La vuelta promedio en su último stint es Top 3.' }
+  },
 
-  { id: 'bea_q1', nombre: 'Bearman', equipo: 'Haas', tier: 1, precio: 8.5, puntos: 90, imagen: '/Pilotos/bearman.png' },
-  { id: 'bea_q2', nombre: 'Bearman Estrella', equipo: 'Haas', tier: 2, precio: 11.0, puntos: 110, imagen: '/Pilotos/bearman.png' },
-  { id: 'bea_q3', nombre: 'Bearman Campeón', equipo: 'Haas', tier: 3, precio: 14.0, puntos: 140, imagen: '/Pilotos/bearman.png' },
+  // --- MERCEDES ---
+  { 
+    id: 'russell_t1', numero: 63, nombre: 'George Russell', equipo: 'Mercedes', tier: 1, precio: 22.0, 
+    imagen: '/Pilotos/russell.png',
+    habilidad_1: { nombre: 'Mr. Saturday', puntos: 6, descripcion: 'Sale en el Top 4 de la parrilla.' }
+  },
+  { 
+    id: 'russell_t2', numero: 63, nombre: 'George Russell (Pro)', equipo: 'Mercedes', tier: 2, precio: 32.0, 
+    imagen: '/Pilotos/russell.png',
+    habilidad_1: { nombre: 'Mr. Saturday', puntos: 6, descripcion: 'Sale en el Top 4 de la parrilla.' },
+    habilidad_2: { nombre: 'Carrera Limpia', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Termina Top 6 y genera 0 Track Limits.' }
+  },
+  { 
+    id: 'antonelli_t1', numero: 12, nombre: 'Kimi Antonelli', equipo: 'Mercedes', tier: 1, precio: 20.0, 
+    imagen: '/Pilotos/antonelli.png',
+    habilidad_1: { nombre: 'Talento Bruto', puntos: 6, descripcion: 'Su velocidad punta absoluta (Speed Trap) supera a la de su compañero.' }
+  },
+  { 
+    id: 'antonelli_t2', numero: 12, nombre: 'Kimi Antonelli (Pro)', equipo: 'Mercedes', tier: 2, precio: 30.0, 
+    imagen: '/Pilotos/antonelli.png',
+    habilidad_1: { nombre: 'Talento Bruto', puntos: 6, descripcion: 'Su velocidad punta absoluta (Speed Trap) supera a la de su compañero.' },
+    habilidad_2: { nombre: 'Relevo Generacional', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Puntúa y cruza la meta por delante de su compañero.' }
+  },
 
-  { id: 'bor_q1', nombre: 'Bortoleto', equipo: 'Audi', tier: 1, precio: 8.2, puntos: 82, imagen: '/Pilotos/bortoleto.png' },
-  { id: 'bor_q2', nombre: 'Bortoleto Estrella', equipo: 'Audi', tier: 2, precio: 10.8, puntos: 108, imagen: '/Pilotos/bortoleto.png' },
-  { id: 'bor_q3', nombre: 'Bortoleto Campeón', equipo: 'Audi', tier: 3, precio: 13.5, puntos: 135, imagen: '/Pilotos/bortoleto.png' },
+  // --- ASTON MARTIN ---
+  { 
+    id: 'alonso_t1', numero: 14, nombre: 'Fernando Alonso', equipo: 'Aston Martin', tier: 1, precio: 19.0, 
+    imagen: '/Pilotos/alonso.png',
+    habilidad_1: { nombre: 'Salida Mágica', puntos: 6, descripcion: 'Gana 2 o más posiciones en la primera vuelta.' }
+  },
+  { 
+    id: 'alonso_t2', numero: 14, nombre: 'Fernando Alonso (Pro)', equipo: 'Aston Martin', tier: 2, precio: 29.0, 
+    imagen: '/Pilotos/alonso.png',
+    habilidad_1: { nombre: 'Salida Mágica', puntos: 6, descripcion: 'Gana 2 o más posiciones en la primera vuelta.' },
+    habilidad_2: { nombre: 'Estratega Suicida', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Puntúa habiendo iniciado con el neumático Duro.' }
+  },
+  { 
+    id: 'stroll_t1', numero: 18, nombre: 'Lance Stroll', equipo: 'Aston Martin', tier: 1, precio: 13.0, 
+    imagen: '/Pilotos/stroll.png',
+    habilidad_1: { nombre: 'Arranque Relámpago', puntos: 6, descripcion: 'Gana 3 posiciones en las primeras 2 vueltas.' }
+  },
+  { 
+    id: 'stroll_t2', numero: 18, nombre: 'Lance Stroll (Pro)', equipo: 'Aston Martin', tier: 2, precio: 23.0, 
+    imagen: '/Pilotos/stroll.png',
+    habilidad_1: { nombre: 'Arranque Relámpago', puntos: 6, descripcion: 'Gana 3 posiciones en las primeras 2 vueltas.' },
+    habilidad_2: { nombre: 'Invisible', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Completa el GP sin penalizaciones.' }
+  },
 
-  { id: 'bot_q1', nombre: 'Bottas', equipo: 'Cadillac', tier: 1, precio: 7.8, puntos: 78, imagen: '/Pilotos/bottas.png' },
-  { id: 'bot_q2', nombre: 'Bottas Estrella', equipo: 'Cadillac', tier: 2, precio: 10.3, puntos: 103, imagen: '/Pilotos/bottas.png' },
-  { id: 'bot_q3', nombre: 'Bottas Campeón', equipo: 'Cadillac', tier: 3, precio: 12.8, puntos: 128, imagen: '/Pilotos/bottas.png' },
+  // --- WILLIAMS ---
+  { 
+    id: 'sainz_t1', numero: 55, nombre: 'Carlos Sainz', equipo: 'Williams', tier: 1, precio: 17.0, 
+    imagen: '/Pilotos/sainz.png',
+    habilidad_1: { nombre: 'Smooth Operator', puntos: 6, descripcion: 'Su stint con Medios es el más largo de los que acaban en el Top 10.' }
+  },
+  { 
+    id: 'sainz_t2', numero: 55, nombre: 'Carlos Sainz (Pro)', equipo: 'Williams', tier: 2, precio: 27.0, 
+    imagen: '/Pilotos/sainz.png',
+    habilidad_1: { nombre: 'Smooth Operator', puntos: 6, descripcion: 'Su stint con Medios es el más largo de los que acaban en el Top 10.' },
+    habilidad_2: { nombre: 'Ingeniero en Pista', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Puntúa haciendo 1 parada menos que el promedio del Top 10.' }
+  },
+  { 
+    id: 'albon_t1', numero: 23, nombre: 'Alexander Albon', equipo: 'Williams', tier: 1, precio: 15.0, 
+    imagen: '/Pilotos/albon.png',
+    habilidad_1: { nombre: 'Muro Tailandés', puntos: 6, descripcion: 'Su velocidad punta máxima está dentro del Top 5 de la sesión.' }
+  },
+  { 
+    id: 'albon_t2', numero: 23, nombre: 'Alexander Albon (Pro)', equipo: 'Williams', tier: 2, precio: 25.0, 
+    imagen: '/Pilotos/albon.png',
+    habilidad_1: { nombre: 'Muro Tailandés', puntos: 6, descripcion: 'Su velocidad punta máxima está dentro del Top 5 de la sesión.' },
+    habilidad_2: { nombre: 'Albono de Gomas', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Logra puntuar completando más de 30 vueltas con un mismo neumático.' }
+  },
 
-  { id: 'col_q1', nombre: 'Colapinto', equipo: 'Alpine', tier: 1, precio: 8.8, puntos: 88, imagen: '/Pilotos/colapinto.png' },
-  { id: 'col_q2', nombre: 'Colapinto Estrella', equipo: 'Alpine', tier: 2, precio: 11.5, puntos: 115, imagen: '/Pilotos/colapinto.png' },
-  { id: 'col_q3', nombre: 'Colapinto Campeón', equipo: 'Alpine', tier: 3, precio: 14.5, puntos: 145, imagen: '/Pilotos/colapinto.png' },
+  // --- HAAS ---
+  { 
+    id: 'ocon_t1', numero: 31, nombre: 'Esteban Ocon', equipo: 'Haas', tier: 1, precio: 14.0, 
+    imagen: '/Pilotos/ocon.png',
+    habilidad_1: { nombre: 'A Cuchillo', puntos: 6, descripcion: 'Marca el Sector 1 absoluto más rápido de la carrera.' }
+  },
+  { 
+    id: 'ocon_t2', numero: 31, nombre: 'Esteban Ocon (Pro)', equipo: 'Haas', tier: 2, precio: 24.0, 
+    imagen: '/Pilotos/ocon.png',
+    habilidad_1: { nombre: 'A Cuchillo', puntos: 6, descripcion: 'Marca el Sector 1 absoluto más rápido de la carrera.' },
+    habilidad_2: { nombre: 'Defensa Numantina', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Puntúa sin haber perdido ni una sola posición respecto a su salida.' }
+  },
+  { 
+    id: 'bearman_t1', numero: 87, nombre: 'Oliver Bearman', equipo: 'Haas', tier: 1, precio: 13.0, 
+    imagen: '/Pilotos/bearman.png',
+    habilidad_1: { nombre: 'Progresión', puntos: 6, descripcion: 'Su vuelta personal más rápida se registra en el último 20% de la carrera.' }
+  },
+  { 
+    id: 'bearman_t2', numero: 87, nombre: 'Oliver Bearman (Pro)', equipo: 'Haas', tier: 2, precio: 23.0, 
+    imagen: '/Pilotos/bearman.png',
+    habilidad_1: { nombre: 'Progresión', puntos: 6, descripcion: 'Su vuelta personal más rápida se registra en el último 20% de la carrera.' },
+    habilidad_2: { nombre: 'Cabeza Fría', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Completa la carrera con 1 parada y sin penalizaciones.' }
+  },
 
-  { id: 'gas_q1', nombre: 'Gasly', equipo: 'Alpine', tier: 1, precio: 8.5, puntos: 85, imagen: '/Pilotos/gasly.png' },
-  { id: 'gas_q2', nombre: 'Gasly Estrella', equipo: 'Alpine', tier: 2, precio: 11.0, puntos: 110, imagen: '/Pilotos/gasly.png' },
-  { id: 'gas_q3', nombre: 'Gasly Campeón', equipo: 'Alpine', tier: 3, precio: 14.0, puntos: 140, imagen: '/Pilotos/gasly.png' },
+  // --- AUDI ---
+  { 
+    id: 'hulkenberg_t1', numero: 27, nombre: 'Nico Hülkenberg', equipo: 'Audi', tier: 1, precio: 13.0, 
+    imagen: '/Pilotos/hulkenberg.png',
+    habilidad_1: { nombre: 'Qualy Master', puntos: 6, descripcion: 'Clasifica en el Top 8 de la parrilla de salida.' }
+  },
+  { 
+    id: 'hulkenberg_t2', numero: 27, nombre: 'Nico Hülkenberg (Pro)', equipo: 'Audi', tier: 2, precio: 23.0, 
+    imagen: '/Pilotos/hulkenberg.png',
+    habilidad_1: { nombre: 'Qualy Master', puntos: 6, descripcion: 'Clasifica en el Top 8 de la parrilla de salida.' },
+    habilidad_2: { nombre: 'Sin Maldición', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Consigue finalizar la carrera dentro del Top 6.' }
+  },
+  { 
+    id: 'bortoleto_t1', numero: 5, nombre: 'Gabriel Bortoleto', equipo: 'Audi', tier: 1, precio: 12.0, 
+    imagen: '/Pilotos/bortoleto.png',
+    habilidad_1: { nombre: 'Estabilidad', puntos: 6, descripcion: 'Su parada dura menos de 2.6s y no pierde posición en la salida.' }
+  },
+  { 
+    id: 'bortoleto_t2', numero: 5, nombre: 'Gabriel Bortoleto (Pro)', equipo: 'Audi', tier: 2, precio: 22.0, 
+    imagen: '/Pilotos/bortoleto.png',
+    habilidad_1: { nombre: 'Estabilidad', puntos: 6, descripcion: 'Su parada dura menos de 2.6s y no pierde posición en la salida.' },
+    habilidad_2: { nombre: 'Reloj Suizo', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): La diferencia entre sus 5 mejores vueltas es inferior a 0.3s.' }
+  },
 
-  { id: 'had_q1', nombre: 'Hadjar', equipo: 'Red Bull', tier: 1, precio: 8.0, puntos: 80, imagen: '/Pilotos/hadjar.png' },
-  { id: 'had_q2', nombre: 'Hadjar Estrella', equipo: 'Red Bull', tier: 2, precio: 10.5, puntos: 105, imagen: '/Pilotos/hadjar.png' },
-  { id: 'had_q3', nombre: 'Hadjar Campeón', equipo: 'Red Bull', tier: 3, precio: 13.0, puntos: 130, imagen: '/Pilotos/hadjar.png' },
+  // --- ALPINE ---
+  { 
+    id: 'gasly_t1', numero: 10, nombre: 'Pierre Gasly', equipo: 'Alpine', tier: 1, precio: 13.0, 
+    imagen: '/Pilotos/gasly.png',
+    habilidad_1: { nombre: 'Pescador', puntos: 6, descripcion: 'Gana posición en las dos vueltas tras apagarse el Safety Car/VSC.' }
+  },
+  { 
+    id: 'gasly_t2', numero: 10, nombre: 'Pierre Gasly (Pro)', equipo: 'Alpine', tier: 2, precio: 23.0, 
+    imagen: '/Pilotos/gasly.png',
+    habilidad_1: { nombre: 'Pescador', puntos: 6, descripcion: 'Gana posición en las dos vueltas tras apagarse el Safety Car/VSC.' },
+    habilidad_2: { nombre: 'Empuje Final', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Mejora su posición en las últimas 3 vueltas.' }
+  },
+  { 
+    id: 'colapinto_t1', numero: 43, nombre: 'Franco Colapinto', equipo: 'Alpine', tier: 1, precio: 14.0, 
+    imagen: '/Pilotos/colapinto.png',
+    habilidad_1: { nombre: 'Garra Argentina', puntos: 6, descripcion: 'Gana posición en la vuelta tras su parada en boxes (Undercut).' }
+  },
+  { 
+    id: 'colapinto_t2', numero: 43, nombre: 'Franco Colapinto (Pro)', equipo: 'Alpine', tier: 2, precio: 24.0, 
+    imagen: '/Pilotos/colapinto.png',
+    habilidad_1: { nombre: 'Garra Argentina', puntos: 6, descripcion: 'Gana posición en la vuelta tras su parada en boxes (Undercut).' },
+    habilidad_2: { nombre: 'Al Límite', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Cruza la meta a menos de 0.8s del coche de delante.' }
+  },
 
-  { id: 'ham_q1', nombre: 'Hamilton', equipo: 'Ferrari', tier: 1, precio: 9.0, puntos: 90, imagen: '/Pilotos/hamilton.png' },
-  { id: 'ham_q2', nombre: 'Hamilton Estrella', equipo: 'Ferrari', tier: 2, precio: 12.0, puntos: 120, imagen: '/Pilotos/hamilton.png' },
-  { id: 'ham_q3', nombre: 'Hamilton Campeón', equipo: 'Ferrari', tier: 3, precio: 15.0, puntos: 150, imagen: '/Pilotos/hamilton.png' },
+  // --- RACING BULLS ---
+  { 
+    id: 'lawson_t1', numero: 30, nombre: 'Liam Lawson', equipo: 'Racing Bulls', tier: 1, precio: 12.0, 
+    imagen: '/Pilotos/lawson.png',
+    habilidad_1: { nombre: 'Ataque Púrpura', puntos: 6, descripcion: 'Marca al menos un sector púrpura absoluto en la carrera.' }
+  },
+  { 
+    id: 'lawson_t2', numero: 30, nombre: 'Liam Lawson (Pro)', equipo: 'Racing Bulls', tier: 2, precio: 22.0, 
+    imagen: '/Pilotos/lawson.png',
+    habilidad_1: { nombre: 'Ataque Púrpura', puntos: 6, descripcion: 'Marca al menos un sector púrpura absoluto en la carrera.' },
+    habilidad_2: { nombre: 'Sin Miedo', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Termina por delante de un Ferrari, McLaren o Mercedes.' }
+  },
+  { 
+    id: 'lindblad_t1', numero: 41, nombre: 'Arvid Lindblad', equipo: 'Racing Bulls', tier: 1, precio: 11.0, 
+    imagen: '/Pilotos/lindblad.png',
+    habilidad_1: { nombre: 'Sangre Nueva', puntos: 6, descripcion: 'Gana 3 o más posiciones en carrera.' }
+  },
+  { 
+    id: 'lindblad_t2', numero: 41, nombre: 'Arvid Lindblad (Pro)', equipo: 'Racing Bulls', tier: 2, precio: 21.0, 
+    imagen: '/Pilotos/lindblad.png',
+    habilidad_1: { nombre: 'Sangre Nueva', puntos: 6, descripcion: 'Gana 3 o más posiciones en carrera.' },
+    habilidad_2: { nombre: 'Sábado Mágico', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Consigue clasificar en la Q3 el sábado.' }
+  },
 
-  { id: 'hul_q1', nombre: 'Hulkenberg', equipo: 'Audi', tier: 1, precio: 8.5, puntos: 85, imagen: '/Pilotos/hulkenberg.png' },
-  { id: 'hul_q2', nombre: 'Hulkenberg Estrella', equipo: 'Audi', tier: 2, precio: 11.0, puntos: 110, imagen: '/Pilotos/hulkenberg.png' },
-  { id: 'hul_q3', nombre: 'Hulkenberg Campeón', equipo: 'Audi', tier: 3, precio: 14.0, puntos: 140, imagen: '/Pilotos/hulkenberg.png' },
-
-  { id: 'law_q1', nombre: 'Lawson', equipo: 'Racing Bulls', tier: 1, precio: 8.0, puntos: 80, imagen: '/Pilotos/lawson.png' },
-  { id: 'law_q2', nombre: 'Lawson Estrella', equipo: 'Racing Bulls', tier: 2, precio: 10.5, puntos: 105, imagen: '/Pilotos/lawson.png' },
-  { id: 'law_q3', nombre: 'Lawson Campeón', equipo: 'Racing Bulls', tier: 3, precio: 13.0, puntos: 130, imagen: '/Pilotos/lawson.png' },
-
-  { id: 'lec_q1', nombre: 'Leclerc', equipo: 'Ferrari', tier: 1, precio: 9.5, puntos: 95, imagen: '/Pilotos/leclerc.png' },
-  { id: 'lec_q2', nombre: 'Leclerc Estrella', equipo: 'Ferrari', tier: 2, precio: 13.0, puntos: 130, imagen: '/Pilotos/leclerc.png' },
-  { id: 'lec_q3', nombre: 'Leclerc Campeón', equipo: 'Ferrari', tier: 3, precio: 16.5, puntos: 165, imagen: '/Pilotos/leclerc.png' },
-
-  { id: 'lindblad_q1', nombre: 'Lindblad', equipo: 'Racing Bulls', tier: 1, precio: 8.2, puntos: 82, imagen: '/Pilotos/lindblad.png' },
-  { id: 'lindblad_q2', nombre: 'Lindblad Estrella', equipo: 'Racing Bulls', tier: 2, precio: 10.8, puntos: 108, imagen: '/Pilotos/lindblad.png' },
-  { id: 'lindblad_q3', nombre: 'Lindblad Campeón', equipo: 'Racing Bulls', tier: 3, precio: 13.5, puntos: 135, imagen: '/Pilotos/lindblad.png' },
-
-  { id: 'nor_q1', nombre: 'Norris', equipo: 'McLaren', tier: 1, precio: 9.0, puntos: 90, imagen: '/Pilotos/norris.png' },
-  { id: 'nor_q2', nombre: 'Norris Estrella', equipo: 'McLaren', tier: 2, precio: 12.0, puntos: 120, imagen: '/Pilotos/norris.png' },
-  { id: 'nor_q3', nombre: 'Norris Campeón', equipo: 'McLaren', tier: 3, precio: 15.0, puntos: 150, imagen: '/Pilotos/norris.png' },
-
-  { id: 'oco_q1', nombre: 'Ocon', equipo: 'Alpine', tier: 1, precio: 8.5, puntos: 85, imagen: '/Pilotos/ocon.png' },
-  { id: 'oco_q2', nombre: 'Ocon Estrella', equipo: 'Alpine', tier: 2, precio: 11.0, puntos: 110, imagen: '/Pilotos/ocon.png' },
-  { id: 'oco_q3', nombre: 'Ocon Campeón', equipo: 'Alpine', tier: 3, precio: 14.0, puntos: 140, imagen: '/Pilotos/ocon.png' },
-
-  { id: 'per_q1', nombre: 'Perez', equipo: 'Cadillac', tier: 1, precio: 9.0, puntos: 90, imagen: '/Pilotos/perez.png' },
-  { id: 'per_q2', nombre: 'Perez Estrella', equipo: 'Cadillac', tier: 2, precio: 12.0, puntos: 120, imagen: '/Pilotos/perez.png' },
-  { id: 'per_q3', nombre: 'Perez Campeón', equipo: 'Cadillac', tier: 3, precio: 15.0, puntos: 150, imagen: '/Pilotos/perez.png' },
-
-  { id: 'pia_q1', nombre: 'Piastri', equipo: 'McLaren', tier: 1, precio: 8.8, puntos: 88, imagen: '/Pilotos/piastri.png' },
-  { id: 'pia_q2', nombre: 'Piastri Estrella', equipo: 'McLaren', tier: 2, precio: 11.5, puntos: 115, imagen: '/Pilotos/piastri.png' },
-  { id: 'pia_q3', nombre: 'Piastri Campeón', equipo: 'McLaren', tier: 3, precio: 14.5, puntos: 145, imagen: '/Pilotos/piastri.png' },
-
-  { id: 'rus_q1', nombre: 'Russell', equipo: 'Mercedes', tier: 1, precio: 9.5, puntos: 95, imagen: '/Pilotos/russell.png' },
-  { id: 'rus_q2', nombre: 'Russell Estrella', equipo: 'Mercedes', tier: 2, precio: 13.0, puntos: 130, imagen: '/Pilotos/russell.png' },
-  { id: 'rus_q3', nombre: 'Russell Campeón', equipo: 'Mercedes', tier: 3, precio: 16.5, puntos: 165, imagen: '/Pilotos/russell.png' },
-
-  { id: 'sai_q1', nombre: 'Sainz', equipo: 'Williams', tier: 1, precio: 9.0, puntos: 90, imagen: '/Pilotos/sainz.png' },
-  { id: 'sai_q2', nombre: 'Sainz Estrella', equipo: 'Williams', tier: 2, precio: 12.0, puntos: 120, imagen: '/Pilotos/sainz.png' },
-  { id: 'sai_q3', nombre: 'Sainz Campeón', equipo: 'Williams', tier: 3, precio: 15.0, puntos: 150, imagen: '/Pilotos/sainz.png' },
-
-  { id: 'str_q1', nombre: 'Stroll', equipo: 'Aston Martin', tier: 1, precio: 8.5, puntos: 85, imagen: '/Pilotos/stroll.png' },
-  { id: 'str_q2', nombre: 'Stroll Estrella', equipo: 'Aston Martin', tier: 2, precio: 11.0, puntos: 110, imagen: '/Pilotos/stroll.png' },
-  { id: 'str_q3', nombre: 'Stroll Campeón', equipo: 'Aston Martin', tier: 3, precio: 14.0, puntos: 140, imagen: '/Pilotos/stroll.png' },
-
-  { id: 'ver_q1', nombre: 'Verstappen', equipo: 'Red Bull', tier: 1, precio: 10.0, puntos: 100, imagen: '/Pilotos/verstappen.png' },
-  { id: 'ver_q2', nombre: 'Verstappen Estrella', equipo: 'Red Bull', tier: 2, precio: 13.5, puntos: 135, imagen: '/Pilotos/verstappen.png' },
-  { id: 'ver_q3', nombre: 'Verstappen Campeón', equipo: 'Red Bull', tier: 3, precio: 17.0, puntos: 170, imagen: '/Pilotos/verstappen.png' }
-]
+  // --- CADILLAC ---
+  { 
+    id: 'perez_t1', numero: 11, nombre: 'Sergio Perez', equipo: 'Cadillac', tier: 1, precio: 11.0, 
+    imagen: '/Pilotos/perez.png',
+    habilidad_1: { nombre: 'Remontada', puntos: 6, descripcion: 'Inicia fuera del Top 10 pero logra cruzar la meta dentro del Top 8.' }
+  },
+  { 
+    id: 'perez_t2', numero: 11, nombre: 'Sergio Perez (Pro)', equipo: 'Cadillac', tier: 2, precio: 21.0, 
+    imagen: '/Pilotos/perez.png',
+    habilidad_1: { nombre: 'Remontada', puntos: 6, descripcion: 'Inicia fuera del Top 10 pero logra cruzar la meta dentro del Top 8.' },
+    habilidad_2: { nombre: 'Ministro de Defensa', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Pasa 8 vueltas con un rival en DRS sin cederle posición.' }
+  },
+  { 
+    id: 'bottas_t1', numero: 77, nombre: 'Valtteri Bottas', equipo: 'Cadillac', tier: 1, precio: 10.0, 
+    imagen: '/Pilotos/bottas.png',
+    habilidad_1: { nombre: 'Qualy Leñador', puntos: 6, descripcion: 'Logra colar el coche en el Top 12 de la parrilla de salida.' }
+  },
+  { 
+    id: 'bottas_t2', numero: 77, nombre: 'Valtteri Bottas (Pro)', equipo: 'Cadillac', tier: 2, precio: 20.0, 
+    imagen: '/Pilotos/bottas.png',
+    habilidad_1: { nombre: 'Qualy Leñador', puntos: 6, descripcion: 'Logra colar el coche en el Top 12 de la parrilla de salida.' },
+    habilidad_2: { nombre: 'Experiencia', puntos: 8, descripcion: 'DESPERTAR (Mejora su pos. Mundial): Es el piloto con el menor tiempo total acumulado en el Pit Lane.' }
+  }
+];
 
 // prettier-ignore
 export const mercadoPotenciadores = [
@@ -108,15 +287,25 @@ export const mercadoPotenciadores = [
 ]
 
 // prettier-ignore
+// TEMPORADA 2026 - Equipos actualizados
 export const mercadoCoches = [
-  { id: 'aston_martin', nombre: 'Aston Martin', precio: 20.0, puntos: 200, imagen: '/Coches/AstonMartin.png' },
-  { id: 'audi', nombre: 'Audi', precio: 20.0, puntos: 200, imagen: '/Coches/Audi.png' },
-  { id: 'cadillac', nombre: 'Cadillac', precio: 20.0, puntos: 200, imagen: '/Coches/Cadillac.png' },
+  // Cambios 2026:
+  // - Williams ahora se llama "Atlassian Williams F1 Team"
+  // - Haas ahora es "TGR Haas F1 Team" (con Toyota como patrocinador principal)
+  // - Sauber se convierte en "Audi Revolut F1 Team" (con Audi como fabricante)
+  // - McLaren es "McLaren Mastercard F1 Team" (con Mastercard como patrocinador)
+  // - Aston Martin mantiene "Aramco Formula One Team"
+  // - Alpine es "BWT Alpine Formula One Team"
+  // - Cadillac NUEVO equipo (11º equipo en la parrilla)
+  
+  { id: 'aston_martin', nombre: 'Aston Martin Aramco', precio: 20.0, puntos: 200, imagen: '/Coches/AstonMartin.png' },
+  { id: 'audi', nombre: 'Audi Revolut F1', precio: 20.0, puntos: 200, imagen: '/Coches/Audi.png' },
+  { id: 'cadillac', nombre: 'Cadillac F1 (NUEVO)', precio: 20.0, puntos: 200, imagen: '/Coches/Cadillac.png' },
   { id: 'ferrari', nombre: 'Ferrari', precio: 20.0, puntos: 200, imagen: '/Coches/Ferrari.png' },
-  { id: 'haas', nombre: 'Haas', precio: 20.0, puntos: 200, imagen: '/Coches/Haas.png' },
-  { id: 'mclaren', nombre: 'McLaren', precio: 20.0, puntos: 200, imagen: '/Coches/Mclaren.png' },
-  { id: 'mercedes', nombre: 'Mercedes', precio: 20.0, puntos: 200, imagen: '/Coches/Mercedes.png' },
-  { id: 'racing_bulls', nombre: 'Racing Bulls', precio: 20.0, puntos: 200, imagen: '/Coches/RacingBulls.png' },
-  { id: 'red_bull', nombre: 'Red Bull', precio: 20.0, puntos: 200, imagen: '/Coches/RedBull.png' },
-  { id: 'williams', nombre: 'Williams', precio: 20.0, puntos: 200, imagen: '/Coches/Williams.png' }
+  { id: 'haas', nombre: 'TGR Haas F1', precio: 20.0, puntos: 200, imagen: '/Coches/Haas.png' },
+  { id: 'mclaren', nombre: 'McLaren Mastercard', precio: 20.0, puntos: 200, imagen: '/Coches/Mclaren.png' },
+  { id: 'mercedes', nombre: 'Mercedes-AMG', precio: 20.0, puntos: 200, imagen: '/Coches/Mercedes.png' },
+  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB', precio: 20.0, puntos: 200, imagen: '/Coches/RacingBulls.png' },
+  { id: 'red_bull', nombre: 'Red Bull Racing', precio: 20.0, puntos: 200, imagen: '/Coches/RedBull.png' },
+  { id: 'williams', nombre: 'Atlassian Williams', precio: 20.0, puntos: 200, imagen: '/Coches/Williams.png' }
 ]

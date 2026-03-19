@@ -22,7 +22,7 @@ const potenciadoresSemanales = ref([])
 
 const generarMercado = () => {
   // Obtiene 1 único piloto tier 1 al azar
-  const pilotosTier1 = mercadoPilotos.filter(p => p.tier === 1)
+  const pilotosTier1 = mercadoPilotos.filter(p => p.tier === 2)
   const pilotosBarajados = pilotosTier1.sort(() => 0.5 - Math.random()).slice(0, 1).map(p => ({ ...p, tipo: 'piloto' }))
   pilotoSemanal.value = pilotosBarajados[0]
 
