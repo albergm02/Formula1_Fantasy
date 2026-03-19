@@ -24,6 +24,7 @@ const crearGaraje = () => ({
 export const useLigasStore = defineStore('ligas', {
   state: () => ({
     ligasDetalles: [],
+    ligaActiva: null,
   }),
 
   actions: {
