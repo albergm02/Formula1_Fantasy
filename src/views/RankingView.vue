@@ -71,23 +71,26 @@ const authStore = useAuthStore()
 const route = useRoute()
 
 const clasificacion = ref([])
-const cargando = ref(true) // 2. ESTADO DE CARGA AÑADIDO
+const cargando = ref(true)
 
+/**
+ * Función para cargar la clasificación de la liga activa. Se obtiene el ID de la liga ya sea por query o por estado global.
+ * Luego se consulta la colección de participaciones para esa liga,
+ * por cada participación se obtiene el nombre del usuario asociado (si existe) para mostrarlo en la clasificación. 
+ * Finalmente, se ordena la clasificación por puntos y presupuesto.
+ * Si ocurre algún error durante el proceso, se muestra un mensaje en la consola.
+ */
 const cargarClasificacion = async () => {
   cargando.value = true
   try {
-    // 3. LEEMOS LA ID DE FORMA SEGURA (de la URL o de la memoria global)
     const ligaId = route.query.liga || ligasStore.ligaActiva
-    
     if (!ligaId) {
       console.error('Error: No se encontró una liga activa (RankingView)')
       cargando.value = false
       return
     }
     
-    // Mantenemos viva la liga en la memoria por si refrescan la página
     ligasStore.ligaActiva = ligaId
-
     const participacionesRef = collection(db, 'participaciones')
     const q = query(participacionesRef, where('id_liga', '==', ligaId))
     const snap = await getDocs(q)
@@ -102,21 +105,18 @@ const cargarClasificacion = async () => {
         const usuarioSnap = await getDoc(usuarioRef)
         if (usuarioSnap.exists()) {
           const usuarioData = usuarioSnap.data()
-          // 4. CORRECCIÓN: Buscamos 'username', que es lo que guardamos en el registro
           nombre = usuarioData.username || usuarioData.nombre || 'Desconocido'
         }
       }
       
       escuderiasData.push({
         id: docSnap.id,
-        email: data.email_usuario, // Lo necesitamos para saber cuál es el usuario logueado
+        email: data.email_usuario, 
         nombre: nombre,
         puntos: data.puntos || 0,
         presupuesto: data.presupuesto || 0,
       })
     }
-    
-    // Ordenamos primero por puntos, y si hay empate, por presupuesto
     clasificacion.value = escuderiasData.sort((a, b) => b.puntos - a.puntos || b.presupuesto - a.presupuesto)
 
   } catch (error) {
