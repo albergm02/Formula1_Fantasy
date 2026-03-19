@@ -1,8 +1,9 @@
 <template>
   <div class="relative min-h-screen overflow-hidden flex items-center justify-center p-4">
-    <!-- Fondo animado -->
-    <MagicRings class="absolute inset-0 -z-10" color="#FF1E00" :ringCount="2"/>
+    <!-- Magic Rings es un componente personalizado que muestra anillos animados en el fondo -->
+    <MagicRings class="absolute inset-0 -z-10" color="#FF1E00" :ringCount="2" />
     <Card class="w-full max-w-md !bg-transparent">
+      <!-- Titulo -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="h-16 w-16 object-contain" />
@@ -14,8 +15,10 @@
 
       <!-- Contenido del formulario de inicio de sesión -->
       <template #content>
+        <!-- $form es la sintaxis para acceder a las propiedades y métodos del formulario proporcionados por PrimeVue Forms -->
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues" :resolver="resolver"
           @submit="iniciarSesion">
+          <!-- Label para el campo de email -->
           <div class="flex flex-col gap-1">
             <label for="email" class="uppercase text-xs font-bold text-[#D9D9D9]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
@@ -25,20 +28,22 @@
             </Message>
           </div>
 
+          <!-- Label para el campo de contraseña -->
           <div class="flex flex-col gap-1">
             <label for="password" class="uppercase text-xs font-bold text-[#D9D9D9]">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
-              toggle-mask :feedback="false"
-              inputClass="w-full !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              toggle-mask :feedback="false" inputClass="w-full !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
           </div>
 
+          <!-- Mensaje de error de Firebase -->
           <Message v-if="firebaseError" severity="error" :closable="false" class="mt-2">
             {{ firebaseError }}
           </Message>
 
+          <!-- Botones de acción -->
           <div class="flex flex-col gap-2 mt-4">
             <Button type="submit" label="ENTRAR AL PADDOCK" :loading="loading"
               class="w-full font-bold !border-none !bg-[#FF1E00] !text-[#D9D9D9]" />
