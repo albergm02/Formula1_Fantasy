@@ -120,11 +120,11 @@
         </p>
 
         <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
-          class="w-full !bg-yellow-600 !border-none !text-white font-bold hover:!bg-yellow-700"
+          class="w-full !bg-[#D9D9D9] !border-none !text-black font-bold"
           @click="ejecutarAbandonar" :loading="cargandoAccion" />
 
-        <Button v-if="ligaSeleccionada.admin === authStore.usuarioGlobal.emailAuth" label="DESTRUIR CAMPEONATO"
-          icon="pi pi-trash" class="w-full !bg-red-700 !border-none !text-white font-bold hover:!bg-red-800"
+        <Button v-if="ligaSeleccionada.admin === authStore.usuarioGlobal.emailAuth" label="ELIMINAR LIGA"
+          icon="pi pi-trash" class="w-full !bg-[#FF1E00] !border-none !text-white font-bold"
           @click="ejecutarEliminar" :loading="cargandoAccion" />
 
       </div>
@@ -248,10 +248,10 @@ const ejecutarAbandonar = () => {
     message: `¿Estás seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
     header: 'CONFIRMACIÓN DE SALIDA',
     icon: 'pi pi-exclamation-triangle',
-    rejectLabel: 'Cancelar',
     acceptLabel: 'Abandonar',
     rejectClass: '!bg-transparent !border-none !text-white',
-    acceptClass: '!bg-yellow-600 !border-none',
+    acceptClass: '!bg-[#00E5E5] !border-none !text-[#15151E]',
+    backgroundColor: '[#15151E]',
     accept: async () => {
 
       cargandoAccion.value = true;
@@ -268,13 +268,12 @@ const ejecutarAbandonar = () => {
 
 const ejecutarEliminar = () => {
   confirm.require({
-    message: '¡ATENCIÓN! Vas a disolver la liga. Todos los participantes serán expulsados y los datos borrados permanentemente.',
-    header: 'BANDERA ROJA: ELIMINAR LIGA',
+    message: 'Todos los participantes serán expulsados y los datos serán borrados permanentemente.',
+    header: 'ELIMINAR LIGA',
     icon: 'pi pi-trash',
-    rejectLabel: 'Abortar',
     acceptLabel: 'Eliminar para todos',
     rejectClass: '!bg-transparent !border-none !text-white',
-    acceptClass: '!bg-red-700 !border-none',
+    acceptClass: '!bg-[#FF1E00] !border-none !text-white',
     accept: async () => {
       cargandoAccion.value = true;
       const resultado = await ligasStore.eliminarLiga(ligaSeleccionada.value.id);
