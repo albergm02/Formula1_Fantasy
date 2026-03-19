@@ -16,9 +16,9 @@
   ></ConfirmDialog>
 
   <!-- Sección de carga para cuando esté cargando -->
-  <div v-if="!authStore.datosCargados" class="flex h-screen w-full items-center justify-center">
-    <i class="pi pi-spin pi-spinner text-3xl text-emerald-500"></i>
-    <p class="text-sm font-bold text-white uppercase">Verificando credenciales...</p>
+  <div v-if="!authStore.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
+    <i class="pi pi-spinner text-4xl text-[#00E5E5] animate-spin"></i>
+    <p class="text-[#00E5E5] text-sm font-bold uppercase tracking-widest animate-pulse">Verificando credenciales...</p>
   </div>
 
   <RouterView v-else />
