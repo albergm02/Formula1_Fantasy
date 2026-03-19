@@ -1,47 +1,49 @@
 <template>
   <div class="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden">
-    <MagicRings class="absolute inset-0 -z-30" color="#FFFFFF" colorTwo="#FFFFFF" :ringCount="2" />
+    <!-- Fondo animado -->
+    <MagicRings class="absolute inset-0 -z-30" color="#FFFFFF" :ringCount="1" :radiusStep="0.05"  />
     <Card class="w-full max-w-md rounded !bg-transparent !text-[#FFFFFF]">
       <template #title>
         <div class="text-center">
           <h1 class="text-2xl font-black text-[#FF1E00] uppercase">Regístrate</h1>
         </div>
       </template>
+      <!-- Contenido del formulario de registro -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues" :resolver="resolver"
           @submit="crearCuenta">
           <div class="flex flex-col gap-1">
-            <label for="username" class="font-bold text-[#D9D9D9] text-xs uppercase">Nombre de usuario</label>
+            <label for="username" class="font-bold text-xs text-[#D9D9D9] uppercase">Nombre de usuario</label>
             <InputText id="username" type="text" name="username" placeholder="Tu nombre de usuario"
-              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
+              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9]" fluid />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple">
               {{ $form.username.error.message }}
             </Message>
           </div>
           <div class="flex flex-col gap-1">
-            <label for="email" class="font-bold text-[#D9D9D9] text-xs uppercase">Email</label>
+            <label for="email" class="font-bold text-xs text-[#D9D9D9] uppercase">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
-              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
+              class="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9]" fluid />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="password" class="font-bold text-[#D9D9D9] text-xs">CONTRASEÑA</label>
+            <label for="password" class="font-bold text-xs text-[#D9D9D9] uppercase">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="new-password" placeholder="********" toggle-mask
               :feedback="false"
-              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
+              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9]" fluid />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="confirmPassword" class="font-bold text-[#D9D9D9] text-xs">CONFIRMAR CONTRASEÑA</label>
+            <label for="confirmPassword" class="font-bold text-xs text-[#D9D9D9] uppercase">Confirmar Contraseña</label>
             <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
               placeholder="********" toggle-mask :feedback="false"
-              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9] focus:!border-[#00E5E5]" fluid />
+              inputClass="w-full !bg-[#15151E] !text-[#FFFFFF] !border-[#D9D9D9]" fluid />
             <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" variant="simple">
               {{ $form.confirmPassword.error.message }}
             </Message>
@@ -53,12 +55,12 @@
 
           <div class="flex flex-col gap-4 mt-4">
             <Button type="submit" label="CREAR CUENTA" :loading="loading"
-              class="w-full !bg-[#FF1E00] !border-none font-bold !text-[#FFFFFF] hover:!bg-[#D01800]" />
+              class="w-full font-bold !bg-[#FF1E00] !border-none !text-[#FFFFFF]" />
             <Button type="button" label="VOLVER" @click="router.push('/')"
-              class="w-full !bg-transparent !border-none font-bold !text-[#00E5E5] hover:!text-[#FFFFFF] transition-colors" />
+              class="w-full font-bold !bg-transparent !border-none !text-[#00E5E5]" />
             <div class="text-center mt-2">
-              <span class="text-[#D9D9D9] text-sm">¿Ya tienes equipo? </span>
-              <router-link to="/" class="text-[#00E5E5] font-bold !text-sm hover:!text-[#FFFFFF]">
+              <span class="text-sm text-[#D9D9D9]">¿Ya tienes equipo? </span>
+              <router-link to="/" class="font-bold text-sm text-[#00E5E5]">
                 Inicia sesión aquí
               </router-link>
             </div>
@@ -120,10 +122,10 @@ const resolver = zodResolver(
     }),
 )
 
-/****
- * Función para manejar el envío del formulario. Primero verifica que los datos sean válidos según el esquema de Zod.
- * Si son válidos, intenta registrar al usuario con Firebase. Si hay un error (como correo ya registrado), muestra un mensaje amigable.
- * El estado de "loading" se utiliza para mostrar un spinner en el botón mientras se procesa la solicitud, mejorando la experiencia del usuario.
+/**
+ * Crea una nueva cuenta utilizando el servicio de autenticación. 
+ * Si el registro es exitoso, se inicializan los datos globales del usuario y se redirige a la página de ligas.
+ * @param param0 Objeto que contiene la validez del formulario y los valores ingresados.
  */
 const crearCuenta = async ({ valid, values }) => {
   if (!valid) return

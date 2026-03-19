@@ -7,10 +7,10 @@
 
         <section class="grid grid-cols-2 gap-4">
           <Button label="CREAR LIGA" icon="pi pi-plus"
-            class="w-full py-3 !bg-[#00E5E5] !text-[#15151E] font-black tracking-widest !border-none hover:!bg-[#00c4c4] transition-colors"
+            class="w-full py-3 !bg-[#00E5E5] !text-[#15151E] font-black tracking-widest !border-none"
             @click="mostrarDialogoCrear = true" />
           <Button label="UNIRSE" icon="pi pi-sign-in"
-            class="w-full py-3 !bg-transparent !border-2 !border-[#00E5E5] !text-[#00E5E5] font-black tracking-widest hover:!bg-[#00E5E5]/10 transition-colors"
+            class="w-full py-3 !bg-transparent !border-2 !border-[#00E5E5] !text-[#00E5E5] font-black tracking-widest"
             @click="mostrarDialogoUnirse = true" />
         </section>
 
@@ -24,7 +24,7 @@
               <template #list="slotProps">
                 <div class="flex flex-col gap-4 w-full">
                   <div v-for="(item, index) in slotProps.items" :key="index"
-                    class="p-4 bg-[#15151E] rounded-xl border border-[#00E5E5]/30 flex items-center justify-between hover:border-[#00E5E5] transition-colors shadow-lg">
+                    class="p-4 bg-[#15151E] rounded-xl border border-[#00E5E5]/30 flex items-center justify-between">
 
                     <div class="flex flex-col gap-1 w-2/3">
                       <h3 class="text-xl font-black text-[#FF1E00] uppercase truncate pr-2" :title="item.nombre">
@@ -40,12 +40,12 @@
                       </div>
                     </div>
 
-                    <div class="flex gap-2 w-1/3 justify-end shrink-0">
+                    <div class="flex gap-2 justify-end">
                       <Button icon="pi pi-cog"
-                        class="!bg-[#111111] !border !border-[#00E5E5]/50 !text-[#00E5E5] hover:!bg-[#00E5E5]/10 !w-10 !h-10 shrink-0"
+                        class="!bg-[#111111] !border !border-[#00E5E5] !text-[#00E5E5]"
                         @click="abrirOpciones(item)" />
                       <Button icon="pi pi-flag-fill"
-                        class="!bg-[#FF1E00] !border-none !text-[#FFFFFF] !w-10 !h-10 hover:!bg-[#D01800] shadow-[0_0_15px_rgba(255,30,0,0.2)] shrink-0"
+                        class="!bg-[#FF1E00] !border-none !text-[#FFFFFF] !w-10 !h-10"
                         @click="entrarEnLiga(item.id)" />
                     </div>
 
@@ -251,7 +251,6 @@ const ejecutarAbandonar = () => {
     acceptLabel: 'Abandonar',
     rejectClass: '!bg-transparent !border-none !text-white',
     acceptClass: '!bg-[#00E5E5] !border-none !text-[#15151E]',
-    backgroundColor: '[#15151E]',
     accept: async () => {
 
       cargandoAccion.value = true;
