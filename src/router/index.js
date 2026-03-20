@@ -72,8 +72,9 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresLiga) {
     const authStore = useAuthStore()
-    if (!authStore.usuarioGlobal && user) {
-      await authStore.cargarDatosUsuario(user.uid)
+
+    if (user && authStore.usuarioGlobal.ligasIds.length === 0) {
+      await authStore.iniciarDatosGlobales(user.email, user.displayName)
     }
 
     if (

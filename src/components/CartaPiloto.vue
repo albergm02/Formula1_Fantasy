@@ -84,13 +84,9 @@ const confirmarCompra = () => {
               DESCRIPCION
             </h4>
 
-            <div v-if="props.piloto.habilidad_1" class="mb-3">
-              <p class="text-[10px] font-black text-emerald-400 uppercase mb-1">
-                {{ props.piloto.habilidad_1.nombre }}
-                <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
-              </p>
-              <p class="text-[11px] text-zinc-300">
-                {{ props.piloto.habilidad_1.descripcion }}
+            <div class="mb-3">
+              <p class="text-[10px] text-zinc-300">
+                {{ props.piloto.descripcion}}
               </p>
             </div>
 
