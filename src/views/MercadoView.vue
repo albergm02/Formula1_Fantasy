@@ -70,7 +70,7 @@ const realizarFichaje = async (elemento) => {
     </section>
 
     <section class="grid grid-cols-1">
-      <div class="w-full">
+      <div class="w-full gap-4 flex flex-col h-full min-h-[350px]">
         <CartaPiloto v-if="pilotoSemanal" :piloto="pilotoSemanal" :modoMercado="true" @fichar="realizarFichaje" />
       </div>
     </section>

@@ -8,8 +8,6 @@ async function fetchGranPremio() {
   const response = await fetch('https://api.openf1.org/v1/meetings?year=2026')
   const meetings = await response.json()
   const hoy = new Date()
-
-  /* Filtro las carreras siguientes y me quedo con la más próxima */
   const proximas = meetings.filter((m) => new Date(m.date_end) > hoy)
   const proxima = proximas.sort((a, b) => new Date(a.date_start) - new Date(b.date_start))[0]
 
