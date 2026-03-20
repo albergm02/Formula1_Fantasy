@@ -86,7 +86,7 @@ const confirmarCompra = () => {
 
             <div class="mb-3">
               <p class="text-[10px] text-zinc-300">
-                {{ props.piloto.descripcion}}
+                {{ props.piloto.descripcion }}
               </p>
             </div>
 
@@ -116,6 +116,19 @@ const confirmarCompra = () => {
               </p>
               <p class="text-[11px] text-zinc-300">
                 {{ props.piloto.habilidad_2.descripcion }}
+              </p>
+            </div>
+
+            <div
+              v-if="props.piloto.tier === 2 && props.piloto.penalizacion"
+              class="mt-2 pt-3 border-t border-zinc-800"
+            >
+              <p class="text-[10px] font-black text-red-500 uppercase mb-1">
+                {{ props.piloto.penalizacion.nombre }}
+                <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>
+              </p>
+              <p class="text-[11px] text-zinc-300">
+                {{ props.piloto.penalizacion.descripcion }}
               </p>
             </div>
 
