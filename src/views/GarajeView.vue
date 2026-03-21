@@ -1,4 +1,6 @@
 <script setup>
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useEscuderiaStore } from '@/stores/storeEscuderia'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -12,13 +14,20 @@ import CartaPotenciador from '@/components/CartaPotenciador.vue'
 const escuderiaStore = useEscuderiaStore()
 const toast = useToast()
 const confirm = useConfirm()
+const route = useRoute()
 
+// Solución al F5 para mantener estado
+onMounted(async () => {
+  if (!escuderiaStore.ligaActivaId && route.query.liga) {
+    await escuderiaStore.cargarEscuderia(route.query.liga)
+  }
+})
 
 const confirmarVentaCoche = (coche) => {
   confirm.require({
-    message: `¿Estás seguro de que quieres vender a ${coche.nombre} por ${Math.floor(coche.precio / 2)}M?`,
+    message: `¿Estás seguro de que quieres vender el chasis ${coche.nombre} por ${Math.floor(coche.precio / 2)}M?`,
     header: 'Confirmar Venta',
-    icon: 'pi pi-shopping-bag',
+    icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'Sí, vender',
     rejectLabel: 'Cancelar',
     accept: async () => {
@@ -34,7 +43,7 @@ const confirmarVentaCoche = (coche) => {
 
 const confirmarDespido = (piloto) => {
   confirm.require({
-    message: `¿Estás seguro de que quieres despedir a ${piloto.nombre} por ${Math.floor(piloto.precio / 2)}M?`,
+    message: `¿Estás seguro de que quieres rescindir el contrato de ${piloto.nombre} por ${Math.floor(piloto.precio / 2)}M?`,
     header: 'Confirmar Despido',
     icon: 'pi pi-user-minus',
     acceptLabel: 'Sí, despedir',
@@ -58,77 +67,82 @@ const intentarEquiparPieza = async (idInstancia) => {
     toast.add({ severity: 'success', summary: 'Acción completada', detail: respuesta.mensaje, life: 3000 })
   }
 }
-
 </script>
 
 <template>
-
   <Header />
 
-  <main class="mx-auto w-full max-w-5xl p-4 flex flex-col gap-8 mt-4">
+  <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-3xl mx-auto w-full">
 
-    <section>
-      <div v-if="escuderiaStore.garaje.coche" class="flex flex-col gap-2 w-full max-w-2xl mx-auto">
-        <div class="w-full min-h-[250px]">
-          <CartaCoche :coche="escuderiaStore.garaje.coche" :modoMercado="false" />
-        </div>
-        <button @click="confirmarVentaCoche(escuderiaStore.garaje.coche)"
-          class="w-full bg-zinc-800 py-3 flex items-center justify-center gap-2 hover:bg-red-600 group transition-colors">
-          <i class="pi pi-shopping-bag text-xs text-red-500 group-hover:text-white transition-colors"></i>
-          <span class="text-xs font-black text-red-500 group-hover:text-white transition-colors">VENDER POR {{
-            Math.floor(escuderiaStore.garaje.coche.precio / 2) }}M</span>
-        </button>
-      </div>
+    <section class="grid">
+      <div v-if="escuderiaStore.garaje.coche" class="flex flex-col w-full h-full">
 
-      <div v-else class="flex flex-col items-center justify-center p-12">
-        <i class="pi pi-car text-4xl mb-3"></i>
-        <span class="text-sm font-bold uppercase tracking-widest">Sin Chasis</span>
-      </div>
-    </section>
+        <CartaCoche :coche="escuderiaStore.garaje.coche" :modoMercado="false" />
 
-    <section>
-      <div v-if="escuderiaStore.garaje.pilotos.length > 0" class="flex flex-wrap justify-center gap-4">
-        <div v-for="piloto in escuderiaStore.garaje.pilotos" :key="piloto.idInstancia"
-          class="flex flex-col gap-2 w-full sm:w-[calc(50%-1rem)] md:w-[calc(33.333%-1rem)]">
-
-          <div class="aspect-[3/4] w-full">
-            <CartaPiloto :piloto="piloto" :modoMercado="false" />
-          </div>
-
-          <button @click="confirmarDespido(piloto)"
-            class="w-full bg-zinc-800 py-3 flex items-center justify-center gap-2 hover:bg-red-600 group transition-colors rounded-xl border border-zinc-800 shadow-lg">
-            <i class="pi pi-user-minus text-xs text-red-500 group-hover:text-white transition-colors"></i>
-            <span class="text-xs font-black text-red-500 group-hover:text-white transition-colors">DESPEDIR ({{
-              Math.floor(piloto.precio / 2) }}M)</span>
+        <div class="px-6 pb-2 -mt-1">
+          <button @click="confirmarVentaCoche(escuderiaStore.garaje.coche)"
+            class="w-full bg-[#111111] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
+            <i class="pi pi-shopping-bag text-sm text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
+            <span class="text-white text-[10px] font-black uppercase tracking-widest">
+              VENDER POR {{ Math.floor(escuderiaStore.garaje.coche.precio / 2) }}M
+            </span>
           </button>
-
         </div>
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-10 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-500 bg-zinc-900/30">
-        <i class="pi pi-users text-4xl mb-3"></i>
-        <span class="text-xs font-bold uppercase tracking-widest">Asientos Vacíos</span>
+        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
+        <i class="pi pi-car text-3xl text-zinc-600 mb-3"></i>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Garaje Vacío</span>
       </div>
     </section>
 
-    <section class="mb-10">
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      <div v-if="escuderiaStore.garaje.potenciadores.length > 0" class="flex flex-wrap justify-center gap-4">
-        <div v-for="pieza in escuderiaStore.garaje.potenciadores" :key="pieza.idInstancia"
-          class="flex flex-col gap-2 relative w-[calc(50%-0.5rem)] md:w-[calc(25%-1rem)]">
+      <template v-if="escuderiaStore.garaje.pilotos.length > 0">
+        <div v-for="piloto in escuderiaStore.garaje.pilotos" :key="piloto.instancia_id"
+          class="flex flex-col w-full h-full">
+
+          <CartaPiloto :piloto="piloto" :modoMercado="false" />
+
+          <div class="px-6 pb-2 -mt-1">
+            <button @click="confirmarDespido(piloto)"
+              class="w-full bg-[#111111] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
+              <i class="pi pi-user-minus text-sm text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
+              <span class="text-white text-[10px] font-black uppercase tracking-widest">
+                DESPEDIR ({{ Math.floor(piloto.precio / 2) }}M)
+              </span>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <div v-else
+        class="col-span-full flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
+        <i class="pi pi-users text-3xl text-zinc-600 mb-3"></i>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Asientos Vacíos</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div v-if="escuderiaStore.garaje.potenciadores.length > 0" class="grid grid-cols-2 gap-6 px-6">
+
+        <div v-for="pieza in escuderiaStore.garaje.potenciadores" :key="pieza.instancia_id"
+          class="flex flex-col w-full h-full">
 
           <div class="aspect-square w-full">
             <CartaPotenciador :potenciador="pieza" :modoMercado="false" />
           </div>
 
-          <button @click="intentarEquiparPieza(pieza.idInstancia)"
-            class="w-full py-3 flex items-center justify-center gap-2 group transition-colors rounded-xl border shadow-lg"
-            :class="pieza.equipado ? 'bg-emerald-600 border-emerald-500 hover:bg-emerald-500' : 'bg-zinc-800 border-zinc-800 hover:bg-emerald-600'">
-            <i class="text-xs transition-colors"
-              :class="pieza.equipado ? 'pi pi-check-circle text-white' : 'pi pi-cog text-emerald-500 group-hover:text-white'"></i>
-            <span class="text-xs font-black transition-colors"
-              :class="pieza.equipado ? 'text-white' : 'text-emerald-500 group-hover:text-white'">
+          <button @click="intentarEquiparPieza(pieza.instancia_id)"
+            class="w-full py-3 mt-2 flex items-center justify-center cursor-pointer transition-colors rounded-xl shadow-lg group"
+            :class="pieza.equipado
+              ? 'bg-emerald-900/20 border border-emerald-500/50 text-emerald-400'
+              : 'bg-[#111111] border border-zinc-800 text-zinc-400 hover:text-white'">
+            <i class="text-[10px] mr-2"
+              :class="pieza.equipado ? 'pi pi-check-circle text-emerald-400' : 'pi pi-cog text-zinc-500 group-hover:text-white transition-colors'"></i>
+            <span class="text-[10px] font-black uppercase tracking-widest"
+              :class="pieza.equipado ? 'text-emerald-400' : 'text-white'">
               {{ pieza.equipado ? 'INSTALADO' : 'INSTALAR' }}
             </span>
           </button>
@@ -137,14 +151,13 @@ const intentarEquiparPieza = async (idInstancia) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-10 border-2 border-dashed border-zinc-800 rounded-xl text-zinc-500 bg-zinc-900/30">
-        <i class="pi pi-box text-4xl mb-3"></i>
-        <span class="text-xs font-bold uppercase tracking-widest">Sin Mejoras Compradas</span>
+        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
+        <i class="pi pi-box text-3xl text-zinc-600 mb-3"></i>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Mejoras Compradas</span>
       </div>
     </section>
 
   </main>
 
   <Navbar />
-
 </template>
