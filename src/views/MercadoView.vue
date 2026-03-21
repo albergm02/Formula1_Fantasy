@@ -65,7 +65,7 @@ const realizarFichaje = async (elemento) => {
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-20">
 
-    <section>
+    <section class="grid">
       <CartaCoche v-if="cocheSemanal" :coche="cocheSemanal" :modoMercado="true" @fichar="realizarFichaje" />
     </section>
 
@@ -73,8 +73,8 @@ const realizarFichaje = async (elemento) => {
       <CartaPiloto v-if="pilotoSemanal" :piloto="pilotoSemanal" :modoMercado="true" @fichar="realizarFichaje" />
     </section>
 
-    <section>
-      <div class="grid grid-cols-2 gap-4">
+    <section class="grid">
+      <div class="grid grid-cols-2 gap-6">
         <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
           <CartaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="realizarFichaje" />
         </div>
