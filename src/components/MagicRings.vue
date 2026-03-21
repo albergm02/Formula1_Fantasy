@@ -1,6 +1,4 @@
-<!-- MagicRings, obtenido de: https://github.com/DavidHDev/vue-bits/
- (Muchas gracias por compartir este componente)-->
-
+<!-- MagicRings, obtenido de: https://github.com/DavidHDev/vue-bits/ (Muchas gracias por compartir este componente)-->
 <script setup lang="ts">
 import * as THREE from 'three';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';

@@ -1,16 +1,33 @@
+<script setup>
+import { computed } from 'vue'
+import { useEscuderiaStore } from '@/stores/storeEscuderia'
+import { useLigasStore } from '@/stores/storeLigas'
+
+const escuderiaStore = useEscuderiaStore()
+const ligasStore = useLigasStore()
+/**
+ * Calcula el nombre de la liga activa. 
+ */
+const nombreLigaActual = computed(() => {
+  const liga = ligasStore.ligasDetalles.find(l => l.id === ligasStore.ligaActiva)
+  return liga ? liga.nombre : 'Mi Campeonato'
+})
+</script>
+
 <template>
-  <div class="flex items-center justify-between bg-[#111111] p-5 rounded-2xl border-l-4 border-[#00E5E5] shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+  <!-- Bienvenida -->
+  <div class="flex items-center justify-between bg-[#111111] p-5">
     <div class="flex flex-col">
-      <span class="text-[#00E5E5] text-[10px] font-black tracking-widest uppercase mb-1">Paddock Global</span>
-      <h1 class="text-xl md:text-2xl font-black text-white italic uppercase truncate w-32 md:w-auto">
+      <span class="text-[#00E5E5] text-[10px] font-black uppercase mb-1">Bienvenido al Paddock</span>
+      <h1 class="text-xl font-black text-white italic uppercase w-32">
         {{ nombreLigaActual }}
       </h1>
     </div>
-    
-    <div class="flex flex-col items-end gap-1 border-l border-white/10 pl-4">
+    <!-- Estadísticas del usuario -->
+    <div class="flex flex-col items-end gap-1 pl-4">
       <div class="flex items-center gap-2">
         <span class="text-[#D9D9D9] text-xs font-medium uppercase">Puntos:</span>
-        <span class="text-white font-black text-lg bg-[#00E5E5]/20 px-2 rounded">{{ escuderiaStore.puntos || 0 }}</span>
+        <span class="text-white font-black text-lg bg-[#00E5E5] px-2">{{ escuderiaStore.puntos || 0 }}</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="text-[#D9D9D9] text-xs font-medium uppercase">Presupuesto:</span>
@@ -19,17 +36,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { computed } from 'vue'
-import { useEscuderiaStore } from '@/stores/storeEscuderia'
-import { useLigasStore } from '@/stores/storeLigas'
-
-const escuderiaStore = useEscuderiaStore()
-const ligasStore = useLigasStore()
-
-const nombreLigaActual = computed(() => {
-  const liga = ligasStore.ligasDetalles.find(l => l.id === ligasStore.ligaActiva)
-  return liga ? liga.nombre : 'Mi Campeonato'
-})
-</script>

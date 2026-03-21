@@ -43,7 +43,7 @@ export const mercadoPilotos = [
     descripcion: 'El tetracampeón neerlandés busca devolver a Red Bull a la cima tras perder la corona el año pasado. Sigue siendo probablemente el piloto más implacable y agresivo de la parrilla.',
     habilidad_1: { nombre: 'Mad Max', puntos: 5, descripcion: 'Sube al podio (Top 3) sin haber conseguido la vuelta rápida de la carrera.' },
     habilidad_2: { nombre: 'Inquebrantable', puntos: 9, descripcion: 'Defiende su posición con éxito durante 5 vueltas consecutivas teniendo a un rival en zona de DRS.' },
-    penalizacion: { nombre: 'Furia por la radio', puntos: -4, descripcion: 'Es apercibido oficialmente con bandera blanca y negra por exceder los límites de pista.' }
+    penalizacion: { nombre: 'Exceso de velocidad', puntos: -4, descripcion: 'Es penalizado por Dirección de Carrera con 5 o 10 segundos de sanción.' }
   },
   { 
     id: 'hadjar_t1', numero: 6, nombre: 'Isack Hadjar', equipo: 'Red Bull', tier: 1, precio: 15.0, 
@@ -57,7 +57,7 @@ export const mercadoPilotos = [
     descripcion: 'Promovido al primer equipo para ser el escudero de Verstappen tras una gran etapa formativa. Tendrá el difícil reto de sobrevivir a la enorme presión que siempre rodea al segundo asiento de Red Bull.',
     habilidad_1: { nombre: 'Gran inicio', puntos: 7, descripcion: 'Marca uno de los 5 mejores tiempos en el Sector 1 durante la primera vuelta.' },
     habilidad_2: { nombre: 'El pequeño Prost', puntos: 8, descripcion: 'Cruza la bandera a cuadros entre los 6 primeros clasificados.' },
-    penalizacion: { nombre: 'Pecado de Novato', puntos: -6, descripcion: 'Es penalizado por Dirección de Carrera con 5 o 10 segundos de sanción.' }
+    penalizacion: { nombre: 'Pecado de Novato', puntos: -6, descripcion: 'Acaba en un puesto inferior a la octava posición.' }
   },
 
   // --- FERRARI ---
@@ -73,7 +73,7 @@ export const mercadoPilotos = [
     descripcion: '"Il Predestinato" sigue siendo la gran apuesta de futuro y presente de Maranello. Buscará maximizar el rendimiento del Ferrari y batir a su histórico compañero de equipo.',
     habilidad_1: { nombre: 'Príncipe de la Pole', puntos: 7, descripcion: 'Consigue la Pole Position y lidera la parrilla de salida el domingo.' },
     habilidad_2: { nombre: 'Il Predestinato', puntos: 9, descripcion: 'Completa un relevo (stint) con neumáticos blandos de mayor duración que la media general.' }, 
-    penalizacion: { nombre: 'Maldición', puntos: -10, descripcion: 'No logra terminar la carrera (DNF) debido a un accidente o problema mecánico.' }
+    penalizacion: { nombre: 'Maldición de Mónaco', puntos: -10, descripcion: 'No logra terminar la carrera (DNF) debido a un accidente o problema mecánico.' }
   },
   { 
     id: 'hamilton_t1', numero: 44, nombre: 'Lewis Hamilton', equipo: 'Ferrari', tier: 1, precio: 23.0, 
@@ -117,7 +117,7 @@ export const mercadoPilotos = [
     descripcion: 'La joya de la corona de la academia de Mercedes, da el salto definitivo para demostrar que el "hype" estaba justificado. Un talento generacional listo para pelear en la zona alta.',
     habilidad_1: { nombre: 'Diamante en Bruto', puntos: 6, descripcion: 'Registra una velocidad máxima en la trampa de velocidad (Speed Trap) superior a la de Russell.' },
     habilidad_2: { nombre: 'Relevo', puntos: 9, descripcion: 'Termina en la zona de puntos y supera a su compañero de equipo en la clasificación final.' },
-    penalizacion: { nombre: 'Exceso de Ímpetu', puntos: -5, descripcion: 'Provoca una bandera amarilla o roja en cualquier sesión de Entrenamientos Libres o Clasificación.' }
+    penalizacion: { nombre: 'Exceso de Ímpetu', puntos: -4, descripcion: 'Provoca una bandera amarilla o roja en cualquier sesión.' }
   },
 
   // --- ASTON MARTIN ---
@@ -326,7 +326,7 @@ export const mercadoPilotos = [
     imagen: '/Pilotos/bottas.png',
     descripcion: 'El finlandés regresa a la parrilla junto a "Checo" para formar una alineación llena de sabiduría y velocidad en el debut de Cadillac. Aportará toda la cultura de trabajo que aprendió en sus años gloriosos.',
     habilidad_1: { nombre: 'Leñador', puntos: 7, descripcion: 'Exprime el coche a una vuelta y se clasifica entre las 12 primeras posiciones de la parrilla.' },
-    habilidad_2: { nombre: 'Sanción Fantasma', puntos: 4, descripcion: 'Completa todo el Gran Premio sin ser investigado ni recibir penalizaciones de la FIA.' }, // Bastante fácil para Bottas
+    habilidad_2: { nombre: 'Sanción Fantasma', puntos: 4, descripcion: 'Completa todo el Gran Premio sin ser investigado ni recibir penalizaciones de la FIA.' }, 
     penalizacion: { nombre: 'Sin Rebufo', puntos: -4, descripcion: 'Marca una de las 3 velocidades máximas más bajas en la trampa de velocidad (Speed Trap) de la carrera.' }
   }
 ];

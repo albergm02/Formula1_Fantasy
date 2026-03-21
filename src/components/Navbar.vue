@@ -1,3 +1,12 @@
+<script setup>
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const isActive = (path) => {
+    return route.path === path
+}
+</script>
+
 <template>
     <nav class="fixed bottom-0 w-full bg-[#15151E] border-t border-[#FF1E00] p-4 z-40 flex justify-around items-center">
 
@@ -33,13 +42,3 @@
 
     </nav>
 </template>
-
-<script setup>
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-/* Flag para determinar si el enlace está activo y cambiar el color del icono y del texto */
-const isActive = (path) => {
-    return route.path === path
-}
-</script>
