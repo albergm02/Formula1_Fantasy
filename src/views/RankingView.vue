@@ -3,7 +3,7 @@
     <Header />
 
     <main class="mx-auto w-full max-w-4xl p-4 flex flex-col gap-4 mt-4">
-      
+
       <div class="flex justify-center border-b border-[#FFFFFF]/50 pb-2">
         <h2 class="text-2xl font-black text-white uppercase">Clasificación general</h2>
       </div>
@@ -11,7 +11,8 @@
       <!-- En caso de que no se hayan cargado los datos -->
       <div v-if="cargando" class="flex flex-col items-center justify-center py-10 gap-3">
         <i class="pi pi-spinner text-4xl text-[#00E5E5] animate-spin"></i>
-        <p class="text-[#00E5E5] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificación...</p>
+        <p class="text-[#00E5E5] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificación...
+        </p>
       </div>
 
       <!-- En caso de que si se hayan cargado los datos -->
@@ -19,17 +20,16 @@
         <!-- Mostramos usuarios, resaltamos al usuario actual -->
         <div v-for="(jugador, index) in clasificacion" :key="jugador.id"
           class="flex items-center justify-between p-4 border border-white"
-          :class="{'!border-[#FF1E00] !bg-[#FF1E00]/10': jugador.email === authStore.usuarioGlobal.emailAuth}">
-          
+          :class="{ '!border-[#FF1E00] !bg-[#FF1E00]/10': jugador.email === authStore.usuarioGlobal.emailAuth }">
+
           <div class="flex items-center gap-4">
             <!-- Lo pongo arriba a la izquierda, dependiendo del index de clasificación le pongo un color u otro -->
-            <div class="text-2xl font-black italic -top-4 relative"
-              :class="{
+            <div class="text-2xl font-black italic -top-4 relative" :class="{
               'text-yellow-400': index === 0,
               'text-gray-200': index === 1,
               'text-amber-600': index === 2,
               'text-[#FFFFFF]': index > 2
-              }">{{ index + 1 }}º</div>
+            }">{{ index + 1 }}º</div>
             <div class="flex flex-col">
               <span class="font-bold text-lg uppercase text-white">
                 {{ jugador.nombre }}
@@ -60,6 +60,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLigasStore } from '@/stores/storeLigas'
 import { useAuthStore } from '@/stores/storeAuth'
+import { useEscuderiaStore } from '@/stores/storeEscuderia'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase'
 
@@ -68,6 +69,7 @@ import Header from '@/components/Header.vue'
 
 const ligasStore = useLigasStore()
 const authStore = useAuthStore()
+const escuderiaStore = useEscuderiaStore()
 const route = useRoute()
 
 const clasificacion = ref([])
@@ -89,17 +91,17 @@ const cargarClasificacion = async () => {
       cargando.value = false
       return
     }
-    
+
     ligasStore.ligaActiva = ligaId
     const participacionesRef = collection(db, 'participaciones')
     const q = query(participacionesRef, where('id_liga', '==', ligaId))
     const snap = await getDocs(q)
     const escuderiasData = []
-    
+
     for (const docSnap of snap.docs) {
       const data = docSnap.data()
       let nombre = 'Desconocido'
-      
+
       if (data.email_usuario) {
         const usuarioRef = doc(db, 'usuarios', data.email_usuario)
         const usuarioSnap = await getDoc(usuarioRef)
@@ -108,10 +110,10 @@ const cargarClasificacion = async () => {
           nombre = usuarioData.username || usuarioData.nombre || 'Desconocido'
         }
       }
-      
+
       escuderiasData.push({
         id: docSnap.id,
-        email: data.email_usuario, 
+        email: data.email_usuario,
         nombre: nombre,
         puntos: data.puntos || 0,
         presupuesto: data.presupuesto || 0,
@@ -126,7 +128,11 @@ const cargarClasificacion = async () => {
   }
 }
 
-onMounted(() => {
-  cargarClasificacion()
+onMounted(async () => {
+  if (!escuderiaStore.ligaActivaId && route.query.liga) {
+    await escuderiaStore.cargarEscuderia(route.query.liga)
+  }
+  await cargarClasificacion()
 })
+
 </script>
