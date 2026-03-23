@@ -13,7 +13,7 @@ const routes = [
   {
     path: '/registro',
     name: 'registro',
-    component: () => import('../views/RegistroView.vue'),
+    component: () => import('../views/RegisterView.vue'),
     meta: { requiresGuest: true },
   },
   {
