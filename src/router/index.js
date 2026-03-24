@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { useAuthStore } from '@/stores/storeAuth'
+import { useLigasStore } from '@/stores/storeLigas'
 
 const routes = [
   {
@@ -72,9 +73,17 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresLiga) {
     const authStore = useAuthStore()
+    const ligasStore = useLigasStore()
 
     if (user && authStore.usuarioGlobal.ligasIds.length === 0) {
       await authStore.initializeUserData(user.email, user.displayName)
+    }
+
+    if (
+      authStore.usuarioGlobal.ligasIds.length > 0 &&
+      ligasStore.ligasDetalles.length === 0
+    ) {
+      await ligasStore.cargarMisLigas()
     }
 
     if (
