@@ -18,7 +18,6 @@ import { useToast } from 'primevue/usetoast'
 
 /* Utilidades */
 import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from '@/utils/authErrors'
-import { isValidEmail, trimText } from '@/utils/text'
 import { showToast } from '@/utils/uiFeedback'
 
 /* Validación con Zod */
@@ -50,7 +49,6 @@ const validationSchema = zodResolver(
 const handleLogin = async ({ valid, values }) => {
   // Zod se encarga de mostrar errores.
   if (!valid) return
-
   isLoading.value = true
   authError.value = ''
 
@@ -72,7 +70,7 @@ const handleGoogleLogin = async () => {
 
   try {
     const userCredential = await signInWithGoogle()
-    const googleEmail = trimText(userCredential.user.email)
+    const googleEmail = userCredential.user.email.trim()
 
     if (!googleEmail) {
       throw new Error('No se pudo obtener el correo de Google.')
@@ -99,9 +97,9 @@ const handleGoogleLogin = async () => {
 
 /* Handler Recuperar Contraseña (Mejorado) */
 const handlePasswordReset = async () => {
-  const emailToSend = trimText(resetEmailAddress.value)
+  const emailToSend = resetEmailAddress.value.trim()
 
-  if (!isValidEmail(emailToSend)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToSend)) {
     showToast(toast, {
       severity: 'warn',
       summary: 'Aviso',

@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router'
 import { signOut } from '@/services/authService'
 import { useAuthStore } from '@/stores/storeAuth'
 import { usernameSchema } from '@/utils/authValidations'
-import { trimText } from '@/utils/text'
 
 import MagicRings from '@/components/MagicRings.vue'
 import Card from 'primevue/card'
@@ -35,7 +34,7 @@ const validationSchema = zodResolver(
 const handleCompleteGoogleProfile = async ({ valid, values }) => {
   if (!valid) return
 
-  const trimmedUsername = trimText(values.username)
+  const trimmedUsername = values.username.trim()
   isLoading.value = true
   authError.value = ''
 

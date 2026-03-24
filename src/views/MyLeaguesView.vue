@@ -6,7 +6,6 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { useLigasStore } from '@/stores/storeLeagues'
 import { useAuthStore } from '@/stores/storeAuth'
-import { trimText, toUpperTrimmed } from '@/utils/text'
 import { showConfirmDialog, showResultToast, showToast } from '@/utils/uiFeedback'
 import Header from '@/components/Header.vue'
 
@@ -43,7 +42,7 @@ onMounted(async () => {
 })
 
 const handleCreateLeague = async () => {
-  const normalizedLeagueName = trimText(newLeagueName.value)
+  const normalizedLeagueName = newLeagueName.value.trim()
 
   if (normalizedLeagueName.length < 3) {
     showToast(toast, {
@@ -76,7 +75,7 @@ const handleCreateLeague = async () => {
 }
 
 const handleJoinLeague = async () => {
-  const normalizedJoinCode = toUpperTrimmed(joinCode.value)
+  const normalizedJoinCode = joinCode.value.trim().toUpperCase()
 
   if (!normalizedJoinCode) {
     return
@@ -190,11 +189,9 @@ const handleDeleteLeague = () => {
                     </div>
 
                     <div class="flex gap-2 justify-end">
-                      <Button icon="pi pi-cog"
-                        class="!bg-[#111111] !border !border-[#00E5E5] !text-[#00E5E5]"
+                      <Button icon="pi pi-cog" class="!bg-[#111111] !border !border-[#00E5E5] !text-[#00E5E5]"
                         @click="openLeagueOptions(item)" />
-                      <Button icon="pi pi-flag-fill"
-                        class="!bg-[#FF1E00] !border-none !text-[#FFFFFF] !w-10 !h-10"
+                      <Button icon="pi pi-flag-fill" class="!bg-[#FF1E00] !border-none !text-[#FFFFFF] !w-10 !h-10"
                         @click="openLeague(item.id)" />
                     </div>
                   </div>
@@ -266,12 +263,12 @@ const handleDeleteLeague = () => {
         </p>
 
         <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
-          class="w-full !bg-[#D9D9D9] !border-none !text-black font-bold"
-          @click="handleLeaveLeague" :loading="isActionLoading" />
+          class="w-full !bg-[#D9D9D9] !border-none !text-black font-bold" @click="handleLeaveLeague"
+          :loading="isActionLoading" />
 
-        <Button v-if="selectedLeague.admin === authStore.currentUser.authEmail" label="ELIMINAR LIGA"
-          icon="pi pi-trash" class="w-full !bg-[#FF1E00] !border-none !text-white font-bold"
-          @click="handleDeleteLeague" :loading="isActionLoading" />
+        <Button v-if="selectedLeague.admin === authStore.currentUser.authEmail" label="ELIMINAR LIGA" icon="pi pi-trash"
+          class="w-full !bg-[#FF1E00] !border-none !text-white font-bold" @click="handleDeleteLeague"
+          :loading="isActionLoading" />
       </div>
     </Dialog>
   </div>

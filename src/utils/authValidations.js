@@ -1,16 +1,7 @@
-/**
- * @fileoverview Esquemas de validación para formularios de autenticación usando Zod.
- * Estos esquemas se utilizan para validar los datos de entrada en los formularios de login y registro.
- * Cada esquema define las reglas de validación para los campos correspondientes (ej: username, email, password).
- * Esto centraliza la lógica de validación y evita repetirla en los componentes.
- */
-
+// Esquemas de validación Zod para autenticación
 import { z } from 'zod'
 
-/**
- * Esquema de validación para el nombre de usuario.
- * @type {import('zod').ZodString}
- */
+// Username: 3-10 caracteres, trim automático
 export const usernameSchema = z
   .string()
   .trim()

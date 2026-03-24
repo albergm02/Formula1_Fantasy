@@ -1,14 +1,6 @@
-/**
- * @fileoverview Funciones para obtener información del próximo Gran Premio de Fórmula 1 usando la API de OpenF1.
- * Incluye funciones para formatear fechas, calcular la cuenta atrás y manejar errores de fetch.
- * Estas funciones se utilizan en el componente NextGrandPrix para mostrar la información del próximo GP.
- */
+// Info del próximo Gran Premio via API OpenF1
 
-/**
- * Formatea una fecha ISO a un objeto con fecha y hora legibles en español.
- * @param {string} isoDate - Fecha en formato ISO
- * @returns {{date: string, time: string}} Objeto con fecha y hora formateadas
- */
+// Fecha ISO → formato legible en español
 const formatGrandPrixDate = (isoDate) => {
   const date = new Date(isoDate)
 
@@ -25,13 +17,7 @@ const formatGrandPrixDate = (isoDate) => {
   }
 }
 
-/**
- * Obtiene información del próximo Gran Premio desde la API de OpenF1.
- * @param {object} options - Opciones para la función
- * @param {Function} options.fetchImpl - Implementación de fetch (por defecto fetch global)
- * @param {number} options.year - Año para filtrar los GP (por defecto 2026)
- * @returns {Promise<object|null>} Información del próximo GP o null si no hay más carreras
- */
+// Próximo GP del año. Devuelve null si no quedan carreras.
 export const getNextGrandPrix = async ({ fetchImpl = fetch, year = 2026 } = {}) => {
   const response = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${year}`)
   const meetings = await response.json()
@@ -58,12 +44,7 @@ export const getNextGrandPrix = async ({ fetchImpl = fetch, year = 2026 } = {}) 
   }
 }
 
-/**
- * Calcula la cuenta atrás para el próximo Gran Premio.
- * @param {string} startDate - Fecha de inicio del GP en formato ISO
- * @param {Date} [now=new Date()] - Fecha actual (para pruebas)
- * @returns {string} Cadena con la cuenta atrás o mensaje si el GP ya comenzó
- */
+// Cuenta atrás hasta el GP → "Xd Xh Xm Xs"
 export const getCountdown = (startDate, now = new Date()) => {
   const raceStart = new Date(startDate)
   const remainingTime = raceStart - now

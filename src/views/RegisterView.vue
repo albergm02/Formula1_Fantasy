@@ -19,7 +19,6 @@ import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 import { usernameSchema } from '@/utils/authValidations'
-import { normalizeTextFields } from '@/utils/text'
 import { getRegisterErrorMessage } from '@/utils/authErrors'
 
 const router = useRouter()
@@ -51,9 +50,8 @@ const validationSchema = zodResolver(
 /* Handler Registro utilizando email / contraseña */
 const handleRegister = async ({ valid, values }) => {
   if (!valid) return
-  const normalizedValues = normalizeTextFields(values, ['email', 'username'])
-  const trimmedEmail = normalizedValues.email
-  const trimmedUsername = normalizedValues.username
+  const trimmedEmail = values.email.trim()
+  const trimmedUsername = values.username.trim()
 
   isLoading.value = true
   authError.value = ''

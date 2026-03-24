@@ -1,25 +1,11 @@
-/**
- * @fileoverview Funciones relacionadas con la interfaz de usuario, como mostrar toasts y diálogos de confirmación.
- * Estas funciones se utilizan para proporcionar retroalimentación visual al usuario sobre el resultado de sus acciones,
- * así como para solicitar confirmación antes de realizar acciones destructivas (ej: vender un coche, salir de una liga).
- * Esto centraliza la lógica de UI feedback y evita repetirla en los componentes.
- */
+// Toasts y diálogos de confirmación
 
-/**
- * Muestra un toast con la severidad, título y detalle indicados
- * @param {object} toast - Componente de toast
- * @param {object} options - Opciones para el toast (severity, summary, detail, life)
- */
+// Toast genérico
 export const showToast = (toast, { severity, summary, detail, life = 3000 }) => {
   toast.add({ severity, summary, detail, life })
 }
 
-/**
- * Muestra toast de éxito o error según result { success, message }
- * @param {object} toast - Componente de toast
- * @param {object} result - Resultado de la operación { success, message }
- * @param {object} options - Opciones para mensajes de éxito (success), error (failure) y detalle (successDetail)
- */
+// Toast automático según resultado del store { success, message }
 export const showResultToast = (
   toast,
   result,
@@ -45,11 +31,7 @@ export const showResultToast = (
   })
 }
 
-/**
- * Muestra un diálogo de confirmación para acciones destructivas.
- * @param {object} confirm - Componente de confirmación
- * @param {object} options - Opciones para el diálogo
- */
+// Confirmación antes de acciones destructivas (vender, salir de liga...)
 export const showConfirmDialog = (confirm, options = {}) => {
   confirm.require({
     icon: 'pi pi-exclamation-triangle',
