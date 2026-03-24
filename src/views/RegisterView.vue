@@ -14,12 +14,27 @@ import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 
+/* Utilidades de manejo de errores */
+import { getRegisterErrorMessage } from '@/utils/authErrors'
+
 /* Validación con Zod */
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 import { usernameSchema } from '@/utils/authValidations'
-import { getRegisterErrorMessage } from '@/utils/authErrors'
+
+/* Esquema de validación con Zod */
+const validationSchema = zodResolver(
+  z.object({
+    username: usernameSchema,
+    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
+    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  })
+)
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -34,18 +49,6 @@ const initialFormValues = ref({
   confirmPassword: '',
 })
 
-/* Esquema de validación con Zod */
-const validationSchema = zodResolver(
-  z.object({
-    username: usernameSchema,
-    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
-    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-    confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'],
-  })
-)
 
 /* Handler Registro utilizando email / contraseña */
 const handleRegister = async ({ valid, values }) => {

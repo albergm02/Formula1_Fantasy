@@ -2,35 +2,41 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+/* Servicios de autenticación */
 import { signOut } from '@/services/authService'
 import { useAuthStore } from '@/stores/storeAuth'
-import { usernameSchema } from '@/utils/authValidations'
 
+/* Componentes UI */
 import MagicRings from '@/components/MagicRings.vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 
+/* Validación con Zod */
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
+import { usernameSchema } from '@/utils/authValidations'
 
-const router = useRouter()
-const authStore = useAuthStore()
-
-const isLoading = ref(false)
-const authError = ref('')
-const initialFormValues = ref({
-  username: '',
-})
-
+/* Esquema de validación con Zod */
 const validationSchema = zodResolver(
   z.object({
     username: usernameSchema,
   })
 )
 
+const router = useRouter()
+const authStore = useAuthStore()
+
+/* Estados */
+const isLoading = ref(false)
+const authError = ref('')
+const initialFormValues = ref({
+  username: '',
+})
+
+/* Handler Completar perfil de Google (elegir nombre de piloto) */
 const handleCompleteGoogleProfile = async ({ valid, values }) => {
   if (!valid) return
 
@@ -39,10 +45,12 @@ const handleCompleteGoogleProfile = async ({ valid, values }) => {
   authError.value = ''
 
   try {
+    // Verificamos que exista una sesión de Google activa antes de continuar
     if (!authStore.currentUser.authEmail) {
       throw new Error('No se encontró una sesión válida de Google.')
     }
 
+    // Creamos el perfil del usuario en Firestore con el nombre elegido
     await authStore.initializeUserData(authStore.currentUser.authEmail, trimmedUsername)
     router.push('/ligas')
   } catch (error) {
@@ -52,6 +60,7 @@ const handleCompleteGoogleProfile = async ({ valid, values }) => {
   }
 }
 
+/* Handler Cancelar registro con Google */
 const cancelGoogleSignup = async () => {
   if (isLoading.value) return
 
@@ -60,11 +69,22 @@ const cancelGoogleSignup = async () => {
 }
 </script>
 
+<!-------------------------------------------------------------------------------------------------------------------------->
+
+<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
+
+<!-------------------------------------------------------------------------------------------------------------------------->
+
 <template>
   <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
+
+    <!-- Animación de fondo -->
     <MagicRings class="absolute inset-0 -z-10" color="#FF1E00" :ringCount="2" />
 
+    <!-- Tarjeta principal -->
     <Card class="w-full max-w-md border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800 !bg-black/40 p-2 md:p-4">
+
+      <!-- Encabezado con logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -74,6 +94,7 @@ const cancelGoogleSignup = async () => {
         </div>
       </template>
 
+      <!-- Contenido del formulario -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
           :resolver="validationSchema" @submit="handleCompleteGoogleProfile">

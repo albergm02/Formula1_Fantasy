@@ -4,10 +4,12 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
+/* Stores */
 import { useLigasStore } from '@/stores/storeLeagues'
 import { useAuthStore } from '@/stores/storeAuth'
-import Header from '@/components/Header.vue'
 
+/* Componentes UI */
+import Header from '@/components/Header.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
@@ -20,6 +22,7 @@ const router = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
 
+/* Estados */
 const newLeagueName = ref('')
 const joinCode = ref('')
 const isLoading = ref(false)
@@ -29,20 +32,24 @@ const isOptionsDialogVisible = ref(false)
 const selectedLeague = ref(null)
 const isActionLoading = ref(false)
 
+/* Abre el menú de opciones de una liga seleccionada */
 const openLeagueOptions = (league) => {
   selectedLeague.value = league
   isOptionsDialogVisible.value = true
 }
 
+/* Al montar, cargamos las ligas del usuario */
 onMounted(async () => {
   isLoading.value = true
   await ligasStore.loadUserLeagues()
   isLoading.value = false
 })
 
+/* Handler Crear liga */
 const handleCreateLeague = async () => {
   const normalizedLeagueName = newLeagueName.value.trim()
 
+  // Validaciones de longitud del nombre
   if (normalizedLeagueName.length < 3) {
     toast.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres' })
     return
@@ -63,6 +70,7 @@ const handleCreateLeague = async () => {
   }
 }
 
+/* Handler Unirse a liga con código de invitación */
 const handleJoinLeague = async () => {
   const normalizedJoinCode = joinCode.value.trim().toUpperCase()
 
@@ -80,11 +88,13 @@ const handleJoinLeague = async () => {
   }
 }
 
+/* Navega al dashboard de una liga concreta */
 const openLeague = (leagueId) => {
   ligasStore.activeLeagueId = leagueId
   router.push({ name: 'inicio', query: { liga: leagueId } })
 }
 
+/* Handler Abandonar liga: pide confirmación antes de salir */
 const handleLeaveLeague = () => {
   confirm.require({
     icon: 'pi pi-exclamation-triangle',
@@ -108,6 +118,7 @@ const handleLeaveLeague = () => {
   })
 }
 
+/* Handler Eliminar liga: acción destructiva, borra la liga para todos */
 const handleDeleteLeague = () => {
   confirm.require({
     icon: 'pi pi-trash',
@@ -132,12 +143,20 @@ const handleDeleteLeague = () => {
 }
 </script>
 
+<!-------------------------------------------------------------------------------------------------------------------------->
+
+<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
+
+<!-------------------------------------------------------------------------------------------------------------------------->
+
 <template>
   <div class="min-h-screen bg-[#15151E] font-sans pb-10">
     <Header />
 
     <div class="p-4 mt-4 max-w-4xl mx-auto">
       <div class="flex flex-col gap-6">
+
+        <!-- Botones de crear y unirse a liga -->
         <section class="grid grid-cols-2 gap-4">
           <Button label="CREAR LIGA" icon="pi pi-plus"
             class="w-full py-3 !bg-[#00E5E5] !text-[#15151E] font-black tracking-widest !border-none"
@@ -147,6 +166,7 @@ const handleDeleteLeague = () => {
             @click="isJoinDialogVisible = true" />
         </section>
 
+        <!-- Listado de ligas del usuario -->
         <section>
           <div v-if="ligasStore.leagueDetails.length > 0" class="flex flex-col justify-center w-full">
             <div class="text-center text-[#D9D9D9] font-bold uppercase tracking-wider mb-4">

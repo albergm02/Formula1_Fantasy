@@ -4,8 +4,11 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
+/* Stores y utilidades */
 import { useEscuderiaStore } from '@/stores/storeTeam'
 import { calculateResaleValue } from '@/utils/garage'
+
+/* Componentes UI */
 import Header from '@/components/Header.vue'
 import Navbar from '@/components/Navbar.vue'
 import CarCard from '@/components/CarCard.vue'
@@ -17,12 +20,14 @@ const toast = useToast()
 const confirm = useConfirm()
 const route = useRoute()
 
+/* Si no hay liga activa en el store, intentamos recuperarla de la query */
 onMounted(async () => {
   if (!escuderiaStore.activeLeagueId && route.query.liga) {
     await escuderiaStore.loadTeam(route.query.liga)
   }
 })
 
+/* Handler Venta de coche: pide confirmación y ejecuta la venta */
 const confirmCarSale = (car) => {
   const resaleValue = calculateResaleValue(car.precio)
 
@@ -43,6 +48,7 @@ const confirmCarSale = (car) => {
   })
 }
 
+/* Handler Despido de piloto: pide confirmación y ejecuta el despido */
 const confirmDriverSale = (driver) => {
   const resaleValue = calculateResaleValue(driver.precio)
 
@@ -64,6 +70,7 @@ const confirmDriverSale = (driver) => {
   })
 }
 
+/* Handler Instalar/Desinstalar potenciador */
 const toggleBoosterInstallation = async (instanceId) => {
   const result = await escuderiaStore.toggleBooster(instanceId)
   if (result.success) {
@@ -74,14 +81,22 @@ const toggleBoosterInstallation = async (instanceId) => {
 }
 </script>
 
+<!-------------------------------------------------------------------------------------------------------------------------->
+
+<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
+
+<!-------------------------------------------------------------------------------------------------------------------------->
+
 <template>
   <Header />
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-3xl mx-auto w-full">
+    <!-- Sección: Coche -->
     <section class="grid">
       <div v-if="escuderiaStore.garage.coche" class="flex flex-col w-full h-full">
         <CarCard :coche="escuderiaStore.garage.coche" :modoMercado="false" />
 
+        <!-- Botón de venta del coche -->
         <div class="px-6 pb-2 -mt-1">
           <button @click="confirmCarSale(escuderiaStore.garage.coche)"
             class="w-full bg-[#111111] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
@@ -100,12 +115,14 @@ const toggleBoosterInstallation = async (instanceId) => {
       </div>
     </section>
 
+    <!-- Sección: Pilotos -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <template v-if="escuderiaStore.garage.pilotos.length > 0">
         <div v-for="driver in escuderiaStore.garage.pilotos" :key="driver.instancia_id"
           class="flex flex-col w-full h-full">
           <DriverCard :piloto="driver" :modoMercado="false" />
 
+          <!-- Botón de despido del piloto -->
           <div class="px-6 pb-2 -mt-1">
             <button @click="confirmDriverSale(driver)"
               class="w-full bg-[#111111] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
@@ -118,6 +135,7 @@ const toggleBoosterInstallation = async (instanceId) => {
         </div>
       </template>
 
+      <!-- Estado vacío: sin pilotos -->
       <div v-else
         class="col-span-full flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
         <i class="pi pi-users text-3xl text-zinc-600 mb-3"></i>

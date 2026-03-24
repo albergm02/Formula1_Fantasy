@@ -3,10 +3,13 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 
+/* Stores */
 import { useLigasStore } from '@/stores/storeLeagues'
 import { useAuthStore } from '@/stores/storeAuth'
 import { useEscuderiaStore } from '@/stores/storeTeam'
 import { db } from '@/services/firebase'
+
+/* Componentes UI */
 import Navbar from '@/components/Navbar.vue'
 import Header from '@/components/Header.vue'
 
@@ -15,26 +18,30 @@ const authStore = useAuthStore()
 const escuderiaStore = useEscuderiaStore()
 const route = useRoute()
 
+/* Estados */
 const ranking = ref([])
 const isLoading = ref(true)
 
+/* Carga la clasificación de la liga activa desde Firestore */
 const loadRanking = async () => {
   isLoading.value = true
 
   try {
     const leagueId = route.query.liga || ligasStore.activeLeagueId
     if (!leagueId) {
-      console.error('Error: No se encontró una liga activa (RankingView)')
       isLoading.value = false
       return
     }
 
     ligasStore.activeLeagueId = leagueId
+
+    // Consultamos todas las participaciones de esta liga
     const participantsRef = collection(db, 'participaciones')
     const leagueQuery = query(participantsRef, where('id_liga', '==', leagueId))
     const participantsSnapshot = await getDocs(leagueQuery)
     const participantRows = []
 
+    // Para cada participante, buscamos su nombre de usuario en la colección de usuarios
     for (const participantDocument of participantsSnapshot.docs) {
       const participantData = participantDocument.data()
       let playerName = 'Desconocido'
@@ -57,17 +64,19 @@ const loadRanking = async () => {
       })
     }
 
+    // Ordenamos: primero por puntos (desc), luego por presupuesto (desc) como desempate
     ranking.value = participantRows.sort(
       (firstPlayer, secondPlayer) =>
         secondPlayer.points - firstPlayer.points || secondPlayer.budget - firstPlayer.budget,
     )
   } catch (error) {
-    console.error('Error al cargar la clasificación (RankingView):', error)
+    // Si falla la carga, el ranking queda vacío
   } finally {
     isLoading.value = false
   }
 }
 
+/* Si no hay liga activa, la recuperamos de la query. Luego cargamos el ranking */
 onMounted(async () => {
   if (!escuderiaStore.activeLeagueId && route.query.liga) {
     await escuderiaStore.loadTeam(route.query.liga)
@@ -77,21 +86,31 @@ onMounted(async () => {
 })
 </script>
 
+<!-------------------------------------------------------------------------------------------------------------------------->
+
+<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
+
+<!-------------------------------------------------------------------------------------------------------------------------->
+
 <template>
   <div class="min-h-screen bg-[#15151E] font-sans pb-24">
     <Header />
 
     <main class="mx-auto w-full max-w-4xl p-4 flex flex-col gap-4 mt-4">
+
+      <!-- Título de la clasificación -->
       <div class="flex justify-center border-b border-[#FFFFFF]/50 pb-2">
         <h2 class="text-2xl font-black text-white uppercase">Clasificación general</h2>
       </div>
 
+      <!-- Spinner de carga -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-10 gap-3">
         <i class="pi pi-spinner text-4xl text-[#00E5E5] animate-spin"></i>
         <p class="text-[#00E5E5] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificación...
         </p>
       </div>
 
+      <!-- Listado de jugadores ordenados por puntos -->
       <div v-else class="flex flex-col gap-3">
         <div v-for="(player, index) in ranking" :key="player.id"
           class="flex items-center justify-between p-4 border border-white"

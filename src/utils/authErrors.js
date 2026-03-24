@@ -1,6 +1,6 @@
 // Traduce errores de Firebase Auth a mensajes legibles para el usuario
 
-const INVALID_CREDENTIAL_CODES = [
+const CREDENCIALES_INVALIDAS = [
   'auth/invalid-credential',
   'auth/user-not-found',
   'auth/wrong-password',
@@ -8,7 +8,7 @@ const INVALID_CREDENTIAL_CODES = [
 
 // Login con email/contraseña
 export const getLoginErrorMessage = (error) => {
-  if (INVALID_CREDENTIAL_CODES.includes(error?.code)) {
+  if (CREDENCIALES_INVALIDAS.includes(error?.code)) {
     return 'Correo o contraseña incorrectos.'
   }
   if (error?.code === 'auth/too-many-requests') {

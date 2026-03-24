@@ -23,6 +23,13 @@ import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
+/* Esquema de validación con Zod */
+const validationSchema = zodResolver(
+  z.object({
+    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
+    password: z.string().min(1, 'La contraseña es obligatoria')
+  })
+)
 
 const router = useRouter()
 const toast = useToast()
@@ -35,14 +42,9 @@ const initialFormValues = ref({ email: '', password: '' })
 const isResetModalVisible = ref(false)
 const resetEmailAddress = ref('')
 const isResetLoading = ref(false)
-const genericResetMessage = 'Si el correo está registrado, recibirás un enlace de recuperación.'
 
-const validationSchema = zodResolver(
-  z.object({
-    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
-    password: z.string().min(1, 'La contraseña es obligatoria')
-  })
-)
+/* Mensajes */
+const genericResetMessage = 'Si el correo está registrado, recibirás un enlace de recuperación.'
 
 /* Handler Login utilizando email / contraseña */
 const handleLogin = async ({ valid, values }) => {
@@ -52,7 +54,9 @@ const handleLogin = async ({ valid, values }) => {
   authError.value = ''
 
   try {
+    // Intentamos iniciar sesión con email y contraseña
     const userCredential = await signIn(values.email, values.password)
+    // Si el inicio de sesión es exitoso, inicializamos los datos del usuario en el store
     await authStore.initializeUserData(userCredential.user.email, userCredential.user.displayName)
     router.push('/ligas')
   } catch (error) {
@@ -71,21 +75,26 @@ const handleGoogleLogin = async () => {
     const userCredential = await signInWithGoogle()
     const googleEmail = userCredential.user.email.trim()
 
+    // Si no obtenemos un correo válido de Google, mostramos un error
     if (!googleEmail) {
       throw new Error('No se pudo obtener el correo de Google.')
     }
 
+    // Intentamos inicializar los datos del usuario.
     const profileExists = await authStore.initializeUserData(googleEmail, userCredential.user.displayName, {
       createIfMissing: false,
     })
 
+    // Si el perfil existe, vamos a ligas. Si no, vamos a completar registro.
     if (profileExists) {
       router.push('/ligas')
       return
     }
 
+    // Si no existe perfil, redirigimos a completar registro con Google
     router.push('/registro-google')
   } catch (error) {
+    // Si el error se debe a que el usuario cerró la ventana emergente de Google, no mostramos un mensaje de error.
     if (!isGooglePopupClosed(error)) {
       authError.value = getGoogleErrorMessage(error)
     }
@@ -98,11 +107,13 @@ const handleGoogleLogin = async () => {
 const handlePasswordReset = async () => {
   const emailToSend = resetEmailAddress.value.trim()
 
+  // Validamos el formato del correo antes de intentar enviar el email de recuperación
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToSend)) {
     toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
     return
   }
-
+  // Intentamos enviar el correo de recuperación. 
+  // Para evitar revelar si un correo está registrado o no, mostramos el mismo mensaje de éxito tanto para correos válidos como para no registrados.
   isResetLoading.value = true
   try {
     await resetPassword(emailToSend)
