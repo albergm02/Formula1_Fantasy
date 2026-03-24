@@ -1,7 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/storeAuth'
-import { useEscuderiaStore } from '@/stores/storeEscuderia'
+import { useEscuderiaStore } from '@/stores/storeTeam'
 import { signOut } from '@/services/authService'
 import Button from 'primevue/button'
 import { useRoute } from 'vue-router'
@@ -13,7 +13,7 @@ const authStore = useAuthStore()
 const escuderiaStore = useEscuderiaStore()
 
 
-const cerrarSesion = async () => {
+const handleSignOut = async () => {
     try {
         await signOut()
         router.push({ name: 'login' })
@@ -22,7 +22,7 @@ const cerrarSesion = async () => {
     }
 }
 
-const volverADashboard = () => {
+const goToDashboard = () => {
     const leagueId = escuderiaStore.activeLeagueId || route.query.liga || null
     if (leagueId) {
         router.push({ name: 'inicio', query: { liga: leagueId } })
@@ -37,21 +37,21 @@ const volverADashboard = () => {
     <!-- z-10 para que el header esté por encima de otros elementos / border-b (border-bottom) -->
     <header class="w-full bg-[#15151E] border-b border-[#FF1E00] p-3 flex justify-between sticky top-0 z-40">
         <div class="flex items-center gap-2">
-            <img src="/logo.png" class="h-16 w-16 object-contain cursor-pointer" @click="volverADashboard" />
-            <span class="font-black italic text-[#FF1E00] text-lg sm:block cursor-pointer" @click="volverADashboard">F1
+            <img src="/logo.png" class="h-16 w-16 object-contain cursor-pointer" @click="goToDashboard" />
+            <span class="font-black italic text-[#FF1E00] text-lg sm:block cursor-pointer" @click="goToDashboard">F1
                 FANTASY</span>
         </div>
 
         <div class="flex items-center gap-3">
             <div class="text-right">
-                <p class="text text-white font-bold uppercase">{{ authStore.usuarioGlobal.nombre }}</p>
+                <p class="text text-white font-bold uppercase">{{ authStore.currentUser.displayName }}</p>
                 <p v-if="route.name !== 'ligas'" class="text-xs text-white mt-0.5">
                     Pts: <strong class="text-yellow-500">{{ escuderiaStore.points }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ escuderiaStore.budget }}M</span>
                 </p>
             </div>
             <!-- hover es utilizado para cambiar el color al clickear -->
-            <Button @click="cerrarSesion" icon="pi pi-sign-out" text
+            <Button @click="handleSignOut" icon="pi pi-sign-out" text
                 class="!text-zinc-400 hover:!text-red-500 cursor-pointer" />
         </div>
     </header>

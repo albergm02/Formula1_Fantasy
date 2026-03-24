@@ -2,76 +2,69 @@ import { defineStore } from 'pinia'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '../services/firebase'
 
-/* Definición del almacén de autenticación */
 export const useAuthStore = defineStore('auth', {
-
   state: () => ({
-    usuarioGlobal: {
-      emailAuth: '',
-      nombre: '',
-      ligasIds: [],
+    currentUser: {
+      authEmail: '',
+      displayName: '',
+      leagueIds: [],
     },
     profileExists: false,
-
-    // Booleano creado para mostrar una pantalla de "Cargando"
-    datosCargados: false,
+    isDataLoaded: false,
   }),
 
   actions: {
-    /* Iniciar sesión y traer datos de perfil de Firebase */
-    async initializeUserData(emailUsuario, nombreUsuario = '', opciones = {}) {
-      const { createIfMissing = true } = opciones
+    async initializeUserData(userEmail, username = '', options = {}) {
+      const { createIfMissing = true } = options
 
       try {
-        this.datosCargados = false
-        this.usuarioGlobal.emailAuth = emailUsuario
-        const docRef = doc(db, 'usuarios', emailUsuario)
+        this.isDataLoaded = false
+        this.currentUser.authEmail = userEmail
+        const docRef = doc(db, 'usuarios', userEmail)
         const docSnap = await getDoc(docRef)
-        // Caso de un login
+
         if (docSnap.exists()) {
           const data = docSnap.data()
-          this.usuarioGlobal.nombre = data.nombre || 'Piloto'
-          this.usuarioGlobal.ligasIds = data.ligasIds || []
-          this.profileExists = true
-          return true
-          // Caso de que sea un registro
-        } else {
-          if (!createIfMissing) {
-            this.usuarioGlobal.nombre = ''
-            this.usuarioGlobal.ligasIds = []
-            this.profileExists = false
-            return false
-          }
-
-          this.usuarioGlobal.nombre = nombreUsuario
-          this.usuarioGlobal.ligasIds = []
-          await setDoc(docRef, {
-            emailAuth: emailUsuario,
-            nombre: nombreUsuario,
-            ligasIds: [],
-          })
+          this.currentUser.displayName = data.nombre || 'Piloto'
+          this.currentUser.leagueIds = data.ligasIds || []
           this.profileExists = true
           return true
         }
+
+        if (!createIfMissing) {
+          this.currentUser.displayName = ''
+          this.currentUser.leagueIds = []
+          this.profileExists = false
+          return false
+        }
+
+        this.currentUser.displayName = username
+        this.currentUser.leagueIds = []
+        await setDoc(docRef, {
+          emailAuth: userEmail,
+          nombre: username,
+          ligasIds: [],
+        })
+        this.profileExists = true
+        return true
       } catch (error) {
         console.error('Error en initializeUserData (storeAuth.js):', error)
         this.profileExists = false
         return false
       } finally {
-        this.datosCargados = true
+        this.isDataLoaded = true
       }
     },
 
-    /* Cerrar sesión y limpiar datos */
-    cerrarSesion() {
-      this.datosCargados = false
-      this.usuarioGlobal = {
-        emailAuth: '',
-        nombre: '',
-        ligasIds: [],
+    clearSession() {
+      this.isDataLoaded = false
+      this.currentUser = {
+        authEmail: '',
+        displayName: '',
+        leagueIds: [],
       }
       this.profileExists = false
-      this.datosCargados = true
+      this.isDataLoaded = true
     },
   },
 })

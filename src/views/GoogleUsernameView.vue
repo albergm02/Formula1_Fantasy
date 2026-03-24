@@ -4,8 +4,8 @@ import { useRouter } from 'vue-router'
 
 import { signOut } from '@/services/authService'
 import { useAuthStore } from '@/stores/storeAuth'
-import { usernameSchema } from '@/utils/validacionesAuth'
-import { trimText } from '@/utils/texto'
+import { usernameSchema } from '@/utils/authValidations'
+import { trimText } from '@/utils/text'
 
 import MagicRings from '@/components/MagicRings.vue'
 import Card from 'primevue/card'
@@ -40,11 +40,11 @@ const handleCompleteGoogleProfile = async ({ valid, values }) => {
   authError.value = ''
 
   try {
-    if (!authStore.usuarioGlobal.emailAuth) {
+    if (!authStore.currentUser.authEmail) {
       throw new Error('No se encontró una sesión válida de Google.')
     }
 
-    await authStore.initializeUserData(authStore.usuarioGlobal.emailAuth, trimmedUsername)
+    await authStore.initializeUserData(authStore.currentUser.authEmail, trimmedUsername)
     router.push('/ligas')
   } catch (error) {
     authError.value = 'Error al completar el registro con Google: ' + error.message
@@ -53,7 +53,7 @@ const handleCompleteGoogleProfile = async ({ valid, values }) => {
   }
 }
 
-const cancelarRegistroGoogle = async () => {
+const cancelGoogleSignup = async () => {
   if (isLoading.value) return
 
   await signOut()
@@ -104,7 +104,7 @@ const cancelarRegistroGoogle = async () => {
 
             <Button type="button" label="Cancelar" :disabled="isLoading"
               class="w-full rounded-lg py-3 font-black uppercase shadow-lg transition-colors !border border-[#00E5E5] !bg-transparent !text-[#00E5E5] hover:!bg-[#00E5E5]/10"
-              @click="cancelarRegistroGoogle" />
+              @click="cancelGoogleSignup" />
           </div>
         </Form>
       </template>

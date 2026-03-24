@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { useEscuderiaStore } from '@/stores/storeEscuderia'
-import { useLigasStore } from '@/stores/storeLigas'
+import { useEscuderiaStore } from '@/stores/storeTeam'
+import { useLigasStore } from '@/stores/storeLeagues'
 
 const escuderiaStore = useEscuderiaStore()
 const ligasStore = useLigasStore()

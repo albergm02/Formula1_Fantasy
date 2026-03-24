@@ -4,14 +4,14 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import { useEscuderiaStore } from '@/stores/storeEscuderia'
-import { calculateResaleValue } from '@/utils/garaje'
+import { useEscuderiaStore } from '@/stores/storeTeam'
+import { calculateResaleValue } from '@/utils/garage'
 import { showConfirmDialog, showResultToast } from '@/utils/uiFeedback'
 import Header from '@/components/Header.vue'
 import Navbar from '@/components/Navbar.vue'
-import CartaCoche from '@/components/CartaCoche.vue'
-import CartaPiloto from '@/components/CartaPiloto.vue'
-import CartaPotenciador from '@/components/CartaPotenciador.vue'
+import CarCard from '@/components/CarCard.vue'
+import DriverCard from '@/components/DriverCard.vue'
+import BoosterCard from '@/components/BoosterCard.vue'
 
 const escuderiaStore = useEscuderiaStore()
 const toast = useToast()
@@ -78,7 +78,7 @@ const toggleBoosterInstallation = async (instanceId) => {
   <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-3xl mx-auto w-full">
     <section class="grid">
       <div v-if="escuderiaStore.garage.coche" class="flex flex-col w-full h-full">
-        <CartaCoche :coche="escuderiaStore.garage.coche" :modoMercado="false" />
+        <CarCard :coche="escuderiaStore.garage.coche" :modoMercado="false" />
 
         <div class="px-6 pb-2 -mt-1">
           <button @click="confirmCarSale(escuderiaStore.garage.coche)"
@@ -102,7 +102,7 @@ const toggleBoosterInstallation = async (instanceId) => {
       <template v-if="escuderiaStore.garage.pilotos.length > 0">
         <div v-for="driver in escuderiaStore.garage.pilotos" :key="driver.instancia_id"
           class="flex flex-col w-full h-full">
-          <CartaPiloto :piloto="driver" :modoMercado="false" />
+          <DriverCard :piloto="driver" :modoMercado="false" />
 
           <div class="px-6 pb-2 -mt-1">
             <button @click="confirmDriverSale(driver)"
@@ -128,7 +128,7 @@ const toggleBoosterInstallation = async (instanceId) => {
         <div v-for="booster in escuderiaStore.garage.potenciadores" :key="booster.instancia_id"
           class="flex flex-col w-full h-full">
           <div class="aspect-square w-full">
-            <CartaPotenciador :potenciador="booster" :modoMercado="false" />
+            <BoosterCard :potenciador="booster" :modoMercado="false" />
           </div>
 
           <button @click="toggleBoosterInstallation(booster.instancia_id)"

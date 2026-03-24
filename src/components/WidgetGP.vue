@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getCountdown, getNextGrandPrix } from '@/utils/granPremio'
+import { getCountdown, getNextGrandPrix } from '@/utils/grandPrix'
 
 const nextGrandPrix = ref(null)
 const countdown = ref('')

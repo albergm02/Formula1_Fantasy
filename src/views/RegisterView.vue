@@ -18,9 +18,9 @@ import Message from 'primevue/message'
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
-import { usernameSchema } from '@/utils/validacionesAuth'
-import { normalizeTextFields } from '@/utils/texto'
-import { getRegisterErrorMessage } from '@/utils/authErrores'
+import { usernameSchema } from '@/utils/authValidations'
+import { normalizeTextFields } from '@/utils/text'
+import { getRegisterErrorMessage } from '@/utils/authErrors'
 
 const router = useRouter()
 const authStore = useAuthStore()

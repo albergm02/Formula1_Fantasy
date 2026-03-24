@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { collection, doc, updateDoc, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/services/firebase'
 import { useAuthStore } from './storeAuth'
-import { createEmptyGarage, calculateResaleValue } from '@/utils/garaje'
+import { createEmptyGarage, calculateResaleValue } from '@/utils/garage'
 
 export const useEscuderiaStore = defineStore('escuderia', {
   state: () => ({
@@ -40,13 +40,13 @@ export const useEscuderiaStore = defineStore('escuderia', {
         }
 
         console.warn(
-          'Error in loadTeam (storeEscuderia.js): active participant not found for the selected league',
+          'Error in loadTeam (storeTeam.js): active participant not found for the selected league',
         )
         this.budget = 50.0
         this.points = 0
         this.garage = createEmptyGarage()
       } catch (error) {
-        console.warn('Error in loadTeam (storeEscuderia.js):', error)
+        console.warn('Error in loadTeam (storeTeam.js):', error)
         this.budget = 50.0
         this.points = 0
         this.garage = createEmptyGarage()
@@ -57,7 +57,7 @@ export const useEscuderiaStore = defineStore('escuderia', {
 
     async saveTeamState() {
       if (!this.activeParticipantId) {
-        console.warn('Error in saveTeamState (storeEscuderia.js): missing active participant id')
+        console.warn('Error in saveTeamState (storeTeam.js): missing active participant id')
         return
       }
 
@@ -69,7 +69,7 @@ export const useEscuderiaStore = defineStore('escuderia', {
           garaje: this.garage,
         })
       } catch (error) {
-        console.error('Error in saveTeamState (storeEscuderia.js):', error)
+        console.error('Error in saveTeamState (storeTeam.js):', error)
       }
     },
 
@@ -139,7 +139,7 @@ export const useEscuderiaStore = defineStore('escuderia', {
           message: `Has obtenido ${calculateResaleValue(item.precio)} de presupuesto, ¡Hasta pronto, ${item.nombre}.!`,
         }
       } catch (error) {
-        console.error('Error in sellItem (storeEscuderia.js):', error)
+        console.error('Error in sellItem (storeTeam.js):', error)
         return { success: false, message: 'Error al vender el elemento. Inténtalo de nuevo.' }
       }
     },

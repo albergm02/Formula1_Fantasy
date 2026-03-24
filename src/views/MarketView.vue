@@ -3,14 +3,14 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
-import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/mercado'
-import { useEscuderiaStore } from '@/stores/storeEscuderia'
+import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/marketData'
+import { useEscuderiaStore } from '@/stores/storeTeam'
 import { showResultToast } from '@/utils/uiFeedback'
 import Navbar from '@/components/Navbar.vue'
 import Header from '@/components/Header.vue'
-import CartaPiloto from '@/components/CartaPiloto.vue'
-import CartaPotenciador from '@/components/CartaPotenciador.vue'
-import CartaCoche from '@/components/CartaCoche.vue'
+import DriverCard from '@/components/DriverCard.vue'
+import BoosterCard from '@/components/BoosterCard.vue'
+import CarCard from '@/components/CarCard.vue'
 
 const escuderiaStore = useEscuderiaStore()
 const toast = useToast()
@@ -64,17 +64,17 @@ const handlePurchase = async (item) => {
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-20">
     <section class="grid">
-      <CartaCoche v-if="weeklyCar" :coche="weeklyCar" :modoMercado="true" @fichar="handlePurchase" />
+      <CarCard v-if="weeklyCar" :coche="weeklyCar" :modoMercado="true" @fichar="handlePurchase" />
     </section>
 
     <section class="grid">
-      <CartaPiloto v-if="weeklyDriver" :piloto="weeklyDriver" :modoMercado="true" @fichar="handlePurchase" />
+      <DriverCard v-if="weeklyDriver" :piloto="weeklyDriver" :modoMercado="true" @fichar="handlePurchase" />
     </section>
 
     <section class="grid">
       <div class="grid grid-cols-2 gap-6">
         <div v-for="booster in weeklyBoosters" :key="booster.id" class="aspect-square">
-          <CartaPotenciador :potenciador="booster" :modoMercado="true" @fichar="handlePurchase" />
+          <BoosterCard :potenciador="booster" :modoMercado="true" @fichar="handlePurchase" />
         </div>
       </div>
     </section>

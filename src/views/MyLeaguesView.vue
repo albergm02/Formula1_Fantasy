@@ -4,9 +4,9 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import { useLigasStore } from '@/stores/storeLigas'
+import { useLigasStore } from '@/stores/storeLeagues'
 import { useAuthStore } from '@/stores/storeAuth'
-import { trimText, toUpperTrimmed } from '@/utils/texto'
+import { trimText, toUpperTrimmed } from '@/utils/text'
 import { showConfirmDialog, showResultToast, showToast } from '@/utils/uiFeedback'
 import Header from '@/components/Header.vue'
 

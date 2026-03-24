@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useEscuderiaStore } from '@/stores/storeEscuderia';
-import { useLigasStore } from '@/stores/storeLigas';
+import { useEscuderiaStore } from '@/stores/storeTeam';
+import { useLigasStore } from '@/stores/storeLeagues';
 
 import Header from '@/components/Header.vue'
 import Navbar from '@/components/Navbar.vue'

@@ -14,7 +14,7 @@ const props = defineProps({
   },
 })
 
-// Emitimos el evento 'fichar' para que el componente padre (MercadoView) gestione la lógica
+// Emitimos el evento 'fichar' para que el componente padre (MarketView) gestione la lógica
 const emit = defineEmits(['fichar'])
 
 const mostrarInfo = ref(false)

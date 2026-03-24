@@ -14,8 +14,8 @@ import {
 } from 'firebase/firestore'
 import { db } from '../services/firebase'
 import { useAuthStore } from './storeAuth'
-import { createEmptyGarage } from '@/utils/garaje'
-import { generateLeagueInviteCode, hasReachedLeagueLimit } from '@/utils/ligas'
+import { createEmptyGarage } from '@/utils/garage'
+import { generateLeagueInviteCode, hasReachedLeagueLimit } from '@/utils/leagues'
 
 export const useLigasStore = defineStore('ligas', {
   state: () => ({
@@ -80,7 +80,7 @@ export const useLigasStore = defineStore('ligas', {
         await this.loadUserLeagues()
         return { success: true, message: `Liga creada. Código: ${inviteCode}` }
       } catch (error) {
-        console.error('Error in createLeague (storeLigas.js):', error)
+        console.error('Error in createLeague (storeLeagues.js):', error)
         return { success: false, message: 'Error al crear la liga. Inténtalo de nuevo.' }
       }
     },
@@ -104,7 +104,7 @@ export const useLigasStore = defineStore('ligas', {
           authStore.currentUser.leagueIds.includes(league.id),
         )
       } catch (error) {
-        console.error('Error in loadUserLeagues (storeLigas.js):', error)
+        console.error('Error in loadUserLeagues (storeLeagues.js):', error)
         this.leagueDetails = []
       }
     },
@@ -160,7 +160,7 @@ export const useLigasStore = defineStore('ligas', {
         await this.loadUserLeagues()
         return { success: true, message: 'Te has unido a la liga.' }
       } catch (error) {
-        console.error('Error in joinLeague (storeLigas.js):', error)
+        console.error('Error in joinLeague (storeLeagues.js):', error)
         return { success: false, message: 'Error al unirse a la liga. Inténtalo de nuevo.' }
       }
     },
@@ -231,7 +231,7 @@ export const useLigasStore = defineStore('ligas', {
 
         return { success: true, message: 'Has abandonado la liga.' }
       } catch (error) {
-        console.error('Error in leaveLeague (storeLigas.js):', error)
+        console.error('Error in leaveLeague (storeLeagues.js):', error)
         return { success: false, message: 'Error de telemetría al abandonar.' }
       }
     },
@@ -277,7 +277,7 @@ export const useLigasStore = defineStore('ligas', {
 
         return { success: true, message: 'Campeonato disuelto con éxito.' }
       } catch (error) {
-        console.error('Error in deleteLeague (storeLigas.js):', error)
+        console.error('Error in deleteLeague (storeLeagues.js):', error)
         return { success: false, message: 'Error al destruir la liga.' }
       }
     },

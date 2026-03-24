@@ -15,8 +15,8 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
-import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from '@/utils/authErrores'
-import { isValidEmail, trimText } from '@/utils/texto'
+import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from '@/utils/authErrors'
+import { isValidEmail, trimText } from '@/utils/text'
 import { showToast } from '@/utils/uiFeedback'
 
 /* Validación con Zod */

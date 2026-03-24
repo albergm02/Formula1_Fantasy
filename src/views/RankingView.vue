@@ -3,9 +3,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 
-import { useLigasStore } from '@/stores/storeLigas'
+import { useLigasStore } from '@/stores/storeLeagues'
 import { useAuthStore } from '@/stores/storeAuth'
-import { useEscuderiaStore } from '@/stores/storeEscuderia'
+import { useEscuderiaStore } from '@/stores/storeTeam'
 import { db } from '@/services/firebase'
 import Navbar from '@/components/Navbar.vue'
 import Header from '@/components/Header.vue'
@@ -95,7 +95,7 @@ onMounted(async () => {
       <div v-else class="flex flex-col gap-3">
         <div v-for="(player, index) in ranking" :key="player.id"
           class="flex items-center justify-between p-4 border border-white"
-          :class="{ '!border-[#FF1E00] !bg-[#FF1E00]/10': player.email === authStore.usuarioGlobal.emailAuth }">
+          :class="{ '!border-[#FF1E00] !bg-[#FF1E00]/10': player.email === authStore.currentUser.authEmail }">
           <div class="flex items-center gap-4">
             <div class="text-2xl font-black italic -top-4 relative" :class="{
               'text-yellow-400': index === 0,

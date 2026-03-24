@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../services/firebase'
 import { useAuthStore } from '@/stores/storeAuth'
-import { useLigasStore } from '@/stores/storeLigas'
+import { useLigasStore } from '@/stores/storeLeagues'
 
 const routes = [
   {
@@ -26,7 +26,7 @@ const routes = [
   {
     path: '/ligas',
     name: 'ligas',
-    component: () => import('../views/MisLigasView.vue'),
+    component: () => import('../views/MyLeaguesView.vue'),
     meta: { requiresAuth: true },
   },
   {
@@ -38,13 +38,13 @@ const routes = [
   {
     path: '/mercado',
     name: 'mercado',
-    component: () => import('../views/MercadoView.vue'),
+    component: () => import('../views/MarketView.vue'),
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
     path: '/garaje',
     name: 'garaje',
-    component: () => import('../views/GarajeView.vue'),
+    component: () => import('../views/GarageView.vue'),
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
@@ -69,7 +69,7 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   const ligasStore = useLigasStore()
 
-  if (user && !authStore.usuarioGlobal.emailAuth) {
+  if (user && !authStore.currentUser.authEmail) {
     await authStore.initializeUserData(user.email, user.displayName, {
       createIfMissing: false,
     })
@@ -97,16 +97,16 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresLiga) {
     if (
-      authStore.usuarioGlobal.ligasIds.length > 0 &&
+      authStore.currentUser.leagueIds.length > 0 &&
       ligasStore.leagueDetails.length === 0
     ) {
       await ligasStore.loadUserLeagues()
     }
 
     if (
-      !authStore.usuarioGlobal ||
-      !authStore.usuarioGlobal.ligasIds ||
-      authStore.usuarioGlobal.ligasIds.length === 0
+      !authStore.currentUser ||
+      !authStore.currentUser.leagueIds ||
+      authStore.currentUser.leagueIds.length === 0
     ) {
       return { name: 'ligas' }
     }
