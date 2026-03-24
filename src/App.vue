@@ -2,18 +2,16 @@
   <div class="fixed inset-0 -z-30 h-full w-full bg-[#15151E]"></div>
 
   <Toast position="top-center" />
-  <ConfirmDialog
-    :pt="{
-      root: {
-        class:
-          '!bg-[#15151E] !border-none',
-      },
-      title: { class: 'text-[#00E5E5]' },
-      content: { class: ' !text-[#D9D9D9]' },
-      footer: { class: '!bg-transparent gap-2 flex justify-end' },
-      icon: { class: '!text-[#FF1E00]' },
-    }"
-  ></ConfirmDialog>
+  <ConfirmDialog :pt="{
+    root: {
+      class:
+        '!bg-[#15151E] !border-none',
+    },
+    title: { class: 'text-[#00E5E5]' },
+    content: { class: ' !text-[#D9D9D9]' },
+    footer: { class: '!bg-transparent gap-2 flex justify-end' },
+    icon: { class: '!text-[#FF1E00]' },
+  }"></ConfirmDialog>
 
   <!-- Sección de carga para cuando esté cargando -->
   <div v-if="!authStore.isDataLoaded" class="flex flex-col items-center justify-center h-screen w-full gap-3">
@@ -38,15 +36,9 @@ const auth = getAuth()
 const router = useRouter()
 
 onMounted(() => {
-  /* Observa cambios de sesión */
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      if (!authStore.currentUser.authEmail) {
-        await authStore.initializeUserData(user.email, user.displayName, {
-          createIfMissing: false,
-        })
-      }
-    } else {
+  /* Observa cambios de sesión: solo gestiona el cierre de sesión */
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
       authStore.clearSession()
       if (router.currentRoute.value.path !== '/' && router.currentRoute.value.path !== 'registro')
         router.push('/')

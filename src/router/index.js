@@ -69,10 +69,16 @@ router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   const ligasStore = useLigasStore()
 
-  if (user && !authStore.currentUser.authEmail) {
+  // Si hay usuario pero aún no se han cargado sus datos, los inicializamos
+  if (user && !authStore.isDataLoaded) {
     await authStore.initializeUserData(user.email, user.displayName, {
       createIfMissing: false,
     })
+  }
+
+  // Si no hay sesión activa, limpiamos el store para ocultar el spinner
+  if (!user && !authStore.isDataLoaded) {
+    authStore.clearSession()
   }
 
   if (to.meta.requiresAuth && !user) {
@@ -96,10 +102,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresLiga) {
-    if (
-      authStore.currentUser.leagueIds.length > 0 &&
-      ligasStore.leagueDetails.length === 0
-    ) {
+    if (authStore.currentUser.leagueIds.length > 0 && ligasStore.leagueDetails.length === 0) {
       await ligasStore.loadUserLeagues()
     }
 
