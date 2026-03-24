@@ -64,7 +64,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-[#15151E] border border-zinc-800 p-4 text-zinc-600">
+  <div class="bg-transparent border-b border-zinc-800 p-4 text-zinc-600">
     <h3 class="text-sm font-bold uppercase tracking-widest mb-2">Próximo Gran Premio</h3>
 
     <div v-if="proximaCarrera" class="flex flex-row items-center gap-4">

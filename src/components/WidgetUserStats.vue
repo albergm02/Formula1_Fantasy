@@ -16,7 +16,7 @@ const nombreLigaActual = computed(() => {
 
 <template>
   <!-- Bienvenida -->
-  <div class="flex items-center justify-between bg-[#111111] p-5">
+  <div class="flex items-center justify-between bg-transparent border-b border-zinc-800 p-5">
     <div class="flex flex-col">
       <span class="text-[#00E5E5] text-[10px] font-black uppercase mb-1">Bienvenido al Paddock</span>
       <h1 class="text-xl font-black text-white italic uppercase w-32">
