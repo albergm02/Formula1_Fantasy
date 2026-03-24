@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import Button from 'primevue/button'
+import ElectricBorder from '@/components/ElectricBorder.vue'
 
 const props = defineProps({
   piloto: {
@@ -38,14 +39,12 @@ const confirmarCompra = () => {
 <template>
   <div class="px-6 py-2 w-full h-full min-h-[500px]">
 
-    <div class="relative w-full h-full flex flex-col overflow-hidden"
-      :class="props.piloto.tier === 2 ? 'p-[2px]' : 'border border-zinc-800'">
-
-      <div v-if="props.piloto.tier === 2"
-        class="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_70%,#D4A843_100%)] animate-[spin_3s_linear_infinite]">
-      </div>
-
-      <div class="relative z-10 bg-[#1A1A1F] flex flex-col flex-1 w-full h-full overflow-hidden">
+    <!-- Tier 2: envuelto con ElectricBorder | Tier 1: div con borde simple -->
+    <component :is="props.piloto.tier === 2 ? ElectricBorder : 'div'" v-bind="props.piloto.tier === 2
+      ? { color: '#D4A843', speed: 0.3, chaos: 0.2, thickness: 3 }
+      : {}"
+      :class="props.piloto.tier === 2 ? 'w-full h-full' : 'w-full h-full border border-zinc-800 overflow-hidden'">
+      <div class="bg-[#1A1A1F] flex flex-col w-full h-full overflow-hidden">
 
         <header class="flex justify-between items-center p-3 z-20 bg-black shrink-0">
           <div class="flex flex-col">
@@ -71,7 +70,7 @@ const confirmarCompra = () => {
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-5 flex flex-col text-left z-30 bg-[#1A1A1F]/90 backdrop-blur-md overflow-y-auto">
+            class="absolute inset-0 p-5 flex flex-col text-left z-20 bg-[#1A1A1F]/90 backdrop-blur-md">
             <h4 class="text-xs font-black border-b border-zinc-700 text-white pb-2 mb-3 text-center">
               DESCRIPCIÓN
             </h4>
@@ -128,6 +127,6 @@ const confirmarCompra = () => {
         </Button>
 
       </div>
-    </div>
+    </component>
   </div>
 </template>
