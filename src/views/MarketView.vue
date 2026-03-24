@@ -5,7 +5,6 @@ import { useToast } from 'primevue/usetoast'
 
 import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/marketData'
 import { useEscuderiaStore } from '@/stores/storeTeam'
-import { showResultToast } from '@/utils/uiFeedback'
 import Navbar from '@/components/Navbar.vue'
 import Header from '@/components/Header.vue'
 import DriverCard from '@/components/DriverCard.vue'
@@ -51,11 +50,11 @@ onMounted(async () => {
 const handlePurchase = async (item) => {
   const result = await escuderiaStore.buyItem(item)
 
-  showResultToast(toast, result, {
-    success: { severity: 'success', summary: 'Fichaje exitoso' },
-    failure: { severity: 'error', summary: 'Fichaje fallido' },
-    successDetail: `Has fichado a ${item.nombre} por ${item.precio}M`,
-  })
+  if (result.success) {
+    toast.add({ severity: 'success', summary: 'Fichaje exitoso', detail: `Has fichado a ${item.nombre} por ${item.precio}M` })
+  } else {
+    toast.add({ severity: 'error', summary: 'Fichaje fallido', detail: result.message })
+  }
 }
 </script>
 

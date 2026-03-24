@@ -18,7 +18,6 @@ import { useToast } from 'primevue/usetoast'
 
 /* Utilidades */
 import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from '@/utils/authErrors'
-import { showToast } from '@/utils/uiFeedback'
 
 /* Validación con Zod */
 import { Form } from '@primevue/forms'
@@ -100,43 +99,23 @@ const handlePasswordReset = async () => {
   const emailToSend = resetEmailAddress.value.trim()
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToSend)) {
-    showToast(toast, {
-      severity: 'warn',
-      summary: 'Aviso',
-      detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).',
-      life: 4000,
-    })
+    toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
     return
   }
 
   isResetLoading.value = true
   try {
     await resetPassword(emailToSend)
-    showToast(toast, {
-      severity: 'success',
-      summary: 'Revisa tu correo',
-      detail: genericResetMessage,
-      life: 6000,
-    })
+    toast.add({ severity: 'success', summary: 'Revisa tu correo', detail: genericResetMessage, life: 6000 })
     isResetModalVisible.value = false
     resetEmailAddress.value = ''
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      showToast(toast, {
-        severity: 'success',
-        summary: 'Revisa tu correo',
-        detail: genericResetMessage,
-        life: 6000,
-      })
+      toast.add({ severity: 'success', summary: 'Revisa tu correo', detail: genericResetMessage, life: 6000 })
       isResetModalVisible.value = false
       resetEmailAddress.value = ''
     } else {
-      showToast(toast, {
-        severity: 'error',
-        summary: 'Error de conexión',
-        detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.',
-        life: 4000,
-      })
+      toast.add({ severity: 'error', summary: 'Error de conexión', detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.', life: 4000 })
     }
   } finally {
     isResetLoading.value = false

@@ -6,7 +6,6 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { useEscuderiaStore } from '@/stores/storeTeam'
 import { calculateResaleValue } from '@/utils/garage'
-import { showConfirmDialog, showResultToast } from '@/utils/uiFeedback'
 import Header from '@/components/Header.vue'
 import Navbar from '@/components/Navbar.vue'
 import CarCard from '@/components/CarCard.vue'
@@ -27,18 +26,19 @@ onMounted(async () => {
 const confirmCarSale = (car) => {
   const resaleValue = calculateResaleValue(car.precio)
 
-  showConfirmDialog(confirm, {
+  confirm.require({
+    icon: 'pi pi-exclamation-triangle',
     message: `¿Estás seguro de que quieres vender el chasis ${car.nombre} por ${resaleValue}M?`,
     header: 'Confirmar Venta',
     acceptLabel: 'Sí, vender',
     rejectLabel: 'Cancelar',
     accept: async () => {
       const result = await escuderiaStore.sellItem(car)
-      showResultToast(toast, result, {
-        success: { severity: 'success', summary: 'Venta completada' },
-        failure: { severity: 'warn', summary: 'Venta denegada' },
-        successDetail: `Has recuperado ${resaleValue}M`,
-      })
+      if (result.success) {
+        toast.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${resaleValue}M` })
+      } else {
+        toast.add({ severity: 'warn', summary: 'Venta denegada', detail: result.message })
+      }
     },
   })
 }
@@ -46,7 +46,8 @@ const confirmCarSale = (car) => {
 const confirmDriverSale = (driver) => {
   const resaleValue = calculateResaleValue(driver.precio)
 
-  showConfirmDialog(confirm, {
+  confirm.require({
+    icon: 'pi pi-exclamation-triangle',
     message: `¿Estás seguro de que quieres rescindir el contrato de ${driver.nombre} por ${resaleValue}M?`,
     header: 'Confirmar Despido',
     icon: 'pi pi-user-minus',
@@ -54,21 +55,22 @@ const confirmDriverSale = (driver) => {
     rejectLabel: 'Cancelar',
     accept: async () => {
       const result = await escuderiaStore.sellItem(driver)
-      showResultToast(toast, result, {
-        success: { severity: 'success', summary: 'Despido completado' },
-        failure: { severity: 'warn', summary: 'Despido denegado' },
-        successDetail: `Has recuperado ${resaleValue}M`,
-      })
+      if (result.success) {
+        toast.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${resaleValue}M` })
+      } else {
+        toast.add({ severity: 'warn', summary: 'Despido denegado', detail: result.message })
+      }
     },
   })
 }
 
 const toggleBoosterInstallation = async (instanceId) => {
   const result = await escuderiaStore.toggleBooster(instanceId)
-  showResultToast(toast, result, {
-    success: { severity: 'success', summary: 'Acción completada' },
-    failure: { severity: 'warn', summary: 'Acción denegada' },
-  })
+  if (result.success) {
+    toast.add({ severity: 'success', summary: 'Acción completada', detail: result.message })
+  } else {
+    toast.add({ severity: 'warn', summary: 'Acción denegada', detail: result.message })
+  }
 }
 </script>
 

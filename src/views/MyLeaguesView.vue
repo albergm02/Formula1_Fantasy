@@ -6,7 +6,6 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { useLigasStore } from '@/stores/storeLeagues'
 import { useAuthStore } from '@/stores/storeAuth'
-import { showConfirmDialog, showResultToast, showToast } from '@/utils/uiFeedback'
 import Header from '@/components/Header.vue'
 
 import Button from 'primevue/button'
@@ -45,32 +44,22 @@ const handleCreateLeague = async () => {
   const normalizedLeagueName = newLeagueName.value.trim()
 
   if (normalizedLeagueName.length < 3) {
-    showToast(toast, {
-      severity: 'warn',
-      summary: 'Nombre inválido',
-      detail: 'El nombre debe tener al menos 3 caracteres',
-    })
+    toast.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres' })
     return
   }
 
   if (normalizedLeagueName.length > 15) {
-    showToast(toast, {
-      severity: 'warn',
-      summary: 'Límite alcanzado',
-      detail: 'El nombre no puede exceder los 15 caracteres',
-    })
+    toast.add({ severity: 'warn', summary: 'Límite alcanzado', detail: 'El nombre no puede exceder los 15 caracteres' })
     return
   }
 
   const result = await ligasStore.createLeague(normalizedLeagueName)
-  showResultToast(toast, result, {
-    success: { severity: 'success', summary: '¡Liga creada!' },
-    failure: { severity: 'error', summary: 'Error' },
-  })
-
   if (result.success) {
+    toast.add({ severity: 'success', summary: '¡Liga creada!', detail: result.message })
     newLeagueName.value = ''
     isCreateDialogVisible.value = false
+  } else {
+    toast.add({ severity: 'error', summary: 'Error', detail: result.message })
   }
 }
 
@@ -82,14 +71,12 @@ const handleJoinLeague = async () => {
   }
 
   const result = await ligasStore.joinLeague(normalizedJoinCode)
-  showResultToast(toast, result, {
-    success: { severity: 'success', summary: '¡Bienvenido!' },
-    failure: { severity: 'error', summary: 'Error al unirse' },
-  })
-
   if (result.success) {
+    toast.add({ severity: 'success', summary: '¡Bienvenido!', detail: result.message })
     joinCode.value = ''
     isJoinDialogVisible.value = false
+  } else {
+    toast.add({ severity: 'error', summary: 'Error al unirse', detail: result.message })
   }
 }
 
@@ -99,7 +86,8 @@ const openLeague = (leagueId) => {
 }
 
 const handleLeaveLeague = () => {
-  showConfirmDialog(confirm, {
+  confirm.require({
+    icon: 'pi pi-exclamation-triangle',
     message: `¿Estás seguro de que quieres abandonar el campeonato "${selectedLeague.value.nombre}"?`,
     header: 'CONFIRMACIÓN DE SALIDA',
     acceptLabel: 'Abandonar',
@@ -110,23 +98,21 @@ const handleLeaveLeague = () => {
       const result = await ligasStore.leaveLeague(selectedLeague.value.id)
       isActionLoading.value = false
 
-      showResultToast(toast, result, {
-        success: { severity: 'success', summary: 'Coche fuera de pista' },
-        failure: { severity: 'error', summary: 'Error al abandonar' },
-      })
-
       if (result.success) {
+        toast.add({ severity: 'success', summary: 'Coche fuera de pista', detail: result.message })
         isOptionsDialogVisible.value = false
+      } else {
+        toast.add({ severity: 'error', summary: 'Error al abandonar', detail: result.message })
       }
     },
   })
 }
 
 const handleDeleteLeague = () => {
-  showConfirmDialog(confirm, {
+  confirm.require({
+    icon: 'pi pi-trash',
     message: 'Todos los participantes serán expulsados y los datos serán borrados permanentemente.',
     header: 'ELIMINAR LIGA',
-    icon: 'pi pi-trash',
     acceptLabel: 'Eliminar para todos',
     rejectClass: '!bg-transparent !border-none !text-white',
     acceptClass: '!bg-[#FF1E00] !border-none !text-white',
@@ -135,13 +121,11 @@ const handleDeleteLeague = () => {
       const result = await ligasStore.deleteLeague(selectedLeague.value.id)
       isActionLoading.value = false
 
-      showResultToast(toast, result, {
-        success: { severity: 'success', summary: 'Campeonato finalizado' },
-        failure: { severity: 'error', summary: 'Error al eliminar' },
-      })
-
       if (result.success) {
+        toast.add({ severity: 'success', summary: 'Campeonato finalizado', detail: result.message })
         isOptionsDialogVisible.value = false
+      } else {
+        toast.add({ severity: 'error', summary: 'Error al eliminar', detail: result.message })
       }
     },
   })
