@@ -15,6 +15,9 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
+import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from '@/utils/authErrores'
+import { isValidEmail, trimText } from '@/utils/texto'
+import { showToast } from '@/utils/uiFeedback'
 
 /* Validación con Zod */
 import { Form } from '@primevue/forms'
@@ -28,10 +31,11 @@ const authStore = useAuthStore()
 /* Estados */
 const isLoading = ref(false)
 const authError = ref('')
-const initialValues = ref({ email: '', password: '' })
-const showResetModal = ref(false)
-const resetEmail = ref('')
+const initialFormValues = ref({ email: '', password: '' })
+const isResetModalVisible = ref(false)
+const resetEmailAddress = ref('')
 const isResetLoading = ref(false)
+const genericResetMessage = 'Si el correo está registrado, recibirás un enlace de recuperación.'
 
 const validationSchema = zodResolver(
   z.object({
@@ -51,13 +55,7 @@ const handleLogin = async ({ valid, values }) => {
     await authStore.initializeUserData(userCredential.user.email, userCredential.user.displayName)
     router.push('/ligas')
   } catch (error) {
-    if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-      authError.value = 'Correo o contraseña incorrectos.'
-    } else if (error.code === 'auth/too-many-requests') {
-      authError.value = 'Demasiados intentos. Inténtalo más tarde.'
-    } else {
-      authError.value = 'Error al iniciar sesión: ' + error.message
-    }
+    authError.value = getLoginErrorMessage(error)
   } finally {
     isLoading.value = false
   }
@@ -70,25 +68,25 @@ const handleGoogleLogin = async () => {
 
   try {
     const userCredential = await signInWithGoogle()
-    const emailGoogle = userCredential.user.email?.trim()
+    const googleEmail = trimText(userCredential.user.email)
 
-    if (!emailGoogle) {
+    if (!googleEmail) {
       throw new Error('No se pudo obtener el correo de Google.')
     }
 
-    const perfilExiste = await authStore.initializeUserData(emailGoogle, userCredential.user.displayName, {
-      crearSiNoExiste: false,
+    const profileExists = await authStore.initializeUserData(googleEmail, userCredential.user.displayName, {
+      createIfMissing: false,
     })
 
-    if (perfilExiste) {
+    if (profileExists) {
       router.push('/ligas')
       return
     }
 
     router.push('/registro-google')
   } catch (error) {
-    if (error.code !== 'auth/popup-closed-by-user') {
-      authError.value = 'Error al iniciar con Google: ' + error.message
+    if (!isGooglePopupClosed(error)) {
+      authError.value = getGoogleErrorMessage(error)
     }
   } finally {
     isLoading.value = false
@@ -97,32 +95,46 @@ const handleGoogleLogin = async () => {
 
 /* Handler Recuperar Contraseña (Mejorado) */
 const handlePasswordReset = async () => {
-  // 1. Limpiamos espacios en blanco accidentales por si ha copiado y pegado
-  const emailToSend = resetEmail.value.trim()
+  const emailToSend = trimText(resetEmailAddress.value)
 
-  // 2. Validación de formato de correo con Regex estándar
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailToSend || !emailRegex.test(emailToSend)) {
-    toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
+  if (!isValidEmail(emailToSend)) {
+    showToast(toast, {
+      severity: 'warn',
+      summary: 'Aviso',
+      detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).',
+      life: 4000,
+    })
     return
   }
 
   isResetLoading.value = true
   try {
     await resetPassword(emailToSend)
-    // Mostramos el mensaje genérico de éxito si todo va bien
-    toast.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
-    showResetModal.value = false
-    resetEmail.value = ''
+    showToast(toast, {
+      severity: 'success',
+      summary: 'Revisa tu correo',
+      detail: genericResetMessage,
+      life: 6000,
+    })
+    isResetModalVisible.value = false
+    resetEmailAddress.value = ''
   } catch (error) {
-    // Si Firebase nos dice que no existe, LO OCULTAMOS al usuario y mostramos el mismo éxito
     if (error.code === 'auth/user-not-found') {
-      toast.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
-      showResetModal.value = false
-      resetEmail.value = ''
+      showToast(toast, {
+        severity: 'success',
+        summary: 'Revisa tu correo',
+        detail: genericResetMessage,
+        life: 6000,
+      })
+      isResetModalVisible.value = false
+      resetEmailAddress.value = ''
     } else {
-      // Solo mostramos error si es un fallo real del servidor (ej. se cayó el internet)
-      toast.add({ severity: 'error', summary: 'Error de conexión', detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.', life: 4000 })
+      showToast(toast, {
+        severity: 'error',
+        summary: 'Error de conexión',
+        detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.',
+        life: 4000,
+      })
     }
   } finally {
     isResetLoading.value = false
@@ -131,7 +143,7 @@ const handlePasswordReset = async () => {
 
 /* Handler para limpiar el estado del modal de recuperación al cerrarlo */
 const onResetModalHide = () => {
-  resetEmail.value = ''
+  resetEmailAddress.value = ''
   isResetLoading.value = false
 }
 
@@ -165,7 +177,7 @@ const onResetModalHide = () => {
 
       <!-- Contenido: Formulario de inicio de sesión -->
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues"
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
           :resolver="validationSchema" @submit="handleLogin">
 
           <!-- Campo de correo electrónico -->
@@ -210,7 +222,7 @@ const onResetModalHide = () => {
             <!-- Botón de contraseña olvidada -->
             <Button type="button" label="¿Olvidaste tu contraseña?" text
               class="w-full mt-1 font-bold transition-colors !border-none !bg-transparent !text-[#00E5E5] hover:!text-cyan-400"
-              @click="showResetModal = true" />
+              @click="isResetModalVisible = true" />
 
             <!-- Enlace de registro -->
             <div class="mt-2 border-t border-zinc-800 pt-5 pb-2 text-center">
@@ -226,7 +238,7 @@ const onResetModalHide = () => {
     </Card>
 
     <!-- Modal de recuperación de contraseña -->
-    <Dialog v-model:visible="showResetModal" modal header="Recuperar Contraseña" @hide="onResetModalHide"
+    <Dialog v-model:visible="isResetModalVisible" modal header="Recuperar Contraseña" @hide="onResetModalHide"
       :headerStyle="{ backgroundColor: '#15151E', color: 'white', borderBottom: '1px solid #27272a' }"
       :contentStyle="{ backgroundColor: '#15151E', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #27272a', borderRadius: '0.75rem' }">
@@ -234,7 +246,7 @@ const onResetModalHide = () => {
       <div class="flex flex-col gap-4">
         <p class="text-sm text-[#D9D9D9]">Introduce tu correo y te enviaremos un enlace de recuperación.</p>
 
-        <InputText v-model="resetEmail" type="email" placeholder="tu@correo.com"
+        <InputText v-model="resetEmailAddress" type="email" placeholder="tu@correo.com"
           class="w-full rounded-lg p-3 text-white focus:ring-1 focus:!border-[#00E5E5] focus:ring-[#00E5E5] !border-zinc-700 !bg-[#111111]"
           @keyup.enter="handlePasswordReset" />
 

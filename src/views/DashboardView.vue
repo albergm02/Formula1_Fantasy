@@ -21,15 +21,15 @@ const router = useRouter()
  * Si hay una liga activa, se carga la escudería correspondiente a esa liga.
  */
 onMounted(async () => {
-  const ligaId = route.query.liga || ligasStore.ligaActiva
+  const leagueId = route.query.liga || ligasStore.activeLeagueId
 
-  if (!ligaId) {
+  if (!leagueId) {
     router.push('/ligas')
     return
   }
 
-  ligasStore.ligaActiva = ligaId
-  await escuderiaStore.cargarEscuderia(ligaId)
+  ligasStore.activeLeagueId = leagueId
+  await escuderiaStore.loadTeam(leagueId)
 })
 </script>
 
@@ -37,7 +37,7 @@ onMounted(async () => {
   <div class="min-h-screen bg-[#15151E] font-sans pb-24">
     <Header />
 
-    <div v-if="escuderiaStore.cargandoEscuderia" class="flex flex-col items-center justify-center gap-4">
+    <div v-if="escuderiaStore.isTeamLoading" class="flex flex-col items-center justify-center gap-4">
       <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
       <p class="text-[#00E5E5] font-bold tracking-widest animate-pulse uppercase text-sm">Cargando telemetría...</p>
     </div>

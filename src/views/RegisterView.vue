@@ -18,7 +18,9 @@ import Message from 'primevue/message'
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
-import { esquemaNombreUsuario } from '@/utils/validacionesAuth'
+import { usernameSchema } from '@/utils/validacionesAuth'
+import { normalizeTextFields } from '@/utils/texto'
+import { getRegisterErrorMessage } from '@/utils/authErrores'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -26,7 +28,7 @@ const authStore = useAuthStore()
 /* Estados del formulario de registro */
 const isLoading = ref(false)
 const authError = ref('')
-const initialValues = ref({
+const initialFormValues = ref({
   username: '',
   email: '',
   password: '',
@@ -36,7 +38,7 @@ const initialValues = ref({
 /* Esquema de validación con Zod */
 const validationSchema = zodResolver(
   z.object({
-    username: esquemaNombreUsuario,
+    username: usernameSchema,
     email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
     password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
     confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
@@ -49,27 +51,18 @@ const validationSchema = zodResolver(
 /* Handler Registro utilizando email / contraseña */
 const handleRegister = async ({ valid, values }) => {
   if (!valid) return
-  // Limpio los espacios en blanco de email y username para evitar errores comunes de tipeo.
-  const cleanEmail = values.email.trim()
-  const cleanUsername = values.username.trim()
-  // Reiniciar estado de error y activar loading.
+  const normalizedValues = normalizeTextFields(values, ['email', 'username'])
+  const trimmedEmail = normalizedValues.email
+  const trimmedUsername = normalizedValues.username
+
   isLoading.value = true
   authError.value = ''
   try {
-    // Creación del usuario en Firebase Authentication.
-    const userCredential = await signUp(cleanEmail, values.password)
-    // Inicialización de datos globales en el store (como email y username) para su uso en toda la app.
-    await authStore.initializeUserData(userCredential.user.email, cleanUsername)
+    const userCredential = await signUp(trimmedEmail, values.password)
+    await authStore.initializeUserData(userCredential.user.email, trimmedUsername)
     router.push('/ligas')
-    // Manejo de errores.
   } catch (error) {
-    if (error.code === 'auth/email-already-in-use') {
-      authError.value = 'El correo electrónico ya está registrado.'
-    } else if (error.code === 'auth/weak-password') {
-      authError.value = 'La contraseña es demasiado débil.'
-    } else {
-      authError.value = 'Error al registrar: ' + error.message
-    }
+    authError.value = getRegisterErrorMessage(error)
   } finally {
     isLoading.value = false
   }
@@ -103,7 +96,7 @@ const handleRegister = async ({ valid, values }) => {
 
       <!-- Contenido del formulario -->
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues"
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
           :resolver="validationSchema" @submit="handleRegister">
 
           <!-- Campo: Nombre de Piloto -->

@@ -1,65 +1,35 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getCountdown, getNextGrandPrix } from '@/utils/granPremio'
 
-const proximaCarrera = ref(null)
+const nextGrandPrix = ref(null)
 const countdown = ref('')
 
 /**
  * Obtiene los datos del próximo gran premio de la temporada actual.
  * Filtra los eventos futuros, ordena por fecha y devuelve el próximo evento con su información relevante.
  */
-async function fetchGranPremio() {
-  const response = await fetch('https://api.openf1.org/v1/meetings?year=2026')
-  const meetings = await response.json()
-  const hoy = new Date()
-  // proximas: eventos con fecha de finalización posterior a hoy
-  const proximas = meetings.filter((m) => new Date(m.date_end) > hoy)
-  // proxima: evento más cercano con fecha de inicio posterior a hoy
-  const proxima = proximas.sort((a, b) => new Date(a.date_start) - new Date(b.date_start))[0]
-
-  return {
-    circuito: proxima.circuit_short_name,
-    nombre_gran_premio: proxima.meeting_name,
-    pais: proxima.country_name,
-    fecha: new Date(proxima.date_start).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }),
-    hora: new Date(proxima.date_start).toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    imagen: proxima.circuit_image,
-    date_start: proxima.date_start,
-  }
+async function fetchNextGrandPrix() {
+  return getNextGrandPrix()
 }
 
 /**
  * Calcula el tiempo restante para el próximo gran premio y actualiza el contador cada segundo.
  * Si el gran premio ya ha comenzado, muestra un mensaje indicando que ha comenzado.
  */
-function actualizarContador() {
-  const now = new Date()
-  const carreraDate = new Date(proximaCarrera.value.date_start)
-  const tiempoRes = carreraDate - now
-
-  if (tiempoRes <= 0) {
-    countdown.value = '¡El gran premio ya ha comenzado!'
+function updateCountdown() {
+  if (!nextGrandPrix.value?.startDate) {
+    countdown.value = ''
     return
   }
 
-  const days = Math.floor(tiempoRes / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((tiempoRes / (1000 * 60 * 60)) % 24)
-  const minutes = Math.floor((tiempoRes / (1000 * 60)) % 60)
-  const seconds = Math.floor((tiempoRes / 1000) % 60)
-  countdown.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
+  countdown.value = getCountdown(nextGrandPrix.value.startDate)
 }
 
 onMounted(async () => {
-  proximaCarrera.value = await fetchGranPremio()
-  actualizarContador()
-  setInterval(actualizarContador, 1000)
+  nextGrandPrix.value = await fetchNextGrandPrix()
+  updateCountdown()
+  setInterval(updateCountdown, 1000)
 })
 </script>
 
@@ -67,14 +37,14 @@ onMounted(async () => {
   <div class="bg-transparent border-b border-zinc-800 p-4 text-zinc-600">
     <h3 class="text-sm font-bold uppercase tracking-widest mb-2">Próximo Gran Premio</h3>
 
-    <div v-if="proximaCarrera" class="flex flex-row items-center gap-4">
+    <div v-if="nextGrandPrix" class="flex flex-row items-center gap-4">
       <div class="flex flex-col items-start flex-1">
-        <span class="text-xs text-white">{{ proximaCarrera.nombre_gran_premio }}</span>
-        <span class="text-xs text-zinc-500">{{ proximaCarrera.circuito }} - {{ proximaCarrera.pais }}</span>
-        <span class="text-xs text-zinc-400">{{ proximaCarrera.fecha }} - {{ proximaCarrera.hora }}</span>
+        <span class="text-xs text-white">{{ nextGrandPrix.grandPrixName }}</span>
+        <span class="text-xs text-zinc-500">{{ nextGrandPrix.circuit }} - {{ nextGrandPrix.country }}</span>
+        <span class="text-xs text-zinc-400">{{ nextGrandPrix.date }} - {{ nextGrandPrix.time }}</span>
         <span class="text-xs text-green-400 mt-2">Faltan: {{ countdown }}</span>
       </div>
-      <img :src="proximaCarrera.imagen" alt="Circuito" class="w-32 h-24 object-contain" />
+      <img :src="nextGrandPrix.image" alt="Circuito" class="w-32 h-24 object-contain" />
     </div>
     <div v-else class="flex flex-col items-center justify-center py-10 gap-3">
       <i class="pi pi-spinner text-4xl text-[#00E5E5] animate-spin"></i>

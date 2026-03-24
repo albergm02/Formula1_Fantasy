@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', {
       nombre: '',
       ligasIds: [],
     },
-    perfilExiste: false,
+    profileExists: false,
 
     // Booleano creado para mostrar una pantalla de "Cargando"
     datosCargados: false,
@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     /* Iniciar sesión y traer datos de perfil de Firebase */
     async initializeUserData(emailUsuario, nombreUsuario = '', opciones = {}) {
-      const { crearSiNoExiste = true } = opciones
+      const { createIfMissing = true } = opciones
 
       try {
         this.datosCargados = false
@@ -32,14 +32,14 @@ export const useAuthStore = defineStore('auth', {
           const data = docSnap.data()
           this.usuarioGlobal.nombre = data.nombre || 'Piloto'
           this.usuarioGlobal.ligasIds = data.ligasIds || []
-          this.perfilExiste = true
+          this.profileExists = true
           return true
           // Caso de que sea un registro
         } else {
-          if (!crearSiNoExiste) {
+          if (!createIfMissing) {
             this.usuarioGlobal.nombre = ''
             this.usuarioGlobal.ligasIds = []
-            this.perfilExiste = false
+            this.profileExists = false
             return false
           }
 
@@ -50,12 +50,12 @@ export const useAuthStore = defineStore('auth', {
             nombre: nombreUsuario,
             ligasIds: [],
           })
-          this.perfilExiste = true
+          this.profileExists = true
           return true
         }
       } catch (error) {
         console.error('Error en initializeUserData (storeAuth.js):', error)
-        this.perfilExiste = false
+        this.profileExists = false
         return false
       } finally {
         this.datosCargados = true
@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', {
         nombre: '',
         ligasIds: [],
       }
-      this.perfilExiste = false
+      this.profileExists = false
       this.datosCargados = true
     },
   },

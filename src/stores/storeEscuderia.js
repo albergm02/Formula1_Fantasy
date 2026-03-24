@@ -2,199 +2,176 @@ import { defineStore } from 'pinia'
 import { collection, doc, updateDoc, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/services/firebase'
 import { useAuthStore } from './storeAuth'
-
-/* Crea un garaje vacío para la entrada de un nuevo jugador */
-const crearGarajeVacio = () => ({
-  coche: null,
-  pilotos: [],
-  potenciadores: [],
-})
+import { createEmptyGarage, calculateResaleValue } from '@/utils/garaje'
 
 export const useEscuderiaStore = defineStore('escuderia', {
   state: () => ({
-    ligaActivaId: null,
-    participanteActivoId: null,
-
-    // Datos de la escudería de este participante en la liga activa
-    presupuesto: 0,
-    puntos: 0,
-    garaje: crearGarajeVacio(),
-
-    cargandoEscuderia: false,
+    activeLeagueId: null,
+    activeParticipantId: null,
+    budget: 0,
+    points: 0,
+    garage: createEmptyGarage(),
+    isTeamLoading: false,
   }),
 
   actions: {
-    /* Carga los datos de la escudería del participante activo en la liga activa */
-    async cargarEscuderia(ligaId) {
-      this.cargandoEscuderia = true
+    async loadTeam(leagueId) {
+      this.isTeamLoading = true
       const authStore = useAuthStore()
 
       try {
-        // Consulta para obtener el participante activo en la liga
-        this.ligaActivaId = ligaId
-        const participantesRef = collection(db, 'participaciones')
-
-        // Busca el participante que corresponde al usuario actual y la liga activa
-        const q = query(
-          participantesRef,
-          where('id_liga', '==', ligaId),
+        this.activeLeagueId = leagueId
+        const participantsRef = collection(db, 'participaciones')
+        const participantQuery = query(
+          participantsRef,
+          where('id_liga', '==', leagueId),
           where('email_usuario', '==', authStore.usuarioGlobal.emailAuth),
         )
-        const querySnapshot = await getDocs(q)
+        const querySnapshot = await getDocs(participantQuery)
 
         if (!querySnapshot.empty) {
-          const docEscuderia = querySnapshot.docs[0]
-          this.participanteActivoId = docEscuderia.id
-          const data = docEscuderia.data()
-          this.presupuesto = data.presupuesto
-          this.puntos = data.puntos
-          this.garaje = data.garaje || crearGarajeVacio()
-        } else {
-          // Asigna valores por defecto en lugar de bloquear la UI
-          console.warn(
-            'Error en cargarEscuderia (storeEscuderia.js): No se encontró el participante para la liga activa',
-          )
-          this.presupuesto = 50.0
-          this.puntos = 0
-          this.garaje = crearGarajeVacio()
-          this.cargandoEscuderia = false
+          const participantDocument = querySnapshot.docs[0]
+          this.activeParticipantId = participantDocument.id
+          const participantData = participantDocument.data()
+          this.budget = participantData.presupuesto
+          this.points = participantData.puntos
+          this.garage = participantData.garaje || createEmptyGarage()
           return
         }
+
+        console.warn(
+          'Error in loadTeam (storeEscuderia.js): active participant not found for the selected league',
+        )
+        this.budget = 50.0
+        this.points = 0
+        this.garage = createEmptyGarage()
       } catch (error) {
-        // Asigna valores por defecto para evitar bloqueos en la UI
-        console.warn('Error en cargarEscuderia (storeEscuderia.js):', error)
-        this.presupuesto = 50.0
-        this.puntos = 0
-        this.garaje = crearGarajeVacio()
-        this.cargandoEscuderia = false
+        console.warn('Error in loadTeam (storeEscuderia.js):', error)
+        this.budget = 50.0
+        this.points = 0
+        this.garage = createEmptyGarage()
       } finally {
-        this.cargandoEscuderia = false
+        this.isTeamLoading = false
       }
     },
 
-    /* Guarda los cambios realizados en la escudería del participante activo en Firestore */
-    async guardarEstadoEscuderia() {
-      if (!this.participanteActivoId) {
-        console.warn(
-          'Error en guardarEstadoEscuderia (storeEscuderia.js): No hay participante activo para guardar',
-        )
+    async saveTeamState() {
+      if (!this.activeParticipantId) {
+        console.warn('Error in saveTeamState (storeEscuderia.js): missing active participant id')
         return
       }
+
       try {
-        const participanteRef = doc(db, 'participaciones', this.participanteActivoId)
-        // Actualiza los datos de la escudería en Firestore
-        await updateDoc(participanteRef, {
-          presupuesto: this.presupuesto,
-          puntos: this.puntos,
-          garaje: this.garaje,
+        const participantRef = doc(db, 'participaciones', this.activeParticipantId)
+        await updateDoc(participantRef, {
+          presupuesto: this.budget,
+          puntos: this.points,
+          garaje: this.garage,
         })
       } catch (error) {
-        console.error('Error en guardarEstadoEscuderia (storeEscuderia.js):', error)
+        console.error('Error in saveTeamState (storeEscuderia.js):', error)
       }
     },
 
-    /* Intenta fichar un elemento para la escudería del participante activo, validando presupuesto y límites */
-    async fichar(elemento) {
-      // Validaciones antes de fichar
-      if (this.presupuesto < elemento.precio) {
+    async buyItem(item) {
+      if (this.budget < item.precio) {
         return {
-          exito: false,
-          mensaje: 'No tienes suficiente presupuesto para fichar este elemento.',
-        }
-      }
-      if (elemento.tipo === 'coche' && this.garaje.coche) {
-        return {
-          exito: false,
-          mensaje: 'Ya tienes un coche fichado. Vende el actual para fichar uno nuevo.',
-        }
-      }
-      if (elemento.tipo === 'piloto' && this.garaje.pilotos.length >= 2) {
-        return {
-          exito: false,
-          mensaje: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
+          success: false,
+          message: 'No tienes suficiente presupuesto para fichar este elemento.',
         }
       }
 
-      this.presupuesto -= elemento.precio
-      // Genera un contrato con ID único para este fichaje
-      const contrato = { ...elemento, instancia_id: Date.now() }
-
-      if (elemento.tipo === 'coche') {
-        this.garaje.coche = contrato
-      } else if (elemento.tipo === 'piloto') {
-        this.garaje.pilotos.push(contrato)
-      } else if (elemento.tipo === 'potenciador') {
-        this.garaje.potenciadores.push(contrato)
+      if (item.tipo === 'coche' && this.garage.coche) {
+        return {
+          success: false,
+          message: 'Ya tienes un coche fichado. Vende el actual para fichar uno nuevo.',
+        }
       }
-      await this.guardarEstadoEscuderia()
-      return { exito: true, mensaje: `Has fichado: ${elemento.nombre} exitosamente.` }
+
+      if (item.tipo === 'piloto' && this.garage.pilotos.length >= 2) {
+        return {
+          success: false,
+          message: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
+        }
+      }
+
+      this.budget -= item.precio
+      const ownedItem = { ...item, instancia_id: Date.now() }
+
+      if (item.tipo === 'coche') {
+        this.garage.coche = ownedItem
+      } else if (item.tipo === 'piloto') {
+        this.garage.pilotos.push(ownedItem)
+      } else if (item.tipo === 'potenciador') {
+        this.garage.potenciadores.push(ownedItem)
+      }
+
+      await this.saveTeamState()
+      return { success: true, message: `Has fichado: ${item.nombre} exitosamente.` }
     },
 
-    /* Vende un elemento de la escudería del participante activo, recuperando parte del presupuesto */
-    async vender(elemento) {
-      if (!elemento) {
-        return { exito: false, mensaje: 'Elemento no encontrado para vender.' }
+    async sellItem(item) {
+      if (!item) {
+        return { success: false, message: 'Elemento no encontrado para vender.' }
       }
 
       try {
-        this.presupuesto += elemento.precio * 0.5 // Recupera el 50% del precio original al vender
+        this.budget += calculateResaleValue(item.precio)
 
-        // Elimina el elemento del garaje, desequipa piezas.
-        if (elemento.tipo === 'coche') {
-          this.garaje.coche = null
-          this.garaje.potenciadores.forEach((p) => {
-            p.equipado = false
+        if (item.tipo === 'coche') {
+          this.garage.coche = null
+          this.garage.potenciadores.forEach((booster) => {
+            booster.equipado = false
           })
-        }
-        // Si se vende un piloto, el garaje se equipa con el piloto restante (si lo hay).
-        else if (elemento.tipo === 'piloto') {
-          this.garaje.pilotos = this.garaje.pilotos.filter(
-            (p) => p.instancia_id !== elemento.instancia_id,
+        } else if (item.tipo === 'piloto') {
+          this.garage.pilotos = this.garage.pilotos.filter(
+            (driver) => driver.instancia_id !== item.instancia_id,
           )
-        }
-        // Igual que en el caso del piloto
-        else if (elemento.tipo === 'potenciador') {
-          this.garaje.potenciadores = this.garaje.potenciadores.filter(
-            (p) => p.instancia_id !== elemento.instancia_id,
+        } else if (item.tipo === 'potenciador') {
+          this.garage.potenciadores = this.garage.potenciadores.filter(
+            (booster) => booster.instancia_id !== item.instancia_id,
           )
         }
 
-        await this.guardarEstadoEscuderia()
+        await this.saveTeamState()
         return {
-          exito: true,
-          mensaje: `Has obtenido ${Math.floor(elemento.precio * 0.5)} de presupuesto, ¡Hasta pronto, ${elemento.nombre}.!`,
+          success: true,
+          message: `Has obtenido ${calculateResaleValue(item.precio)} de presupuesto, ¡Hasta pronto, ${item.nombre}.!`,
         }
       } catch (error) {
-        console.error('Error en vender (storeEscuderia.js):', error)
-        return { exito: false, mensaje: 'Error al vender el elemento. Inténtalo de nuevo.' }
+        console.error('Error in sellItem (storeEscuderia.js):', error)
+        return { success: false, message: 'Error al vender el elemento. Inténtalo de nuevo.' }
       }
     },
 
-    async togglePotenciador(instanciaId) {
-      const potenciador = this.garaje.potenciadores.find((p) => p.instancia_id === instanciaId)
-      if (!potenciador) {
-        return { exito: false, mensaje: 'Potenciador no encontrado para equipar.' }
+    async toggleBooster(instanceId) {
+      const booster = this.garage.potenciadores.find((item) => item.instancia_id === instanceId)
+
+      if (!booster) {
+        return { success: false, message: 'Potenciador no encontrado para equipar.' }
       }
-      if (!this.garaje.coche) {
+
+      if (!this.garage.coche) {
         return {
-          exito: false,
-          mensaje: 'Debes tener un coche fichado para equipar un potenciador.',
+          success: false,
+          message: 'Debes tener un coche fichado para equipar un potenciador.',
         }
       }
-      potenciador.equipado = !potenciador.equipado
-      await this.guardarEstadoEscuderia()
+
+      booster.equipado = !booster.equipado
+      await this.saveTeamState()
       return {
-        exito: true,
-        mensaje: `Has ${potenciador.equipado ? 'equipado' : 'desequipado'} el potenciador: ${potenciador.nombre}.`,
+        success: true,
+        message: `Has ${booster.equipado ? 'equipado' : 'desequipado'} el potenciador: ${booster.nombre}.`,
       }
     },
 
-    async salirDeLaLiga() {
-      this.ligaActivaId = null
-      this.participanteActivoId = null
-      this.presupuesto = 0
-      this.puntos = 0
-      this.garaje = crearGarajeVacio()
+    clearActiveLeagueState() {
+      this.activeLeagueId = null
+      this.activeParticipantId = null
+      this.budget = 0
+      this.points = 0
+      this.garage = createEmptyGarage()
     },
   },
 })

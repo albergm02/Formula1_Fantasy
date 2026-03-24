@@ -23,9 +23,9 @@ const cerrarSesion = async () => {
 }
 
 const volverADashboard = () => {
-    const ligaId = escuderiaStore.ligaActualId || route.query.liga || null
-    if (ligaId) {
-        router.push({ name: 'inicio', query: { liga: ligaId } })
+    const leagueId = escuderiaStore.activeLeagueId || route.query.liga || null
+    if (leagueId) {
+        router.push({ name: 'inicio', query: { liga: leagueId } })
     } else {
         router.push({ name: 'ligas' })
     }
@@ -46,8 +46,8 @@ const volverADashboard = () => {
             <div class="text-right">
                 <p class="text text-white font-bold uppercase">{{ authStore.usuarioGlobal.nombre }}</p>
                 <p v-if="route.name !== 'ligas'" class="text-xs text-white mt-0.5">
-                    Pts: <strong class="text-yellow-500">{{ escuderiaStore.puntos }}</strong>
-                    | <span class="text-emerald-500 font-bold">{{ escuderiaStore.presupuesto }}M</span>
+                    Pts: <strong class="text-yellow-500">{{ escuderiaStore.points }}</strong>
+                    | <span class="text-emerald-500 font-bold">{{ escuderiaStore.budget }}M</span>
                 </p>
             </div>
             <!-- hover es utilizado para cambiar el color al clickear -->

@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 
 import { signOut } from '@/services/authService'
 import { useAuthStore } from '@/stores/storeAuth'
-import { esquemaNombreUsuario } from '@/utils/validacionesAuth'
+import { usernameSchema } from '@/utils/validacionesAuth'
+import { trimText } from '@/utils/texto'
 
 import MagicRings from '@/components/MagicRings.vue'
 import Card from 'primevue/card'
@@ -21,20 +22,20 @@ const authStore = useAuthStore()
 
 const isLoading = ref(false)
 const authError = ref('')
-const initialValues = ref({
+const initialFormValues = ref({
   username: '',
 })
 
 const validationSchema = zodResolver(
   z.object({
-    username: esquemaNombreUsuario,
+    username: usernameSchema,
   })
 )
 
 const handleCompleteGoogleProfile = async ({ valid, values }) => {
   if (!valid) return
 
-  const nombreUsuario = values.username.trim()
+  const trimmedUsername = trimText(values.username)
   isLoading.value = true
   authError.value = ''
 
@@ -43,7 +44,7 @@ const handleCompleteGoogleProfile = async ({ valid, values }) => {
       throw new Error('No se encontró una sesión válida de Google.')
     }
 
-    await authStore.initializeUserData(authStore.usuarioGlobal.emailAuth, nombreUsuario)
+    await authStore.initializeUserData(authStore.usuarioGlobal.emailAuth, trimmedUsername)
     router.push('/ligas')
   } catch (error) {
     authError.value = 'Error al completar el registro con Google: ' + error.message
@@ -75,7 +76,7 @@ const cancelarRegistroGoogle = async () => {
       </template>
 
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialValues"
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
           :resolver="validationSchema" @submit="handleCompleteGoogleProfile">
 
           <p class="text-sm text-[#D9D9D9] text-center">

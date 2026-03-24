@@ -29,8 +29,6 @@ const routes = [
     component: () => import('../views/MisLigasView.vue'),
     meta: { requiresAuth: true },
   },
-
-  /* ZONA DE ENTRADA AL JUEGO */
   {
     path: '/dashboard',
     name: 'inicio',
@@ -73,7 +71,7 @@ router.beforeEach(async (to) => {
 
   if (user && !authStore.usuarioGlobal.emailAuth) {
     await authStore.initializeUserData(user.email, user.displayName, {
-      crearSiNoExiste: false,
+      createIfMissing: false,
     })
   }
 
@@ -82,27 +80,27 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresGuest && user) {
-    if (!authStore.perfilExiste) {
+    if (!authStore.profileExists) {
       return { name: 'registro-google' }
     }
 
     return { name: 'ligas' }
   }
 
-  if (user && !authStore.perfilExiste && !to.meta.requiresIncompleteProfile) {
+  if (user && !authStore.profileExists && !to.meta.requiresIncompleteProfile) {
     return { name: 'registro-google' }
   }
 
-  if (to.meta.requiresIncompleteProfile && authStore.perfilExiste) {
+  if (to.meta.requiresIncompleteProfile && authStore.profileExists) {
     return { name: 'ligas' }
   }
 
   if (to.meta.requiresLiga) {
     if (
       authStore.usuarioGlobal.ligasIds.length > 0 &&
-      ligasStore.ligasDetalles.length === 0
+      ligasStore.leagueDetails.length === 0
     ) {
-      await ligasStore.cargarMisLigas()
+      await ligasStore.loadUserLeagues()
     }
 
     if (

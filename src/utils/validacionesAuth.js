@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const esquemaNombreUsuario = z
+export const usernameSchema = z
   .string()
   .trim()
   .min(3, 'El nombre debe tener al menos 3 caracteres')
