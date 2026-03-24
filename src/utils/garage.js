@@ -1,23 +1,12 @@
 /**
- * Utilidades relacionadas con el garaje del jugador.
- *
- * El garaje es el equipo personal de cada jugador dentro de una liga:
- * contiene su coche, sus pilotos y sus potenciadores activos.
- * Este módulo provee funciones de creación e inicialización del garaje,
- * así como cálculos de valor de reventa.
+ * @fileoverview Funciones relacionadas con el garaje del usuario en la liga de Fantasy F1.
+ * Esto incluye la creación de un garaje vacío por defecto y el cálculo del valor de reventa de los coches.
+ * Estas funciones se utilizan para inicializar el garaje al unirse a una liga y para calcular el valor de reventa al vender un coche.
  */
 
 /**
- * Devuelve la estructura de un garaje completamente vacío.
- *
- * Úsala cuando un jugador se une a una liga por primera vez y todavía
- * no ha comprado nada en el mercado. Es la «plantilla» base del garaje.
- *
- * @returns {{ coche: null, pilotos: [], potenciadores: [] }}
- *
- * @example
- * const garaje = createEmptyGarage()
- * // { coche: null, pilotos: [], potenciadores: [] }
+ * Crea un garaje vacío con estructura predeterminada (sin coche, sin pilotos, sin potenciadores).
+ * @returns {object} Garaje vacío
  */
 export const createEmptyGarage = () => ({
   coche: null,
@@ -26,17 +15,8 @@ export const createEmptyGarage = () => ({
 })
 
 /**
- * Calcula cuánto dinero recupera el jugador al vender un elemento.
- *
- * La tasa de reventa es el 50% del precio original. El resultado se redondea
- * hacia abajo para evitar decimales en el presupuesto.
- *
- * @param {number} [price=0] - Precio de compra original del elemento.
- * @returns {number} Créditos que se devuelven al jugador al vender.
- *
- * @example
- * calculateResaleValue(20)  // → 10
- * calculateResaleValue(15)  // → 7  (se redondea hacia abajo)
- * calculateResaleValue()    // → 0  (precio no proporcionado)
+ * Calcula el valor de reventa de un coche (50% del precio original, redondeado hacia abajo).
+ * @param {number} price - Precio original del coche
+ * @returns {number} Valor de reventa
  */
 export const calculateResaleValue = (price = 0) => Math.floor(Number(price || 0) * 0.5)

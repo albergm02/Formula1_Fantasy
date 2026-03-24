@@ -1,71 +1,36 @@
 /**
- * Utilidades para limpiar y normalizar texto antes de enviarlo a Firebase.
- *
- * Antes de guardar cualquier dato de texto en Firestore (nombres, códigos, emails...)
- * es importante sanearlo: quitar espacios accidentales, unificar mayúsculas, etc.
- * Agrupa aquí todas las operaciones de este tipo para no duplicarlas en stores y componentes.
+ * @fileoverview Funciones de utilidad para manejo de texto, como trim, validación de email y normalización de campos.
+ * Estas funciones se utilizan en varios lugares de la aplicación para asegurar que el texto ingresado por el usuario
+ * esté limpio y en el formato esperado, evitando errores comunes relacionados con espacios sobrantes o formatos incorrectos.
+ * Esto centraliza la lógica de manejo de texto y evita repetirla en los componentes.
  */
 
 /**
- * Elimina los espacios en blanco al inicio y al final de un texto.
- *
- * Es la operación más básica de saneamiento. Casi siempre querrás aplicarla
- * a cualquier input antes de guardarlo en Firestore.
- *
- * @param {*} [value=''] - El valor a limpiar (se convierte a string si no lo es).
- * @returns {string} El texto sin espacios sobrantes.
- *
- * @example
- * trimText('  hamilton  ')  // → 'hamilton'
- * trimText(null)            // → ''  (maneja valores nulos con seguridad)
+ * Quita espacios sobrantes de un texto (maneja nulos)
+ * @param {string} value - Texto a limpiar
+ * @returns {string} Texto limpio
  */
 export const trimText = (value = '') => String(value ?? '').trim()
 
 /**
- * Convierte un texto a mayúsculas y elimina los espacios sobrantes.
- *
- * Útil para códigos de invitación de ligas o valores que deben guardarse
- * en mayúsculas para evitar duplicados por diferencia de capitalización.
- *
- * @param {*} [value=''] - El valor a procesar.
- * @returns {string} El texto en mayúsculas y sin espacios sobrantes.
- *
- * @example
- * toUpperTrimmed('  a3f9kz  ')  // → 'A3F9KZ'
+ * Convierte un texto a mayúsculas y le aplica trim (maneja nulos)
+ * @param {string} value - Texto a convertir
+ * @returns {string} Texto convertido a mayúsculas y limpio
  */
 export const toUpperTrimmed = (value = '') => trimText(value).toUpperCase()
 
 /**
- * Comprueba si una cadena tiene formato de correo electrónico válido.
- *
- * Usa una expresión regular básica: verifica que haya texto, un @, un dominio
- * y una extensión. No realiza verificación de existencia real del correo.
- * Limpia espacios antes de validar.
- *
- * @param {string} [email=''] - El correo a validar.
- * @returns {boolean} `true` si el formato es correcto.
- *
- * @example
- * isValidEmail('lewis@mercedes.com')  // → true
- * isValidEmail('no-es-un-email')       // → false
+ * Valida formato básico de email
+ * @param {string} email - Email a validar
+ * @returns {boolean} True si el email es válido, false en caso contrario
  */
 export const isValidEmail = (email = '') => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimText(email))
 
 /**
- * Aplica `trimText` a un conjunto específico de campos dentro de un objeto.
- *
- * Úsala justo antes de enviar un formulario a Firebase para sanear todos
- * los campos de texto de golpe, sin tener que llamar a trimText campo por campo.
- * No modifica el objeto original (devuelve una copia).
- *
- * @param {Object} [values={}] - Objeto con los datos del formulario.
- * @param {string[]} [fields=[]] - Nombres de los campos que se deben limpiar.
- * @returns {Object} Copia del objeto con los campos indicados ya saneados.
- *
- * @example
- * const datos = { nombre: '  Max ', email: ' max@rb.com ', edad: 26 }
- * normalizeTextFields(datos, ['nombre', 'email'])
- * // → { nombre: 'Max', email: 'max@rb.com', edad: 26 }
+ * Normaliza campos de texto en un objeto, aplicando trim a los campos especificados
+ * @param {object} values - Objeto con los valores a normalizar
+ * @param {string[]} fields - Array de nombres de campos a normalizar
+ * @returns {object} Nuevo objeto con los campos normalizados
  */
 export const normalizeTextFields = (values = {}, fields = []) => {
   const normalizedValues = { ...values }
