@@ -50,7 +50,7 @@ onMounted(async () => {
     </div>
 
     <!-- Contenido principal: widgets de stats y próximo GP -->
-    <main v-else class="p-4 max-w-4xl mx-auto flex flex-col gap-6 mt-2">
+    <main v-else class="p-4 max-w-md mx-auto w-full flex flex-col gap-6 mt-2">
       <WidgetUserStats />
       <WidgetGP />
     </main>

@@ -96,7 +96,7 @@ onMounted(async () => {
   <div class="min-h-screen bg-[#1A1A1F] font-sans pb-24">
     <Header />
 
-    <main class="mx-auto w-full max-w-4xl p-4 flex flex-col gap-4 mt-4">
+    <main class="mx-auto w-full max-w-md p-4 flex flex-col gap-4 mt-4">
 
       <!-- Título de la clasificación -->
       <div class="flex justify-center border-b border-[#FFFFFF]/50 pb-2">

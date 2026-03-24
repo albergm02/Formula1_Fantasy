@@ -90,7 +90,7 @@ const toggleBoosterInstallation = async (instanceId) => {
 <template>
   <Header />
 
-  <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-3xl mx-auto w-full">
+  <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-md mx-auto w-full">
     <!-- Sección: Coche -->
     <section class="grid">
       <div v-if="escuderiaStore.garage.coche" class="flex flex-col w-full h-full">
