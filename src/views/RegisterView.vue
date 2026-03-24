@@ -80,7 +80,7 @@ const handleRegister = async ({ valid, values }) => {
   <div class="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
 
     <!-- Animación de fondo -->
-    <MagicRings class="absolute inset-0 -z-10" color="#FF1E00" :ringCount="2" />
+    <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal de registro -->
     <Card class="w-full max-w-md p-2 border shadow-2xl md:p-4 rounded-xl backdrop-blur-md border-zinc-800 !bg-black/40">
@@ -90,7 +90,7 @@ const handleRegister = async ({ valid, values }) => {
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-2xl font-black uppercase tracking-widest text-[#FF1E00]">Regístrate</h1>
+            <h1 class="text-2xl font-black uppercase tracking-widest text-[#E10600]">Regístrate</h1>
           </div>
         </div>
       </template>
@@ -102,10 +102,10 @@ const handleRegister = async ({ valid, values }) => {
 
           <!-- Campo: Nombre de Piloto -->
           <div class="flex flex-col gap-1">
-            <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#D9D9D9]">Nombre de
+            <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de
               Piloto</label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#FF1E00] !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              class="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -113,9 +113,9 @@ const handleRegister = async ({ valid, values }) => {
 
           <!-- Campo: Email -->
           <div class="flex flex-col gap-1">
-            <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#D9D9D9]">Email</label>
+            <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
-              class="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#FF1E00] !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              class="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
@@ -124,10 +124,10 @@ const handleRegister = async ({ valid, values }) => {
           <!-- Campo: Contraseña -->
           <div class="flex flex-col gap-1">
             <label for="password"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#D9D9D9]">Contraseña</label>
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="new-password" placeholder="********" toggle-mask
               :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#FF1E00] !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
@@ -136,10 +136,10 @@ const handleRegister = async ({ valid, values }) => {
           <!-- Campo: Confirmar Contraseña -->
           <div class="flex flex-col gap-1">
             <label for="confirmPassword"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#D9D9D9]">Confirmar Contraseña</label>
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar Contraseña</label>
             <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
               placeholder="********" toggle-mask :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#FF1E00] !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
             <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.confirmPassword.error.message }}
             </Message>
@@ -154,13 +154,13 @@ const handleRegister = async ({ valid, values }) => {
           <div class="flex flex-col gap-3 mt-4">
 
             <Button type="submit" label="CREAR EQUIPO" :loading="isLoading"
-              class="w-full py-3 font-black uppercase transition-colors shadow-lg rounded-lg !border-none !bg-[#FF1E00] !text-[#D9D9D9] hover:!bg-red-600" />
+              class="w-full py-3 font-black uppercase transition-colors shadow-lg rounded-lg !border-none !bg-[#E10600] !text-[#F0ECEC] hover:!bg-[#C00500]" />
 
             <!-- Enlace a login -->
             <div class="pt-5 pb-2 mt-2 text-center border-t border-zinc-800">
-              <span class="text-xs text-[#D9D9D9]">¿Ya tienes equipo? </span>
+              <span class="text-xs text-[#F0ECEC]">¿Ya tienes equipo? </span>
               <router-link to="/"
-                class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#00E5E5] hover:text-white">
+                class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#D4A843] hover:text-white">
                 Inicia sesión aquí
               </router-link>
             </div>

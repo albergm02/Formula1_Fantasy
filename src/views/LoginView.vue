@@ -152,7 +152,7 @@ const onResetModalHide = () => {
   <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
 
     <!-- Animación de fondo -->
-    <MagicRings class="absolute inset-0 -z-10" color="#FF1E00" :ringCount="2" />
+    <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta de inicio de sesión -->
     <Card class="w-full max-w-md border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800 !bg-black/40 p-2 md:p-4">
@@ -162,7 +162,7 @@ const onResetModalHide = () => {
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-3xl font-black uppercase tracking-widest text-[#FF1E00]">F1 Fantasy</h1>
+            <h1 class="text-3xl font-black uppercase tracking-widest text-[#E10600]">F1 Fantasy</h1>
           </div>
         </div>
       </template>
@@ -174,9 +174,9 @@ const onResetModalHide = () => {
 
           <!-- Campo de correo electrónico -->
           <div class="flex flex-col gap-1">
-            <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#D9D9D9]">Email</label>
+            <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
-              class="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#FF1E00] !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              class="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
@@ -185,10 +185,10 @@ const onResetModalHide = () => {
           <!-- Campo de contraseña -->
           <div class="flex flex-col gap-1">
             <label for="password"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#D9D9D9]">Contraseña</label>
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
               toggle-mask :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#FF1E00] !border-[#D9D9D9] !bg-[#15151E] !text-[#D9D9D9]" />
+              inputClass="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
@@ -204,7 +204,7 @@ const onResetModalHide = () => {
 
             <!-- Botón de inicio de sesión -->
             <Button type="submit" label="Iniciar sesión" :loading="isLoading"
-              class="w-full rounded-lg py-3 font-black uppercase shadow-lg transition-colors !border-none !bg-[#FF1E00] !text-[#D9D9D9] hover:!bg-red-600" />
+              class="w-full rounded-lg py-3 font-black uppercase shadow-lg transition-colors !border-none !bg-[#E10600] !text-[#F0ECEC] hover:!bg-[#C00500]" />
 
             <!-- Botón de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
@@ -213,14 +213,14 @@ const onResetModalHide = () => {
 
             <!-- Botón de contraseña olvidada -->
             <Button type="button" label="¿Olvidaste tu contraseña?" text
-              class="w-full mt-1 font-bold transition-colors !border-none !bg-transparent !text-[#00E5E5] hover:!text-cyan-400"
+              class="w-full mt-1 font-bold transition-colors !border-none !bg-transparent !text-[#D4A843] hover:!text-[#C09638]"
               @click="isResetModalVisible = true" />
 
             <!-- Enlace de registro -->
             <div class="mt-2 border-t border-zinc-800 pt-5 pb-2 text-center">
-              <span class="text-xs text-[#D9D9D9]">¿No tienes equipo? </span>
+              <span class="text-xs text-[#F0ECEC]">¿No tienes equipo? </span>
               <router-link to="/registro"
-                class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#00E5E5] hover:text-white">
+                class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#D4A843] hover:text-white">
                 Regístrate aquí
               </router-link>
             </div>
@@ -231,19 +231,19 @@ const onResetModalHide = () => {
 
     <!-- Modal de recuperación de contraseña -->
     <Dialog v-model:visible="isResetModalVisible" modal header="Recuperar Contraseña" @hide="onResetModalHide"
-      :headerStyle="{ backgroundColor: '#15151E', color: 'white', borderBottom: '1px solid #27272a' }"
-      :contentStyle="{ backgroundColor: '#15151E', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #27272a', borderRadius: '0.75rem' }">
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
 
       <div class="flex flex-col gap-4">
-        <p class="text-sm text-[#D9D9D9]">Introduce tu correo y te enviaremos un enlace de recuperación.</p>
+        <p class="text-sm text-[#F0ECEC]">Introduce tu correo y te enviaremos un enlace de recuperación.</p>
 
         <InputText v-model="resetEmailAddress" type="email" placeholder="tu@correo.com"
-          class="w-full rounded-lg p-3 text-white focus:ring-1 focus:!border-[#00E5E5] focus:ring-[#00E5E5] !border-zinc-700 !bg-[#111111]"
+          class="w-full rounded-lg p-3 text-white focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700 !bg-[#121218]"
           @keyup.enter="handlePasswordReset" />
 
         <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="isResetLoading"
-          class="mt-2 w-full rounded-lg py-3 font-black tracking-widest !border-none !bg-[#00E5E5] !text-[#111111] hover:!bg-cyan-400"
+          class="mt-2 w-full rounded-lg py-3 font-black tracking-widest !border-none !bg-[#D4A843] !text-[#121218] hover:!bg-[#C09638]"
           @click="handlePasswordReset" />
       </div>
     </Dialog>

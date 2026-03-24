@@ -37,7 +37,7 @@ const confirmarCompra = () => {
 
     <div class="relative w-full h-full flex flex-col overflow-hidden border border-zinc-800">
 
-      <div class="relative z-10 bg-[#15151E] flex flex-col flex-1 w-full h-full overflow-hidden">
+      <div class="relative z-10 bg-[#1A1A1F] flex flex-col flex-1 w-full h-full overflow-hidden">
 
         <header class="flex justify-between items-center p-2 z-20 bg-black shrink-0">
           <div class="flex flex-col w-2/3">
@@ -46,7 +46,7 @@ const confirmarCompra = () => {
             </span>
             <span class="text-[9px] text-zinc-500 uppercase font-bold">MEJORA</span>
           </div>
-          <span class="text-[10px] font-black text-[#00E5E5]">{{ props.potenciador.precio }}M</span>
+          <span class="text-[10px] font-black text-[#D4A843]">{{ props.potenciador.precio }}M</span>
         </header>
 
         <main class="relative flex-1 w-full cursor-pointer bg-transparent" @click="mostrarInfo = !mostrarInfo">
@@ -62,7 +62,7 @@ const confirmarCompra = () => {
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-4 flex flex-col text-center z-30 bg-[#15151E]/90 backdrop-blur-md overflow-y-auto">
+            class="absolute inset-0 p-4 flex flex-col text-center z-30 bg-[#1A1A1F]/90 backdrop-blur-md overflow-y-auto">
             <h4 class="text-[10px] font-black border-b border-zinc-700 text-white pb-1 mb-2">
               DESCRIPCIÓN
             </h4>

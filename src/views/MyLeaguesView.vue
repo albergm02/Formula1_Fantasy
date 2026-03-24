@@ -102,7 +102,7 @@ const handleLeaveLeague = () => {
     header: 'CONFIRMACIÓN DE SALIDA',
     acceptLabel: 'Abandonar',
     rejectClass: '!bg-transparent !border-none !text-white',
-    acceptClass: '!bg-[#00E5E5] !border-none !text-[#15151E]',
+    acceptClass: '!bg-[#D4A843] !border-none !text-[#1A1A1F]',
     accept: async () => {
       isActionLoading.value = true
       const result = await ligasStore.leaveLeague(selectedLeague.value.id)
@@ -126,7 +126,7 @@ const handleDeleteLeague = () => {
     header: 'ELIMINAR LIGA',
     acceptLabel: 'Eliminar para todos',
     rejectClass: '!bg-transparent !border-none !text-white',
-    acceptClass: '!bg-[#FF1E00] !border-none !text-white',
+    acceptClass: '!bg-[#E10600] !border-none !text-white',
     accept: async () => {
       isActionLoading.value = true
       const result = await ligasStore.deleteLeague(selectedLeague.value.id)
@@ -150,7 +150,7 @@ const handleDeleteLeague = () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen bg-[#15151E] font-sans pb-10">
+  <div class="min-h-screen bg-[#1A1A1F] font-sans pb-10">
     <Header />
 
     <div class="p-4 mt-4 max-w-4xl mx-auto">
@@ -159,17 +159,17 @@ const handleDeleteLeague = () => {
         <!-- Botones de crear y unirse a liga -->
         <section class="grid grid-cols-2 gap-4">
           <Button label="CREAR LIGA" icon="pi pi-plus"
-            class="w-full py-3 !bg-[#00E5E5] !text-[#15151E] font-black tracking-widest !border-none"
+            class="w-full py-3 !bg-[#D4A843] !text-[#1A1A1F] font-black tracking-widest !border-none"
             @click="isCreateDialogVisible = true" />
           <Button label="UNIRSE" icon="pi pi-sign-in"
-            class="w-full py-3 !bg-transparent !border-2 !border-[#00E5E5] !text-[#00E5E5] font-black tracking-widest"
+            class="w-full py-3 !bg-transparent !border-2 !border-[#D4A843] !text-[#D4A843] font-black tracking-widest"
             @click="isJoinDialogVisible = true" />
         </section>
 
         <!-- Listado de ligas del usuario -->
         <section>
           <div v-if="ligasStore.leagueDetails.length > 0" class="flex flex-col justify-center w-full">
-            <div class="text-center text-[#D9D9D9] font-bold uppercase tracking-wider mb-4">
+            <div class="text-center text-[#F0ECEC] font-bold uppercase tracking-wider mb-4">
               Ligas disponibles: {{ ligasStore.leagueDetails.length }}/8
             </div>
 
@@ -177,25 +177,25 @@ const handleDeleteLeague = () => {
               <template #list="slotProps">
                 <div class="flex flex-col gap-4 w-full">
                   <div v-for="(item, index) in slotProps.items" :key="index"
-                    class="p-4 bg-[#15151E] rounded-xl border border-[#00E5E5]/30 flex items-center justify-between">
+                    class="p-4 bg-[#1A1A1F] rounded-xl border border-[#D4A843]/30 flex items-center justify-between">
                     <div class="flex flex-col gap-1 w-2/3">
-                      <h3 class="text-xl font-black text-[#FF1E00] uppercase truncate pr-2" :title="item.nombre">
+                      <h3 class="text-xl font-black text-[#E10600] uppercase truncate pr-2" :title="item.nombre">
                         {{ item.nombre }}
                       </h3>
-                      <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#D9D9D9] font-medium opacity-80">
+                      <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#F0ECEC] font-medium opacity-80">
                         <span class="flex items-center gap-1">
-                          <i class="pi pi-users text-[#00E5E5]"></i> {{ item.participantes }}
+                          <i class="pi pi-users text-[#D4A843]"></i> {{ item.participantes }}
                         </span>
                         <span class="flex items-center gap-1">
-                          <i class="pi pi-key text-[#00E5E5]"></i> {{ item.codigo_invitacion }}
+                          <i class="pi pi-key text-[#D4A843]"></i> {{ item.codigo_invitacion }}
                         </span>
                       </div>
                     </div>
 
                     <div class="flex gap-2 justify-end">
-                      <Button icon="pi pi-cog" class="!bg-[#111111] !border !border-[#00E5E5] !text-[#00E5E5]"
+                      <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click="openLeagueOptions(item)" />
-                      <Button icon="pi pi-flag-fill" class="!bg-[#FF1E00] !border-none !text-[#FFFFFF] !w-10 !h-10"
+                      <Button icon="pi pi-flag-fill" class="!bg-[#E10600] !border-none !text-[#FFFFFF] !w-10 !h-10"
                         @click="openLeague(item.id)" />
                     </div>
                   </div>
@@ -206,7 +206,7 @@ const handleDeleteLeague = () => {
 
           <div v-else-if="!isLoading" class="flex justify-center mt-10">
             <Message severity="secondary"
-              class="!text-center !bg-transparent !border !border-[#D9D9D9]/20 !text-[#D9D9D9]">
+              class="!text-center !bg-transparent !border !border-[#F0ECEC]/20 !text-[#F0ECEC]">
               No perteneces a ninguna liga todavía. Crea o únete a una.
             </Message>
           </div>
@@ -215,63 +215,63 @@ const handleDeleteLeague = () => {
     </div>
 
     <Dialog v-model:visible="isCreateDialogVisible" modal header="CREAR CAMPEONATO" :pt="{
-      root: { class: '!bg-[#15151E] !border-none mx-4 w-full max-w-sm' },
-      header: { class: '!bg-[#15151E] !rounded' },
-      title: { class: 'font-bold tracking-widest text-[#FF1E00]' },
-      content: { class: '!bg-[#15151E] pt-4' },
-      closeButton: { class: 'hover:!bg-[#D9D9D9] !text-[#D9D9D9]' },
+      root: { class: '!bg-[#1A1A1F] !border-none mx-4 w-full max-w-sm' },
+      header: { class: '!bg-[#1A1A1F] !rounded' },
+      title: { class: 'font-bold tracking-widest text-[#E10600]' },
+      content: { class: '!bg-[#1A1A1F] pt-4' },
+      closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
     }">
       <div class="flex flex-col gap-4">
-        <span class="text-[#D9D9D9]"> Puedes crear un máximo de 8 ligas</span>
+        <span class="text-[#F0ECEC]"> Puedes crear un máximo de 8 ligas</span>
         <InputText v-model="newLeagueName" placeholder="Introduzca aquí el nombre"
-          class="w-full !bg-[#111111] !text-[#D9D9D9] focus:!border-[#FF1E00]" autofocus />
+          class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#E10600]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="isCreateDialogVisible = false"
-            class="!bg-transparent !border-none !text-[#D9D9D9] hover:!text-white" />
+            class="!bg-transparent !border-none !text-[#F0ECEC] hover:!text-white" />
           <Button label="Crear" @click="handleCreateLeague"
-            class="!bg-[#FF1E00] !border-none !px-10 font-bold hover:!bg-[#D01800]" />
+            class="!bg-[#E10600] !border-none !px-10 font-bold hover:!bg-[#C00500]" />
         </div>
       </div>
     </Dialog>
 
     <Dialog v-model:visible="isJoinDialogVisible" modal header="UNIRSE A LIGA" :pt="{
-      root: { class: '!bg-[#15151E] !border-none mx-4 w-full max-w-sm' },
-      header: { class: '!bg-[#15151E] !rounded ' },
-      title: { class: 'font-bold tracking-widest text-[#00E5E5]' },
-      content: { class: '!bg-[#15151E] pt-4' },
-      closeButton: { class: 'hover:!bg-[#D9D9D9] !text-[#D9D9D9]' },
+      root: { class: '!bg-[#1A1A1F] !border-none mx-4 w-full max-w-sm' },
+      header: { class: '!bg-[#1A1A1F] !rounded ' },
+      title: { class: 'font-bold tracking-widest text-[#D4A843]' },
+      content: { class: '!bg-[#1A1A1F] pt-4' },
+      closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
     }">
       <div class="flex flex-col gap-4">
-        <span class="text-[#D9D9D9] text-sm">Introduce el código de invitación de 6 dígitos.</span>
+        <span class="text-[#F0ECEC] text-sm">Introduce el código de invitación de 6 dígitos.</span>
         <InputText v-model="joinCode" placeholder="Ej: A1B2C3"
-          class="w-full uppercase !bg-[#111111] focus:!border-[#00E5E5]" autofocus />
+          class="w-full uppercase !bg-[#121218] focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="isJoinDialogVisible = false"
-            class="!bg-transparent !border-none !text-[#D9D9D9] hover:!text-white" />
+            class="!bg-transparent !border-none !text-[#F0ECEC] hover:!text-white" />
           <Button label="Unirse" @click="handleJoinLeague"
-            class="!bg-[#00E5E5] !text-[#15151E] !border-none !px-10 font-bold hover:!bg-[#00c4c4]" />
+            class="!bg-[#D4A843] !text-[#1A1A1F] !border-none !px-10 font-bold hover:!bg-[#C09638]" />
         </div>
       </div>
     </Dialog>
 
     <Dialog v-model:visible="isOptionsDialogVisible" modal header="AJUSTES DE LIGA" :pt="{
-      root: { class: '!bg-[#15151E] !border-none mx-4 w-full max-w-sm' },
-      header: { class: '!bg-[#15151E] !rounded' },
-      title: { class: 'font-bold tracking-widest text-[#D9D9D9]' },
-      content: { class: '!bg-[#15151E] pt-4 pb-6' },
-      closeButton: { class: 'hover:!bg-[#D9D9D9] !text-[#D9D9D9]' },
+      root: { class: '!bg-[#1A1A1F] !border-none mx-4 w-full max-w-sm' },
+      header: { class: '!bg-[#1A1A1F] !rounded' },
+      title: { class: 'font-bold tracking-widest text-[#F0ECEC]' },
+      content: { class: '!bg-[#1A1A1F] pt-4 pb-6' },
+      closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
     }">
       <div v-if="selectedLeague" class="flex flex-col gap-4">
-        <p class="text-center text-[#D9D9D9] text-sm mb-2">
+        <p class="text-center text-[#F0ECEC] text-sm mb-2">
           ¿Qué deseas hacer con la liga <strong class="text-white">{{ selectedLeague.nombre }}</strong>?
         </p>
 
         <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
-          class="w-full !bg-[#D9D9D9] !border-none !text-black font-bold" @click="handleLeaveLeague"
+          class="w-full !bg-[#F0ECEC] !border-none !text-black font-bold" @click="handleLeaveLeague"
           :loading="isActionLoading" />
 
         <Button v-if="selectedLeague.admin === authStore.currentUser.authEmail" label="ELIMINAR LIGA" icon="pi pi-trash"
-          class="w-full !bg-[#FF1E00] !border-none !text-white font-bold" @click="handleDeleteLeague"
+          class="w-full !bg-[#E10600] !border-none !text-white font-bold" @click="handleDeleteLeague"
           :loading="isActionLoading" />
       </div>
     </Dialog>

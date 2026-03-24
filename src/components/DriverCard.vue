@@ -42,20 +42,20 @@ const confirmarCompra = () => {
       :class="props.piloto.tier === 2 ? 'p-[2px]' : 'border border-zinc-800'">
 
       <div v-if="props.piloto.tier === 2"
-        class="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_70%,#00E5E5_100%)] animate-[spin_3s_linear_infinite]">
+        class="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[conic-gradient(from_0deg,transparent_70%,#D4A843_100%)] animate-[spin_3s_linear_infinite]">
       </div>
 
-      <div class="relative z-10 bg-[#15151E] flex flex-col flex-1 w-full h-full overflow-hidden">
+      <div class="relative z-10 bg-[#1A1A1F] flex flex-col flex-1 w-full h-full overflow-hidden">
 
         <header class="flex justify-between items-center p-3 z-20 bg-black shrink-0">
           <div class="flex flex-col">
             <span class="text-xs font-black text-white uppercase">
               {{ props.piloto.nombre }}
-              <span v-if="props.piloto.tier === 2" class="text-[#00E5E5] ml-1">EN RACHA</span>
+              <span v-if="props.piloto.tier === 2" class="text-[#D4A843] ml-1">EN RACHA</span>
             </span>
             <span class="text-[10px] text-zinc-500 uppercase font-bold">{{ props.piloto.equipo }}</span>
           </div>
-          <span class="text-xs font-black text-[#00E5E5]">{{ props.piloto.precio }}M</span>
+          <span class="text-xs font-black text-[#D4A843]">{{ props.piloto.precio }}M</span>
         </header>
 
         <main class="relative flex-1 w-full cursor-pointer" @click="mostrarInfo = !mostrarInfo">
@@ -71,7 +71,7 @@ const confirmarCompra = () => {
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-5 flex flex-col text-left z-30 bg-[#15151E]/90 backdrop-blur-md overflow-y-auto">
+            class="absolute inset-0 p-5 flex flex-col text-left z-30 bg-[#1A1A1F]/90 backdrop-blur-md overflow-y-auto">
             <h4 class="text-xs font-black border-b border-zinc-700 text-white pb-2 mb-3 text-center">
               DESCRIPCIÓN
             </h4>
@@ -96,7 +96,7 @@ const confirmarCompra = () => {
             </div>
 
             <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2" class="mt-2 pt-3 border-t border-zinc-800">
-              <p class="text-[10px] font-black text-[#00E5E5] uppercase mb-1 drop-shadow-sm">
+              <p class="text-[10px] font-black text-[#D4A843] uppercase mb-1 drop-shadow-sm">
                 {{ props.piloto.habilidad_2.nombre }}
                 <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
               </p>

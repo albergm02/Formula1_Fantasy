@@ -40,13 +40,13 @@ onMounted(async () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen bg-[#15151E] font-sans pb-24">
+  <div class="min-h-screen bg-[#1A1A1F] font-sans pb-24">
     <Header />
 
     <!-- Spinner mientras carga la escudería -->
     <div v-if="escuderiaStore.isTeamLoading" class="flex flex-col items-center justify-center gap-4">
       <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
-      <p class="text-[#00E5E5] font-bold tracking-widest animate-pulse uppercase text-sm">Cargando telemetría...</p>
+      <p class="text-[#D4A843] font-bold tracking-widest animate-pulse uppercase text-sm">Cargando telemetría...</p>
     </div>
 
     <!-- Contenido principal: widgets de stats y próximo GP -->

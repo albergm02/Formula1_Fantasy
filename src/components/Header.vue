@@ -35,10 +35,10 @@ const goToDashboard = () => {
 
 <template>
     <!-- z-10 para que el header esté por encima de otros elementos / border-b (border-bottom) -->
-    <header class="w-full bg-[#15151E] border-b border-[#FF1E00] p-3 flex justify-between sticky top-0 z-40">
+    <header class="w-full bg-[#1A1A1F] border-b border-[#E10600] p-3 flex justify-between sticky top-0 z-40">
         <div class="flex items-center gap-2">
             <img src="/logo.png" class="h-16 w-16 object-contain cursor-pointer" @click="goToDashboard" />
-            <span class="font-black italic text-[#FF1E00] text-lg sm:block cursor-pointer" @click="goToDashboard">F1
+            <span class="font-black italic text-[#E10600] text-lg sm:block cursor-pointer" @click="goToDashboard">F1
                 FANTASY</span>
         </div>
 
@@ -46,7 +46,7 @@ const goToDashboard = () => {
             <div class="text-right">
                 <p class="text text-white font-bold uppercase">{{ authStore.currentUser.displayName }}</p>
                 <p v-if="route.name !== 'ligas'" class="text-xs text-white mt-0.5">
-                    Pts: <strong class="text-yellow-500">{{ escuderiaStore.points }}</strong>
+                    Pts: <strong class="text-[#D4A843]">{{ escuderiaStore.points }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ escuderiaStore.budget }}M</span>
                 </p>
             </div>

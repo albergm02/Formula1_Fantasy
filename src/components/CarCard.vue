@@ -37,7 +37,7 @@ const confirmarCompra = () => {
 
     <div class="relative w-full h-full flex flex-col overflow-hidden border border-zinc-800">
 
-      <div class="relative z-10 bg-[#15151E] flex flex-col flex-1 w-full h-full overflow-hidden">
+      <div class="relative z-10 bg-[#1A1A1F] flex flex-col flex-1 w-full h-full overflow-hidden">
 
         <header class="flex justify-between items-center p-3 z-20 bg-black shrink-0">
           <div class="flex flex-col">
@@ -46,7 +46,7 @@ const confirmarCompra = () => {
             </span>
             <span class="text-[10px] text-zinc-500 uppercase font-bold">CHASIS</span>
           </div>
-          <span class="text-xs font-black text-[#00E5E5]">{{ props.coche.precio }}M</span>
+          <span class="text-xs font-black text-[#D4A843]">{{ props.coche.precio }}M</span>
         </header>
 
         <main class="relative flex-1 w-full cursor-pointer bg-transparent" @click="mostrarInfo = !mostrarInfo">
@@ -62,7 +62,7 @@ const confirmarCompra = () => {
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-5 flex flex-col text-left z-30 bg-[#15151E]/90 backdrop-blur-md overflow-y-auto">
+            class="absolute inset-0 p-5 flex flex-col text-left z-30 bg-[#1A1A1F]/90 backdrop-blur-md overflow-y-auto">
 
             <h4 class="text-xs font-black border-b border-zinc-700 text-white pb-2 mb-3 text-center">
               DESCRIPCIÓN

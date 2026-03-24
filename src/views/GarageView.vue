@@ -99,7 +99,7 @@ const toggleBoosterInstallation = async (instanceId) => {
         <!-- Botón de venta del coche -->
         <div class="px-6 pb-2 -mt-1">
           <button @click="confirmCarSale(escuderiaStore.garage.coche)"
-            class="w-full bg-[#111111] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
+            class="w-full bg-[#121218] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
             <i class="pi pi-shopping-bag text-sm text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest">
               VENDER POR {{ calculateResaleValue(escuderiaStore.garage.coche.precio) }}M
@@ -109,7 +109,7 @@ const toggleBoosterInstallation = async (instanceId) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
+        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#1A1A1F]/50 rounded-2xl mx-6">
         <i class="pi pi-car text-3xl text-zinc-600 mb-3"></i>
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Garaje Vacío</span>
       </div>
@@ -125,7 +125,7 @@ const toggleBoosterInstallation = async (instanceId) => {
           <!-- Botón de despido del piloto -->
           <div class="px-6 pb-2 -mt-1">
             <button @click="confirmDriverSale(driver)"
-              class="w-full bg-[#111111] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
+              class="w-full bg-[#121218] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
               <i class="pi pi-user-minus text-sm text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
               <span class="text-white text-[10px] font-black uppercase tracking-widest">
                 DESPEDIR ({{ calculateResaleValue(driver.precio) }}M)
@@ -137,7 +137,7 @@ const toggleBoosterInstallation = async (instanceId) => {
 
       <!-- Estado vacío: sin pilotos -->
       <div v-else
-        class="col-span-full flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
+        class="col-span-full flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#1A1A1F]/50 rounded-2xl mx-6">
         <i class="pi pi-users text-3xl text-zinc-600 mb-3"></i>
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Asientos Vacíos</span>
       </div>
@@ -155,7 +155,7 @@ const toggleBoosterInstallation = async (instanceId) => {
             class="w-full py-3 mt-2 flex items-center justify-center cursor-pointer transition-colors rounded-xl shadow-lg group"
             :class="booster.equipado
               ? 'bg-emerald-900/20 border border-emerald-500/50 text-emerald-400'
-              : 'bg-[#111111] border border-zinc-800 text-zinc-400 hover:text-white'">
+              : 'bg-[#121218] border border-zinc-800 text-zinc-400 hover:text-white'">
             <i class="text-[10px] mr-2"
               :class="booster.equipado ? 'pi pi-check-circle text-emerald-400' : 'pi pi-cog text-zinc-500 group-hover:text-white transition-colors'"></i>
             <span class="text-[10px] font-black uppercase tracking-widest"
@@ -167,7 +167,7 @@ const toggleBoosterInstallation = async (instanceId) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#15151E]/50 rounded-2xl mx-6">
+        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#1A1A1F]/50 rounded-2xl mx-6">
         <i class="pi pi-box text-3xl text-zinc-600 mb-3"></i>
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Mejoras Compradas</span>
       </div>

@@ -1,22 +1,22 @@
 <template>
-  <div class="fixed inset-0 -z-30 h-full w-full bg-[#15151E]"></div>
+  <div class="fixed inset-0 -z-30 h-full w-full bg-[#1A1A1F]"></div>
 
   <Toast position="top-center" />
   <ConfirmDialog :pt="{
     root: {
       class:
-        '!bg-[#15151E] !border-none',
+        '!bg-[#1A1A1F] !border-none',
     },
-    title: { class: 'text-[#00E5E5]' },
-    content: { class: ' !text-[#D9D9D9]' },
+    title: { class: 'text-[#D4A843]' },
+    content: { class: ' !text-[#F0ECEC]' },
     footer: { class: '!bg-transparent gap-2 flex justify-end' },
-    icon: { class: '!text-[#FF1E00]' },
+    icon: { class: '!text-[#E10600]' },
   }"></ConfirmDialog>
 
   <!-- Sección de carga para cuando esté cargando -->
   <div v-if="!authStore.isDataLoaded" class="flex flex-col items-center justify-center h-screen w-full gap-3">
-    <i class="pi pi-spinner text-4xl text-[#00E5E5] animate-spin"></i>
-    <p class="text-[#00E5E5] text-sm font-bold uppercase tracking-widest animate-pulse">Verificando credenciales...</p>
+    <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
+    <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Verificando credenciales...</p>
   </div>
 
   <RouterView v-else />

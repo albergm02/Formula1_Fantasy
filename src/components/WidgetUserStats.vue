@@ -20,7 +20,7 @@ const activeLeagueName = computed(() => {
   <!-- Bienvenida -->
   <div class="flex items-center justify-between bg-transparent border-b border-zinc-800 p-5">
     <div class="flex flex-col">
-      <span class="text-[#00E5E5] text-[10px] font-black uppercase mb-1">Bienvenido al Paddock</span>
+      <span class="text-[#D4A843] text-[10px] font-black uppercase mb-1">Bienvenido al Paddock</span>
       <h1 class="text-xl font-black text-white italic uppercase w-32">
         {{ activeLeagueName }}
       </h1>
@@ -28,12 +28,12 @@ const activeLeagueName = computed(() => {
     <!-- Estadísticas del usuario -->
     <div class="flex flex-col items-end gap-1 pl-4">
       <div class="flex items-center gap-2">
-        <span class="text-[#D9D9D9] text-xs font-medium uppercase">Puntos:</span>
-        <span class="text-white font-black text-lg bg-[#00E5E5] px-2">{{ escuderiaStore.points || 0 }}</span>
+        <span class="text-[#F0ECEC] text-xs font-medium uppercase">Puntos:</span>
+        <span class="text-white font-black text-lg bg-[#D4A843] px-2">{{ escuderiaStore.points || 0 }}</span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-[#D9D9D9] text-xs font-medium uppercase">Presupuesto:</span>
-        <span class="text-[#FF1E00] font-black text-lg">${{ escuderiaStore.budget || 50 }}M</span>
+        <span class="text-[#F0ECEC] text-xs font-medium uppercase">Presupuesto:</span>
+        <span class="text-[#E10600] font-black text-lg">${{ escuderiaStore.budget || 50 }}M</span>
       </div>
     </div>
   </div>

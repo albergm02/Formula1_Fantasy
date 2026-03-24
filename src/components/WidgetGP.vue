@@ -47,8 +47,8 @@ onMounted(async () => {
       <img :src="nextGrandPrix.image" alt="Circuito" class="w-32 h-24 object-contain" />
     </div>
     <div v-else class="flex flex-col items-center justify-center py-10 gap-3">
-      <i class="pi pi-spinner text-4xl text-[#00E5E5] animate-spin"></i>
-      <p class="text-[#00E5E5] text-sm font-bold uppercase tracking-widest animate-pulse">
+      <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
+      <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">
         Cargando próximo gran premio...
       </p>
     </div>
