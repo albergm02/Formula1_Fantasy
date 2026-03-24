@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     /* Iniciar sesión y traer datos de perfil de Firebase */
-    async iniciarDatosGlobales(emailUsuario, nombreUsuario) {
+    async initializeUserData(emailUsuario, nombreUsuario) {
       try {
         this.datosCargados = false
         this.usuarioGlobal.emailAuth = emailUsuario
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', {
           })
         }
       } catch (error) {
-        console.error('Error en iniciarDatosGlobales (storeAuth.js):', error)
+        console.error('Error en initializeUserData (storeAuth.js):', error)
       } finally {
         this.datosCargados = true
       }

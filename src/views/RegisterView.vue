@@ -58,7 +58,7 @@ const handleRegister = async ({ valid, values }) => {
     // Creación del usuario en Firebase Authentication.
     const userCredential = await signUp(cleanEmail, values.password)
     // Inicialización de datos globales en el store (como email y username) para su uso en toda la app.
-    await authStore.iniciarDatosGlobales(userCredential.user.email, cleanUsername)
+    await authStore.initializeUserData(userCredential.user.email, cleanUsername)
     router.push('/ligas')
     // Manejo de errores.
   } catch (error) {

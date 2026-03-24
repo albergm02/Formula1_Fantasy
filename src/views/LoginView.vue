@@ -48,7 +48,7 @@ const handleLogin = async ({ valid, values }) => {
 
   try {
     const userCredential = await signIn(values.email, values.password)
-    await authStore.iniciarDatosGlobales(userCredential.user.email, userCredential.user.displayName)
+    await authStore.initializeUserData(userCredential.user.email, userCredential.user.displayName)
     router.push('/ligas')
   } catch (error) {
     if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
@@ -75,7 +75,7 @@ const handleGoogleLogin = async () => {
     const emailGoogle = userCredential.user.email
     const nombreGoogle = userCredential.user.displayName.trim() || emailGoogle.split('@')[0]
     // Guardamos y redirigimos a ligas.
-    await authStore.iniciarDatosGlobales(emailGoogle, nombreGoogle)
+    await authStore.initializeUserData(emailGoogle, nombreGoogle)
     router.push('/ligas')
   } catch (error) {
     // Ignoramos el error si el usuario cancela.

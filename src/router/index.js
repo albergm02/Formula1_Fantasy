@@ -74,7 +74,7 @@ router.beforeEach(async (to) => {
     const authStore = useAuthStore()
 
     if (user && authStore.usuarioGlobal.ligasIds.length === 0) {
-      await authStore.iniciarDatosGlobales(user.email, user.displayName)
+      await authStore.initializeUserData(user.email, user.displayName)
     }
 
     if (
