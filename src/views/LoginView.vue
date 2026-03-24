@@ -15,6 +15,8 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
+
+/* Utilidades */
 import { getGoogleErrorMessage, getLoginErrorMessage, isGooglePopupClosed } from '@/utils/authErrors'
 import { isValidEmail, trimText } from '@/utils/text'
 import { showToast } from '@/utils/uiFeedback'
@@ -46,7 +48,9 @@ const validationSchema = zodResolver(
 
 /* Handler Login utilizando email / contraseña */
 const handleLogin = async ({ valid, values }) => {
+  // Zod se encarga de mostrar errores.
   if (!valid) return
+
   isLoading.value = true
   authError.value = ''
 
