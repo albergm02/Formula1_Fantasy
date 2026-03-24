@@ -42,7 +42,9 @@ onMounted(() => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       if (!authStore.usuarioGlobal.emailAuth) {
-        await authStore.initializeUserData(user.email, user.displayName)
+        await authStore.initializeUserData(user.email, user.displayName, {
+          crearSiNoExiste: false,
+        })
       }
     } else {
       authStore.cerrarSesion()

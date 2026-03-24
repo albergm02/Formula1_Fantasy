@@ -18,6 +18,12 @@ const routes = [
     meta: { requiresGuest: true },
   },
   {
+    path: '/registro-google',
+    name: 'registro-google',
+    component: () => import('../views/GoogleUsernameView.vue'),
+    meta: { requiresAuth: true, requiresIncompleteProfile: true },
+  },
+  {
     path: '/ligas',
     name: 'ligas',
     component: () => import('../views/MisLigasView.vue'),
@@ -62,23 +68,36 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const user = await getCurrentUser()
+  const authStore = useAuthStore()
+  const ligasStore = useLigasStore()
+
+  if (user && !authStore.usuarioGlobal.emailAuth) {
+    await authStore.initializeUserData(user.email, user.displayName, {
+      crearSiNoExiste: false,
+    })
+  }
 
   if (to.meta.requiresAuth && !user) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
   if (to.meta.requiresGuest && user) {
+    if (!authStore.perfilExiste) {
+      return { name: 'registro-google' }
+    }
+
+    return { name: 'ligas' }
+  }
+
+  if (user && !authStore.perfilExiste && !to.meta.requiresIncompleteProfile) {
+    return { name: 'registro-google' }
+  }
+
+  if (to.meta.requiresIncompleteProfile && authStore.perfilExiste) {
     return { name: 'ligas' }
   }
 
   if (to.meta.requiresLiga) {
-    const authStore = useAuthStore()
-    const ligasStore = useLigasStore()
-
-    if (user && authStore.usuarioGlobal.ligasIds.length === 0) {
-      await authStore.initializeUserData(user.email, user.displayName)
-    }
-
     if (
       authStore.usuarioGlobal.ligasIds.length > 0 &&
       ligasStore.ligasDetalles.length === 0

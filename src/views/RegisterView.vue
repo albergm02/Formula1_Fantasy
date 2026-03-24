@@ -18,6 +18,7 @@ import Message from 'primevue/message'
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
+import { esquemaNombreUsuario } from '@/utils/validacionesAuth'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -35,7 +36,7 @@ const initialValues = ref({
 /* Esquema de validación con Zod */
 const validationSchema = zodResolver(
   z.object({
-    username: z.string().min(3, 'El nombre debe tener al menos 3 caracteres').max(8, 'El nombre no debe exceder los 8 caracteres'),
+    username: esquemaNombreUsuario,
     email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
     password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
     confirmPassword: z.string().min(1, 'Confirma tu contraseña'),

@@ -69,16 +69,24 @@ const handleGoogleLogin = async () => {
   isLoading.value = true
 
   try {
-    // Se espera hasta que el usuario complete la autenticación con Google (o la cancele) y se obtiene su información.
     const userCredential = await signInWithGoogle()
-    // Cogemos los datos.
-    const emailGoogle = userCredential.user.email
-    const nombreGoogle = userCredential.user.displayName.trim() || emailGoogle.split('@')[0]
-    // Guardamos y redirigimos a ligas.
-    await authStore.initializeUserData(emailGoogle, nombreGoogle)
-    router.push('/ligas')
+    const emailGoogle = userCredential.user.email?.trim()
+
+    if (!emailGoogle) {
+      throw new Error('No se pudo obtener el correo de Google.')
+    }
+
+    const perfilExiste = await authStore.initializeUserData(emailGoogle, userCredential.user.displayName, {
+      crearSiNoExiste: false,
+    })
+
+    if (perfilExiste) {
+      router.push('/ligas')
+      return
+    }
+
+    router.push('/registro-google')
   } catch (error) {
-    // Ignoramos el error si el usuario cancela.
     if (error.code !== 'auth/popup-closed-by-user') {
       authError.value = 'Error al iniciar con Google: ' + error.message
     }
@@ -196,7 +204,7 @@ const onResetModalHide = () => {
 
             <!-- Botón de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
-              class="flex w-full items-center justify-center gap-2 rounded-lg py-3 font-bold uppercase shadow-lg transition-colors !border-none !bg-white text-black hover:!bg-gray-200"
+              class="flex w-full items-center justify-center gap-2 rounded-lg py-3 font-bold uppercase shadow-lg transition-colors !border-none !bg-white !text-black hover:!bg-gray-300"
               @click="handleGoogleLogin" />
 
             <!-- Botón de contraseña olvidada -->
