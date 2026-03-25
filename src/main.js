@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+﻿import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
@@ -12,7 +12,7 @@ import 'primeicons/primeicons.css'
 import './assets/main.css'
 
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from './services/firebase'
+import { auth } from './services/servicioFirebase'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -31,3 +31,4 @@ onAuthStateChanged(auth, () => {
     appMounted = true
   }
 })
+

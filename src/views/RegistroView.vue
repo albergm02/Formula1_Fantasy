@@ -1,10 +1,10 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-/* Servicios de autenticación */
-import { signUp } from '@/services/authService'
-import { useAuthStore } from '@/stores/storeAuth'
+/* Servicios de autenticaciÃ³n */
+import { registrarse } from '@/services/servicioAutenticacion'
+import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 /* Componentes UI */
 import MagicRings from '@/components/MagicRings.vue'
@@ -15,29 +15,29 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 
 /* Utilidades de manejo de errores */
-import { getRegisterErrorMessage } from '@/utils/authErrors'
+import { obtenerMensajeErrorRegistro } from '@/utils/erroresAutenticacion'
 
-/* Validación con Zod */
+/* ValidaciÃ³n con Zod */
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
-import { usernameSchema } from '@/utils/authValidations'
+import { esquemaNombreUsuario } from '@/utils/validacionesAutenticacion'
 
-/* Esquema de validación con Zod */
+/* Esquema de validaciÃ³n con Zod */
 const validationSchema = zodResolver(
   z.object({
-    username: usernameSchema,
-    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
-    password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-    confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
+    username: esquemaNombreUsuario,
+    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo invÃ¡lido'),
+    password: z.string().min(8, 'La contraseÃ±a debe tener al menos 8 caracteres'),
+    confirmPassword: z.string().min(1, 'Confirma tu contraseÃ±a'),
   }).refine((data) => data.password === data.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
+    message: 'Las contraseÃ±as no coinciden',
     path: ['confirmPassword'],
   })
 )
 
 const router = useRouter()
-const authStore = useAuthStore()
+const storeAutenticacion = usarStoreAutenticacion()
 
 /* Estados del formulario de registro */
 const isLoading = ref(false)
@@ -50,7 +50,7 @@ const initialFormValues = ref({
 })
 
 
-/* Handler Registro utilizando email / contraseña */
+/* Handler Registro utilizando email / contraseÃ±a */
 const handleRegister = async ({ valid, values }) => {
   if (!valid) return
   const trimmedEmail = values.email.trim()
@@ -59,11 +59,11 @@ const handleRegister = async ({ valid, values }) => {
   isLoading.value = true
   authError.value = ''
   try {
-    const userCredential = await signUp(trimmedEmail, values.password)
-    await authStore.initializeUserData(userCredential.user.email, trimmedUsername)
+    const userCredential = await registrarse(trimmedEmail, values.password)
+    await storeAutenticacion.inicializarDatosUsuario(userCredential.user.email, trimmedUsername)
     router.push('/ligas')
   } catch (error) {
-    authError.value = getRegisterErrorMessage(error)
+    authError.value = obtenerMensajeErrorRegistro(error)
   } finally {
     isLoading.value = false
   }
@@ -79,18 +79,18 @@ const handleRegister = async ({ valid, values }) => {
 <template>
   <div class="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
 
-    <!-- Animación de fondo -->
+    <!-- AnimaciÃ³n de fondo -->
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal de registro -->
     <Card class="w-full max-w-md p-2 border shadow-2xl lg:p-4 rounded-xl backdrop-blur-md border-zinc-800 !bg-black/40">
 
-      <!-- Encabezado con logo y título -->
+      <!-- Encabezado con logo y tÃ­tulo -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-2xl font-black uppercase tracking-widest text-[#E10600]">Regístrate</h1>
+            <h1 class="text-2xl font-black uppercase tracking-widest text-[#E10600]">RegÃ­strate</h1>
           </div>
         </div>
       </template>
@@ -121,10 +121,10 @@ const handleRegister = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Campo: Contraseña -->
+          <!-- Campo: ContraseÃ±a -->
           <div class="flex flex-col gap-1">
             <label for="password"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">ContraseÃ±a</label>
             <Password inputId="password" name="password" autocomplete="new-password" placeholder="********" toggle-mask
               :feedback="false" class="w-full [&>input]:w-full"
               inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
@@ -133,10 +133,10 @@ const handleRegister = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Campo: Confirmar Contraseña -->
+          <!-- Campo: Confirmar ContraseÃ±a -->
           <div class="flex flex-col gap-1">
             <label for="confirmPassword"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar Contraseña</label>
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar ContraseÃ±a</label>
             <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
               placeholder="********" toggle-mask :feedback="false" class="w-full [&>input]:w-full"
               inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
@@ -145,12 +145,12 @@ const handleRegister = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Mensaje de error de autenticación -->
+          <!-- Mensaje de error de autenticaciÃ³n -->
           <Message v-if="authError" severity="error" :closable="false" class="mt-2 text-sm">
             {{ authError }}
           </Message>
 
-          <!-- Botones de acción -->
+          <!-- Botones de acciÃ³n -->
           <div class="flex flex-col gap-3 mt-4">
 
             <Button type="submit" label="CREAR EQUIPO" :loading="isLoading"
@@ -158,10 +158,10 @@ const handleRegister = async ({ valid, values }) => {
 
             <!-- Enlace a login -->
             <div class="pt-5 pb-2 mt-2 text-center border-t border-zinc-800">
-              <span class="text-xs text-[#F0ECEC]">¿Ya tienes equipo? </span>
+              <span class="text-xs text-[#F0ECEC]">Â¿Ya tienes equipo? </span>
               <router-link to="/"
                 class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#D4A843] hover:text-white">
-                Inicia sesión aquí
+                Inicia sesiÃ³n aquÃ­
               </router-link>
             </div>
 
@@ -171,3 +171,4 @@ const handleRegister = async ({ valid, values }) => {
     </Card>
   </div>
 </template>
+

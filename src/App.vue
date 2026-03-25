@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="fixed inset-0 -z-30 h-full w-full bg-[#1A1A1F]"></div>
 
   <Toast position="top-center" />
@@ -13,8 +13,8 @@
     icon: { class: '!text-[#E10600]' },
   }"></ConfirmDialog>
 
-  <!-- Sección de carga para cuando esté cargando -->
-  <div v-if="!authStore.isDataLoaded" class="flex flex-col items-center justify-center h-screen w-full gap-3">
+  <!-- SecciÃ³n de carga para cuando estÃ© cargando -->
+  <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
     <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
     <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Verificando credenciales...</p>
   </div>
@@ -28,21 +28,23 @@ import { onMounted } from 'vue'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 
-import { useAuthStore } from './stores/storeAuth'
+import { usarStoreAutenticacion } from './stores/storeAutenticacion'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 
-const authStore = useAuthStore()
+const storeAutenticacion = usarStoreAutenticacion()
 const auth = getAuth()
 const router = useRouter()
 
 onMounted(() => {
-  /* Observa cambios de sesión: solo gestiona el cierre de sesión */
+  /* Observa cambios de sesiÃ³n: solo gestiona el cierre de sesiÃ³n */
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      authStore.clearSession()
+      storeAutenticacion.limpiarSesion()
       if (router.currentRoute.value.path !== '/' && router.currentRoute.value.path !== 'registro')
         router.push('/')
     }
   })
 })
 </script>
+
+

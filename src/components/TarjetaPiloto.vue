@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import Button from 'primevue/button'
@@ -15,19 +15,19 @@ const props = defineProps({
   },
 })
 
-// Emitimos el evento 'fichar' para que el componente padre (MarketView) gestione la lógica
+// Emitimos el evento 'fichar' para que el componente padre (MercadoView) gestione la lÃ³gica
 const emit = defineEmits(['fichar'])
 
 const mostrarInfo = ref(false)
 const confirm = useConfirm()
 
-// Lógica de confirmación de compra encapsulada
+// LÃ³gica de confirmaciÃ³n de compra encapsulada
 const confirmarCompra = () => {
   confirm.require({
-    message: `¿Estás seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
+    message: `Â¿EstÃ¡s seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
     header: 'Confirmar Fichaje',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Sí, fichar',
+    acceptLabel: 'SÃ­, fichar',
     rejectLabel: 'No, cancelar',
     accept() {
       emit('fichar', props.piloto)
@@ -72,7 +72,7 @@ const confirmarCompra = () => {
           <div v-show="mostrarInfo"
             class="absolute inset-0 p-5 flex flex-col text-left z-20 bg-[#1A1A1F]/90 backdrop-blur-md">
             <h4 class="text-xs font-black border-b border-zinc-700 text-white pb-2 mb-3 text-center">
-              DESCRIPCIÓN
+              DESCRIPCIÃ“N
             </h4>
             <div class="mb-3">
               <p class="text-[10px] text-zinc-300 leading-tight">
