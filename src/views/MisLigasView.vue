@@ -150,7 +150,7 @@ const manejarEliminarLiga = () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen bg-[#1A1A1F] font-sans pb-10">
+  <div class="min-h-screen pb-10 bg-[#1A1A1F] font-sans">
     <Cabecera />
 
     <div class="p-4 mt-4 max-w-4xl mx-auto">
@@ -162,14 +162,14 @@ const manejarEliminarLiga = () => {
             class="w-full py-3 !bg-[#D4A843] !text-[#1A1A1F] font-black tracking-widest !border-none"
             @click="dialogoCrearVisible = true" />
           <Button label="UNIRSE" icon="pi pi-sign-in"
-            class="w-full py-3 !bg-transparent !border-2 !border-[#D4A843] !text-[#D4A843] font-black tracking-widest"
+            class="w-full py-3 !bg-transparent !text-[#D4A843] font-black tracking-widest !border-2 !border-[#D4A843]"
             @click="dialogoUnirseVisible = true" />
         </section>
 
         <!-- Listado de ligas del usuario -->
         <section>
           <div v-if="ligasStore.detallesLigas.length > 0" class="flex flex-col justify-center w-full">
-            <div class="text-center text-[#F0ECEC] font-bold uppercase tracking-wider mb-4">
+            <div class="mb-4 text-center text-[#F0ECEC] font-bold uppercase tracking-wider">
               Ligas disponibles: {{ ligasStore.detallesLigas.length }}/8
             </div>
 
@@ -177,25 +177,25 @@ const manejarEliminarLiga = () => {
               <template #list="slotProps">
                 <div class="flex flex-col gap-4 w-full">
                   <div v-for="(item, index) in slotProps.items" :key="index"
-                    class="p-4 bg-[#1A1A1F] rounded-xl border border-[#D4A843]/30 flex items-center justify-between">
+                    class="p-4 flex items-center justify-between bg-[#1A1A1F] rounded-xl border border-[#D4A843]/30">
                     <div class="flex flex-col gap-1 w-2/3">
-                      <h3 class="text-xl font-black text-[#E10600] uppercase truncate pr-2" :title="item.nombre">
+                      <h3 class="pr-2 text-xl font-black text-[#E10600] uppercase truncate" :title="item.nombre">
                         {{ item.nombre }}
                       </h3>
                       <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#F0ECEC] font-medium opacity-80">
                         <span class="flex items-center gap-1">
-                          <i class="pi pi-users text-[#D4A843]"></i> {{ item.participantes }}
+                          <i class="text-[#D4A843] pi pi-users"></i> {{ item.participantes }}
                         </span>
                         <span class="flex items-center gap-1">
-                          <i class="pi pi-key text-[#D4A843]"></i> {{ item.codigo_invitacion }}
+                          <i class="text-[#D4A843] pi pi-key"></i> {{ item.codigo_invitacion }}
                         </span>
                       </div>
                     </div>
 
                     <div class="flex gap-2 justify-end">
-                      <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                      <Button icon="pi pi-cog" class="!bg-[#121218] !text-[#D4A843] !border !border-[#D4A843]"
                         @click="abrirOpcionesLiga(item)" />
-                      <Button icon="pi pi-flag-fill" class="!bg-[#E10600] !border-none !text-[#FFFFFF] !w-10 !h-10"
+                      <Button icon="pi pi-flag-fill" class="!w-10 !h-10 !bg-[#E10600] !text-[#FFFFFF] !border-none"
                         @click="abrirLiga(item.id)" />
                     </div>
                   </div>
@@ -206,7 +206,7 @@ const manejarEliminarLiga = () => {
 
           <div v-else-if="!cargando" class="flex justify-center mt-10">
             <Message severity="secondary"
-              class="!text-center !bg-transparent !border !border-[#F0ECEC]/20 !text-[#F0ECEC]">
+              class="!bg-transparent !text-center !text-[#F0ECEC] !border !border-[#F0ECEC]/20">
               No perteneces a ninguna liga todavÃ­a. Crea o Ãºnete a una.
             </Message>
           </div>
@@ -227,9 +227,9 @@ const manejarEliminarLiga = () => {
           class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#E10600]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"
-            class="!bg-transparent !border-none !text-[#F0ECEC] hover:!text-white" />
+            class="!bg-transparent !text-[#F0ECEC] !border-none hover:!text-white" />
           <Button label="Crear" @click="manejarCrearLiga"
-            class="!bg-[#E10600] !border-none !px-10 font-bold hover:!bg-[#C00500]" />
+            class="!px-10 !bg-[#E10600] font-bold !border-none hover:!bg-[#C00500]" />
         </div>
       </div>
     </Dialog>
@@ -244,12 +244,12 @@ const manejarEliminarLiga = () => {
       <div class="flex flex-col gap-4">
         <span class="text-[#F0ECEC] text-sm">Introduce el cÃ³digo de invitaciÃ³n de 6 dÃ­gitos.</span>
         <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3"
-          class="w-full uppercase !bg-[#121218] focus:!border-[#D4A843]" autofocus />
+          class="w-full !bg-[#121218] uppercase focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoUnirseVisible = false"
-            class="!bg-transparent !border-none !text-[#F0ECEC] hover:!text-white" />
+            class="!bg-transparent !text-[#F0ECEC] !border-none hover:!text-white" />
           <Button label="Unirse" @click="manejarUnirseLiga"
-            class="!bg-[#D4A843] !text-[#1A1A1F] !border-none !px-10 font-bold hover:!bg-[#C09638]" />
+            class="!px-10 !bg-[#D4A843] !text-[#1A1A1F] font-bold !border-none hover:!bg-[#C09638]" />
         </div>
       </div>
     </Dialog>
@@ -262,20 +262,21 @@ const manejarEliminarLiga = () => {
       closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
     }">
       <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
-        <p class="text-center text-[#F0ECEC] text-sm mb-2">
+        <p class="mb-2 text-center text-[#F0ECEC] text-sm">
           Â¿QuÃ© deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
         </p>
 
         <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
-          class="w-full !bg-[#F0ECEC] !border-none !text-black font-bold" @click="manejarAbandonarLiga"
+          class="w-full !bg-[#F0ECEC] !text-black font-bold !border-none" @click="manejarAbandonarLiga"
           :loading="cargandoAccion" />
 
         <Button v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion" label="ELIMINAR LIGA" icon="pi pi-trash"
-          class="w-full !bg-[#E10600] !border-none !text-white font-bold" @click="manejarEliminarLiga"
+          class="w-full !bg-[#E10600] !text-white font-bold !border-none" @click="manejarEliminarLiga"
           :loading="cargandoAccion" />
       </div>
     </Dialog>
   </div>
 </template>
+
 
 

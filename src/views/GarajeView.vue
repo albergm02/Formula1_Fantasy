@@ -33,9 +33,9 @@ const confirmarVentaCoche = (coche) => {
 
   confirm.require({
     icon: 'pi pi-exclamation-triangle',
-    message: `Â¿EstÃ¡s seguro de que quieres vender el chasis ${coche.nombre} por ${valorReventa}M?`,
+    message: `¿Estás seguro de que quieres vender el chasis ${coche.nombre} por ${valorReventa}M?`,
     header: 'Confirmar Venta',
-    acceptLabel: 'SÃ­, vender',
+    acceptLabel: 'Sí, vender',
     rejectLabel: 'Cancelar',
     accept: async () => {
       const resultado = await escuderiaStore.venderElemento(coche)
@@ -54,10 +54,10 @@ const confirmarVentaPiloto = (piloto) => {
 
   confirm.require({
     icon: 'pi pi-exclamation-triangle',
-    message: `Â¿EstÃ¡s seguro de que quieres rescindir el contrato de ${piloto.nombre} por ${valorReventa}M?`,
+    message: `¿Estás seguro de que quieres rescindir el contrato de ${piloto.nombre} por ${valorReventa}M?`,
     header: 'Confirmar Despido',
     icon: 'pi pi-user-minus',
-    acceptLabel: 'SÃ­, despedir',
+    acceptLabel: 'Sí, despedir',
     rejectLabel: 'Cancelar',
     accept: async () => {
       const resultado = await escuderiaStore.venderElemento(piloto)
@@ -74,9 +74,9 @@ const confirmarVentaPiloto = (piloto) => {
 const alternarInstalacionPotenciador = async (idInstancia) => {
   const resultado = await escuderiaStore.alternarPotenciador(idInstancia)
   if (resultado.success) {
-    toast.add({ severity: 'success', summary: 'AcciÃ³n completada', detail: resultado.message })
+    toast.add({ severity: 'success', summary: 'Acción completada', detail: resultado.message })
   } else {
-    toast.add({ severity: 'warn', summary: 'AcciÃ³n denegada', detail: resultado.message })
+    toast.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
   }
 }
 </script>
@@ -85,22 +85,22 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
 
 <!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
 
-<!-------------------------------------------------------------------------------------------------------------------------->
+<!------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <Cabecera />
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-md mx-auto w-full">
-    <!-- SecciÃ³n: Coche -->
+    <!-- Sección: Coche -->
     <section class="grid">
       <div v-if="escuderiaStore.garaje.coche" class="flex flex-col w-full h-full">
         <TarjetaCoche :coche="escuderiaStore.garaje.coche" :modoMercado="false" />
 
-        <!-- BotÃ³n de venta del coche -->
+        <!-- Botón de venta del coche -->
         <div class="px-6 pb-2 -mt-1">
           <button @click="confirmarVentaCoche(escuderiaStore.garaje.coche)"
-            class="w-full bg-[#121218] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
-            <i class="pi pi-shopping-bag text-sm text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
+            class="w-full py-4 flex items-center justify-center bg-[#121218] border border-zinc-800 hover:border-red-900/50 cursor-pointer transition-colors shadow-lg rounded-xl group">
+            <i class="mr-2 text-sm text-red-500 pi pi-shopping-bag group-hover:scale-110 transition-transform"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest">
               VENDER POR {{ calcularValorReventa(escuderiaStore.garaje.coche.precio) }}M
             </span>
@@ -109,8 +109,8 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#1A1A1F]/50 rounded-2xl mx-6">
-        <i class="pi pi-car text-3xl text-zinc-600 mb-3"></i>
+        class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="mb-3 text-3xl text-zinc-600 pi pi-car"></i>
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Garaje VacÃ­o</span>
       </div>
     </section>
@@ -125,8 +125,8 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
           <!-- BotÃ³n de despido del piloto -->
           <div class="px-6 pb-2 -mt-1">
             <button @click="confirmarVentaPiloto(piloto)"
-              class="w-full bg-[#121218] border border-zinc-800 hover:border-red-900/50 py-4 flex items-center justify-center cursor-pointer transition-colors shadow-lg rounded-xl group">
-              <i class="pi pi-user-minus text-sm text-red-500 mr-2 group-hover:scale-110 transition-transform"></i>
+              class="w-full py-4 flex items-center justify-center bg-[#121218] border border-zinc-800 hover:border-red-900/50 cursor-pointer transition-colors shadow-lg rounded-xl group">
+              <i class="mr-2 text-sm text-red-500 pi pi-user-minus group-hover:scale-110 transition-transform"></i>
               <span class="text-white text-[10px] font-black uppercase tracking-widest">
                 DESPEDIR ({{ calcularValorReventa(piloto.precio) }}M)
               </span>
@@ -137,8 +137,8 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
 
       <!-- Estado vacÃ­o: sin pilotos -->
       <div v-else
-        class="col-span-full flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#1A1A1F]/50 rounded-2xl mx-6">
-        <i class="pi pi-users text-3xl text-zinc-600 mb-3"></i>
+        class="col-span-full flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="mb-3 text-3xl text-zinc-600 pi pi-users"></i>
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Asientos VacÃ­os</span>
       </div>
     </section>
@@ -156,7 +156,7 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
             :class="potenciador.equipado
               ? 'bg-emerald-900/20 border border-emerald-500/50 text-emerald-400'
               : 'bg-[#121218] border border-zinc-800 text-zinc-400 hover:text-white'">
-            <i class="text-[10px] mr-2"
+            <i class="mr-2 text-[10px]"
               :class="potenciador.equipado ? 'pi pi-check-circle text-emerald-400' : 'pi pi-cog text-zinc-500 group-hover:text-white transition-colors'"></i>
             <span class="text-[10px] font-black uppercase tracking-widest"
               :class="potenciador.equipado ? 'text-emerald-400' : 'text-white'">
@@ -167,8 +167,8 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-12 border border-zinc-800/50 bg-[#1A1A1F]/50 rounded-2xl mx-6">
-        <i class="pi pi-box text-3xl text-zinc-600 mb-3"></i>
+        class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="mb-3 text-3xl text-zinc-600 pi pi-box"></i>
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Mejoras Compradas</span>
       </div>
     </section>
@@ -176,4 +176,5 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
 
   <BarraNavegacion />
 </template>
+
 

@@ -18,10 +18,10 @@ const activeLeagueName = computed(() => {
 
 <template>
   <!-- Bienvenida -->
-  <div class="flex items-center justify-between bg-transparent border-b border-zinc-800 p-5">
+  <div class="flex items-center justify-between p-5 bg-transparent border-b border-zinc-800">
     <div class="flex flex-col">
-      <span class="text-[#D4A843] text-[10px] font-black uppercase mb-1">Bienvenido al Paddock</span>
-      <h1 class="text-xl font-black text-white italic uppercase w-32">
+      <span class="mb-1 text-[#D4A843] text-[10px] font-black uppercase">Bienvenido al Paddock</span>
+      <h1 class="w-32 text-xl font-black text-white italic uppercase">
         {{ activeLeagueName }}
       </h1>
     </div>
@@ -29,7 +29,7 @@ const activeLeagueName = computed(() => {
     <div class="flex flex-col items-end gap-1 pl-4">
       <div class="flex items-center gap-2">
         <span class="text-[#F0ECEC] text-xs font-medium uppercase">Puntos:</span>
-        <span class="text-white font-black text-lg bg-[#D4A843] px-2">{{ escuderiaStore.puntos || 0 }}</span>
+        <span class="px-2 bg-[#D4A843] text-white font-black text-lg">{{ escuderiaStore.puntos || 0 }}</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="text-[#F0ECEC] text-xs font-medium uppercase">Presupuesto:</span>
@@ -38,5 +38,6 @@ const activeLeagueName = computed(() => {
     </div>
   </div>
 </template>
+
 
 

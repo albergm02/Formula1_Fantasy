@@ -40,13 +40,13 @@ onMounted(async () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen bg-[#1A1A1F] font-sans pb-24">
+  <div class="min-h-screen pb-24 bg-[#1A1A1F] font-sans">
     <Cabecera />
 
     <!-- Spinner mientras carga la escuderÃ­a -->
     <div v-if="escuderiaStore.cargandoEquipo" class="flex flex-col items-center justify-center gap-4">
       <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
-      <p class="text-[#D4A843] font-bold tracking-widest animate-pulse uppercase text-sm">Cargando telemetrÃ­a...</p>
+      <p class="text-[#D4A843] font-bold tracking-widest uppercase text-sm animate-pulse">Cargando telemetrÃ­a...</p>
     </div>
 
     <!-- Contenido principal: widgets de stats y prÃ³ximo GP -->
@@ -58,4 +58,5 @@ onMounted(async () => {
     <BarraNavegacion />
   </div>
 </template>
+
 

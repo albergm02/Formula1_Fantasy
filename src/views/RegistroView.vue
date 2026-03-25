@@ -83,7 +83,7 @@ const handleRegister = async ({ valid, values }) => {
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal de registro -->
-    <Card class="w-full max-w-md p-2 border shadow-2xl lg:p-4 rounded-xl backdrop-blur-md border-zinc-800 !bg-black/40">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border shadow-2xl rounded-xl backdrop-blur-md border-zinc-800">
 
       <!-- Encabezado con logo y tÃ­tulo -->
       <template #title>
@@ -105,7 +105,7 @@ const handleRegister = async ({ valid, values }) => {
             <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de
               Piloto</label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -115,7 +115,7 @@ const handleRegister = async ({ valid, values }) => {
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
-              class="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
@@ -154,13 +154,13 @@ const handleRegister = async ({ valid, values }) => {
           <div class="flex flex-col gap-3 mt-4">
 
             <Button type="submit" label="CREAR EQUIPO" :loading="isLoading"
-              class="w-full py-3 font-black uppercase transition-colors shadow-lg rounded-lg !border-none !bg-[#E10600] !text-[#F0ECEC] hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] transition-colors shadow-lg rounded-lg !border-none hover:!bg-[#C00500]" />
 
             <!-- Enlace a login -->
             <div class="pt-5 pb-2 mt-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">Â¿Ya tienes equipo? </span>
               <router-link to="/"
-                class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#D4A843] hover:text-white">
+                class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] hover:text-white transition-colors">
                 Inicia sesiÃ³n aquÃ­
               </router-link>
             </div>
@@ -171,4 +171,5 @@ const handleRegister = async ({ valid, values }) => {
     </Card>
   </div>
 </template>
+
 

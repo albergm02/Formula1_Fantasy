@@ -93,19 +93,19 @@ onMounted(async () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen bg-[#1A1A1F] font-sans pb-24">
+  <div class="min-h-screen pb-24 bg-[#1A1A1F] font-sans">
     <Cabecera />
 
     <main class="mx-auto w-full max-w-md p-4 flex flex-col gap-4 mt-4">
 
       <!-- TÃ­tulo de la clasificaciÃ³n -->
-      <div class="flex justify-center border-b border-[#FFFFFF]/50 pb-2">
+      <div class="flex justify-center pb-2 border-b border-[#FFFFFF]/50">
         <h2 class="text-2xl font-black text-white uppercase">ClasificaciÃ³n general</h2>
       </div>
 
       <!-- Spinner de carga -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-10 gap-3">
-        <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
+        <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
         <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificaciÃ³n...
         </p>
       </div>
@@ -116,27 +116,22 @@ onMounted(async () => {
           class="flex items-center justify-between p-4 border border-white"
           :class="{ '!border-[#E10600] !bg-[#E10600]/10': player.email === storeAutenticacion.usuarioActual.correoAutenticacion }">
           <div class="flex items-center gap-4">
-            <div class="text-2xl font-black italic -top-4 relative" :class="{
-              'text-yellow-400': index === 0,
-              'text-gray-200': index === 1,
-              'text-amber-600': index === 2,
-              'text-[#FFFFFF]': index > 2
-            }">{{ index + 1 }}Âº</div>
+            <div class="relative text-2xl font-black italic -top-4" :class="{ 'text-yellow-400': index === 0, 'text-gray-200': index === 1, 'text-amber-600': index === 2, 'text-[#FFFFFF]': index > 2 }">{{ index + 1 }}Âº</div>
             <div class="flex flex-col">
               <span class="font-bold text-lg uppercase text-white">
                 {{ player.name }}
               </span>
-              <span class="text-xs mt-1 text-[#F0ECEC]">
+              <span class="mt-1 text-xs text-[#F0ECEC]">
                 Presupuesto: <span class="text-[#E10600] font-bold">${{ player.presupuesto }}M</span>
               </span>
             </div>
           </div>
 
-          <div class="text-right flex flex-col items-end justify-center">
+          <div class="flex flex-col items-end justify-center text-right">
             <span class="text-3xl font-black text-[#D4A843]">
               {{ player.puntos }}
             </span>
-            <span class="text-xs uppercase font-bold mt-1 text-[#F0ECEC]">
+            <span class="mt-1 text-xs uppercase font-bold text-[#F0ECEC]">
               PTS
             </span>
           </div>
@@ -146,5 +141,6 @@ onMounted(async () => {
     <BarraNavegacion />
   </div>
 </template>
+
 
 

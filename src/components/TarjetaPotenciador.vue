@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import Button from 'primevue/button'
@@ -20,10 +20,10 @@ const confirm = useConfirm()
 
 const confirmarCompra = () => {
   confirm.require({
-    message: `¿Estás seguro de que quieres pujar por ${props.potenciador.nombre} por ${props.potenciador.precio}M?`,
+    message: `Â¿EstÃ¡s seguro de que quieres pujar por ${props.potenciador.nombre} por ${props.potenciador.precio}M?`,
     header: 'Confirmar Puja',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Sí, pujar',
+    acceptLabel: 'SÃ­, pujar',
     rejectLabel: 'No, cancelar',
     accept() {
       emit('fichar', props.potenciador)
@@ -37,9 +37,9 @@ const confirmarCompra = () => {
 
     <div class="relative w-full h-full flex flex-col overflow-hidden border border-zinc-800">
 
-      <div class="relative z-10 bg-[#1A1A1F] flex flex-col flex-1 w-full h-full overflow-hidden">
+      <div class="relative z-10 flex flex-col flex-1 w-full h-full overflow-hidden bg-[#1A1A1F]">
 
-        <header class="flex justify-between items-center p-2 z-20 bg-black shrink-0">
+        <header class="flex justify-between items-center p-2 z-20 shrink-0 bg-black">
           <div class="flex flex-col w-2/3">
             <span class="text-[10px] font-black text-white uppercase truncate">
               {{ props.potenciador.nombre }}
@@ -49,26 +49,26 @@ const confirmarCompra = () => {
           <span class="text-[10px] font-black text-[#D4A843]">{{ props.potenciador.precio }}M</span>
         </header>
 
-        <main class="relative flex-1 w-full cursor-pointer bg-transparent" @click="mostrarInfo = !mostrarInfo">
+        <main class="relative flex-1 w-full bg-transparent cursor-pointer" @click="mostrarInfo = !mostrarInfo">
 
           <img v-if="props.potenciador.imagen" :src="props.potenciador.imagen"
             class="absolute inset-0 w-full h-full object-cover object-center" />
 
           <div v-show="!mostrarInfo"
-            class="absolute inset-0 w-full flex items-center justify-center pointer-events-none z-20">
-            <span class="text-[9px] font-black text-white px-2 py-1 bg-black/60 rounded animate-pulse text-center">
+            class="absolute inset-0 w-full flex items-center justify-center z-20 pointer-events-none">
+            <span class="px-2 py-1 bg-black/60 text-[9px] font-black text-white text-center rounded animate-pulse">
               VER DETALLES
             </span>
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-4 flex flex-col text-center z-30 bg-[#1A1A1F]/90 backdrop-blur-md overflow-y-auto">
-            <h4 class="text-[10px] font-black border-b border-zinc-700 text-white pb-1 mb-2">
-              DESCRIPCIÓN
+            class="absolute inset-0 p-4 flex flex-col z-30 overflow-y-auto bg-[#1A1A1F]/90 text-center backdrop-blur-md">
+            <h4 class="pb-1 mb-2 text-[10px] font-black text-white border-b border-zinc-700">
+              DESCRIPCIÃ“N
             </h4>
 
-            <p class="text-[9px] text-zinc-300 leading-relaxed mb-2">
-              {{ props.potenciador.descripcion || 'Pieza de rendimiento. Instálala en tu monoplaza.' }}
+            <p class="mb-2 text-[9px] text-zinc-300 leading-relaxed">
+              {{ props.potenciador.descripcion || 'Pieza de rendimiento. InstÃ¡lala en tu monoplaza.' }}
             </p>
 
             <div class="mt-auto pt-2">
@@ -78,8 +78,8 @@ const confirmarCompra = () => {
         </main>
 
         <Button v-if="modoMercado" @click="confirmarCompra" unstyled
-          class="w-full bg-black border-none py-3 z-20 shrink-0 flex items-center justify-center cursor-pointer">
-          <i class="pi pi-money-bill font-bold text-[10px] text-white mr-1"></i>
+          class="w-full py-3 z-20 shrink-0 flex items-center justify-center bg-black border-none cursor-pointer">
+          <i class="mr-1 font-bold text-[10px] text-white pi pi-money-bill"></i>
           <span class="text-white text-[10px] font-black uppercase tracking-widest">PUJAR</span>
         </Button>
 

@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="fixed inset-0 -z-30 h-full w-full bg-[#1A1A1F]"></div>
+  <div class="fixed inset-0 h-full w-full bg-[#1A1A1F] -z-30"></div>
 
   <Toast position="top-center" />
   <ConfirmDialog :pt="{
@@ -15,7 +15,7 @@
 
   <!-- SecciÃ³n de carga para cuando estÃ© cargando -->
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
-    <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
+    <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
     <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Verificando credenciales...</p>
   </div>
 
@@ -46,5 +46,6 @@ onMounted(() => {
   })
 })
 </script>
+
 
 

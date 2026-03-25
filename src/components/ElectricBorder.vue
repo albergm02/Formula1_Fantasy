@@ -1,5 +1,5 @@
-<!-------------------------------------------------------------------------------------------------------------------------->
-<!-- ElectricBorder.vue: Componente de borde eléctrico animado para resaltar elementos con un efecto de electricidad. -->
+﻿<!-------------------------------------------------------------------------------------------------------------------------->
+<!-- ElectricBorder.vue: Componente de borde elÃ©ctrico animado para resaltar elementos con un efecto de electricidad. -->
 <!-- Creditos a: @BalintFerenczy on X - https://codepen.io/BalintFerenczy/pen/KwdoyEN -->
 <!-- Y a: https://vue-bits.dev/animations/electric-border, open source de componentes primevue -->
 <!-------------------------------------------------------------------------------------------------------------------------->
@@ -168,7 +168,7 @@ const bgGlowStyle = computed<CSSProperties>(() => ({
 
 <template>
     <div ref="rootRef" :class="['relative isolate', className]" :style="style">
-        <svg ref="svgRef" class="fixed opacity-0 w-0 h-0 pointer-events-none"
+        <svg ref="svgRef" class="fixed w-0 h-0 opacity-0 pointer-events-none"
             style="position: absolute; top: -9999px; left: -9999px" aria-hidden="true" focusable="false">
             <defs>
                 <filter :id="filterId" color-interpolation-filters="sRGB" x="-200%" y="-200%" width="500%"
@@ -207,7 +207,7 @@ const bgGlowStyle = computed<CSSProperties>(() => ({
             </defs>
         </svg>
 
-        <div class="absolute inset-0 pointer-events-none z-30" :style="inheritRadius">
+        <div class="absolute inset-0 z-30 pointer-events-none" :style="inheritRadius">
             <div ref="strokeRef" class="box-border absolute inset-0" :style="strokeStyle" />
             <div class="box-border absolute inset-0" :style="glow1Style" />
             <div class="box-border absolute inset-0" :style="glow2Style" />
@@ -219,3 +219,4 @@ const bgGlowStyle = computed<CSSProperties>(() => ({
         </div>
     </div>
 </template>
+

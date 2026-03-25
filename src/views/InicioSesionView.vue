@@ -155,7 +155,7 @@ const onResetModalHide = () => {
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta de inicio de sesiÃ³n -->
-    <Card class="w-full max-w-md border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800 !bg-black/40 p-2 lg:p-4">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
 
       <!-- Encabezado: Logo y tÃ­tulo -->
       <template #title>
@@ -176,7 +176,7 @@ const onResetModalHide = () => {
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
-              class="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
@@ -204,23 +204,23 @@ const onResetModalHide = () => {
 
             <!-- BotÃ³n de inicio de sesiÃ³n -->
             <Button type="submit" label="Iniciar sesiÃ³n" :loading="isLoading"
-              class="w-full rounded-lg py-3 font-black uppercase shadow-lg transition-colors !border-none !bg-[#E10600] !text-[#F0ECEC] hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] rounded-lg shadow-lg transition-colors !border-none hover:!bg-[#C00500]" />
 
             <!-- BotÃ³n de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
-              class="flex w-full items-center justify-center gap-2 rounded-lg py-3 font-bold uppercase shadow-lg transition-colors !border-none !bg-white !text-black hover:!bg-gray-300"
+              class="flex w-full items-center justify-center gap-2 py-3 !bg-white font-bold uppercase !text-black rounded-lg shadow-lg transition-colors !border-none hover:!bg-gray-300"
               @click="handleGoogleLogin" />
 
             <!-- BotÃ³n de contraseÃ±a olvidada -->
             <Button type="button" label="Â¿Olvidaste tu contraseÃ±a?" text
-              class="w-full mt-1 font-bold transition-colors !border-none !bg-transparent !text-[#D4A843] hover:!text-[#C09638]"
+              class="w-full mt-1 !bg-transparent font-bold !text-[#D4A843] transition-colors !border-none hover:!text-[#C09638]"
               @click="isResetModalVisible = true" />
 
             <!-- Enlace de registro -->
-            <div class="mt-2 border-t border-zinc-800 pt-5 pb-2 text-center">
+            <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">Â¿No tienes equipo? </span>
               <router-link to="/registro"
-                class="ml-1 text-xs font-black uppercase tracking-widest transition-colors text-[#D4A843] hover:text-white">
+                class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] hover:text-white transition-colors">
                 RegÃ­strate aquÃ­
               </router-link>
             </div>
@@ -239,14 +239,15 @@ const onResetModalHide = () => {
         <p class="text-sm text-[#F0ECEC]">Introduce tu correo y te enviaremos un enlace de recuperaciÃ³n.</p>
 
         <InputText v-model="resetEmailAddress" type="email" placeholder="tu@correo.com"
-          class="w-full rounded-lg p-3 text-white focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700 !bg-[#121218]"
+          class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700"
           @keyup.enter="handlePasswordReset" />
 
         <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="isResetLoading"
-          class="mt-2 w-full rounded-lg py-3 font-black tracking-widest !border-none !bg-[#D4A843] !text-[#121218] hover:!bg-[#C09638]"
+          class="mt-2 w-full py-3 !bg-[#D4A843] font-black tracking-widest !text-[#121218] rounded-lg !border-none hover:!bg-[#C09638]"
           @click="handlePasswordReset" />
       </div>
     </Dialog>
   </div>
 </template>
+
 

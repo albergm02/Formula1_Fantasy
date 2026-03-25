@@ -43,14 +43,14 @@ const confirmarCompra = () => {
     <component :is="props.piloto.tier === 2 ? ElectricBorder : 'div'" v-bind="props.piloto.tier === 2
       ? { color: '#D4A843', speed: 0.3, chaos: 0.2, thickness: 3 }
       : {}"
-      :class="props.piloto.tier === 2 ? 'w-full h-full' : 'w-full h-full border border-zinc-800 overflow-hidden'">
-      <div class="bg-[#1A1A1F] flex flex-col w-full h-full overflow-hidden">
+      :class="props.piloto.tier === 2 ? 'w-full h-full' : 'w-full h-full overflow-hidden border border-zinc-800'">
+      <div class="flex flex-col w-full h-full overflow-hidden bg-[#1A1A1F]">
 
-        <header class="flex justify-between items-center p-3 z-20 bg-black shrink-0">
+        <header class="flex justify-between items-center p-3 z-20 shrink-0 bg-black">
           <div class="flex flex-col">
             <span class="text-xs font-black text-white uppercase">
               {{ props.piloto.nombre }}
-              <span v-if="props.piloto.tier === 2" class="text-[#D4A843] ml-1">EN RACHA</span>
+              <span v-if="props.piloto.tier === 2" class="ml-1 text-[#D4A843]">EN RACHA</span>
             </span>
             <span class="text-[10px] text-zinc-500 uppercase font-bold">{{ props.piloto.equipo }}</span>
           </div>
@@ -63,15 +63,15 @@ const confirmarCompra = () => {
             class="absolute inset-0 w-full h-full object-cover object-top" />
 
           <div v-show="!mostrarInfo"
-            class="absolute inset-0 w-full flex items-center justify-center pointer-events-none z-20">
-            <span class="text-xs font-black text-white px-3 py-1 bg-black/60 rounded animate-pulse">
+            class="absolute inset-0 w-full flex items-center justify-center z-20 pointer-events-none">
+            <span class="px-3 py-1 bg-black/60 text-xs font-black text-white rounded animate-pulse">
               TOCA PARA VER DETALLES
             </span>
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-5 flex flex-col text-left z-20 bg-[#1A1A1F]/90 backdrop-blur-md">
-            <h4 class="text-xs font-black border-b border-zinc-700 text-white pb-2 mb-3 text-center">
+            class="absolute inset-0 p-5 flex flex-col z-20 bg-[#1A1A1F]/90 text-left backdrop-blur-md">
+            <h4 class="pb-2 mb-3 text-xs font-black text-white text-center border-b border-zinc-700">
               DESCRIPCIÃ“N
             </h4>
             <div class="mb-3">
@@ -80,12 +80,12 @@ const confirmarCompra = () => {
               </p>
             </div>
 
-            <h4 class="text-xs font-black border-b border-zinc-700 text-white pb-2 mb-3 text-center">
+            <h4 class="pb-2 mb-3 text-xs font-black text-white text-center border-b border-zinc-700">
               HABILIDADES
             </h4>
 
             <div v-if="props.piloto.habilidad_1" class="mb-3">
-              <p class="text-[10px] font-black text-emerald-400 uppercase mb-1 drop-shadow-sm">
+              <p class="mb-1 text-[10px] font-black text-emerald-400 uppercase drop-shadow-sm">
                 {{ props.piloto.habilidad_1.nombre }}
                 <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
               </p>
@@ -95,7 +95,7 @@ const confirmarCompra = () => {
             </div>
 
             <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2" class="mt-2 pt-3 border-t border-zinc-800">
-              <p class="text-[10px] font-black text-[#D4A843] uppercase mb-1 drop-shadow-sm">
+              <p class="mb-1 text-[10px] font-black text-[#D4A843] uppercase drop-shadow-sm">
                 {{ props.piloto.habilidad_2.nombre }}
                 <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
               </p>
@@ -105,7 +105,7 @@ const confirmarCompra = () => {
             </div>
 
             <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion" class="mt-2 pt-3 border-t border-zinc-800">
-              <p class="text-[10px] font-black text-red-500 uppercase mb-1 drop-shadow-sm">
+              <p class="mb-1 text-[10px] font-black text-red-500 uppercase drop-shadow-sm">
                 {{ props.piloto.penalizacion.nombre }}
                 <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>
               </p>
@@ -121,8 +121,8 @@ const confirmarCompra = () => {
         </main>
 
         <Button v-if="modoMercado" @click="confirmarCompra" unstyled
-          class="w-full bg-black border-none py-4 z-20 shrink-0 flex items-center justify-center cursor-pointer">
-          <i class="pi pi-money-bill font-bold text-sm text-white mr-2"></i>
+          class="w-full py-4 z-20 shrink-0 flex items-center justify-center bg-black border-none cursor-pointer">
+          <i class="mr-2 font-bold text-sm text-white pi pi-money-bill"></i>
           <span class="text-white font-black uppercase tracking-widest">PUJAR</span>
         </Button>
 
@@ -130,3 +130,4 @@ const confirmarCompra = () => {
     </component>
   </div>
 </template>
+

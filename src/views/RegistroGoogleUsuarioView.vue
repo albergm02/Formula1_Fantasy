@@ -82,7 +82,7 @@ const cancelGoogleSignup = async () => {
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal -->
-    <Card class="w-full max-w-md border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800 !bg-black/40 p-2 lg:p-4">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
 
       <!-- Encabezado con logo y tÃ­tulo -->
       <template #title>
@@ -108,7 +108,7 @@ const cancelGoogleSignup = async () => {
               Nombre de Piloto
             </label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -120,10 +120,10 @@ const cancelGoogleSignup = async () => {
 
           <div class="flex flex-col gap-3 mt-4">
             <Button type="submit" label="Continuar" :loading="isLoading"
-              class="w-full rounded-lg py-3 font-black uppercase shadow-lg transition-colors !border-none !bg-[#E10600] !text-[#F0ECEC] hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] rounded-lg shadow-lg transition-colors !border-none hover:!bg-[#C00500]" />
 
             <Button type="button" label="Cancelar" :disabled="isLoading"
-              class="w-full rounded-lg py-3 font-black uppercase shadow-lg transition-colors !border border-[#D4A843] !bg-transparent !text-[#D4A843] hover:!bg-[#D4A843]/10"
+              class="w-full py-3 !bg-transparent font-black uppercase !text-[#D4A843] rounded-lg shadow-lg transition-colors !border border-[#D4A843] hover:!bg-[#D4A843]/10"
               @click="cancelGoogleSignup" />
           </div>
         </Form>
@@ -131,5 +131,6 @@ const cancelGoogleSignup = async () => {
     </Card>
   </div>
 </template>
+
 
 
