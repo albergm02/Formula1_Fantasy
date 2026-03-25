@@ -1,6 +1,7 @@
 ﻿<script setup>
 import { ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
+import Dialog from 'primevue/dialog'
 
 const mostrarDetalles = ref(false)
 
@@ -87,57 +88,53 @@ const confirmarCompra = () => {
         </div>
 
         <!-- Botón de visibilidad (posición fija en la carta) -->
-        <button @click="mostrarDetalles = !mostrarDetalles"
+        <button @click="mostrarDetalles = true"
           class="absolute bottom-3 left-3 z-20 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 cursor-pointer transition-all hover:bg-black/70 hover:border-white/30 active:scale-90">
-          <i :class="mostrarDetalles ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-white/90 text-base"></i>
+          <i class="pi pi-eye text-white/90 text-base"></i>
         </button>
-
-        <!-- Panel de detalles (overlay completo sobre la carta) -->
-        <Transition name="detalles">
-          <div v-if="mostrarDetalles"
-            class="absolute inset-0 z-10 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col justify-center p-4 space-y-3 overflow-y-auto">
-
-            <!-- Nombre del piloto en el overlay -->
-            <p class="text-base font-black text-white uppercase tracking-wide text-center drop-shadow-md">
-              {{ props.piloto.nombre }}
-            </p>
-
-            <!-- Habilidad 1 -->
-            <div v-if="props.piloto.habilidad_1" class="px-3 py-2.5 rounded-lg bg-white/10">
-              <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
-                {{ props.piloto.habilidad_1.nombre }}
-                <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
-              </p>
-              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
-                {{ props.piloto.habilidad_1.descripcion }}
-              </p>
-            </div>
-
-            <!-- Habilidad 2 (solo Tier 2) -->
-            <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2" class="px-3 py-2.5 rounded-lg bg-white/10">
-              <p class="text-sm font-black text-[#D4A843] uppercase leading-tight">
-                {{ props.piloto.habilidad_2.nombre }}
-                <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
-              </p>
-              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
-                {{ props.piloto.habilidad_2.descripcion }}
-              </p>
-            </div>
-
-            <!-- Penalizacion (solo Tier 2) -->
-            <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion" class="px-3 py-2.5 rounded-lg bg-white/10">
-              <p class="text-sm font-black text-red-500 uppercase leading-tight">
-                {{ props.piloto.penalizacion.nombre }}
-                <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>
-              </p>
-              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
-                {{ props.piloto.penalizacion.descripcion }}
-              </p>
-            </div>
-          </div>
-        </Transition>
 
       </div>
     </div>
+
+    <!-- Modal de detalles (fuera de la carta) -->
+    <Dialog v-model:visible="mostrarDetalles" :header="props.piloto.nombre" modal
+      :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 rounded-xl max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white/60 hover:text-white' } }">
+      <div class="space-y-3">
+        <!-- Habilidad 1 -->
+        <div v-if="props.piloto.habilidad_1" class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+          <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
+            {{ props.piloto.habilidad_1.nombre }}
+            <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
+          </p>
+          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
+            {{ props.piloto.habilidad_1.descripcion }}
+          </p>
+        </div>
+
+        <!-- Habilidad 2 (solo Tier 2) -->
+        <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2"
+          class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+          <p class="text-sm font-black text-[#D4A843] uppercase leading-tight">
+            {{ props.piloto.habilidad_2.nombre }}
+            <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
+          </p>
+          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
+            {{ props.piloto.habilidad_2.descripcion }}
+          </p>
+        </div>
+
+        <!-- Penalizacion (solo Tier 2) -->
+        <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion"
+          class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+          <p class="text-sm font-black text-red-500 uppercase leading-tight">
+            {{ props.piloto.penalizacion.nombre }}
+            <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>
+          </p>
+          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
+            {{ props.piloto.penalizacion.descripcion }}
+          </p>
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
