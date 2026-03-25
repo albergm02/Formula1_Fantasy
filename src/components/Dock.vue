@@ -68,26 +68,12 @@ const handleMouseLeave = () => {
 
 <template>
   <div :style="{ height: currentHeight + 'px', scrollbarWidth: 'none' }" class="flex items-center mx-2 max-w-full">
-    <div
-      @mousemove="handleMouseMove"
-      @mouseleave="handleMouseLeave"
+    <div @mousemove="handleMouseMove" @mouseleave="handleMouseLeave"
       :class="`${props.className} absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-end w-fit gap-4 rounded-2xl border-neutral-700 border-2 pb-2 px-4`"
-      :style="{ height: props.panelHeight + 'px' }"
-      role="toolbar"
-      aria-="Application dock"
-    >
-      <DockItem
-        v-for="(item, index) in props.items"
-        :key="index"
-        :onClick="item.onClick"
-        :className="item.className"
-        :mouseX="mouseX"
-        :spring="props.spring"
-        :distance="props.distance"
-        :magnification="props.magnification"
-        :baseItemSize="props.baseItemSize"
-        :item="item"
-      />
+      :style="{ height: props.panelHeight + 'px' }" role="toolbar" aria-="Application dock">
+      <DockItem v-for="(item, index) in props.items" :key="index" :onClick="item.onClick" :className="item.className"
+        :mouseX="mouseX" :spring="props.spring" :distance="props.distance" :magnification="props.magnification"
+        :baseItemSize="props.baseItemSize" :item="item" />
     </div>
   </div>
 </template>
@@ -102,7 +88,7 @@ const DockItem = defineComponent({
     },
     onClick: {
       type: Function,
-      default: () => {}
+      default: () => { }
     },
     mouseX: {
       type: Object as () => ReturnType<typeof useMotionValue<number>>,

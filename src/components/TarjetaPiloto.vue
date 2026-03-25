@@ -1,8 +1,8 @@
 ﻿<script setup>
 import { ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
-import Button from 'primevue/button'
-import ElectricBorder from '@/components/ElectricBorder.vue'
+
+const mostrarDetalles = ref(false)
 
 const props = defineProps({
   piloto: {
@@ -15,19 +15,15 @@ const props = defineProps({
   },
 })
 
-// Emitimos el evento 'fichar' para que el componente padre (MercadoView) gestione la lÃ³gica
 const emit = defineEmits(['fichar'])
-
-const mostrarInfo = ref(false)
 const confirm = useConfirm()
 
-// LÃ³gica de confirmaciÃ³n de compra encapsulada
 const confirmarCompra = () => {
   confirm.require({
-    message: `Â¿EstÃ¡s seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
+    message: `¿Estás seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
     header: 'Confirmar Fichaje',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'SÃ­, fichar',
+    acceptLabel: 'Sí, fichar',
     rejectLabel: 'No, cancelar',
     accept() {
       emit('fichar', props.piloto)
@@ -37,97 +33,123 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="px-6 py-2 w-full h-full min-h-[500px]">
+  <div class="w-full">
+    <div :class="[
+      'w-full rounded-xl overflow-hidden border',
+      props.piloto.tier === 2 ? 'border-[#D4A843]/60' : 'border-zinc-800'
+    ]">
+      <!-- La imagen ES la carta. Todo se superpone encima -->
+      <div class="relative w-full overflow-hidden rounded-xl">
 
-    <!-- Tier 2: envuelto con ElectricBorder | Tier 1: div con borde simple -->
-    <component :is="props.piloto.tier === 2 ? ElectricBorder : 'div'" v-bind="props.piloto.tier === 2
-      ? { color: '#D4A843', speed: 0.3, chaos: 0.2, thickness: 3 }
-      : {}"
-      :class="props.piloto.tier === 2 ? 'w-full h-full' : 'w-full h-full overflow-hidden border border-zinc-800'">
-      <div class="flex flex-col w-full h-full overflow-hidden bg-[#1A1A1F]">
+        <!-- Imagen de fondo completa -->
+        <img v-if="props.piloto.imagen" :src="props.piloto.imagen" :alt="props.piloto.nombre"
+          class="w-full h-auto block" />
 
-        <header class="flex justify-between items-center p-3 z-20 shrink-0 bg-black">
-          <div class="flex flex-col">
-            <span class="text-xs font-black text-white uppercase">
-              {{ props.piloto.nombre }}
-              <span v-if="props.piloto.tier === 2" class="ml-1 text-[#D4A843]">EN RACHA</span>
-            </span>
-            <span class="text-[10px] text-zinc-500 uppercase font-bold">{{ props.piloto.equipo }}</span>
-          </div>
-          <span class="text-xs font-black text-[#D4A843]">{{ props.piloto.precio }}M</span>
-        </header>
+        <!-- Badge EN RACHA (esquina superior izquierda) -->
+        <span v-if="props.piloto.tier === 2"
+          class="absolute top-2 left-2 z-20 px-2 py-1 text-[8px] font-black text-[#D4A843] uppercase bg-black/50 rounded backdrop-blur-sm border border-[#D4A843]/40">
+          EN RACHA
+        </span>
 
-        <main class="relative flex-1 w-full cursor-pointer" @click="mostrarInfo = !mostrarInfo">
+        <!-- Overlay de info (lado derecho, siempre visible) -->
+        <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 
-          <img v-if="props.piloto.imagen" :src="props.piloto.imagen"
-            class="absolute inset-0 w-full h-full object-cover object-top" />
+          <!-- Header: nombre + equipo + precio -->
+          <div>
+            <div class="flex justify-between items-start">
+              <div class="flex flex-col min-w-0">
+                <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
+                  {{ props.piloto.nombre }}
+                </span>
+                <span class="text-xs text-white/60 uppercase font-bold drop-shadow-sm">
+                  {{ props.piloto.equipo }}
+                </span>
+              </div>
 
-          <div v-show="!mostrarInfo"
-            class="absolute inset-0 w-full flex items-center justify-center z-20 pointer-events-none">
-            <span class="px-3 py-1 bg-black/60 text-xs font-black text-white rounded animate-pulse">
-              TOCA PARA VER DETALLES
-            </span>
-          </div>
-
-          <div v-show="mostrarInfo"
-            class="absolute inset-0 p-5 flex flex-col z-20 bg-[#1A1A1F]/90 text-left backdrop-blur-md">
-            <h4 class="pb-2 mb-3 text-xs font-black text-white text-center border-b border-zinc-700">
-              DESCRIPCIÃ“N
-            </h4>
-            <div class="mb-3">
-              <p class="text-[10px] text-zinc-300 leading-tight">
-                {{ props.piloto.descripcion }}
-              </p>
             </div>
+          </div>
 
-            <h4 class="pb-2 mb-3 text-xs font-black text-white text-center border-b border-zinc-700">
-              HABILIDADES
-            </h4>
+          <div class="flex-1"></div>
 
-            <div v-if="props.piloto.habilidad_1" class="mb-3">
-              <p class="mb-1 text-[10px] font-black text-emerald-400 uppercase drop-shadow-sm">
+          <!-- Precio justo encima del botón -->
+          <div v-if="modoMercado" class="flex justify-end mb-1">
+            <span class="text-sm font-black text-[#D4A843] drop-shadow-md">
+              {{ props.piloto.precio }}M
+            </span>
+          </div>
+
+          <!-- Boton PUJAR (pegado abajo) -->
+          <button v-if="modoMercado" @click="confirmarCompra"
+            class="w-full py-2.5 flex items-center justify-center rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 cursor-pointer transition-all hover:bg-black/70 hover:border-white/20 active:scale-[0.98]">
+            <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
+            <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
+          </button>
+        </div>
+
+        <!-- Botón de visibilidad (posición fija en la carta) -->
+        <button @click="mostrarDetalles = !mostrarDetalles"
+          class="absolute bottom-3 left-3 z-20 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 cursor-pointer transition-all hover:bg-black/70 hover:border-white/30 active:scale-90">
+          <i :class="mostrarDetalles ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-white/90 text-base"></i>
+        </button>
+
+        <!-- Panel de detalles (overlay completo sobre la carta) -->
+        <Transition name="detalles">
+          <div v-if="mostrarDetalles"
+            class="absolute inset-0 z-10 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col justify-center p-4 space-y-3 overflow-y-auto">
+
+            <!-- Nombre del piloto en el overlay -->
+            <p class="text-base font-black text-white uppercase tracking-wide text-center drop-shadow-md">
+              {{ props.piloto.nombre }}
+            </p>
+
+            <!-- Habilidad 1 -->
+            <div v-if="props.piloto.habilidad_1" class="px-3 py-2.5 rounded-lg bg-white/10">
+              <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
                 {{ props.piloto.habilidad_1.nombre }}
                 <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
               </p>
-              <p class="text-[11px] text-zinc-300 leading-tight">
+              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
                 {{ props.piloto.habilidad_1.descripcion }}
               </p>
             </div>
 
-            <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2" class="mt-2 pt-3 border-t border-zinc-800">
-              <p class="mb-1 text-[10px] font-black text-[#D4A843] uppercase drop-shadow-sm">
+            <!-- Habilidad 2 (solo Tier 2) -->
+            <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2" class="px-3 py-2.5 rounded-lg bg-white/10">
+              <p class="text-sm font-black text-[#D4A843] uppercase leading-tight">
                 {{ props.piloto.habilidad_2.nombre }}
                 <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
               </p>
-              <p class="text-[11px] text-zinc-300 leading-tight">
+              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
                 {{ props.piloto.habilidad_2.descripcion }}
               </p>
             </div>
 
-            <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion" class="mt-2 pt-3 border-t border-zinc-800">
-              <p class="mb-1 text-[10px] font-black text-red-500 uppercase drop-shadow-sm">
+            <!-- Penalizacion (solo Tier 2) -->
+            <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion" class="px-3 py-2.5 rounded-lg bg-white/10">
+              <p class="text-sm font-black text-red-500 uppercase leading-tight">
                 {{ props.piloto.penalizacion.nombre }}
                 <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>
               </p>
-              <p class="text-[11px] text-zinc-300 leading-tight">
+              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
                 {{ props.piloto.penalizacion.descripcion }}
               </p>
             </div>
-
-            <div class="mt-auto pt-4 text-center">
-              <span class="text-[10px] font-black text-white animate-pulse">TOCA PARA VOLVER</span>
-            </div>
           </div>
-        </main>
-
-        <Button v-if="modoMercado" @click="confirmarCompra" unstyled
-          class="w-full py-4 z-20 shrink-0 flex items-center justify-center bg-black border-none cursor-pointer">
-          <i class="mr-2 font-bold text-sm text-white pi pi-money-bill"></i>
-          <span class="text-white font-black uppercase tracking-widest">PUJAR</span>
-        </Button>
+        </Transition>
 
       </div>
-    </component>
+    </div>
   </div>
 </template>
 
+<style>
+.detalles-enter-active,
+.detalles-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.detalles-enter-from,
+.detalles-leave-to {
+  opacity: 0;
+}
+</style>
