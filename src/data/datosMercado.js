@@ -352,52 +352,52 @@ export const mercadoPotenciadores = [
 // prettier-ignore
 export const mercadoCoches = [
   { 
-    id: 'aston_martin', nombre: 'Aston Martin Aramco', precio: 20.0, puntos: 200, imagen: '/Coches/AstonMartin.png',
+    id: 'aston_martin', nombre: 'Aston Martin Aramco', precio: 20.0, puntos: 200, imagen: '/Coches/astonmartin.webp',
     descripcion: 'El chasis desarrollado en la vanguardista fábrica de Silverstone. Destaca por su capacidad para generar carga aerodinámica en curvas lentas y su agresividad en salidas.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Fernando Alonso o Lance Stroll en tu equipo.' }
   },
   { 
-    id: 'audi', nombre: 'Audi Revolut F1', precio: 20.0, puntos: 200, imagen: '/Coches/Audi.png',
+    id: 'audi', nombre: 'Audi Revolut F1', precio: 20.0, puntos: 200, imagen: '/Coches/audi.webp',
     descripcion: 'La obra maestra de la ingeniería alemana hace su debut. Un monoplaza diseñado desde cero, priorizando la fiabilidad del motor y la consistencia en tandas largas.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Nico Hülkenberg o Gabriel Bortoleto en tu equipo.' }
   },
   { 
-    id: 'cadillac', nombre: 'Cadillac F1', precio: 20.0, puntos: 200, imagen: '/Coches/Cadillac.png',
+    id: 'cadillac', nombre: 'Cadillac F1', precio: 20.0, puntos: 200, imagen: '/Coches/cadillac.webp',
     descripcion: 'El rugido estadounidense llega a la F1. Un coche pesado pero extremadamente robusto en recta, diseñado para sobrevivir a batallas intensas en el cuerpo a cuerpo.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Sergio Perez o Valtteri Bottas en tu equipo.' }
   },
   { 
-    id: 'ferrari', nombre: 'Ferrari', precio: 20.0, puntos: 200, imagen: '/Coches/Ferrari.png',
+    id: 'ferrari', nombre: 'Ferrari', precio: 20.0, puntos: 200, imagen: '/Coches/ferrari.webp',
     descripcion: 'El icónico monoplaza rojo de Maranello. Un misil a una vuelta con un motor potentísimo, famoso por calentar los neumáticos más rápido que nadie.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Charles Leclerc o Lewis Hamilton en tu equipo.' }
   },
   { 
-    id: 'haas', nombre: 'TGR Haas F1', precio: 20.0, puntos: 200, imagen: '/Coches/Haas.png',
+    id: 'haas', nombre: 'TGR Haas F1', precio: 20.0, puntos: 200, imagen: '/Coches/haas.webp',
     descripcion: 'Con el nuevo soporte técnico de Toyota Gazoo Racing, este monoplaza es un cazador de oportunidades. Destaca por aprovechar el caos y clasificar sorprendentemente bien.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Esteban Ocon u Oliver Bearman en tu equipo.' }
   },
   { 
-    id: 'mclaren', nombre: 'McLaren Mastercard', precio: 20.0, puntos: 200, imagen: '/Coches/Mclaren.png',
+    id: 'mclaren', nombre: 'McLaren Mastercard', precio: 20.0, puntos: 200, imagen: '/Coches/mclaren.webp',
     descripcion: 'El coche a batir. Una maravilla aerodinámica color papaya que devora las curvas rápidas y mima los neumáticos de forma excepcional en cualquier condición.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Lando Norris u Oscar Piastri en tu equipo.' }
   },
   { 
-    id: 'mercedes', nombre: 'Mercedes-AMG', precio: 20.0, puntos: 200, imagen: '/Coches/Mercedes.png',
+    id: 'mercedes', nombre: 'Mercedes-AMG', precio: 20.0, puntos: 200, imagen: '/Coches/mercedes.webp',
     descripcion: 'La flecha plateada/negra es un prodigio de la eficiencia. Un chasis que brilla especialmente los domingos gracias a su estabilidad en ritmo de carrera.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a George Russell o Kimi Antonelli en tu equipo.' }
   },
   { 
-    id: 'racing_bulls', nombre: 'Racing Bulls VCARB', precio: 20.0, puntos: 200, imagen: '/Coches/RacingBulls.png',
+    id: 'racing_bulls', nombre: 'Racing Bulls VCARB', precio: 20.0, puntos: 200, imagen: '/Coches/racingbulls.webp',
     descripcion: 'El hermano menor de Red Bull hereda soluciones técnicas punteras. Un coche muy ágil en circuitos revirados e ideal para pilotos jóvenes que asumen riesgos.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Liam Lawson o Arvid Lindblad en tu equipo.' }
   },
   { 
-    id: 'red_bull', nombre: 'Red Bull Racing', precio: 20.0, puntos: 200, imagen: '/Coches/RedBull.png',
+    id: 'red_bull', nombre: 'Red Bull Racing', precio: 20.0, puntos: 200, imagen: '/Coches/redbull.webp',
     descripcion: 'La obra cumbre de la aerodinámica moderna. Un monoplaza afilado, letal en zonas de alta velocidad y con el sistema de DRS más efectivo de toda la parrilla.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Max Verstappen o Isack Hadjar en tu equipo.' }
   },
   { 
-    id: 'williams', nombre: 'Atlassian Williams', precio: 20.0, puntos: 200, imagen: '/Coches/Williams.png',
+    id: 'williams', nombre: 'Atlassian Williams', precio: 20.0, puntos: 200, imagen: '/Coches/williams.webp',
     descripcion: 'El histórico equipo británico presenta un monoplaza optimizado para la baja resistencia aerodinámica (low drag). Es un auténtico misil inalcanzable en las grandes rectas.',
     habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Obtienes este bono si tienes alineado a Carlos Sainz o Alexander Albon en tu equipo.' }
   }

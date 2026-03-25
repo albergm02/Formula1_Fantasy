@@ -1,7 +1,8 @@
-﻿<script setup>
+<script setup>
 import { ref } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
-import Button from 'primevue/button'
+
+const mostrarDetalles = ref(false)
 
 const props = defineProps({
   coche: {
@@ -15,15 +16,14 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['fichar'])
-const mostrarInfo = ref(false)
 const confirm = useConfirm()
 
 const confirmarCompra = () => {
   confirm.require({
-    message: `Â¿EstÃ¡s seguro de que quieres fichar a ${props.coche.nombre} por ${props.coche.precio}M?`,
+    message: `¿Estás seguro de que quieres fichar a ${props.coche.nombre} por ${props.coche.precio}M?`,
     header: 'Confirmar Fichaje',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'SÃ­, fichar',
+    acceptLabel: 'Sí, fichar',
     rejectLabel: 'No, cancelar',
     accept() {
       emit('fichar', props.coche)
@@ -33,72 +33,86 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="px-6 py-2 w-full h-full min-h-[400px]">
+  <div class="w-full">
+    <div class="w-full rounded-xl overflow-hidden border border-zinc-800">
+      <div class="relative w-full overflow-hidden rounded-xl">
 
-    <div class="relative w-full h-full flex flex-col overflow-hidden border border-zinc-800">
+        <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
+          class="w-full h-auto block" />
 
-      <div class="relative z-10 flex flex-col flex-1 w-full h-full overflow-hidden bg-[#1A1A1F]">
+        <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 
-        <header class="flex justify-between items-center p-3 z-20 shrink-0 bg-black">
-          <div class="flex flex-col">
-            <span class="text-xs font-black text-white uppercase">
+          <div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
+                {{ props.coche.nombre }}
+              </span>
+              <span class="text-xs text-white/60 uppercase font-bold drop-shadow-sm">
+                CHASIS
+              </span>
+            </div>
+          </div>
+
+          <div class="flex-1"></div>
+
+          <div v-if="modoMercado" class="flex justify-end mb-1">
+            <span class="text-sm font-black text-[#D4A843] drop-shadow-md">
+              {{ props.coche.precio }}M
+            </span>
+          </div>
+
+          <button v-if="modoMercado" @click="confirmarCompra"
+            class="w-full py-2.5 flex items-center justify-center rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 cursor-pointer transition-all hover:bg-black/70 hover:border-white/20 active:scale-[0.98]">
+            <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
+            <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
+          </button>
+        </div>
+
+        <button @click="mostrarDetalles = !mostrarDetalles"
+          class="absolute bottom-3 left-3 z-20 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 cursor-pointer transition-all hover:bg-black/70 hover:border-white/30 active:scale-90">
+          <i :class="mostrarDetalles ? 'pi pi-eye-slash' : 'pi pi-eye'" class="text-white/90 text-base"></i>
+        </button>
+
+        <Transition name="detalles-coche">
+          <div v-if="mostrarDetalles"
+            class="absolute inset-0 z-10 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col justify-center p-4 space-y-3 overflow-y-auto">
+
+            <p class="text-base font-black text-white uppercase tracking-wide text-center drop-shadow-md">
               {{ props.coche.nombre }}
-            </span>
-            <span class="text-[10px] text-zinc-500 uppercase font-bold">CHASIS</span>
-          </div>
-          <span class="text-xs font-black text-[#D4A843]">{{ props.coche.precio }}M</span>
-        </header>
+            </p>
 
-        <main class="relative flex-1 w-full bg-transparent cursor-pointer" @click="mostrarInfo = !mostrarInfo">
-
-          <img v-if="props.coche.imagen" :src="props.coche.imagen"
-            class="absolute inset-0 w-full h-full object-contain object-center p-2" />
-
-          <div v-show="!mostrarInfo"
-            class="absolute inset-0 w-full flex items-center justify-center z-20 pointer-events-none">
-            <span class="px-3 py-1 bg-black/60 text-xs font-black text-white rounded animate-pulse">
-              TOCA PARA VER DETALLES
-            </span>
-          </div>
-
-          <div v-show="mostrarInfo"
-            class="absolute inset-0 p-5 flex flex-col z-30 overflow-y-auto bg-[#1A1A1F]/90 text-left backdrop-blur-md">
-
-            <h4 class="pb-2 mb-3 text-xs font-black text-white text-center border-b border-zinc-700">
-              DESCRIPCIÃ“N
-            </h4>
-            <div class="mb-3">
-              <p class="text-[10px] text-zinc-300 leading-tight">
+            <div class="px-3 py-2.5 rounded-lg bg-white/10">
+              <p class="text-sm font-black text-sky-400 uppercase leading-tight">DESCRIPCIÓN</p>
+              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
                 {{ props.coche.descripcion }}
               </p>
             </div>
 
-            <h4 class="pb-2 mb-3 text-xs font-black text-white text-center border-b border-zinc-700">
-              MEJORA
-            </h4>
-            <div v-if="props.coche.habilidad" class="mb-3">
-              <p class="mb-1 text-[10px] font-black text-emerald-400 uppercase drop-shadow-sm">
+            <div v-if="props.coche.habilidad" class="px-3 py-2.5 rounded-lg bg-white/10">
+              <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
                 {{ props.coche.habilidad.nombre }}
                 <span class="text-white">+{{ props.coche.habilidad.puntos }}</span>
               </p>
-              <p class="text-[11px] text-zinc-300 leading-tight">
+              <p class="mt-1.5 text-xs text-white/80 leading-relaxed">
                 {{ props.coche.habilidad.descripcion }}
               </p>
             </div>
-
-            <div class="mt-auto pt-4 text-center">
-              <span class="text-[10px] font-black text-white animate-pulse">TOCA PARA VOLVER</span>
-            </div>
           </div>
-        </main>
-
-        <Button v-if="modoMercado" @click="confirmarCompra" unstyled
-          class="w-full py-4 z-20 shrink-0 flex items-center justify-center bg-black border-none cursor-pointer">
-          <i class="mr-2 font-bold text-sm text-white pi pi-money-bill"></i>
-          <span class="text-white font-black uppercase tracking-widest">PUJAR</span>
-        </Button>
+        </Transition>
 
       </div>
     </div>
   </div>
 </template>
+
+<style>
+.detalles-coche-enter-active,
+.detalles-coche-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.detalles-coche-enter-from,
+.detalles-coche-leave-to {
+  opacity: 0;
+}
+</style>

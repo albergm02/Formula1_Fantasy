@@ -141,15 +141,3 @@ const confirmarCompra = () => {
     </div>
   </div>
 </template>
-
-<style>
-.detalles-enter-active,
-.detalles-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.detalles-enter-from,
-.detalles-leave-to {
-  opacity: 0;
-}
-</style>
