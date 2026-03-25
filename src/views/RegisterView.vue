@@ -83,7 +83,7 @@ const handleRegister = async ({ valid, values }) => {
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal de registro -->
-    <Card class="w-full max-w-md p-2 border shadow-2xl md:p-4 rounded-xl backdrop-blur-md border-zinc-800 !bg-black/40">
+    <Card class="w-full max-w-md p-2 border shadow-2xl lg:p-4 rounded-xl backdrop-blur-md border-zinc-800 !bg-black/40">
 
       <!-- Encabezado con logo y título -->
       <template #title>

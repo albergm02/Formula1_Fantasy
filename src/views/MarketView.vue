@@ -76,7 +76,7 @@ const handlePurchase = async (item) => {
 <template>
   <Header />
 
-  <main class="p-4 flex flex-col gap-6 mt-4 mb-20 max-w-md mx-auto w-full">
+  <main class="p-4 flex flex-col gap-6 mt-4 mb-20 max-w-lg mx-auto w-full">
 
     <!-- Coche destacado de la semana -->
     <section class="grid">

@@ -155,7 +155,7 @@ const onResetModalHide = () => {
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta de inicio de sesión -->
-    <Card class="w-full max-w-md border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800 !bg-black/40 p-2 md:p-4">
+    <Card class="w-full max-w-md border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800 !bg-black/40 p-2 lg:p-4">
 
       <!-- Encabezado: Logo y título -->
       <template #title>

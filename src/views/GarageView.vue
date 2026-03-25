@@ -116,7 +116,7 @@ const toggleBoosterInstallation = async (instanceId) => {
     </section>
 
     <!-- Sección: Pilotos -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section class="grid grid-cols-1 gap-6">
       <template v-if="escuderiaStore.garage.pilotos.length > 0">
         <div v-for="driver in escuderiaStore.garage.pilotos" :key="driver.instancia_id"
           class="flex flex-col w-full h-full">
