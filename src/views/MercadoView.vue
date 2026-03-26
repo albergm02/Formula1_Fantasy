@@ -17,8 +17,8 @@ import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
 
 const escuderiaStore = usarStoreEscuderia()
-const toast = useToast()
-const route = useRoute()
+const notificacion = useToast()
+const ruta = useRoute()
 
 /* Estados del mercado semanal */
 const pilotoSemanal = ref(null)
@@ -48,8 +48,8 @@ const generarMercadoSemanal = () => {
 
 /* Si no hay liga activa, la recuperamos de la query. Luego generamos el mercado */
 onMounted(async () => {
-  if (!escuderiaStore.idLigaActiva && route.query.liga) {
-    await escuderiaStore.cargarEquipo(route.query.liga)
+  if (!escuderiaStore.idLigaActiva && ruta.query.liga) {
+    await escuderiaStore.cargarEquipo(ruta.query.liga)
   }
 
   generarMercadoSemanal()
@@ -60,9 +60,9 @@ const manejarCompra = async (elemento) => {
   const resultado = await escuderiaStore.comprarElemento(elemento)
 
   if (resultado.success) {
-    toast.add({ severity: 'success', summary: 'Fichaje exitoso', detail: `Has fichado a ${elemento.nombre} por ${elemento.precio}M` })
+    notificacion.add({ severity: 'success', summary: 'Fichaje exitoso', detail: `Has fichado a ${elemento.nombre} por ${elemento.precio}M` })
   } else {
-    toast.add({ severity: 'error', summary: 'Fichaje fallido', detail: resultado.message })
+    notificacion.add({ severity: 'error', summary: 'Fichaje fallido', detail: resultado.message })
   }
 }
 </script>

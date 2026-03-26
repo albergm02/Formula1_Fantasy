@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-/* Servicios de autenticaciÃ³n */
+/* Servicios de autenticación */
 import { iniciarSesion, iniciarSesionConGoogle, restablecerContrasena } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
@@ -19,124 +19,126 @@ import { useToast } from 'primevue/usetoast'
 /* Utilidades */
 import { obtenerMensajeErrorGoogle, obtenerMensajeErrorInicioSesion, popupGoogleCerrado } from '@/utils/erroresAutenticacion'
 
-/* ValidaciÃ³n con Zod */
+/* Validación con Zod */
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
-/* Esquema de validaciÃ³n con Zod */
-const validationSchema = zodResolver(
+
+/* Esquema de validación con Zod */
+const esquemaValidacion = zodResolver(
   z.object({
-    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo invÃ¡lido'),
-    password: z.string().min(1, 'La contraseÃ±a es obligatoria')
+    email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
+    password: z.string().min(1, 'La contraseña es obligatoria')
   })
 )
 
-const router = useRouter()
-const toast = useToast()
+/* Router, store de autenticación y toast */
+const enrutador = useRouter()
+const notificacion = useToast()
 const storeAutenticacion = usarStoreAutenticacion()
 
 /* Estados */
-const isLoading = ref(false)
-const authError = ref('')
-const initialFormValues = ref({ email: '', password: '' })
-const isResetModalVisible = ref(false)
-const resetEmailAddress = ref('')
-const isResetLoading = ref(false)
+const cargando = ref(false)
+const errorAutenticacion = ref('')
+const valoresInicialesFormulario = ref({ email: '', password: '' })
+const modalRecuperacionVisible = ref(false)
+const correoRecuperacion = ref('')
+const cargandoRecuperacion = ref(false)
 
 /* Mensajes */
-const genericResetMessage = 'Si el correo estÃ¡ registrado, recibirÃ¡s un enlace de recuperaciÃ³n.'
+const mensajeRecuperacionGenerico = 'Si el correo está registrado, recibirás un enlace de recuperación.'
 
-/* Handler Login utilizando email / contraseÃ±a */
-const handleLogin = async ({ valid, values }) => {
+/* Handler Login utilizando email / contraseña */
+const handlerLogin = async ({ valid, values }) => {
   // Zod se encarga de mostrar errores.
   if (!valid) return
-  isLoading.value = true
-  authError.value = ''
+  cargando.value = true
+  errorAutenticacion.value = ''
 
   try {
-    // Intentamos iniciar sesiÃ³n con email y contraseÃ±a
-    const userCredential = await iniciarSesion(values.email, values.password)
-    // Si el inicio de sesiÃ³n es exitoso, inicializamos los datos del usuario en el store
-    await storeAutenticacion.inicializarDatosUsuario(userCredential.user.email, userCredential.user.displayName)
-    router.push('/ligas')
+    // Intentamos iniciar sesión con email y contraseña
+    const credencialUsuario = await iniciarSesion(values.email, values.password)
+    // Si el inicio de sesión es exitoso, inicializamos los datos del usuario en el store
+    await storeAutenticacion.inicializarDatosUsuario(credencialUsuario.user.email, credencialUsuario.user.displayName)
+    enrutador.push('/ligas')
   } catch (error) {
-    authError.value = obtenerMensajeErrorInicioSesion(error)
+    errorAutenticacion.value = obtenerMensajeErrorInicioSesion(error)
   } finally {
-    isLoading.value = false
+    cargando.value = false
   }
 }
 
-/* Handler login vÃ­a Google */
-const handleGoogleLogin = async () => {
-  authError.value = ''
-  isLoading.value = true
+/* Handler login vía Google */
+const handlerGoogleLogin = async () => {
+  errorAutenticacion.value = ''
+  cargando.value = true
 
   try {
-    const userCredential = await iniciarSesionConGoogle()
-    const googleEmail = userCredential.user.email.trim()
+    const credencialUsuario = await iniciarSesionConGoogle()
+    const correoGoogle = credencialUsuario.user.email.trim()
 
-    // Si no obtenemos un correo vÃ¡lido de Google, mostramos un error
-    if (!googleEmail) {
+    // Si no obtenemos un correo válido de Google, mostramos un error
+    if (!correoGoogle) {
       throw new Error('No se pudo obtener el correo de Google.')
     }
 
     // Intentamos inicializar los datos del usuario.
-    const perfilExiste = await storeAutenticacion.inicializarDatosUsuario(googleEmail, userCredential.user.displayName, {
-      createIfMissing: false,
+    const perfilExiste = await storeAutenticacion.inicializarDatosUsuario(correoGoogle, credencialUsuario.user.displayName, {
+      crearNuevo: false,
     })
 
     // Si el perfil existe, vamos a ligas. Si no, vamos a completar registro.
     if (perfilExiste) {
-      router.push('/ligas')
+      enrutador.push('/ligas')
       return
     }
 
     // Si no existe perfil, redirigimos a completar registro con Google
-    router.push('/registro-google')
+    enrutador.push('/registro-google')
   } catch (error) {
-    // Si el error se debe a que el usuario cerrÃ³ la ventana emergente de Google, no mostramos un mensaje de error.
+    // Si el error se debe a que el usuario cerró la ventana emergente de Google, no mostramos un mensaje de error.
     if (!popupGoogleCerrado(error)) {
-      authError.value = obtenerMensajeErrorGoogle(error)
+      errorAutenticacion.value = obtenerMensajeErrorGoogle(error)
     }
   } finally {
-    isLoading.value = false
+    cargando.value = false
   }
 }
 
-/* Handler Recuperar ContraseÃ±a (Mejorado) */
-const handlePasswordReset = async () => {
-  const emailToSend = resetEmailAddress.value.trim()
+/* Handler Recuperar Contraseña (Mejorado) */
+const handlerRestablecerContrasena = async () => {
+  const correoAEnviar = correoRecuperacion.value.trim()
 
-  // Validamos el formato del correo antes de intentar enviar el email de recuperaciÃ³n
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToSend)) {
-    toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo vÃ¡lido (ej: piloto@correo.com).', life: 4000 })
+  // Validamos el formato del correo antes de intentar enviar el email de recuperación
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoAEnviar)) {
+    notificacion.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
     return
   }
-  // Intentamos enviar el correo de recuperaciÃ³n. 
-  // Para evitar revelar si un correo estÃ¡ registrado o no, mostramos el mismo mensaje de Ã©xito tanto para correos vÃ¡lidos como para no registrados.
-  isResetLoading.value = true
+  // Intentamos enviar el correo de recuperación. 
+  // Para evitar revelar si un correo está registrado o no, mostramos el mismo mensaje de éxito tanto para correos válidos como para no registrados.
+  cargandoRecuperacion.value = true
   try {
-    await restablecerContrasena(emailToSend)
-    toast.add({ severity: 'success', summary: 'Revisa tu correo', detail: genericResetMessage, life: 6000 })
-    isResetModalVisible.value = false
-    resetEmailAddress.value = ''
+    await restablecerContrasena(correoAEnviar)
+    notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: mensajeRecuperacionGenerico, life: 6000 })
+    modalRecuperacionVisible.value = false
+    correoRecuperacion.value = ''
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      toast.add({ severity: 'success', summary: 'Revisa tu correo', detail: genericResetMessage, life: 6000 })
-      isResetModalVisible.value = false
-      resetEmailAddress.value = ''
+      notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: mensajeRecuperacionGenerico, life: 6000 })
+      modalRecuperacionVisible.value = false
+      correoRecuperacion.value = ''
     } else {
-      toast.add({ severity: 'error', summary: 'Error de conexiÃ³n', detail: 'Hubo un problema de red. IntÃ©ntalo de nuevo mÃ¡s tarde.', life: 4000 })
+      notificacion.add({ severity: 'error', summary: 'Error de conexión', detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.', life: 4000 })
     }
   } finally {
-    isResetLoading.value = false
+    cargandoRecuperacion.value = false
   }
 }
 
-/* Handler para limpiar el estado del modal de recuperaciÃ³n al cerrarlo */
-const onResetModalHide = () => {
-  resetEmailAddress.value = ''
-  isResetLoading.value = false
+/* Handler para limpiar el estado del modal de recuperación al cerrarlo */
+const alOcultarModalRecuperacion = () => {
+  correoRecuperacion.value = ''
+  cargandoRecuperacion.value = false
 }
 
 </script>
@@ -151,13 +153,13 @@ const onResetModalHide = () => {
   <!-- Contenedor principal -->
   <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
 
-    <!-- AnimaciÃ³n de fondo -->
+    <!-- Animación de fondo -->
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
-    <!-- Tarjeta de inicio de sesiÃ³n -->
+    <!-- Tarjeta de inicio de sesión -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
 
-      <!-- Encabezado: Logo y tÃ­tulo -->
+      <!-- Encabezado: Logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -167,25 +169,25 @@ const onResetModalHide = () => {
         </div>
       </template>
 
-      <!-- Contenido: Formulario de inicio de sesiÃ³n -->
+      <!-- Contenido: Formulario de inicio de sesión -->
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
-          :resolver="validationSchema" @submit="handleLogin">
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
+          :resolver="esquemaValidacion" @submit="handlerLogin">
 
-          <!-- Campo de correo electrÃ³nico -->
+          <!-- Campo de correo electrónico -->
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
-            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@correo.com"
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="tu@correo.com"
               class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
-          <!-- Campo de contraseÃ±a -->
+          <!-- Campo de contraseña -->
           <div class="flex flex-col gap-1">
             <label for="password"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">ContraseÃ±a</label>
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
               toggle-mask :feedback="false" class="w-full [&>input]:w-full"
               inputClass="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
@@ -195,33 +197,33 @@ const onResetModalHide = () => {
           </div>
 
           <!-- Mensaje de error -->
-          <Message v-if="authError" severity="error" :closable="false" class="mt-2 text-sm">
-            {{ authError }}
+          <Message v-if="errorAutenticacion" severity="error" :closable="false" class="mt-2 text-sm">
+            {{ errorAutenticacion }}
           </Message>
 
-          <!-- Botones de acciÃ³n -->
+          <!-- Botones de acción -->
           <div class="flex flex-col gap-3 mt-4">
 
-            <!-- BotÃ³n de inicio de sesiÃ³n -->
-            <Button type="submit" label="Iniciar sesiÃ³n" :loading="isLoading"
+            <!-- Botón de inicio de sesión -->
+            <Button type="submit" label="Iniciar sesión" :loading="cargando"
               class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] rounded-lg shadow-lg transition-colors !border-none hover:!bg-[#C00500]" />
 
-            <!-- BotÃ³n de inicio con Google -->
+            <!-- Botón de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
               class="flex w-full items-center justify-center gap-2 py-3 !bg-white font-bold uppercase !text-black rounded-lg shadow-lg transition-colors !border-none hover:!bg-gray-300"
-              @click="handleGoogleLogin" />
+              @click="handlerGoogleLogin" />
 
-            <!-- BotÃ³n de contraseÃ±a olvidada -->
-            <Button type="button" label="Â¿Olvidaste tu contraseÃ±a?" text
+            <!-- Botón de contraseña olvidada -->
+            <Button type="button" label="¿Olvidaste tu contraseña?" text
               class="w-full mt-1 !bg-transparent font-bold !text-[#D4A843] transition-colors !border-none hover:!text-[#C09638]"
-              @click="isResetModalVisible = true" />
+              @click="modalRecuperacionVisible = true" />
 
             <!-- Enlace de registro -->
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
-              <span class="text-xs text-[#F0ECEC]">Â¿No tienes equipo? </span>
+              <span class="text-xs text-[#F0ECEC]">¿No tienes equipo? </span>
               <router-link to="/registro"
                 class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] hover:text-white transition-colors">
-                RegÃ­strate aquÃ­
+                Regístrate aquí
               </router-link>
             </div>
           </div>
@@ -229,22 +231,22 @@ const onResetModalHide = () => {
       </template>
     </Card>
 
-    <!-- Modal de recuperaciÃ³n de contraseÃ±a -->
-    <Dialog v-model:visible="isResetModalVisible" modal header="Recuperar ContraseÃ±a" @hide="onResetModalHide"
+    <!-- Modal de recuperación de contraseña -->
+    <Dialog v-model:visible="modalRecuperacionVisible" modal header="Recuperar Contraseña" @hide="alOcultarModalRecuperacion"
       :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
 
       <div class="flex flex-col gap-4">
-        <p class="text-sm text-[#F0ECEC]">Introduce tu correo y te enviaremos un enlace de recuperaciÃ³n.</p>
+        <p class="text-sm text-[#F0ECEC]">Introduce tu correo y te enviaremos un enlace de recuperación.</p>
 
-        <InputText v-model="resetEmailAddress" type="email" placeholder="tu@correo.com"
+        <InputText v-model="correoRecuperacion" type="email" placeholder="tu@correo.com"
           class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700"
-          @keyup.enter="handlePasswordReset" />
+          @keyup.enter="handlerRestablecerContrasena" />
 
-        <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="isResetLoading"
+        <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="cargandoRecuperacion"
           class="mt-2 w-full py-3 !bg-[#D4A843] font-black tracking-widest !text-[#121218] rounded-lg !border-none hover:!bg-[#C09638]"
-          @click="handlePasswordReset" />
+          @click="handlerRestablecerContrasena" />
       </div>
     </Dialog>
   </div>

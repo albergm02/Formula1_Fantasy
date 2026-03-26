@@ -4,7 +4,7 @@ import { auth } from '../services/servicioFirebase'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
-const routes = [
+const rutas = [
   {
     path: '/',
     name: 'login',
@@ -59,33 +59,33 @@ const routes = [
   },
 ]
 
-const router = createRouter({
+const enrutador = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes: rutas,
 })
 
-router.beforeEach(async (to) => {
-  const user = await obtenerUsuarioActual()
+enrutador.beforeEach(async (to) => {
+  const usuario = await obtenerUsuarioActual()
   const storeAutenticacion = usarStoreAutenticacion()
-  const ligasStore = usarStoreLigas()
+  const storeLigas = usarStoreLigas()
 
   // Si hay usuario pero aÃºn no se han cargado sus datos, los inicializamos
-  if (user && !storeAutenticacion.datosCargados) {
-    await storeAutenticacion.inicializarDatosUsuario(user.email, user.displayName, {
+  if (usuario && !storeAutenticacion.datosCargados) {
+    await storeAutenticacion.inicializarDatosUsuario(usuario.email, usuario.displayName, {
       createIfMissing: false,
     })
   }
 
   // Si no hay sesiÃ³n activa, limpiamos el store para ocultar el spinner
-  if (!user && !storeAutenticacion.datosCargados) {
+  if (!usuario && !storeAutenticacion.datosCargados) {
     storeAutenticacion.limpiarSesion()
   }
 
-  if (to.meta.requiresAuth && !user) {
+  if (to.meta.requiresAuth && !usuario) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.meta.requiresGuest && user) {
+  if (to.meta.requiresGuest && usuario) {
     if (!storeAutenticacion.perfilExiste) {
       return { name: 'registro-google' }
     }
@@ -93,7 +93,7 @@ router.beforeEach(async (to) => {
     return { name: 'ligas' }
   }
 
-  if (user && !storeAutenticacion.perfilExiste && !to.meta.requiresIncompleteProfile) {
+  if (usuario && !storeAutenticacion.perfilExiste && !to.meta.requiresIncompleteProfile) {
     return { name: 'registro-google' }
   }
 
@@ -102,8 +102,8 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresLiga) {
-    if (storeAutenticacion.usuarioActual.idsLigas.length > 0 && ligasStore.detallesLigas.length === 0) {
-      await ligasStore.cargarLigasUsuario()
+    if (storeAutenticacion.usuarioActual.idsLigas.length > 0 && storeLigas.detallesLigas.length === 0) {
+      await storeLigas.cargarLigasUsuario()
     }
 
     if (
@@ -120,18 +120,18 @@ router.beforeEach(async (to) => {
 
 function obtenerUsuarioActual() {
   return new Promise((resolve, reject) => {
-    const unsubscribe = onAuthStateChanged(
+    const desuscribir = onAuthStateChanged(
       auth,
-      (user) => {
-        unsubscribe()
-        resolve(user)
+      (usuario) => {
+        desuscribir()
+        resolve(usuario)
       },
       reject,
     )
   })
 }
 
-export default router
+export default enrutador
 
 
 

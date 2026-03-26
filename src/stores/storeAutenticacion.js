@@ -14,12 +14,22 @@ export const usarStoreAutenticacion = defineStore('auth', {
   }),
 
   actions: {
+
+    /**
+     * Inicializa los datos del usuario en el store.
+     * @param {string} correoUsuario - El correo del usuario.
+     * @param {string} nombreUsuario - El nombre visible del usuario.
+     * @param {Object} opciones - Opciones adicionales.
+     * @param {boolean} opciones.crearNuevo - Indica si se debe crear un perfil si no existe.
+     * @returns {Promise<boolean>} - Retorna true si el perfil existe o se creó, false en caso contrario.
+     */
     async inicializarDatosUsuario(correoUsuario, nombreUsuario = '', opciones = {}) {
-      const { createIfMissing = true } = opciones
+      const { crearNuevo = true } = opciones
 
       try {
         this.datosCargados = false
         this.usuarioActual.correoAutenticacion = correoUsuario
+        // Compruebo si el perfil del usuario ya existe en Firestore.
         const docRef = doc(db, 'usuarios', correoUsuario)
         const docSnap = await getDoc(docRef)
 
@@ -31,17 +41,19 @@ export const usarStoreAutenticacion = defineStore('auth', {
           return true
         }
 
-        if (!createIfMissing) {
+        // Si el perfil no existe y no se desea crear uno nuevo, se limpian los datos y se retorna false.
+        if (!crearNuevo) {
           this.usuarioActual.nombreVisible = ''
           this.usuarioActual.idsLigas = []
           this.perfilExiste = false
           return false
         }
 
+        // Si el perfil no existe y se desea crear uno nuevo, se inicializan los datos y se guarda en Firestore.
         this.usuarioActual.nombreVisible = nombreUsuario
         this.usuarioActual.idsLigas = []
         await setDoc(docRef, {
-          emailAuth: correoUsuario,
+          correoAutenticacion: correoUsuario,
           nombre: nombreUsuario,
           ligasIds: [],
         })
@@ -56,6 +68,9 @@ export const usarStoreAutenticacion = defineStore('auth', {
       }
     },
 
+    /**
+     * Limpia los datos de la sesión actual, restableciendo el estado del store a su configuración inicial.
+     */
     limpiarSesion() {
       this.datosCargados = false
       this.usuarioActual = {

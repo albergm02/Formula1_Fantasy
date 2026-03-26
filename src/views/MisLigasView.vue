@@ -18,9 +18,9 @@ import DataView from 'primevue/dataview'
 
 const ligasStore = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
-const router = useRouter()
-const toast = useToast()
-const confirm = useConfirm()
+const enrutador = useRouter()
+const notificacion = useToast()
+const confirmar = useConfirm()
 
 /* Estados */
 const nombreNuevaLiga = ref('')
@@ -33,8 +33,8 @@ const ligaSeleccionada = ref(null)
 const cargandoAccion = ref(false)
 
 /* Abre el menÃº de opciones de una liga seleccionada */
-const abrirOpcionesLiga = (league) => {
-  ligaSeleccionada.value = league
+const abrirOpcionesLiga = (liga) => {
+  ligaSeleccionada.value = liga
   dialogoOpcionesVisible.value = true
 }
 
@@ -51,22 +51,22 @@ const manejarCrearLiga = async () => {
 
   // Validaciones de longitud del nombre
   if (nombreLigaNormalizado.length < 3) {
-    toast.add({ severity: 'warn', summary: 'Nombre invÃ¡lido', detail: 'El nombre debe tener al menos 3 caracteres' })
+    notificacion.add({ severity: 'warn', summary: 'Nombre invÃ¡lido', detail: 'El nombre debe tener al menos 3 caracteres' })
     return
   }
 
   if (nombreLigaNormalizado.length > 15) {
-    toast.add({ severity: 'warn', summary: 'LÃ­mite alcanzado', detail: 'El nombre no puede exceder los 15 caracteres' })
+    notificacion.add({ severity: 'warn', summary: 'LÃ­mite alcanzado', detail: 'El nombre no puede exceder los 15 caracteres' })
     return
   }
 
-  const result = await ligasStore.crearLiga(nombreLigaNormalizado)
-  if (result.success) {
-    toast.add({ severity: 'success', summary: 'Â¡Liga creada!', detail: result.message })
+  const resultado = await ligasStore.crearLiga(nombreLigaNormalizado)
+  if (resultado.success) {
+    notificacion.add({ severity: 'success', summary: 'Â¡Liga creada!', detail: resultado.message })
     nombreNuevaLiga.value = ''
     dialogoCrearVisible.value = false
   } else {
-    toast.add({ severity: 'error', summary: 'Error', detail: result.message })
+    notificacion.add({ severity: 'error', summary: 'Error', detail: resultado.message })
   }
 }
 
@@ -78,25 +78,25 @@ const manejarUnirseLiga = async () => {
     return
   }
 
-  const result = await ligasStore.unirseALiga(codigoUnionNormalizado)
-  if (result.success) {
-    toast.add({ severity: 'success', summary: 'Â¡Bienvenido!', detail: result.message })
+  const resultado = await ligasStore.unirseALiga(codigoUnionNormalizado)
+  if (resultado.success) {
+    notificacion.add({ severity: 'success', summary: 'Â¡Bienvenido!', detail: resultado.message })
     codigoUnion.value = ''
     dialogoUnirseVisible.value = false
   } else {
-    toast.add({ severity: 'error', summary: 'Error al unirse', detail: result.message })
+    notificacion.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.message })
   }
 }
 
 /* Navega al dashboard de una liga concreta */
-const abrirLiga = (leagueId) => {
-  ligasStore.idLigaActiva = leagueId
-  router.push({ name: 'inicio', query: { liga: leagueId } })
+const abrirLiga = (idLiga) => {
+  ligasStore.idLigaActiva = idLiga
+  enrutador.push({ name: 'inicio', query: { liga: idLiga } })
 }
 
 /* Handler Abandonar liga: pide confirmaciÃ³n antes de salir */
 const manejarAbandonarLiga = () => {
-  confirm.require({
+  confirmar.require({
     icon: 'pi pi-exclamation-triangle',
     message: `Â¿EstÃ¡s seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
     header: 'CONFIRMACIÃ“N DE SALIDA',
@@ -105,14 +105,14 @@ const manejarAbandonarLiga = () => {
     acceptClass: '!bg-[#D4A843] !border-none !text-[#1A1A1F]',
     accept: async () => {
       cargandoAccion.value = true
-      const result = await ligasStore.abandonarLiga(ligaSeleccionada.value.id)
+      const resultado = await ligasStore.abandonarLiga(ligaSeleccionada.value.id)
       cargandoAccion.value = false
 
-      if (result.success) {
-        toast.add({ severity: 'success', summary: 'Coche fuera de pista', detail: result.message })
+      if (resultado.success) {
+        notificacion.add({ severity: 'success', summary: 'Coche fuera de pista', detail: resultado.message })
         dialogoOpcionesVisible.value = false
       } else {
-        toast.add({ severity: 'error', summary: 'Error al abandonar', detail: result.message })
+        notificacion.add({ severity: 'error', summary: 'Error al abandonar', detail: resultado.message })
       }
     },
   })
@@ -120,7 +120,7 @@ const manejarAbandonarLiga = () => {
 
 /* Handler Eliminar liga: acciÃ³n destructiva, borra la liga para todos */
 const manejarEliminarLiga = () => {
-  confirm.require({
+  confirmar.require({
     icon: 'pi pi-trash',
     message: 'Todos los participantes serÃ¡n expulsados y los datos serÃ¡n borrados permanentemente.',
     header: 'ELIMINAR LIGA',
@@ -129,14 +129,14 @@ const manejarEliminarLiga = () => {
     acceptClass: '!bg-[#E10600] !border-none !text-white',
     accept: async () => {
       cargandoAccion.value = true
-      const result = await ligasStore.eliminarLiga(ligaSeleccionada.value.id)
+      const resultado = await ligasStore.eliminarLiga(ligaSeleccionada.value.id)
       cargandoAccion.value = false
 
-      if (result.success) {
-        toast.add({ severity: 'success', summary: 'Campeonato finalizado', detail: result.message })
+      if (resultado.success) {
+        notificacion.add({ severity: 'success', summary: 'Campeonato finalizado', detail: resultado.message })
         dialogoOpcionesVisible.value = false
       } else {
-        toast.add({ severity: 'error', summary: 'Error al eliminar', detail: result.message })
+        notificacion.add({ severity: 'error', summary: 'Error al eliminar', detail: resultado.message })
       }
     },
   })

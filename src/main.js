@@ -14,21 +14,21 @@ import './assets/main.css'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './services/servicioFirebase'
 
-const app = createApp(App)
-const pinia = createPinia()
+const aplicacion = createApp(App)
+const gestorPinia = createPinia()
 
-app.use(PrimeVue, { theme: { preset: Aura } })
-app.use(pinia)
-app.use(router)
-app.use(ToastService)
-app.use(ConfirmationService)
+aplicacion.use(PrimeVue, { theme: { preset: Aura } })
+aplicacion.use(gestorPinia)
+aplicacion.use(router)
+aplicacion.use(ToastService)
+aplicacion.use(ConfirmationService)
 
-let appMounted = false
+let aplicacionMontada = false
 
 onAuthStateChanged(auth, () => {
-  if (!appMounted) {
-    app.mount('#app')
-    appMounted = true
+  if (!aplicacionMontada) {
+    aplicacion.mount('#app')
+    aplicacionMontada = true
   }
 })
 

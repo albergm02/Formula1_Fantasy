@@ -15,21 +15,21 @@ import ProgressSpinner from 'primevue/progressspinner'
 
 const escuderiaStore = usarStoreEscuderia()
 const ligasStore = usarStoreLigas()
-const route = useRoute()
-const router = useRouter()
+const ruta = useRoute()
+const enrutador = useRouter()
 
 /* Al montar, comprobamos si hay una liga activa. Si no la hay, redirigimos a /ligas */
 onMounted(async () => {
-  const leagueId = route.query.liga || ligasStore.idLigaActiva
+  const idLiga = ruta.query.liga || ligasStore.idLigaActiva
 
-  if (!leagueId) {
-    router.push('/ligas')
+  if (!idLiga) {
+    enrutador.push('/ligas')
     return
   }
 
   // Guardamos la liga activa y cargamos la escuderÃ­a del jugador
-  ligasStore.idLigaActiva = leagueId
-  await escuderiaStore.cargarEquipo(leagueId)
+  ligasStore.idLigaActiva = idLiga
+  await escuderiaStore.cargarEquipo(idLiga)
 })
 </script>
 

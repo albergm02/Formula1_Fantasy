@@ -32,16 +32,16 @@ import { usarStoreAutenticacion } from './stores/storeAutenticacion'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 
 const storeAutenticacion = usarStoreAutenticacion()
-const auth = getAuth()
-const router = useRouter()
+const autenticacion = getAuth()
+const enrutador = useRouter()
 
 onMounted(() => {
   /* Observa cambios de sesiÃ³n: solo gestiona el cierre de sesiÃ³n */
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
+  onAuthStateChanged(autenticacion, (usuario) => {
+    if (!usuario) {
       storeAutenticacion.limpiarSesion()
-      if (router.currentRoute.value.path !== '/' && router.currentRoute.value.path !== 'registro')
-        router.push('/')
+      if (enrutador.currentRoute.value.path !== '/' && enrutador.currentRoute.value.path !== 'registro')
+        enrutador.push('/')
     }
   })
 })

@@ -16,10 +16,10 @@ const props = defineProps({
 
 const emit = defineEmits(['fichar'])
 const mostrarInfo = ref(false)
-const confirm = useConfirm()
+const confirmar = useConfirm()
 
 const confirmarCompra = () => {
-  confirm.require({
+  confirmar.require({
     message: `Â¿EstÃ¡s seguro de que quieres pujar por ${props.potenciador.nombre} por ${props.potenciador.precio}M?`,
     header: 'Confirmar Puja',
     icon: 'pi pi-exclamation-triangle',

@@ -17,10 +17,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['fichar'])
-const confirm = useConfirm()
+const confirmar = useConfirm()
 
 const confirmarCompra = () => {
-  confirm.require({
+  confirmar.require({
     message: `¿Estás seguro de que quieres fichar a ${props.piloto.nombre} por ${props.piloto.precio}M?`,
     header: 'Confirmar Fichaje',
     icon: 'pi pi-exclamation-triangle',

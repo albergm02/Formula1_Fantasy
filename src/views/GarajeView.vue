@@ -16,14 +16,14 @@ import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 
 const escuderiaStore = usarStoreEscuderia()
-const toast = useToast()
-const confirm = useConfirm()
-const route = useRoute()
+const notificacion = useToast()
+const confirmar = useConfirm()
+const ruta = useRoute()
 
 /* Si no hay liga activa en el store, intentamos recuperarla de la query */
 onMounted(async () => {
-  if (!escuderiaStore.idLigaActiva && route.query.liga) {
-    await escuderiaStore.cargarEquipo(route.query.liga)
+  if (!escuderiaStore.idLigaActiva && ruta.query.liga) {
+    await escuderiaStore.cargarEquipo(ruta.query.liga)
   }
 })
 
@@ -31,7 +31,7 @@ onMounted(async () => {
 const confirmarVentaCoche = (coche) => {
   const valorReventa = calcularValorReventa(coche.precio)
 
-  confirm.require({
+  confirmar.require({
     icon: 'pi pi-exclamation-triangle',
     message: `¿Estás seguro de que quieres vender el chasis ${coche.nombre} por ${valorReventa}M?`,
     header: 'Confirmar Venta',
@@ -40,9 +40,9 @@ const confirmarVentaCoche = (coche) => {
     accept: async () => {
       const resultado = await escuderiaStore.venderElemento(coche)
       if (resultado.success) {
-        toast.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M` })
+        notificacion.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M` })
       } else {
-        toast.add({ severity: 'warn', summary: 'Venta denegada', detail: resultado.message })
+        notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: resultado.message })
       }
     },
   })
@@ -52,7 +52,7 @@ const confirmarVentaCoche = (coche) => {
 const confirmarVentaPiloto = (piloto) => {
   const valorReventa = calcularValorReventa(piloto.precio)
 
-  confirm.require({
+  confirmar.require({
     icon: 'pi pi-exclamation-triangle',
     message: `¿Estás seguro de que quieres rescindir el contrato de ${piloto.nombre} por ${valorReventa}M?`,
     header: 'Confirmar Despido',
@@ -62,9 +62,9 @@ const confirmarVentaPiloto = (piloto) => {
     accept: async () => {
       const resultado = await escuderiaStore.venderElemento(piloto)
       if (resultado.success) {
-        toast.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M` })
+        notificacion.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M` })
       } else {
-        toast.add({ severity: 'warn', summary: 'Despido denegado', detail: resultado.message })
+        notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: resultado.message })
       }
     },
   })
@@ -74,9 +74,9 @@ const confirmarVentaPiloto = (piloto) => {
 const alternarInstalacionPotenciador = async (idInstancia) => {
   const resultado = await escuderiaStore.alternarPotenciador(idInstancia)
   if (resultado.success) {
-    toast.add({ severity: 'success', summary: 'Acción completada', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: 'Acción completada', detail: resultado.message })
   } else {
-    toast.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
   }
 }
 </script>

@@ -20,29 +20,29 @@ import { z } from 'zod'
 import { esquemaNombreUsuario } from '@/utils/validacionesAutenticacion'
 
 /* Esquema de validaciÃ³n con Zod */
-const validationSchema = zodResolver(
+const esquemaValidacion = zodResolver(
   z.object({
     username: esquemaNombreUsuario,
   })
 )
 
-const router = useRouter()
+const enrutador = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 
 /* Estados */
-const isLoading = ref(false)
-const authError = ref('')
-const initialFormValues = ref({
+const cargando = ref(false)
+const errorAutenticacion = ref('')
+const valoresInicialesFormulario = ref({
   username: '',
 })
 
 /* Handler Completar perfil de Google (elegir nombre de piloto) */
-const handleCompleteGoogleProfile = async ({ valid, values }) => {
+const handlerCompletarPerfilGoogle = async ({ valid, values }) => {
   if (!valid) return
 
-  const trimmedUsername = values.username.trim()
-  isLoading.value = true
-  authError.value = ''
+  const usuarioNormalizado = values.username.trim()
+  cargando.value = true
+  errorAutenticacion.value = ''
 
   try {
     // Verificamos que exista una sesiÃ³n de Google activa antes de continuar
@@ -51,21 +51,21 @@ const handleCompleteGoogleProfile = async ({ valid, values }) => {
     }
 
     // Creamos el perfil del usuario en Firestore con el nombre elegido
-    await storeAutenticacion.inicializarDatosUsuario(storeAutenticacion.usuarioActual.correoAutenticacion, trimmedUsername)
-    router.push('/ligas')
+    await storeAutenticacion.inicializarDatosUsuario(storeAutenticacion.usuarioActual.correoAutenticacion, usuarioNormalizado)
+    enrutador.push('/ligas')
   } catch (error) {
-    authError.value = 'Error al completar el registro con Google: ' + error.message
+    errorAutenticacion.value = 'Error al completar el registro con Google: ' + error.message
   } finally {
-    isLoading.value = false
+    cargando.value = false
   }
 }
 
 /* Handler Cancelar registro con Google */
-const cancelGoogleSignup = async () => {
-  if (isLoading.value) return
+const cancelarRegistroGoogle = async () => {
+  if (cargando.value) return
 
   await cerrarSesion()
-  router.push('/')
+  enrutador.push('/')
 }
 </script>
 
@@ -96,8 +96,8 @@ const cancelGoogleSignup = async () => {
 
       <!-- Contenido del formulario -->
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
-          :resolver="validationSchema" @submit="handleCompleteGoogleProfile">
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
+          :resolver="esquemaValidacion" @submit="handlerCompletarPerfilGoogle">
 
           <p class="text-sm text-[#F0ECEC] text-center">
             Es tu primera vez entrando con Google. Elige tu nombre de piloto para continuar.
@@ -114,17 +114,17 @@ const cancelGoogleSignup = async () => {
             </Message>
           </div>
 
-          <Message v-if="authError" severity="error" :closable="false" class="mt-2 text-sm">
-            {{ authError }}
+          <Message v-if="errorAutenticacion" severity="error" :closable="false" class="mt-2 text-sm">
+            {{ errorAutenticacion }}
           </Message>
 
           <div class="flex flex-col gap-3 mt-4">
-            <Button type="submit" label="Continuar" :loading="isLoading"
+            <Button type="submit" label="Continuar" :loading="cargando"
               class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] rounded-lg shadow-lg transition-colors !border-none hover:!bg-[#C00500]" />
 
-            <Button type="button" label="Cancelar" :disabled="isLoading"
+            <Button type="button" label="Cancelar" :disabled="cargando"
               class="w-full py-3 !bg-transparent font-black uppercase !text-[#D4A843] rounded-lg shadow-lg transition-colors !border border-[#D4A843] hover:!bg-[#D4A843]/10"
-              @click="cancelGoogleSignup" />
+              @click="cancelarRegistroGoogle" />
           </div>
         </Form>
       </template>

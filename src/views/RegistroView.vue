@@ -24,7 +24,7 @@ import { z } from 'zod'
 import { esquemaNombreUsuario } from '@/utils/validacionesAutenticacion'
 
 /* Esquema de validaciÃ³n con Zod */
-const validationSchema = zodResolver(
+const esquemaValidacion = zodResolver(
   z.object({
     username: esquemaNombreUsuario,
     email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo invÃ¡lido'),
@@ -36,13 +36,13 @@ const validationSchema = zodResolver(
   })
 )
 
-const router = useRouter()
+const enrutador = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 
 /* Estados del formulario de registro */
-const isLoading = ref(false)
-const authError = ref('')
-const initialFormValues = ref({
+const cargando = ref(false)
+const errorAutenticacion = ref('')
+const valoresInicialesFormulario = ref({
   username: '',
   email: '',
   password: '',
@@ -51,21 +51,21 @@ const initialFormValues = ref({
 
 
 /* Handler Registro utilizando email / contraseÃ±a */
-const handleRegister = async ({ valid, values }) => {
+const handlerRegistro = async ({ valid, values }) => {
   if (!valid) return
-  const trimmedEmail = values.email.trim()
-  const trimmedUsername = values.username.trim()
+  const correoNormalizado = values.email.trim()
+  const usuarioNormalizado = values.username.trim()
 
-  isLoading.value = true
-  authError.value = ''
+  cargando.value = true
+  errorAutenticacion.value = ''
   try {
-    const userCredential = await registrarse(trimmedEmail, values.password)
-    await storeAutenticacion.inicializarDatosUsuario(userCredential.user.email, trimmedUsername)
-    router.push('/ligas')
+    const credencialUsuario = await registrarse(correoNormalizado, values.password)
+    await storeAutenticacion.inicializarDatosUsuario(credencialUsuario.user.email, usuarioNormalizado)
+    enrutador.push('/ligas')
   } catch (error) {
-    authError.value = obtenerMensajeErrorRegistro(error)
+    errorAutenticacion.value = obtenerMensajeErrorRegistro(error)
   } finally {
-    isLoading.value = false
+    cargando.value = false
   }
 }
 </script>
@@ -97,8 +97,8 @@ const handleRegister = async ({ valid, values }) => {
 
       <!-- Contenido del formulario -->
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="initialFormValues"
-          :resolver="validationSchema" @submit="handleRegister">
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
+          :resolver="esquemaValidacion" @submit="handlerRegistro">
 
           <!-- Campo: Nombre de Piloto -->
           <div class="flex flex-col gap-1">
@@ -146,14 +146,14 @@ const handleRegister = async ({ valid, values }) => {
           </div>
 
           <!-- Mensaje de error de autenticaciÃ³n -->
-          <Message v-if="authError" severity="error" :closable="false" class="mt-2 text-sm">
-            {{ authError }}
+          <Message v-if="errorAutenticacion" severity="error" :closable="false" class="mt-2 text-sm">
+            {{ errorAutenticacion }}
           </Message>
 
           <!-- Botones de acciÃ³n -->
           <div class="flex flex-col gap-3 mt-4">
 
-            <Button type="submit" label="CREAR EQUIPO" :loading="isLoading"
+            <Button type="submit" label="CREAR EQUIPO" :loading="cargando"
               class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] transition-colors shadow-lg rounded-lg !border-none hover:!bg-[#C00500]" />
 
             <!-- Enlace a login -->

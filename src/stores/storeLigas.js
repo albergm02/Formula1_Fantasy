@@ -72,8 +72,8 @@ export const usarStoreLigas = defineStore('ligas', {
         }
         await addDoc(collection(db, 'participaciones'), participacion)
 
-        const userRef = doc(db, 'usuarios', storeAutenticacion.usuarioActual.correoAutenticacion)
-        await updateDoc(userRef, {
+        const referenciaUsuario = doc(db, 'usuarios', storeAutenticacion.usuarioActual.correoAutenticacion)
+        await updateDoc(referenciaUsuario, {
           ligasIds: arrayUnion(idLiga),
         })
         storeAutenticacion.usuarioActual.idsLigas.push(idLiga)
@@ -151,8 +151,8 @@ export const usarStoreLigas = defineStore('ligas', {
           participantes: documentoLiga.data().participantes + 1,
         })
 
-        const userRef = doc(db, 'usuarios', storeAutenticacion.usuarioActual.correoAutenticacion)
-        await updateDoc(userRef, {
+        const referenciaUsuario = doc(db, 'usuarios', storeAutenticacion.usuarioActual.correoAutenticacion)
+        await updateDoc(referenciaUsuario, {
           ligasIds: arrayUnion(idLiga),
         })
 

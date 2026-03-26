@@ -16,73 +16,73 @@ import Cabecera from '@/components/Cabecera.vue'
 const ligasStore = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
 const escuderiaStore = usarStoreEscuderia()
-const route = useRoute()
+const ruta = useRoute()
 
 /* Estados */
 const ranking = ref([])
-const isLoading = ref(true)
+const cargando = ref(true)
 
 /* Carga la clasificaciÃ³n de la liga activa desde Firestore */
-const loadRanking = async () => {
-  isLoading.value = true
+const cargarClasificacion = async () => {
+  cargando.value = true
 
   try {
-    const leagueId = route.query.liga || ligasStore.idLigaActiva
-    if (!leagueId) {
-      isLoading.value = false
+    const idLiga = ruta.query.liga || ligasStore.idLigaActiva
+    if (!idLiga) {
+      cargando.value = false
       return
     }
 
-    ligasStore.idLigaActiva = leagueId
+    ligasStore.idLigaActiva = idLiga
 
     // Consultamos todas las participaciones de esta liga
-    const participantsRef = collection(db, 'participaciones')
-    const leagueQuery = query(participantsRef, where('id_liga', '==', leagueId))
-    const participantsSnapshot = await getDocs(leagueQuery)
-    const participantRows = []
+    const referenciaParticipaciones = collection(db, 'participaciones')
+    const consultaLiga = query(referenciaParticipaciones, where('id_liga', '==', idLiga))
+    const instantaneaParticipaciones = await getDocs(consultaLiga)
+    const filasParticipantes = []
 
     // Para cada participante, buscamos su nombre de usuario en la colecciÃ³n de usuarios
-    for (const participantDocument of participantsSnapshot.docs) {
-      const participantData = participantDocument.data()
-      let playerName = 'Desconocido'
+    for (const documentoParticipante of instantaneaParticipaciones.docs) {
+      const datosParticipante = documentoParticipante.data()
+      let nombreJugador = 'Desconocido'
 
-      if (participantData.email_usuario) {
-        const userRef = doc(db, 'usuarios', participantData.email_usuario)
-        const userSnapshot = await getDoc(userRef)
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.data()
-          playerName = userData.username || userData.nombre || 'Desconocido'
+      if (datosParticipante.email_usuario) {
+        const referenciaUsuario = doc(db, 'usuarios', datosParticipante.email_usuario)
+        const instantaneaUsuario = await getDoc(referenciaUsuario)
+        if (instantaneaUsuario.exists()) {
+          const datosUsuario = instantaneaUsuario.data()
+          nombreJugador = datosUsuario.username || datosUsuario.nombre || 'Desconocido'
         }
       }
 
-      participantRows.push({
-        id: participantDocument.id,
-        email: participantData.email_usuario,
-        name: playerName,
-        puntos: participantData.puntos || 0,
-        presupuesto: participantData.presupuesto || 0,
+      filasParticipantes.push({
+        id: documentoParticipante.id,
+        email: datosParticipante.email_usuario,
+        name: nombreJugador,
+        puntos: datosParticipante.puntos || 0,
+        presupuesto: datosParticipante.presupuesto || 0,
       })
     }
 
     // Ordenamos: primero por puntos (desc), luego por presupuesto (desc) como desempate
-    ranking.value = participantRows.sort(
-      (firstPlayer, secondPlayer) =>
-        secondPlayer.puntos - firstPlayer.puntos || secondPlayer.presupuesto - firstPlayer.presupuesto,
+    ranking.value = filasParticipantes.sort(
+      (primerJugador, segundoJugador) =>
+        segundoJugador.puntos - primerJugador.puntos || segundoJugador.presupuesto - primerJugador.presupuesto,
     )
   } catch (error) {
     // Si falla la carga, el ranking queda vacÃ­o
   } finally {
-    isLoading.value = false
+    cargando.value = false
   }
 }
 
 /* Si no hay liga activa, la recuperamos de la query. Luego cargamos el ranking */
 onMounted(async () => {
-  if (!escuderiaStore.idLigaActiva && route.query.liga) {
-    await escuderiaStore.cargarEquipo(route.query.liga)
+  if (!escuderiaStore.idLigaActiva && ruta.query.liga) {
+    await escuderiaStore.cargarEquipo(ruta.query.liga)
   }
 
-  await loadRanking()
+  await cargarClasificacion()
 })
 </script>
 
@@ -104,7 +104,7 @@ onMounted(async () => {
       </div>
 
       <!-- Spinner de carga -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-10 gap-3">
+      <div v-if="cargando" class="flex flex-col items-center justify-center py-10 gap-3">
         <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
         <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificaciÃ³n...
         </p>

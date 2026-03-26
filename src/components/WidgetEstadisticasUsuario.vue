@@ -8,11 +8,11 @@ const ligasStore = usarStoreLigas()
 /**
  * Calcula el nombre de la liga activa. 
  */
-const activeLeagueName = computed(() => {
-  const activeLeague = ligasStore.detallesLigas.find(
-    (league) => league.id === ligasStore.idLigaActiva,
+const nombreLigaActiva = computed(() => {
+  const ligaActiva = ligasStore.detallesLigas.find(
+    (liga) => liga.id === ligasStore.idLigaActiva,
   )
-  return activeLeague ? activeLeague.nombre : 'Mi Campeonato'
+  return ligaActiva ? ligaActiva.nombre : 'Mi Campeonato'
 })
 </script>
 
@@ -22,7 +22,7 @@ const activeLeagueName = computed(() => {
     <div class="flex flex-col">
       <span class="mb-1 text-[#D4A843] text-[10px] font-black uppercase">Bienvenido al Paddock</span>
       <h1 class="w-32 text-xl font-black text-white italic uppercase">
-        {{ activeLeagueName }}
+        {{ nombreLigaActiva }}
       </h1>
     </div>
     <!-- EstadÃ­sticas del usuario -->
