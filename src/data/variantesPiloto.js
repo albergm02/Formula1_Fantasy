@@ -1,5 +1,6 @@
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 import { pilotosBase } from '@/data/bases/pilotosBase'
+import { calcularPuntuacionBase } from '@/utils/puntuacion'
 
 export const variantesPiloto = [
   {
@@ -26,17 +27,24 @@ export const variantesPiloto = [
     color: '#a78bfa',
     icono: 'pi-cloud',
   },
+  {
+    variante: 'base',
+    perfil: 'base',
+    incrementoPrecio: 0,
+    nombreHabilidad: 'Piloto Base',
+    color: '#a1a1aa',
+    icono: 'pi-user',
+  },
 ]
 
 /**
  * Crea una carta de piloto a partir del catalogo base y una variante de puntuacion.
- * @param {} pilotoBase
- * @param {} variante
- * @returns
+ * La puntuacion base se calcula con los atributos del piloto y los pesos de la variante.
  */
 const crearCartaPiloto = (pilotoBase, variante) => {
   const perfil = perfilesPuntuacion[variante.perfil]
   const reglas = perfil.reglasUsuario
+  const ptsPonderados = calcularPuntuacionBase(pilotoBase.atributos, perfil.pesos)
 
   return {
     id: `${pilotoBase.idBase}_${variante.variante}`,
@@ -51,10 +59,10 @@ const crearCartaPiloto = (pilotoBase, variante) => {
     iconoVariante: variante.icono,
     nombreVariante: variante.nombreHabilidad,
     perfilPuntuacion: variante.perfil,
+    pesos: perfil.pesos,
+    atributos: pilotoBase.atributos,
+    puntuacionBase: ptsPonderados,
     reglasUsuario: reglas,
-    habilidad_1: { nombre: perfil.nombre, descripcion: reglas[0] },
-    habilidad_2: { nombre: 'Regla Extra', descripcion: reglas[1] },
-    penalizacion: { nombre: 'Penalizacion', descripcion: reglas[2] },
   }
 }
 

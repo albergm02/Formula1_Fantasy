@@ -1,5 +1,5 @@
 ﻿<script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import Dialog from 'primevue/dialog'
 
@@ -18,6 +18,17 @@ const props = defineProps({
 
 const emit = defineEmits(['fichar'])
 const confirmar = useConfirm()
+
+const barrasAtributos = computed(() => {
+  const a = props.piloto.atributos
+  const p = props.piloto.pesos
+  if (!a || !p) return []
+  return [
+    { nombre: 'Ritmo', valor: a.ritmo, peso: p.ritmo, color: '#38bdf8' },
+    { nombre: 'Consistencia', valor: a.consistencia, peso: p.consistencia, color: '#22c55e' },
+    { nombre: 'Adaptabilidad', valor: a.adaptabilidad, peso: p.adaptabilidad, color: '#a78bfa' },
+  ]
+})
 
 const confirmarCompra = () => {
   confirmar.require({
@@ -106,9 +117,36 @@ const confirmarCompra = () => {
     <Dialog v-model:visible="mostrarDetalles" :header="props.piloto.nombre" modal
       :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white hover:text-zinc-200' } }">
       <div class="space-y-3">
+
+        <!-- Puntuacion ponderada -->
+        <div class="px-3 py-2.5 bg-zinc-800 border border-zinc-700 flex items-center justify-between">
+          <p class="text-sm font-black text-white uppercase">Puntuacion Base</p>
+          <span class="text-lg font-black" :style="{ color: props.piloto.colorVariante }">
+            {{ props.piloto.puntuacionBase }}
+          </span>
+        </div>
+
+        <!-- Barras de atributos -->
+        <div class="px-3 py-2.5 bg-zinc-800 border border-zinc-700 space-y-2">
+          <p class="text-sm font-black text-sky-400 uppercase leading-tight mb-2">Atributos</p>
+          <div v-for="barra in barrasAtributos" :key="barra.nombre" class="space-y-0.5">
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] font-bold text-zinc-300 uppercase">{{ barra.nombre }}</span>
+              <span class="text-[10px] font-black text-white">{{ barra.valor }} <span class="text-zinc-500">× {{
+                  barra.peso }}</span></span>
+            </div>
+            <div class="w-full h-1.5 bg-zinc-700 overflow-hidden">
+              <div class="h-full transition-all duration-500"
+                :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: 0.4 + barra.peso }"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reglas de la variante -->
         <div v-if="props.piloto.reglasUsuario?.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-sky-400 uppercase leading-tight">
-            Reglas de puntuacion
+          <p class="text-sm font-black uppercase leading-tight" :style="{ color: props.piloto.colorVariante }">
+            <i class="pi mr-1" :class="props.piloto.iconoVariante"></i>
+            {{ props.piloto.nombreVariante }}
           </p>
           <ul class="mt-2 space-y-1.5">
             <li v-for="(regla, indice) in props.piloto.reglasUsuario" :key="`${props.piloto.id}-regla-${indice}`"
@@ -118,40 +156,6 @@ const confirmarCompra = () => {
           </ul>
         </div>
 
-        <!-- Habilidad 1 -->
-        <div v-if="props.piloto.habilidad_1" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
-            {{ props.piloto.habilidad_1.nombre }}
-            <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
-          </p>
-          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
-            {{ props.piloto.habilidad_1.descripcion }}
-          </p>
-        </div>
-
-        <!-- Habilidad 2 (solo Tier 2) -->
-        <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2"
-          class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-[#D4A843] uppercase leading-tight">
-            {{ props.piloto.habilidad_2.nombre }}
-            <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
-          </p>
-          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
-            {{ props.piloto.habilidad_2.descripcion }}
-          </p>
-        </div>
-
-        <!-- Penalizacion (solo Tier 2) -->
-        <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion"
-          class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-red-500 uppercase leading-tight">
-            {{ props.piloto.penalizacion.nombre }}
-            <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>
-          </p>
-          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
-            {{ props.piloto.penalizacion.descripcion }}
-          </p>
-        </div>
       </div>
     </Dialog>
   </div>

@@ -1,41 +1,54 @@
+/**
+ * Perfiles de puntuacion con sistema de atributos ponderados.
+ * Cada variante aplica diferentes pesos a los 3 atributos del piloto:
+ *   ritmo (0-100), consistencia (0-100), adaptabilidad (0-100)
+ *
+ * Formula: puntuacionBase = (pesoRitmo × ritmo) + (pesoConsistencia × consistencia) + (pesoAdaptabilidad × adaptabilidad)
+ * Rango resultante: 0-100 → se escala a puntos de fantasy
+ */
 export const perfilesPuntuacion = {
   clasificador: {
     clave: 'clasificador',
     nombre: 'Clasificador',
-    descripcion: 'Puntua por rendimiento en clasificacion.',
+    descripcion: 'Prioriza la velocidad pura en clasificacion.',
+    pesos: { ritmo: 0.6, consistencia: 0.3, adaptabilidad: 0.1 },
     reglasUsuario: [
-      '+10 si clasifica en Top 10.',
-      '+8 extra si entra en Q3.',
-      '-6 si es eliminado en Q1.',
+      'Ritmo x0.6 — penaliza pilotos lentos, premia la vuelta rapida.',
+      'Consistencia x0.3 — un piloto regular suma puntos estables.',
+      'Adaptabilidad x0.1 — poco peso, no importa el clima o la estrategia.',
     ],
-    puntuacion: { top10Qualy: 10, q3: 8, eliminadoQ1: -6 },
   },
   carrera: {
     clave: 'carrera',
     nombre: 'Carrera',
-    descripcion: 'Puntua por resultado final y adelantamientos.',
+    descripcion: 'Prioriza la regularidad y los resultados en carrera.',
+    pesos: { ritmo: 0.2, consistencia: 0.6, adaptabilidad: 0.2 },
     reglasUsuario: [
-      '+3 por cada posicion ganada en carrera.',
-      '+10 si termina en Top 5.',
-      '-6 si abandona (DNF).',
+      'Consistencia x0.6 — premio fuerte por terminar bien cada carrera.',
+      'Ritmo x0.2 — la velocidad ayuda, pero no define.',
+      'Adaptabilidad x0.2 — bonus moderado en condiciones cambiantes.',
     ],
-    puntuacion: { posicionGanadaCarrera: 3, top5Final: 10, dnf: -6 },
   },
   lluvia: {
     clave: 'lluvia',
     nombre: 'Lluvia',
-    descripcion: 'Apuesta por la lluvia. Alto riesgo, alta recompensa.',
+    descripcion: 'Apuesta por condiciones extremas y caos en pista.',
+    pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.6 },
     reglasUsuario: [
-      '+3 por cada posicion ganada en carrera.',
-      'Si llueve (>= 5 vueltas mojadas), todos los puntos x1.5.',
-      'Si NO llueve, todos los puntos x0.75.',
+      'Adaptabilidad x0.6 — los pilotos que brillan en lluvia y caos dominan.',
+      'Ritmo x0.2 — la velocidad base aporta algo.',
+      'Consistencia x0.2 — no es lo principal cuando todo cambia.',
     ],
-    puntuacion: {
-      posicionGanadaCarrera: 3,
-      top5Final: 10,
-      dnf: -6,
-      multiplicadorLluvia: 1.5,
-      multiplicadorSeco: 0.75,
-    },
+  },
+  base: {
+    clave: 'base',
+    nombre: 'Base',
+    descripcion: 'Perfil equilibrado sin priorizar ningun atributo.',
+    pesos: { ritmo: 0.3, consistencia: 0.3, adaptabilidad: 0.3 },
+    reglasUsuario: [
+      'Ritmo x0.3 — contribucion equilibrada de velocidad.',
+      'Consistencia x0.3 — contribucion equilibrada de regularidad.',
+      'Adaptabilidad x0.3 — contribucion equilibrada de versatilidad.',
+    ],
   },
 }

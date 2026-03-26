@@ -6,6 +6,7 @@ import { usarStoreAutenticacion } from './storeAutenticacion'
 
 /* Utilidades para manejar el garaje del equipo */
 import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
+import { calcularSinergias, aplicarSinergia } from '@/utils/sinergia'
 
 export const usarStoreEscuderia = defineStore('escuderia', {
   state: () => ({
@@ -16,6 +17,23 @@ export const usarStoreEscuderia = defineStore('escuderia', {
     garaje: crearGarajeVacio(),
     cargandoEquipo: false,
   }),
+
+  getters: {
+    /**
+     * Calcula las sinergias activas del garaje actual.
+     * @returns {{ sinergias: Array, multiplicadorTotal: number }}
+     */
+    sinergias: (state) => calcularSinergias(state.garaje),
+
+    /**
+     * Calcula los puntos totales del garaje aplicando sinergias.
+     * @returns {number}
+     */
+    puntosConSinergia() {
+      const base = this.garaje.pilotos.reduce((acc, p) => acc + (p.puntuacionBase || 0), 0)
+      return aplicarSinergia(base, this.sinergias.multiplicadorTotal)
+    },
+  },
 
   actions: {
     /**
@@ -70,7 +88,9 @@ export const usarStoreEscuderia = defineStore('escuderia', {
      */
     async guardarEstadoEquipo() {
       if (!this.idParticipanteActivo) {
-        console.warn('Error en guardarEstadoEquipo (storeEquipo.js): falta el ID del participante activo, no se puede guardar el estado del equipo')
+        console.warn(
+          'Error en guardarEstadoEquipo (storeEquipo.js): falta el ID del participante activo, no se puede guardar el estado del equipo',
+        )
         return
       }
 
@@ -173,7 +193,9 @@ export const usarStoreEscuderia = defineStore('escuderia', {
      * @returns {Promise<Object>} - Una promesa que se resuelve con el resultado de la operación.
      */
     async alternarPotenciador(idInstancia) {
-      const potenciador = this.garaje.potenciadores.find((elemento) => elemento.instancia_id === idInstancia)
+      const potenciador = this.garaje.potenciadores.find(
+        (elemento) => elemento.instancia_id === idInstancia,
+      )
 
       if (!potenciador) {
         return { success: false, message: 'Potenciador no encontrado para equipar.' }
@@ -203,6 +225,3 @@ export const usarStoreEscuderia = defineStore('escuderia', {
     },
   },
 })
-
-
-
