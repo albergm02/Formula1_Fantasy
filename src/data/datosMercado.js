@@ -1,350 +1,283 @@
+export const perfilesPuntuacion = {
+  clasificador: {
+    clave: 'clasificador',
+    nombre: 'Clasificador',
+    descripcion: 'Puntua mejor en clasificacion que en carrera.',
+    reglasUsuario: [
+      '+12 si clasifica en Top 10.',
+      '+6 extra si entra en Q3.',
+      '-4 si cae en Q1.'
+    ],
+    puntuacion: {
+      top10Qualy: 12,
+      q3: 6,
+      eliminadoQ1: -4
+    }
+  },
+  carrera: {
+    clave: 'carrera',
+    nombre: 'Carrera',
+    descripcion: 'Puntua por resultado final y remontada.',
+    reglasUsuario: [
+      '+2 por cada posicion ganada en carrera.',
+      '+10 si termina en Top 5.',
+      '-8 si abandona (DNF).'
+    ],
+    puntuacion: {
+      posicionGanadaCarrera: 2,
+      top5Final: 10,
+      dnf: -8
+    }
+  },
+  lluvia: {
+    clave: 'lluvia',
+    nombre: 'Lluvia',
+    descripcion: 'Usa reglas de Carrera y activa multiplicador con lluvia.',
+    reglasUsuario: [
+      'Usa las mismas reglas de la variante Carrera.',
+      'Si hay lluvia (>= 5 vueltas mojadas), aplica x1.5 al total.',
+      'Si no hay lluvia, se queda en x1.0.'
+    ],
+    puntuacion: {
+      posicionGanadaCarrera: 2,
+      top5Final: 10,
+      dnf: -8,
+      multiplicadorLluvia: 1.5
+    }
+  }
+};
+
 // prettier-ignore
-export const mercadoPilotos = [
-  // --- MCLAREN ---
-  { 
-    id: 'norris_t1', numero: 1, nombre: 'Lando Norris', equipo: 'McLaren', tier: 1, precio: 26.0, 
-    imagen: '/Pilotos/norris.webp',
-    habilidad_1: { nombre: 'Ritmo Papaya', puntos: 10, descripcion: 'Logra el récord absoluto del Sector 2 (Púrpura) en al menos 5 vueltas durante la carrera.' }
-  },
-  { 
-    id: 'norris_t2', numero: 1, nombre: 'Lando Norris', equipo: 'McLaren', tier: 2, precio: 36.0, 
-    imagen: '/Pilotos/norris.webp',
-    habilidad_1: { nombre: 'Ritmo Papaya', puntos: 10, descripcion: 'Logra el récord absoluto del Sector 2 (Púrpura) en al menos 5 vueltas durante la carrera.' },
-    habilidad_2: { nombre: 'Last Lap Lando', puntos: 6, descripcion: 'Registra su vuelta personal más rápida dentro de las últimas 5 vueltas del Gran Premio.' },
-    penalizacion: { nombre: 'Foco Perdido', puntos: -6, descripcion: 'Termina la primera vuelta en una posición inferior a la de su salida.' } 
-  },
-  { 
-    id: 'piastri_t1', numero: 81, nombre: 'Oscar Piastri', equipo: 'McLaren', tier: 1, precio: 24.0, 
-    imagen: '/Pilotos/piastri.webp',
-    habilidad_1: { nombre: 'Sangre Fría', puntos: 8, descripcion: 'Mantiene o mejora su posición inicial al finalizar la exigente primera vuelta.' } 
-  },
-  { 
-    id: 'piastri_t2', numero: 81, nombre: 'Oscar Piastri', equipo: 'McLaren', tier: 2, precio: 34.0, 
-    imagen: '/Pilotos/piastri.webp',
-    habilidad_1: { nombre: 'Sangre Fría', puntos: 8, descripcion: 'Mantiene o mejora su posición inicial al finalizar la exigente primera vuelta.' },
-    habilidad_2: { nombre: 'Chico de Hielo', puntos: 8, descripcion: 'Cruza la línea de meta en una posición superior a la que ocupaba en la parrilla de salida.' },
-    penalizacion: { nombre: 'Desgaste Prematuro', puntos: -6, descripcion: 'Es adelantado en pista por su compañero de equipo después de realizar su primera parada en boxes.' }
-  },
+const pilotosBase = [
+  { idBase: 'norris', numero: 1, nombre: 'Lando Norris', equipo: 'McLaren', precioBase: 26.0, imagen: '/Pilotos/norris.webp' },
+  { idBase: 'piastri', numero: 81, nombre: 'Oscar Piastri', equipo: 'McLaren', precioBase: 24.0, imagen: '/Pilotos/piastri.webp' },
+  { idBase: 'verstappen', numero: 3, nombre: 'Max Verstappen', equipo: 'Red Bull', precioBase: 25.0, imagen: '/Pilotos/verstappen.webp' },
+  { idBase: 'hadjar', numero: 6, nombre: 'Isack Hadjar', equipo: 'Red Bull', precioBase: 15.0, imagen: '/Pilotos/hadjar.webp' },
+  { idBase: 'leclerc', numero: 16, nombre: 'Charles Leclerc', equipo: 'Ferrari', precioBase: 24.0, imagen: '/Pilotos/leclerc.webp' },
+  { idBase: 'hamilton', numero: 44, nombre: 'Lewis Hamilton', equipo: 'Ferrari', precioBase: 23.0, imagen: '/Pilotos/hamilton.webp' },
+  { idBase: 'russell', numero: 63, nombre: 'George Russell', equipo: 'Mercedes', precioBase: 22.0, imagen: '/Pilotos/russell.webp' },
+  { idBase: 'antonelli', numero: 12, nombre: 'Kimi Antonelli', equipo: 'Mercedes', precioBase: 20.0, imagen: '/Pilotos/antonelli.webp' },
+  { idBase: 'alonso', numero: 14, nombre: 'Fernando Alonso', equipo: 'Aston Martin', precioBase: 19.0, imagen: '/Pilotos/alonso.webp' },
+  { idBase: 'stroll', numero: 18, nombre: 'Lance Stroll', equipo: 'Aston Martin', precioBase: 13.0, imagen: '/Pilotos/stroll.webp' },
+  { idBase: 'sainz', numero: 55, nombre: 'Carlos Sainz', equipo: 'Williams', precioBase: 17.0, imagen: '/Pilotos/sainz.webp' },
+  { idBase: 'albon', numero: 23, nombre: 'Alexander Albon', equipo: 'Williams', precioBase: 15.0, imagen: '/Pilotos/albon.webp' },
+  { idBase: 'ocon', numero: 31, nombre: 'Esteban Ocon', equipo: 'Haas', precioBase: 14.0, imagen: '/Pilotos/ocon.webp' },
+  { idBase: 'bearman', numero: 87, nombre: 'Oliver Bearman', equipo: 'Haas', precioBase: 13.0, imagen: '/Pilotos/bearman.webp' },
+  { idBase: 'hulkenberg', numero: 27, nombre: 'Nico Hulkenberg', equipo: 'Audi', precioBase: 13.0, imagen: '/Pilotos/hulkenberg.webp' },
+  { idBase: 'bortoleto', numero: 5, nombre: 'Gabriel Bortoleto', equipo: 'Audi', precioBase: 12.0, imagen: '/Pilotos/bortoleto.webp' },
+  { idBase: 'gasly', numero: 10, nombre: 'Pierre Gasly', equipo: 'Alpine', precioBase: 13.0, imagen: '/Pilotos/gasly.webp' },
+  { idBase: 'colapinto', numero: 43, nombre: 'Franco Colapinto', equipo: 'Alpine', precioBase: 14.0, imagen: '/Pilotos/colapinto.webp' },
+  { idBase: 'lawson', numero: 30, nombre: 'Liam Lawson', equipo: 'Racing Bulls', precioBase: 12.0, imagen: '/Pilotos/lawson.webp' },
+  { idBase: 'lindblad', numero: 41, nombre: 'Arvid Lindblad', equipo: 'Racing Bulls', precioBase: 11.0, imagen: '/Pilotos/lindblad.webp' },
+  { idBase: 'perez', numero: 11, nombre: 'Sergio Perez', equipo: 'Cadillac', precioBase: 11.0, imagen: '/Pilotos/perez.webp' },
+  { idBase: 'bottas', numero: 77, nombre: 'Valtteri Bottas', equipo: 'Cadillac', precioBase: 10.0, imagen: '/Pilotos/bottas.webp' }
+];
 
-  // --- RED BULL RACING ---
-  { 
-    id: 'verstappen_t1', numero: 3, nombre: 'Max Verstappen', equipo: 'Red Bull', tier: 1, precio: 25.0, 
-    imagen: '/Pilotos/verstappen.webp',
-    habilidad_1: { nombre: 'Mad Max', puntos: 6, descripcion: 'Sube al podio (Top 3) sin haber conseguido la vuelta rápida de la carrera.' }
+const configuracionVariantesPiloto = [
+  {
+    variante: 'clasificador',
+    perfilPuntuacion: 'clasificador',
+    tier: 1,
+    incrementoPrecio: 0,
+    nombreHabilidad: 'Puntos de Clasificacion'
   },
-  { 
-    id: 'verstappen_t2', numero: 3, nombre: 'Max Verstappen', equipo: 'Red Bull', tier: 2, precio: 35.0, 
-    imagen: '/Pilotos/verstappen.webp',
-    habilidad_1: { nombre: 'Mad Max', puntos: 6, descripcion: 'Sube al podio (Top 3) sin haber conseguido la vuelta rápida de la carrera.' },
-    habilidad_2: { nombre: 'Inquebrantable', puntos: 10, descripcion: 'Defiende su posición con éxito durante 5 vueltas consecutivas teniendo a un rival en zona de DRS.' },
-    penalizacion: { nombre: 'Exceso de velocidad', puntos: -6, descripcion: 'Es penalizado por Dirección de Carrera con 5 o 10 segundos de sanción.' }
+  {
+    variante: 'carrera',
+    perfilPuntuacion: 'carrera',
+    tier: 2,
+    incrementoPrecio: 1.5,
+    nombreHabilidad: 'Puntos de Carrera'
   },
-  { 
-    id: 'hadjar_t1', numero: 6, nombre: 'Isack Hadjar', equipo: 'Red Bull', tier: 1, precio: 15.0, 
-    imagen: '/Pilotos/hadjar.webp',
-    habilidad_1: { nombre: 'Gran inicio', puntos: 8, descripcion: 'Marca uno de los 5 mejores tiempos en el Sector 1 durante la primera vuelta.' }
-  },
-  { 
-    id: 'hadjar_t2', numero: 6, nombre: 'Isack Hadjar', equipo: 'Red Bull', tier: 2, precio: 25.0, 
-    imagen: '/Pilotos/hadjar.webp',
-    habilidad_1: { nombre: 'Gran inicio', puntos: 8, descripcion: 'Marca uno de los 5 mejores tiempos en el Sector 1 durante la primera vuelta.' },
-    habilidad_2: { nombre: 'El pequeño Prost', puntos: 8, descripcion: 'Cruza la bandera a cuadros entre los 6 primeros clasificados.' },
-    penalizacion: { nombre: 'Pecado de Novato', puntos: -6, descripcion: 'Acaba en un puesto inferior a la octava posición.' }
-  },
-
-  // --- FERRARI ---
-  { 
-    id: 'leclerc_t1', numero: 16, nombre: 'Charles Leclerc', equipo: 'Ferrari', tier: 1, precio: 24.0, 
-    imagen: '/Pilotos/leclerc.webp',
-    habilidad_1: { nombre: 'Príncipe de la Pole', puntos: 10, descripcion: 'Consigue la Pole Position y lidera la parrilla de salida el domingo.' } 
-  },
-  { 
-    id: 'leclerc_t2', numero: 16, nombre: 'Charles Leclerc', equipo: 'Ferrari', tier: 2, precio: 34.0, 
-    imagen: '/Pilotos/leclerc.webp',
-    habilidad_1: { nombre: 'Príncipe de la Pole', puntos: 10, descripcion: 'Consigue la Pole Position y lidera la parrilla de salida el domingo.' },
-    habilidad_2: { nombre: 'Il Predestinato', puntos: 6, descripcion: 'Completa un relevo (stint) con neumáticos blandos de mayor duración que la media general.' }, 
-    penalizacion: { nombre: 'Maldición de Mónaco', puntos: -6, descripcion: 'No logra terminar la carrera (DNF) debido a un accidente o problema mecánico.' }
-  },
-  { 
-    id: 'hamilton_t1', numero: 44, nombre: 'Lewis Hamilton', equipo: 'Ferrari', tier: 1, precio: 23.0, 
-    imagen: '/Pilotos/hamilton.webp',
-    habilidad_1: { nombre: 'Sunday King', puntos: 10, descripcion: 'Remonta y termina la carrera al menos 4 posiciones por encima de su lugar de salida.' }
-  },
-  { 
-    id: 'hamilton_t2', numero: 44, nombre: 'Lewis Hamilton', equipo: 'Ferrari', tier: 2, precio: 33.0, 
-    imagen: '/Pilotos/hamilton.webp',
-    habilidad_1: { nombre: 'Sunday King', puntos: 10, descripcion: 'Remonta y termina la carrera al menos 4 posiciones por encima de su lugar de salida.' },
-    habilidad_2: { nombre: 'Hammer Time', puntos: 6, descripcion: 'Finaliza el Gran Premio por delante de su compañero de equipo.' },
-    penalizacion: { nombre: 'Gomas Frías', puntos: -6, descripcion: 'Cede al menos una posición en la vuelta de relanzamiento tras un coche de seguridad (Safety Car).' }
-  },
-
-  // --- MERCEDES ---
-  { 
-    id: 'russell_t1', numero: 63, nombre: 'George Russell', equipo: 'Mercedes', tier: 1, precio: 22.0, 
-    imagen: '/Pilotos/russell.webp',
-    habilidad_1: { nombre: 'Mr. Saturday', puntos: 8, descripcion: 'Firma una clasificación estelar y toma la salida desde el Top 3.' }
-  },
-  { 
-    id: 'russell_t2', numero: 63, nombre: 'George Russell', equipo: 'Mercedes', tier: 2, precio: 32.0, 
-    imagen: '/Pilotos/russell.webp',
-    habilidad_1: { nombre: 'Mr. Saturday', puntos: 8, descripcion: 'Firma una clasificación estelar y toma la salida desde el Top 3.' },
-    habilidad_2: { nombre: 'Carrera Limpia', puntos: 8, descripcion: 'Finaliza en el Top 5 sin recibir un solo aviso por exceder los límites de pista (Track Limits).' },
-    penalizacion: { nombre: 'Presión Crítica', puntos: -6, descripcion: 'Es adelantado o sufre un accidente letal en las últimas 3 vueltas de la carrera.' } 
-  },
-  { 
-    id: 'antonelli_t1', numero: 12, nombre: 'Kimi Antonelli', equipo: 'Mercedes', tier: 1, precio: 20.0, 
-    imagen: '/Pilotos/antonelli.webp',
-    habilidad_1: { nombre: 'Diamante en Bruto', puntos: 8, descripcion: 'Registra una velocidad máxima en la trampa de velocidad (Speed Trap) superior a la de Russell.' }
-  },
-  { 
-    id: 'antonelli_t2', numero: 12, nombre: 'Kimi Antonelli', equipo: 'Mercedes', tier: 2, precio: 30.0, 
-    imagen: '/Pilotos/antonelli.webp',
-    habilidad_1: { nombre: 'Diamante en Bruto', puntos: 8, descripcion: 'Registra una velocidad máxima en la trampa de velocidad (Speed Trap) superior a la de Russell.' },
-    habilidad_2: { nombre: 'Relevo', puntos: 8, descripcion: 'Termina en la zona de puntos y supera a su compañero de equipo en la clasificación final.' },
-    penalizacion: { nombre: 'Exceso de Ímpetu', puntos: -6, descripcion: 'Provoca una bandera amarilla o roja en cualquier sesión.' }
-  },
-
-  // --- ASTON MARTIN ---
-  { 
-    id: 'alonso_t1', numero: 14, nombre: 'Fernando Alonso', equipo: 'Aston Martin', tier: 1, precio: 19.0, 
-    imagen: '/Pilotos/alonso.webp',
-    habilidad_1: { nombre: 'Salida Mágica', puntos: 8, descripcion: 'Avanza 2 o más posiciones respecto a su lugar en la parrilla antes de finalizar la primera vuelta.' }
-  },
-  { 
-    id: 'alonso_t2', numero: 14, nombre: 'Fernando Alonso', equipo: 'Aston Martin', tier: 2, precio: 29.0, 
-    imagen: '/Pilotos/alonso.webp',
-    habilidad_1: { nombre: 'Salida Mágica', puntos: 8, descripcion: 'Avanza 2 o más posiciones respecto a su lugar en la parrilla antes de finalizar la primera vuelta.' },
-    habilidad_2: { nombre: 'El padre', puntos: 6, descripcion: 'Rueda por delante de su compañero de equipo de forma ininterrumpida durante 20 vueltas.' }, 
-    penalizacion: { nombre: 'Motor GP2', puntos: -4, descripcion: 'Registra una de las 3 peores velocidades máximas de la carrera o abandona por avería.' }
-  },
-  { 
-    id: 'stroll_t1', numero: 18, nombre: 'Lance Stroll', equipo: 'Aston Martin', tier: 1, precio: 13.0, 
-    imagen: '/Pilotos/stroll.webp',
-    habilidad_1: { nombre: 'Lancelot', puntos: 10, descripcion: 'Completa la carrera dentro de la zona de puntos (Top 10).' }
-  },
-  { 
-    id: 'stroll_t2', numero: 18, nombre: 'Lance Stroll', equipo: 'Aston Martin', tier: 2, precio: 23.0, 
-    imagen: '/Pilotos/stroll.webp',
-    habilidad_1: { nombre: 'Lancelot', puntos: 10, descripcion: 'Completa la carrera dentro de la zona de puntos (Top 10).' },
-    habilidad_2: { nombre: 'Invisible', puntos: 6, descripcion: 'Finaliza el Gran Premio sin estar involucrado en investigaciones ni recibir sanciones de la FIA.' },
-    penalizacion: { nombre: 'Espejos Rotos', puntos: -6, descripcion: 'Sufre daños en su monoplaza debido a una colisión en las 3 primeras vueltas.' }
-  },
-
-  // --- WILLIAMS ---
-  { 
-    id: 'sainz_t1', numero: 55, nombre: 'Carlos Sainz', equipo: 'Williams', tier: 1, precio: 17.0, 
-    imagen: '/Pilotos/sainz.webp',
-    habilidad_1: { nombre: 'Smooth Operator', puntos: 10, descripcion: 'Realiza el relevo (stint) más largo con neumáticos medios entre los pilotos que acaban en el Top 10.' } 
-  },
-  { 
-    id: 'sainz_t2', numero: 55, nombre: 'Carlos Sainz', equipo: 'Williams', tier: 2, precio: 27.0, 
-    imagen: '/Pilotos/sainz.webp',
-    habilidad_1: { nombre: 'Smooth Operator', puntos: 10, descripcion: 'Realiza el relevo (stint) más largo con neumáticos medios entre los pilotos que acaban en el Top 10.' },
-    habilidad_2: { nombre: 'Ingeniero en Pista', puntos: 8, descripcion: 'Entra en los puntos realizando al menos una parada en boxes menos que la media del Top 10.' }, 
-    penalizacion: { nombre: 'Estrategia de equipo', puntos: -8, descripcion: 'Sufre una parada en boxes (pit stop) deficiente que excede los 3.5 segundos.' }
-  },
-  { 
-    id: 'albon_t1', numero: 23, nombre: 'Alexander Albon', equipo: 'Williams', tier: 1, precio: 15.0, 
-    imagen: '/Pilotos/albon.webp',
-    habilidad_1: { nombre: 'Muro Tailandés', puntos: 8, descripcion: 'Mantiene a sus rivales a raya y no es adelantado en pista durante al menos 15 vueltas consecutivas.' }
-  },
-  { 
-    id: 'albon_t2', numero: 23, nombre: 'Alexander Albon', equipo: 'Williams', tier: 2, precio: 25.0, 
-    imagen: '/Pilotos/albon.webp',
-    habilidad_1: { nombre: 'Muro Tailandés', puntos: 8, descripcion: 'Mantiene a sus rivales a raya y no es adelantado en pista durante al menos 15 vueltas consecutivas.' },
-    habilidad_2: { nombre: 'Albono de Gomas', puntos: 10, descripcion: 'Acaba en los puntos tras exprimir al máximo y completar más de 30 vueltas con un único juego de neumáticos.' },
-    penalizacion: { nombre: 'Muro Real', puntos: -8, descripcion: 'Causa la salida del Safety Car o una bandera amarilla debido a una salida de pista.' }
-  },
-
-  // --- HAAS ---
-  { 
-    id: 'ocon_t1', numero: 31, nombre: 'Esteban Ocon', equipo: 'Haas', tier: 1, precio: 14.0, 
-    imagen: '/Pilotos/ocon.webp',
-    habilidad_1: { nombre: 'A Cuchillo', puntos: 6, descripcion: 'Logra un tiempo de paso por el Sector 1 más rápido que su compañero de equipo durante la carrera.' }
-  },
-  { 
-    id: 'ocon_t2', numero: 31, nombre: 'Esteban Ocon', equipo: 'Haas', tier: 2, precio: 24.0, 
-    imagen: '/Pilotos/ocon.webp',
-    habilidad_1: { nombre: 'A Cuchillo', puntos: 6, descripcion: 'Logra un tiempo de paso por el Sector 1 más rápido que su compañero de equipo durante la carrera.' },
-    habilidad_2: { nombre: 'Tensiómetro', puntos: 10, descripcion: 'Es penalizado oficialmente por causar una colisión con otro monoplaza durante la carrera.' }, 
-    penalizacion: { nombre: 'Karma', puntos: -6, descripcion: 'Sufre el primer abandono (DNF) de toda la parrilla en la carrera.' }
-  },
-  { 
-    id: 'bearman_t1', numero: 87, nombre: 'Oliver Bearman', equipo: 'Haas', tier: 1, precio: 13.0, 
-    imagen: '/Pilotos/bearman.webp',
-    habilidad_1: { nombre: 'Progresión', puntos: 8, descripcion: 'Reserva su mejor ritmo para el final, logrando su vuelta personal más rápida en el último cuarto de carrera.' }
-  },
-  { 
-    id: 'bearman_t2', numero: 87, nombre: 'Oliver Bearman', equipo: 'Haas', tier: 2, precio: 23.0, 
-    imagen: '/Pilotos/bearman.webp',
-    habilidad_1: { nombre: 'Progresión', puntos: 8, descripcion: 'Reserva su mejor ritmo para el final, logrando su vuelta personal más rápida en el último cuarto de carrera.' },
-    habilidad_2: { nombre: 'Madurez', puntos: 8, descripcion: 'Termina en la zona de puntos y cruza la meta por delante de su compañero de equipo.' },
-    penalizacion: { nombre: 'Ansiedad en Pit', puntos: -6, descripcion: 'Es sancionado por Dirección de Carrera por superar el límite de velocidad en el Pit Lane.' }
-  },
-
-  // --- AUDI ---
-  { 
-    id: 'hulkenberg_t1', numero: 27, nombre: 'Nico Hülkenberg', equipo: 'Audi', tier: 1, precio: 13.0, 
-    imagen: '/Pilotos/hulkenberg.webp',
-    habilidad_1: { nombre: 'Hulk', puntos: 6, descripcion: 'Realiza un adelantamiento válido sobre su compañero de equipo en la pista.' }
-  },
-  { 
-    id: 'hulkenberg_t2', numero: 27, nombre: 'Nico Hülkenberg', equipo: 'Audi', tier: 2, precio: 23.0, 
-    imagen: '/Pilotos/hulkenberg.webp',
-    habilidad_1: { nombre: 'Hulk', puntos: 6, descripcion: 'Realiza un adelantamiento válido sobre su compañero de equipo en la pista.' },
-    habilidad_2: { nombre: 'Maestro de la Qualy', puntos: 10, descripcion: 'Asegura una codiciada posición entre los 8 primeros en la sesión de clasificación del sábado.' },
-    penalizacion: { nombre: 'Caída Dominical', puntos: -8, descripcion: 'Termina la carrera habiendo cedido 4 o más posiciones respecto a su lugar en la parrilla.' }
-  },
-  { 
-    id: 'bortoleto_t1', numero: 5, nombre: 'Gabriel Bortoleto', equipo: 'Audi', tier: 1, precio: 12.0, 
-    imagen: '/Pilotos/bortoleto.webp',
-    habilidad_1: { nombre: 'Alumno', puntos: 10, descripcion: 'Cruza la línea de meta en una posición superior a la del bicampeón Fernando Alonso.' }
-  },
-  { 
-    id: 'bortoleto_t2', numero: 5, nombre: 'Gabriel Bortoleto', equipo: 'Audi', tier: 2, precio: 22.0, 
-    imagen: '/Pilotos/bortoleto.webp',
-    habilidad_1: { nombre: 'Alumno', puntos: 10, descripcion: 'Cruza la línea de meta en una posición superior a la del bicampeón Fernando Alonso.' },
-    habilidad_2: { nombre: 'Estabilidad', puntos: 8, descripcion: 'Mantiene un ritmo robótico: la diferencia de tiempo entre sus 5 mejores vueltas es inferior a 0.3 segundos.' }, 
-    penalizacion: { nombre: 'Tráfico', puntos: -8, descripcion: 'No logra superar el corte y queda eliminado en la primera ronda de clasificación (Q1).' }
-  },
-
-  // --- ALPINE ---
-  { 
-    id: 'gasly_t1', numero: 10, nombre: 'Pierre Gasly', equipo: 'Alpine', tier: 1, precio: 13.0, 
-    imagen: '/Pilotos/gasly.webp',
-    habilidad_1: { nombre: 'Pescador', puntos: 8, descripcion: 'Adelanta al menos a un piloto en las dos vueltas posteriores al relanzamiento de la carrera (tras SC/VSC).' }
-  },
-  { 
-    id: 'gasly_t2', numero: 10, nombre: 'Pierre Gasly', equipo: 'Alpine', tier: 2, precio: 23.0, 
-    imagen: '/Pilotos/gasly.webp',
-    habilidad_1: { nombre: 'Pescador', puntos: 8, descripcion: 'Adelanta al menos a un piloto en las dos vueltas posteriores al relanzamiento de la carrera (tras SC/VSC).' },
-    habilidad_2: { nombre: 'Fransly', puntos: 8, descripcion: 'Logra que tanto él como su compañero de equipo finalicen en la zona de puntos.' },
-    penalizacion: { nombre: 'Mala Suerte', puntos: -6, descripcion: 'Sufre la parada en boxes (pit stop) más lenta de la carrera en comparación con el resto de pilotos.' }
-  },
-  { 
-    id: 'colapinto_t1', numero: 43, nombre: 'Franco Colapinto', equipo: 'Alpine', tier: 1, precio: 14.0, 
-    imagen: '/Pilotos/colapinto.webp',
-    habilidad_1: { nombre: 'Garra Argentina', puntos: 8, descripcion: 'Finaliza la carrera superando a su compañero de equipo por 2 posiciones o más.' }
-  },
-  { 
-    id: 'colapinto_t2', numero: 43, nombre: 'Franco Colapinto', equipo: 'Alpine', tier: 2, precio: 24.0, 
-    imagen: '/Pilotos/colapinto.webp',
-    habilidad_1: { nombre: 'Garra Argentina', puntos: 8, descripcion: 'Finaliza la carrera superando a su compañero de equipo por 2 posiciones o más.' },
-    habilidad_2: { nombre: 'Al Límite', puntos: 8, descripcion: 'Pasa bajo la bandera a cuadros pisando los talones a su rival, a menos de 0.8 segundos de diferencia.' },
-    penalizacion: { nombre: 'Demasiado Límite', puntos: -6, descripcion: 'Provoca una interrupción por Bandera Roja en cualquier sesión de Entrenamientos Libres o Clasificación.' }
-  },
-
-  // --- RACING BULLS ---
-  { 
-    id: 'lawson_t1', numero: 30, nombre: 'Liam Lawson', equipo: 'Racing Bulls', tier: 1, precio: 12.0, 
-    imagen: '/Pilotos/lawson.webp',
-    habilidad_1: { nombre: 'Ataque Púrpura', puntos: 10, descripcion: 'Consigue el récord absoluto de la sesión (Sector Púrpura) en al menos uno de los sectores durante la carrera.' }
-  },
-  { 
-    id: 'lawson_t2', numero: 30, nombre: 'Liam Lawson', equipo: 'Racing Bulls', tier: 2, precio: 22.0, 
-    imagen: '/Pilotos/lawson.webp',
-    habilidad_1: { nombre: 'Ataque Púrpura', puntos: 10, descripcion: 'Consigue el récord absoluto de la sesión (Sector Púrpura) en al menos uno de los sectores durante la carrera.' },
-    habilidad_2: { nombre: 'Venganza', puntos: 6, descripcion: 'Cruza la línea de meta en mejor posición que, al menos, uno de los pilotos oficiales de Red Bull Racing.' },
-    penalizacion: { nombre: 'Presión de Marko', puntos: -6, descripcion: 'Recibe la bandera azul en pista al ser doblado por el líder de la carrera.' } 
-  },
-  { 
-    id: 'lindblad_t1', numero: 41, nombre: 'Arvid Lindblad', equipo: 'Racing Bulls', tier: 1, precio: 11.0, 
-    imagen: '/Pilotos/lindblad.webp',
-    habilidad_1: { nombre: 'Nuevo Talento', puntos: 10, descripcion: 'Consigue finalizar la exigente carrera del domingo dentro de los 10 primeros clasificados.' }
-  },
-  { 
-    id: 'lindblad_t2', numero: 41, nombre: 'Arvid Lindblad', equipo: 'Racing Bulls', tier: 2, precio: 21.0, 
-    imagen: '/Pilotos/lindblad.webp',
-    habilidad_1: { nombre: 'Nuevo Talento', puntos: 10, descripcion: 'Consigue finalizar la exigente carrera del domingo dentro de los 10 primeros clasificados.' },
-    habilidad_2: { nombre: 'Sábado Mágico', puntos: 8, descripcion: 'Supera las rondas de eliminación y logra acceder a la Q3 en la clasificación del sábado.' },
-    penalizacion: { nombre: 'Ritmo Irregular', puntos: -8, descripcion: 'Registra una vuelta (sin contar Safety Car o Pit Stop) que es al menos 3 segundos más lenta que su ritmo promedio.' }
-  },
-
-  // --- CADILLAC ---
-  { 
-    id: 'perez_t1', numero: 11, nombre: 'Sergio Perez', equipo: 'Cadillac', tier: 1, precio: 11.0, 
-    imagen: '/Pilotos/perez.webp',
-    habilidad_1: { nombre: 'Garra Mexicana', puntos: 6, descripcion: 'Asegura una sólida posición al cruzar la meta entre los 14 primeros.' }
-  },
-  { 
-    id: 'perez_t2', numero: 11, nombre: 'Sergio Perez', equipo: 'Cadillac', tier: 2, precio: 21.0, 
-    imagen: '/Pilotos/perez.webp',
-    habilidad_1: { nombre: 'Garra Mexicana', puntos: 6, descripcion: 'Asegura una sólida posición al cruzar la meta entre los 14 primeros.' },
-    habilidad_2: { nombre: 'Ministro de Defensa', puntos: 8, descripcion: 'Resiste el ataque de un rival con DRS abierto durante 3 vueltas consecutivas sin ser adelantado.' },
-    penalizacion: { nombre: 'Desastre en Qualy', puntos: -4, descripcion: 'No logra superar el corte y cae eliminado en la primera sesión de clasificación (Q1).' }
-  },
-  { 
-    id: 'bottas_t1', numero: 77, nombre: 'Valtteri Bottas', equipo: 'Cadillac', tier: 1, precio: 10.0, 
-    imagen: '/Pilotos/bottas.webp',
-    habilidad_1: { nombre: 'Leñador', puntos: 8, descripcion: 'Exprime el coche a una vuelta y se clasifica entre las 12 primeras posiciones de la parrilla.' }
-  },
-  { 
-    id: 'bottas_t2', numero: 77, nombre: 'Valtteri Bottas', equipo: 'Cadillac', tier: 2, precio: 20.0, 
-    imagen: '/Pilotos/bottas.webp',
-    habilidad_1: { nombre: 'Leñador', puntos: 8, descripcion: 'Exprime el coche a una vuelta y se clasifica entre las 12 primeras posiciones de la parrilla.' },
-    habilidad_2: { nombre: 'Sanción Fantasma', puntos: 6, descripcion: 'Completa todo el Gran Premio sin ser investigado ni recibir penalizaciones de la FIA.' }, 
-    penalizacion: { nombre: 'Sin Rebufo', puntos: -4, descripcion: 'Marca una de las 3 velocidades máximas más bajas en la trampa de velocidad (Speed Trap) de la carrera.' }
+  {
+    variante: 'lluvia',
+    perfilPuntuacion: 'lluvia',
+    tier: 2,
+    incrementoPrecio: 3,
+    nombreHabilidad: 'Puntos de Lluvia'
   }
 ];
 
-// prettier-ignore
+function construirHabilidadesSegunPerfil(clavePerfil, nombreHabilidad) {
+  const perfil = perfilesPuntuacion[clavePerfil];
+
+  return {
+    habilidad_1: {
+      nombre: nombreHabilidad,
+      puntos: 12,
+      descripcion: perfil.reglasUsuario[0]
+    },
+    habilidad_2: {
+      nombre: 'Regla Extra',
+      puntos: 6,
+      descripcion: perfil.reglasUsuario[1]
+    },
+    penalizacion: {
+      nombre: 'Penalizacion',
+      puntos: -4,
+      descripcion: perfil.reglasUsuario[2]
+    }
+  };
+}
+
+function construirCartaPiloto(pilotoBase, varianteConfig) {
+  const precio = Number((pilotoBase.precioBase + varianteConfig.incrementoPrecio).toFixed(1));
+  const habilidades = construirHabilidadesSegunPerfil(variantaConfigSegura(varianteConfig.perfilPuntuacion), varianteConfig.nombreHabilidad);
+
+  return {
+    id: `${pilotoBase.idBase}_${varianteConfig.variante}`,
+    numero: pilotoBase.numero,
+    nombre: pilotoBase.nombre,
+    equipo: pilotoBase.equipo,
+    tier: varianteConfig.tier,
+    precio,
+    imagen: pilotoBase.imagen,
+    tipoCarta: 'piloto',
+    variante: varianteConfig.variante,
+    perfilPuntuacion: varianteConfig.perfilPuntuacion,
+    reglasUsuario: perfilesPuntuacion[varianteConfig.perfilPuntuacion].reglasUsuario,
+    ...habilidades
+  };
+}
+
+function variantaConfigSegura(perfilPuntuacion) {
+  return perfilesPuntuacion[perfilPuntuacion] ? perfilPuntuacion : 'carrera';
+}
+
+export const mercadoPilotos = pilotosBase.flatMap(pilotoBase =>
+  configuracionVariantesPiloto.map(varianteConfig => construirCartaPiloto(pilotoBase, varianteConfig))
+);
+
+export const mercadoPilotosConPerfiles = mercadoPilotos;
+export const mercadoPilotosVariantes = mercadoPilotos;
+
 export const mercadoPotenciadores = [
-  { id: 'aleron_delantero', nombre: 'Ala Delantera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Delantero.png' },
-  { id: 'aleron_trasero', nombre: 'Ala Trasera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Trasero.png' },
-  { id: 'bateria', nombre: 'Batería', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Batería.png' },
-  { id: 'caja_de_cambios', nombre: 'Caja de Cambios', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Caja_de_Cambios.png' },
-  { id: 'chasis', nombre: 'Chasis', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Chasis.png' },
-  { id: 'difusor', nombre: 'Difusor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Difusor.png' },
-  { id: 'discos_de_frenos', nombre: 'Discos de Frenos', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Discos_de_Frenos.png' },
-  { id: 'mgu_k', nombre: 'MGU-K', precio: 5.0, puntos: 50, imagen: '/Potenciadores/MGU-K.png' },
-  { id: 'motor_v6', nombre: 'Motor V6', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Motor V6.png' },
-  { id: 'pontones', nombre: 'Pontones', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Pontones.png' },
-  { id: 'suspension', nombre: 'Suspensión', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Suspensión.png' },
-  { id: 'tubo_de_escape', nombre: 'Tubo de Escape', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Tubo_de_Escape.png' },
-  { id: 'turbocompresor', nombre: 'Compresor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Turbocompresor.png' },
-  { id: 'volante', nombre: 'Volante', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Volante.png' }
-]
+  { id: 'aleron_delantero', nombre: 'Ala Delantera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Delantero.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'aleron_trasero', nombre: 'Ala Trasera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Trasero.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'bateria', nombre: 'Bateria', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Batería.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'caja_de_cambios', nombre: 'Caja de Cambios', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Caja_de_Cambios.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'chasis', nombre: 'Chasis', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Chasis.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'difusor', nombre: 'Difusor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Difusor.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'discos_de_frenos', nombre: 'Discos de Frenos', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Discos_de_Frenos.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'mgu_k', nombre: 'MGU-K', precio: 5.0, puntos: 50, imagen: '/Potenciadores/MGU-K.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'motor_v6', nombre: 'Motor V6', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Motor V6.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'pontones', nombre: 'Pontones', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Pontones.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'suspension', nombre: 'Suspension', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Suspensión.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'tubo_de_escape', nombre: 'Tubo de Escape', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Tubo_de_Escape.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'turbocompresor', nombre: 'Compresor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Turbocompresor.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'volante', nombre: 'Volante', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Volante.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' }
+];
 
-// prettier-ignore
 export const mercadoCoches = [
-  { 
-    id: 'aston_martin', nombre: 'Aston Martin Aramco', precio: 20.0, puntos: 200, imagen: '/Coches/astonmartin.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Fernando Alonso o Lance Stroll en tu equipo.' }
+  {
+    id: 'aston_martin',
+    nombre: 'Aston Martin Aramco',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/astonmartin.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Aston Martin.' }
   },
-  { 
-    id: 'audi', nombre: 'Audi Revolut F1', precio: 20.0, puntos: 200, imagen: '/Coches/audi.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Nico Hülkenberg o Gabriel Bortoleto en tu equipo.' }
+  {
+    id: 'audi',
+    nombre: 'Audi Revolut F1',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/audi.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Audi.' }
   },
-  { 
-    id: 'cadillac', nombre: 'Cadillac F1', precio: 20.0, puntos: 200, imagen: '/Coches/cadillac.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Sergio Perez o Valtteri Bottas en tu equipo.' }
+  {
+    id: 'cadillac',
+    nombre: 'Cadillac F1',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/cadillac.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Cadillac.' }
   },
-  { 
-    id: 'ferrari', nombre: 'Ferrari', precio: 20.0, puntos: 200, imagen: '/Coches/ferrari.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Charles Leclerc o Lewis Hamilton en tu equipo.' }
+  {
+    id: 'ferrari',
+    nombre: 'Ferrari',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/ferrari.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Ferrari.' }
   },
-  { 
-    id: 'haas', nombre: 'TGR Haas F1', precio: 20.0, puntos: 200, imagen: '/Coches/haas.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Esteban Ocon u Oliver Bearman en tu equipo.' }
+  {
+    id: 'haas',
+    nombre: 'TGR Haas F1',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/haas.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Haas.' }
   },
-  { 
-    id: 'mclaren', nombre: 'McLaren Mastercard', precio: 20.0, puntos: 200, imagen: '/Coches/mclaren.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Lando Norris u Oscar Piastri en tu equipo.' }
+  {
+    id: 'mclaren',
+    nombre: 'McLaren Mastercard',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/mclaren.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos McLaren.' }
   },
-  { 
-    id: 'mercedes', nombre: 'Mercedes-AMG', precio: 20.0, puntos: 200, imagen: '/Coches/mercedes.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a George Russell o Kimi Antonelli en tu equipo.' }
+  {
+    id: 'mercedes',
+    nombre: 'Mercedes-AMG',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/mercedes.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Mercedes.' }
   },
-  { 
-    id: 'racing_bulls', nombre: 'Racing Bulls VCARB', precio: 20.0, puntos: 200, imagen: '/Coches/racingbulls.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Liam Lawson o Arvid Lindblad en tu equipo.' }
+  {
+    id: 'racing_bulls',
+    nombre: 'Racing Bulls VCARB',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/racingbulls.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Racing Bulls.' }
   },
-  { 
-    id: 'red_bull', nombre: 'Red Bull Racing', precio: 20.0, puntos: 200, imagen: '/Coches/redbull.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Max Verstappen o Isack Hadjar en tu equipo.' }
+  {
+    id: 'red_bull',
+    nombre: 'Red Bull Racing',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/redbull.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Red Bull.' }
   },
-  { 
-    id: 'williams', nombre: 'Atlassian Williams', precio: 20.0, puntos: 200, imagen: '/Coches/williams.webp',
-    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Obtienes este bono si tienes alineado a Carlos Sainz o Alexander Albon en tu equipo.' }
+  {
+    id: 'williams',
+    nombre: 'Atlassian Williams',
+    precio: 20.0,
+    puntos: 200,
+    imagen: '/Coches/williams.webp',
+    tipoCarta: 'coche',
+    perfilPuntuacion: 'coche_base_v1',
+    habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Williams.' }
   }
 ];
+
+export const mercadoPotenciadoresConPerfiles = mercadoPotenciadores;
+export const mercadoCochesConPerfiles = mercadoCoches;
+
+export const resumenMercadoVariantes = {
+  pilotosBase: pilotosBase.length,
+  variantesPorPiloto: configuracionVariantesPiloto.length,
+  pilotosConVariantes: mercadoPilotos.length,
+  potenciadores: mercadoPotenciadores.length,
+  coches: mercadoCoches.length,
+  totalCartasConVariantes: mercadoPilotos.length + mercadoPotenciadores.length + mercadoCoches.length
+};
