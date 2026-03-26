@@ -33,9 +33,13 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="w-full h-full min-h-[250px]">
+  <div class="w-full h-full min-h-[180px]">
 
-    <div class="relative w-full h-full flex flex-col overflow-hidden border border-zinc-800">
+    <div class="relative w-full h-full flex flex-col overflow-hidden border border-fuchsia-300 bg-black">
+
+      <span class="absolute top-2 right-2 z-30 px-2 py-1 text-[8px] font-black uppercase bg-black text-fuchsia-200 border border-fuchsia-300">
+        POTENCIADOR
+      </span>
 
       <div class="relative z-10 flex flex-col flex-1 w-full h-full overflow-hidden bg-[#1A1A1F]">
 
@@ -44,7 +48,7 @@ const confirmarCompra = () => {
             <span class="text-[10px] font-black text-white uppercase truncate">
               {{ props.potenciador.nombre }}
             </span>
-            <span class="text-[9px] text-zinc-500 uppercase font-bold">MEJORA</span>
+            <span class="text-[9px] text-zinc-300 uppercase font-bold">MEJORA</span>
           </div>
           <span class="text-[10px] font-black text-[#D4A843]">{{ props.potenciador.precio }}M</span>
         </header>
@@ -56,16 +60,23 @@ const confirmarCompra = () => {
 
           <div v-show="!mostrarInfo"
             class="absolute inset-0 w-full flex items-center justify-center z-20 pointer-events-none">
-            <span class="px-2 py-1 bg-black/60 text-[9px] font-black text-white text-center rounded animate-pulse">
+            <span class="px-2 py-1 bg-black text-[9px] font-black text-white text-center animate-pulse border border-white">
               VER DETALLES
             </span>
           </div>
 
           <div v-show="mostrarInfo"
-            class="absolute inset-0 p-4 flex flex-col z-30 overflow-y-auto bg-[#1A1A1F]/90 text-center backdrop-blur-md">
+            class="absolute inset-0 p-4 flex flex-col z-30 overflow-y-auto bg-[#1A1A1F] text-center">
             <h4 class="pb-1 mb-2 text-[10px] font-black text-white border-b border-zinc-700">
               DESCRIPCIÃ“N
             </h4>
+
+            <ul v-if="props.potenciador.reglasUsuario?.length" class="mb-2 space-y-1 text-left">
+              <li v-for="(regla, indice) in props.potenciador.reglasUsuario"
+                :key="`${props.potenciador.id}-regla-${indice}`" class="text-[9px] text-zinc-300 leading-relaxed">
+                • {{ regla }}
+              </li>
+            </ul>
 
             <p class="mb-2 text-[9px] text-zinc-300 leading-relaxed">
               {{ props.potenciador.descripcion || 'Pieza de rendimiento. InstÃ¡lala en tu monoplaza.' }}

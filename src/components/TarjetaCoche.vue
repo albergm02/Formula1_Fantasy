@@ -34,12 +34,16 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="w-full">
-    <div class="w-full rounded-xl overflow-hidden border border-zinc-800">
-      <div class="relative w-full overflow-hidden rounded-xl">
+  <div class="w-full h-[180px]">
+    <div class="w-full h-full overflow-hidden border border-amber-300 bg-black">
+      <div class="relative w-full h-full overflow-hidden">
+
+        <span class="absolute top-2 right-2 z-20 px-2 py-1 text-[8px] font-black uppercase bg-black text-amber-200 border border-amber-300">
+          COCHE
+        </span>
 
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
-          class="w-full h-auto block" />
+          class="w-full h-full object-cover block" />
 
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 
@@ -48,7 +52,7 @@ const confirmarCompra = () => {
               <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
                 {{ props.coche.nombre }}
               </span>
-              <span class="text-xs text-white/60 uppercase font-bold drop-shadow-sm">
+              <span class="text-xs text-zinc-300 uppercase font-bold">
                 CHASIS
               </span>
             </div>
@@ -63,15 +67,15 @@ const confirmarCompra = () => {
           </div>
 
           <button v-if="modoMercado" @click="confirmarCompra"
-            class="w-full py-2.5 flex items-center justify-center rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 cursor-pointer transition-all hover:bg-black/70 hover:border-white/20 active:scale-[0.98]">
+            class="w-full py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
             <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
           </button>
         </div>
 
         <button @click="mostrarDetalles = true"
-          class="absolute bottom-3 left-3 z-20 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 cursor-pointer transition-all hover:bg-black/70 hover:border-white/30 active:scale-90">
-          <i class="pi pi-eye text-white/90 text-base"></i>
+          class="absolute bottom-3 left-3 z-20 p-2 bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-90">
+          <i class="pi pi-eye text-white text-base"></i>
         </button>
 
       </div>
@@ -79,9 +83,21 @@ const confirmarCompra = () => {
 
     <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.coche.nombre" modal
-      :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 rounded-xl max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white/60 hover:text-white' } }">
+      :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white hover:text-zinc-200' } }">
       <div class="space-y-3">
-        <div v-if="props.coche.habilidad" class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+        <div v-if="props.coche.reglasUsuario?.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
+          <p class="text-sm font-black text-sky-400 uppercase leading-tight">
+            Reglas de puntuacion
+          </p>
+          <ul class="mt-2 space-y-1.5">
+            <li v-for="(regla, indice) in props.coche.reglasUsuario" :key="`${props.coche.id}-regla-${indice}`"
+              class="text-xs text-zinc-300 leading-relaxed">
+              • {{ regla }}
+            </li>
+          </ul>
+        </div>
+
+        <div v-if="props.coche.habilidad" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
             {{ props.coche.habilidad.nombre }}
             <span class="text-white">+{{ props.coche.habilidad.puntos }}</span>

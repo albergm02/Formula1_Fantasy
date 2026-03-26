@@ -34,22 +34,17 @@ const confirmarCompra = () => {
 </script>
 
 <template>
-  <div class="w-full">
-    <div :class="[
-      'w-full rounded-xl overflow-hidden border',
-      props.piloto.tier === 2 ? 'border-[#D4A843]/60' : 'border-zinc-800'
-    ]">
+  <div class="w-full h-[180px]">
+    <div class="w-full h-full overflow-hidden border border-sky-400 bg-black">
       <!-- La imagen ES la carta. Todo se superpone encima -->
-      <div class="relative w-full overflow-hidden rounded-xl">
+      <div class="relative w-full h-full overflow-hidden">
 
         <!-- Imagen de fondo completa -->
         <img v-if="props.piloto.imagen" :src="props.piloto.imagen" :alt="props.piloto.nombre"
-          class="w-full h-auto block" />
+          class="w-full h-full object-cover block" />
 
-        <!-- Badge EN RACHA (esquina superior izquierda) -->
-        <span v-if="props.piloto.tier === 2"
-          class="absolute top-2 left-2 z-20 px-2 py-1 text-[8px] font-black text-[#D4A843] uppercase bg-black/50 rounded backdrop-blur-sm border border-[#D4A843]/40">
-          EN RACHA
+        <span class="absolute top-2 right-2 z-20 px-2 py-1 text-[8px] font-black uppercase bg-black text-sky-200 border border-sky-300">
+          PILOTO
         </span>
 
         <!-- Overlay de info (lado derecho, siempre visible) -->
@@ -62,7 +57,7 @@ const confirmarCompra = () => {
                 <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
                   {{ props.piloto.nombre }}
                 </span>
-                <span class="text-xs text-white/60 uppercase font-bold drop-shadow-sm">
+                <span class="text-xs text-zinc-300 uppercase font-bold">
                   {{ props.piloto.equipo }}
                 </span>
               </div>
@@ -81,7 +76,7 @@ const confirmarCompra = () => {
 
           <!-- Boton PUJAR (pegado abajo) -->
           <button v-if="modoMercado" @click="confirmarCompra"
-            class="w-full py-2.5 flex items-center justify-center rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 cursor-pointer transition-all hover:bg-black/70 hover:border-white/20 active:scale-[0.98]">
+            class="w-full py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
             <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
           </button>
@@ -89,8 +84,8 @@ const confirmarCompra = () => {
 
         <!-- Botón de visibilidad (posición fija en la carta) -->
         <button @click="mostrarDetalles = true"
-          class="absolute bottom-3 left-3 z-20 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 cursor-pointer transition-all hover:bg-black/70 hover:border-white/30 active:scale-90">
-          <i class="pi pi-eye text-white/90 text-base"></i>
+          class="absolute bottom-3 left-3 z-20 p-2 bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-90">
+          <i class="pi pi-eye text-white text-base"></i>
         </button>
 
       </div>
@@ -98,10 +93,22 @@ const confirmarCompra = () => {
 
     <!-- Modal de detalles (fuera de la carta) -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.piloto.nombre" modal
-      :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 rounded-xl max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white/60 hover:text-white' } }">
+      :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white hover:text-zinc-200' } }">
       <div class="space-y-3">
+        <div v-if="props.piloto.reglasUsuario?.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
+          <p class="text-sm font-black text-sky-400 uppercase leading-tight">
+            Reglas de puntuacion
+          </p>
+          <ul class="mt-2 space-y-1.5">
+            <li v-for="(regla, indice) in props.piloto.reglasUsuario" :key="`${props.piloto.id}-regla-${indice}`"
+              class="text-xs text-zinc-300 leading-relaxed">
+              • {{ regla }}
+            </li>
+          </ul>
+        </div>
+
         <!-- Habilidad 1 -->
-        <div v-if="props.piloto.habilidad_1" class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+        <div v-if="props.piloto.habilidad_1" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
             {{ props.piloto.habilidad_1.nombre }}
             <span class="text-white">+{{ props.piloto.habilidad_1.puntos }}</span>
@@ -113,7 +120,7 @@ const confirmarCompra = () => {
 
         <!-- Habilidad 2 (solo Tier 2) -->
         <div v-if="props.piloto.tier === 2 && props.piloto.habilidad_2"
-          class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+          class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black text-[#D4A843] uppercase leading-tight">
             {{ props.piloto.habilidad_2.nombre }}
             <span class="text-white">+{{ props.piloto.habilidad_2.puntos }}</span>
@@ -125,7 +132,7 @@ const confirmarCompra = () => {
 
         <!-- Penalizacion (solo Tier 2) -->
         <div v-if="props.piloto.tier === 2 && props.piloto.penalizacion"
-          class="px-3 py-2.5 rounded-lg bg-white/5 border border-zinc-700">
+          class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black text-red-500 uppercase leading-tight">
             {{ props.piloto.penalizacion.nombre }}
             <span class="text-white">{{ props.piloto.penalizacion.puntos }}</span>

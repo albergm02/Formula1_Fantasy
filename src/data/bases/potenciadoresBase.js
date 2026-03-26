@@ -1,0 +1,16 @@
+export const potenciadoresBase = [
+  { id: 'aleron_delantero', nombre: 'Ala Delantera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Delantero.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'aleron_trasero', nombre: 'Ala Trasera', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Alerón_Trasero.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'bateria', nombre: 'Bateria', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Batería.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'caja_de_cambios', nombre: 'Caja de Cambios', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Caja_de_Cambios.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'chasis', nombre: 'Chasis', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Chasis.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'difusor', nombre: 'Difusor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Difusor.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'discos_de_frenos', nombre: 'Discos de Frenos', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Discos_de_Frenos.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'mgu_k', nombre: 'MGU-K', precio: 5.0, puntos: 50, imagen: '/Potenciadores/MGU-K.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'motor_v6', nombre: 'Motor V6', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Motor V6.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'pontones', nombre: 'Pontones', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Pontones.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'suspension', nombre: 'Suspension', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Suspensión.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'tubo_de_escape', nombre: 'Tubo de Escape', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Tubo_de_Escape.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'turbocompresor', nombre: 'Compresor', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Turbocompresor.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+  { id: 'volante', nombre: 'Volante', precio: 5.0, puntos: 50, imagen: '/Potenciadores/Volante.png', tipoCarta: 'potenciador', perfilPuntuacion: 'potenciador_base_v1' },
+];
