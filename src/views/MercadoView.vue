@@ -25,7 +25,7 @@ const pilotosSemanales = ref([])
 const cochesSemanales = ref([])
 const potenciadoresSemanales = ref([])
 
-/* Genera el mercado semanal: selecciona aleatoriamente 3 pilotos, 2 coches y 6 potenciadores */
+/* Genera el mercado semanal: selecciona aleatoriamente 3 pilotos, 2 coches y 4 potenciadores */
 const generarMercadoSemanal = () => {
   pilotosSemanales.value = [...mercadoPilotos]
     .sort(() => 0.5 - Math.random())
@@ -39,7 +39,7 @@ const generarMercadoSemanal = () => {
 
   potenciadoresSemanales.value = [...mercadoPotenciadores]
     .sort(() => 0.5 - Math.random())
-    .slice(0, 6)
+    .slice(0, 4)
     .map((potenciador) => ({ ...potenciador, tipo: 'potenciador' }))
 }
 
@@ -108,10 +108,9 @@ const handlerCompra = async (elemento) => {
         <h2 class="text-sm font-black text-white uppercase tracking-widest">Potenciadores</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
-          <TarjetaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="handlerCompra" />
-        </div>
+      <div class="grid grid-cols-1 gap-4">
+        <TarjetaPotenciador v-for="potenciador in potenciadoresSemanales" :key="potenciador.id"
+          :potenciador="potenciador" :modoMercado="true" @fichar="handlerCompra" />
       </div>
     </section>
   </main>

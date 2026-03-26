@@ -133,6 +133,13 @@ export const usarStoreEscuderia = defineStore('escuderia', {
         }
       }
 
+      if (elemento.tipo === 'rueda' && this.garaje.ruedas) {
+        return {
+          success: false,
+          message: 'Ya tienes ruedas equipadas. Vende las actuales para elegir otras.',
+        }
+      }
+
       this.presupuesto -= elemento.precio
       const elementoComprado = { ...elemento, instancia_id: Date.now() }
 
@@ -142,6 +149,8 @@ export const usarStoreEscuderia = defineStore('escuderia', {
         this.garaje.pilotos.push(elementoComprado)
       } else if (elemento.tipo === 'potenciador') {
         this.garaje.potenciadores.push(elementoComprado)
+      } else if (elemento.tipo === 'rueda') {
+        this.garaje.ruedas = elementoComprado
       }
 
       await this.guardarEstadoEquipo()
@@ -174,6 +183,8 @@ export const usarStoreEscuderia = defineStore('escuderia', {
           this.garaje.potenciadores = this.garaje.potenciadores.filter(
             (potenciador) => potenciador.instancia_id !== elemento.instancia_id,
           )
+        } else if (elemento.tipo === 'rueda') {
+          this.garaje.ruedas = null
         }
 
         await this.guardarEstadoEquipo()

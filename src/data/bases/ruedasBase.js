@@ -1,0 +1,67 @@
+/**
+ * Compuestos de neumaticos disponibles en 2026.
+ * Cada compuesto modifica atributos de los pilotos asignados.
+ * El jugador debe elegir un compuesto para la jornada.
+ */
+export const ruedasBase = [
+  {
+    id: 'blando',
+    nombre: 'Blando (C5)',
+    compuesto: 'blando',
+    precio: 2.0,
+    imagen: '/Ruedas/blandos.webp',
+    color: '#ef4444',
+    icono: 'pi-circle-fill',
+    tipoCarta: 'rueda',
+    mejoras: { ritmo: 10, consistencia: -5, adaptabilidad: 0 },
+    descripcion: 'Grip maximo en clasificacion y primeras vueltas. Degradacion alta.',
+  },
+  {
+    id: 'medio',
+    nombre: 'Medio (C3)',
+    compuesto: 'medio',
+    precio: 2.0,
+    imagen: '/Ruedas/medios.webp',
+    color: '#eab308',
+    icono: 'pi-circle-fill',
+    tipoCarta: 'rueda',
+    mejoras: { ritmo: 4, consistencia: 4, adaptabilidad: 0 },
+    descripcion: 'Equilibrio entre rendimiento y durabilidad.',
+  },
+  {
+    id: 'duro',
+    nombre: 'Duro (C1)',
+    compuesto: 'duro',
+    precio: 2.0,
+    imagen: '/Ruedas/hard.webp',
+    color: '#e5e7eb',
+    icono: 'pi-circle-fill',
+    tipoCarta: 'rueda',
+    mejoras: { ritmo: -5, consistencia: 10, adaptabilidad: 0 },
+    descripcion: 'Maxima durabilidad. Menos grip pero muy consistente.',
+  },
+  {
+    id: 'intermedio',
+    nombre: 'Intermedios',
+    compuesto: 'intermedio',
+    precio: 2.0,
+    imagen: '/Ruedas/intermedios.webp',
+    color: '#22c55e',
+    icono: 'pi-circle-fill',
+    tipoCarta: 'rueda',
+    mejoras: { ritmo: 0, consistencia: 0, adaptabilidad: 10 },
+    descripcion: 'Rendimiento optimo en pista mixta seca/mojada.',
+  },
+  {
+    id: 'lluvia',
+    nombre: 'Full Wet',
+    compuesto: 'lluvia',
+    precio: 2.0,
+    imagen: '/Ruedas/wet.webp',
+    color: '#3b82f6',
+    icono: 'pi-circle-fill',
+    tipoCarta: 'rueda',
+    mejoras: { ritmo: -3, consistencia: 3, adaptabilidad: 8 },
+    descripcion: 'Agarre maximo en condiciones de lluvia fuerte.',
+  },
+]

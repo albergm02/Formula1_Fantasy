@@ -14,6 +14,7 @@ import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
 import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
+import TarjetaRueda from '@/components/TarjetaRueda.vue'
 
 const escuderiaStore = usarStoreEscuderia()
 const notificacion = useToast()
@@ -79,6 +80,26 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
   }
 }
+
+const confirmarVentaRuedas = (ruedas) => {
+  const valorReventa = calcularValorReventa(ruedas.precio)
+
+  confirmar.require({
+    icon: 'pi pi-exclamation-triangle',
+    message: `Quitar ${ruedas.nombre} y recuperar ${valorReventa}M?`,
+    header: 'Confirmar Cambio de Ruedas',
+    acceptLabel: 'Si, quitar',
+    rejectLabel: 'Cancelar',
+    accept: async () => {
+      const resultado = await escuderiaStore.venderElemento(ruedas)
+      if (resultado.success) {
+        notificacion.add({ severity: 'success', summary: 'Ruedas retiradas', detail: `Has recuperado ${valorReventa}M` })
+      } else {
+        notificacion.add({ severity: 'warn', summary: 'Accion denegada', detail: resultado.message })
+      }
+    },
+  })
+}
 </script>
 
 <!-------------------------------------------------------------------------------------------------------------------------->
@@ -91,8 +112,13 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
   <Cabecera />
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-md mx-auto w-full">
-    <!-- Sección: Coche -->
+    <!-- Seccion: Coche -->
     <section class="grid">
+      <div class="flex items-center gap-3 px-6 mb-3">
+        <i class="pi pi-car text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Coche</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
       <div v-if="escuderiaStore.garaje.coche" class="flex flex-col w-full h-full">
         <TarjetaCoche :coche="escuderiaStore.garaje.coche" :modoMercado="false" />
 
@@ -115,8 +141,13 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
       </div>
     </section>
 
-    <!-- SecciÃ³n: Pilotos -->
+    <!-- Seccion: Pilotos -->
     <section class="grid grid-cols-1 gap-6">
+      <div class="flex items-center gap-3 px-6">
+        <i class="pi pi-users text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Pilotos</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
       <template v-if="escuderiaStore.garaje.pilotos.length > 0">
         <div v-for="piloto in escuderiaStore.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col w-full h-full">
@@ -144,12 +175,16 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
     </section>
 
     <section class="grid">
-      <div v-if="escuderiaStore.garaje.potenciadores.length > 0" class="grid grid-cols-2 gap-6 px-6">
+      <div class="flex items-center gap-3 px-6 mb-3">
+        <i class="pi pi-bolt text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Potenciadores</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
+
+      <div v-if="escuderiaStore.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-6 px-6">
         <div v-for="potenciador in escuderiaStore.garaje.potenciadores" :key="potenciador.instancia_id"
           class="flex flex-col w-full h-full">
-          <div class="aspect-square w-full">
-            <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
-          </div>
+          <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
 
           <button @click="alternarInstalacionPotenciador(potenciador.instancia_id)"
             class="w-full py-3 mt-2 flex items-center justify-center cursor-pointer transition-colors rounded-xl shadow-lg group"
@@ -172,9 +207,35 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
         <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Mejoras Compradas</span>
       </div>
     </section>
+
+    <!-- Seccion: Ruedas -->
+    <section class="grid">
+      <div class="flex items-center gap-3 px-6 mb-3">
+        <i class="pi pi-circle-fill text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Neumaticos</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
+
+      <div v-if="escuderiaStore.garaje.ruedas" class="flex flex-col w-full h-full px-6">
+        <TarjetaRueda :rueda="escuderiaStore.garaje.ruedas" :modoMercado="false" />
+        <div class="pb-2 mt-2">
+          <button @click="confirmarVentaRuedas(escuderiaStore.garaje.ruedas)"
+            class="w-full py-4 flex items-center justify-center bg-[#121218] border border-zinc-800 hover:border-red-900/50 cursor-pointer transition-colors shadow-lg rounded-xl group">
+            <i class="mr-2 text-sm text-red-500 pi pi-shopping-bag group-hover:scale-110 transition-transform"></i>
+            <span class="text-white text-[10px] font-black uppercase tracking-widest">
+              QUITAR ({{ calcularValorReventa(escuderiaStore.garaje.ruedas.precio) }}M)
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div v-else
+        class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="mb-3 text-3xl text-zinc-600 pi pi-circle"></i>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Neumaticos</span>
+      </div>
+    </section>
   </main>
 
   <BarraNavegacion />
 </template>
-
-
