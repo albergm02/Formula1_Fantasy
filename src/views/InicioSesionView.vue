@@ -3,12 +3,12 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 /* Servicios de autenticación */
-import { iniciarSesion, iniciarSesionConGoogle, restablecerContrasena } from '@/services/servicioAutenticacion'
+import { iniciarSesion, iniciarSesionConGoogle, restablecerContraseña } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 /* Componentes UI */
 import Hyperspeed from '@/components/Hyperspeed.vue'
-import { hyperspeedPresets } from '@/components/HyperspeedPresets'
+import { hyperspeedPresets } from '@/utils/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -106,7 +106,7 @@ const handlerGoogleLogin = async () => {
 }
 
 /* Handler Recuperar Contraseña (Mejorado) */
-const handlerRestablecerContrasena = async () => {
+const handlerRestablecerContraseña = async () => {
   const correoAEnviar = correoRecuperacion.value.trim()
 
   // Validamos el formato del correo antes de intentar enviar el email de recuperación
@@ -118,7 +118,7 @@ const handlerRestablecerContrasena = async () => {
   // Para evitar revelar si un correo está registrado o no, mostramos el mismo mensaje de éxito tanto para correos válidos como para no registrados.
   cargandoRecuperacion.value = true
   try {
-    await restablecerContrasena(correoAEnviar)
+    await restablecerContraseña(correoAEnviar)
     notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
     modalRecuperacionVisible.value = false
     correoRecuperacion.value = ''
@@ -244,11 +244,11 @@ const alOcultarModalRecuperacion = () => {
 
         <InputText v-model="correoRecuperacion" type="email" placeholder="tu@correo.com"
           class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700"
-          @keyup.enter="handlerRestablecerContrasena" />
+          @keyup.enter="handlerRestablecerContraseña" />
 
         <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="cargandoRecuperacion"
           class="mt-2 w-full py-3 !bg-[#D4A843] font-black tracking-widest !text-[#121218] rounded-lg !border-none hover:!bg-[#C09638]"
-          @click="handlerRestablecerContrasena" />
+          @click="handlerRestablecerContraseña" />
       </div>
     </Dialog>
   </div>

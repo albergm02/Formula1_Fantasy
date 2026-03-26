@@ -8,7 +8,7 @@ import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 /* Componentes UI */
 import Hyperspeed from '@/components/Hyperspeed.vue'
-import { hyperspeedPresets } from '@/components/HyperspeedPresets'
+import { hyperspeedPresets } from '@/utils/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
