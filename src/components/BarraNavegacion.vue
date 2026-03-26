@@ -15,7 +15,7 @@ const navegar = (destino) => {
 const elementosNav = computed(() => [
   {
     icon: () => h('i', { class: 'pi pi-home', style: { fontSize: '18px', color: ruta.path === '/dashboard' ? '#E10600' : 'white' } }),
-    label: 'Ligas',
+    label: 'Inicio',
     onClick: () => navegar('/dashboard'),
   },
   {
@@ -43,15 +43,7 @@ const elementosNav = computed(() => [
 
 <template>
   <div class="fixed bottom-0 left-0 right-0 z-40 flex justify-center pb-2">
-    <Dock
-      :items="elementosNav"
-      :panel-height="68"
-      :base-item-size="50"
-      :magnification="70"
-      :distance="200"
-      :dock-height="256"
-      :spring="{ mass: 0.1, stiffness: 150, damping: 12 }"
-    />
+    <Dock :items="elementosNav" :panel-height="68" :base-item-size="50" :magnification="70" :distance="200"
+      :dock-height="256" :spring="{ mass: 0.1, stiffness: 150, damping: 12 }" />
   </div>
 </template>
-

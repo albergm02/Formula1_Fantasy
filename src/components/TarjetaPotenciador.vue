@@ -35,11 +35,7 @@ const confirmarCompra = () => {
 <template>
   <div class="w-full h-full min-h-[180px]">
 
-    <div class="relative w-full h-full flex flex-col overflow-hidden border border-fuchsia-300 bg-black">
-
-      <span class="absolute top-2 right-2 z-30 px-2 py-1 text-[8px] font-black uppercase bg-black text-fuchsia-200 border border-fuchsia-300">
-        POTENCIADOR
-      </span>
+    <div class="relative w-full h-full flex flex-col overflow-hidden border border-zinc-700 bg-black">
 
       <div class="relative z-10 flex flex-col flex-1 w-full h-full overflow-hidden bg-[#1A1A1F]">
 
@@ -60,7 +56,8 @@ const confirmarCompra = () => {
 
           <div v-show="!mostrarInfo"
             class="absolute inset-0 w-full flex items-center justify-center z-20 pointer-events-none">
-            <span class="px-2 py-1 bg-black text-[9px] font-black text-white text-center animate-pulse border border-white">
+            <span
+              class="px-2 py-1 bg-black text-[9px] font-black text-white text-center animate-pulse border border-white">
               VER DETALLES
             </span>
           </div>

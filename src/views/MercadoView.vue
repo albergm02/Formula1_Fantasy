@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
 /* Datos del mercado */
-import { mercadoPilotos, mercadoPotenciadores, mercadoCoches } from '@/data/datosMercado'
+import { mercadoPilotos, mercadoCoches, mercadoPotenciadores } from '@/data/datosMercado'
 
 /* Store */
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
@@ -27,18 +27,17 @@ const potenciadoresSemanales = ref([])
 
 /* Genera el mercado semanal: selecciona aleatoriamente 3 pilotos, 2 coches y 6 potenciadores */
 const generarMercadoSemanal = () => {
-  pilotosSemanales.value = mercadoPilotos
-    .filter((piloto) => piloto.tier === 2)
+  pilotosSemanales.value = [...mercadoPilotos]
     .sort(() => 0.5 - Math.random())
     .slice(0, 3)
     .map((piloto) => ({ ...piloto, tipo: 'piloto' }))
 
-  cochesSemanales.value = mercadoCoches
+  cochesSemanales.value = [...mercadoCoches]
     .sort(() => 0.5 - Math.random())
     .slice(0, 2)
     .map((coche) => ({ ...coche, tipo: 'coche' }))
 
-  potenciadoresSemanales.value = mercadoPotenciadores
+  potenciadoresSemanales.value = [...mercadoPotenciadores]
     .sort(() => 0.5 - Math.random())
     .slice(0, 6)
     .map((potenciador) => ({ ...potenciador, tipo: 'potenciador' }))
@@ -76,20 +75,39 @@ const handlerCompra = async (elemento) => {
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-20 max-w-lg mx-auto w-full">
 
-    <!-- Coches destacados de la semana -->
-    <section class="grid grid-cols-1 gap-4">
-      <TarjetaCoche v-for="coche in cochesSemanales" :key="coche.id" :coche="coche" :modoMercado="true"
-        @fichar="handlerCompra" />
+    <!-- Seccion: Coches -->
+    <section class="flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-car text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Coches</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
+      <div class="grid grid-cols-1 gap-4">
+        <TarjetaCoche v-for="coche in cochesSemanales" :key="coche.id" :coche="coche" :modoMercado="true"
+          @fichar="handlerCompra" />
+      </div>
     </section>
 
-    <!-- Pilotos destacados de la semana -->
-    <section class="grid grid-cols-1 gap-4">
-      <TarjetaPiloto v-for="piloto in pilotosSemanales" :key="piloto.id" :piloto="piloto" :modoMercado="true"
-        @fichar="handlerCompra" />
+    <!-- Seccion: Pilotos -->
+    <section class="flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-users text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Pilotos</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
+      <div class="grid grid-cols-1 gap-4">
+        <TarjetaPiloto v-for="piloto in pilotosSemanales" :key="piloto.id" :piloto="piloto" :modoMercado="true"
+          @fichar="handlerCompra" />
+      </div>
     </section>
 
-    <!-- Potenciadores disponibles -->
-    <section class="grid">
+    <!-- Seccion: Potenciadores -->
+    <section class="flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-bolt text-white text-lg"></i>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Potenciadores</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div v-for="potenciador in potenciadoresSemanales" :key="potenciador.id" class="aspect-square">
           <TarjetaPotenciador :potenciador="potenciador" :modoMercado="true" @fichar="handlerCompra" />
@@ -100,4 +118,3 @@ const handlerCompra = async (elemento) => {
 
   <BarraNavegacion />
 </template>
-

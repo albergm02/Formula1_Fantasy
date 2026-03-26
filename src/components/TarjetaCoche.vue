@@ -35,12 +35,8 @@ const confirmarCompra = () => {
 
 <template>
   <div class="w-full h-[180px]">
-    <div class="w-full h-full overflow-hidden border border-amber-300 bg-black">
+    <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
-
-        <span class="absolute top-2 right-2 z-20 px-2 py-1 text-[8px] font-black uppercase bg-black text-amber-200 border border-amber-300">
-          COCHE
-        </span>
 
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
@@ -60,23 +56,33 @@ const confirmarCompra = () => {
 
           <div class="flex-1"></div>
 
+          <!-- Precio -->
           <div v-if="modoMercado" class="flex justify-end mb-1">
-            <span class="text-sm font-black text-[#D4A843] drop-shadow-md">
+            <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black border border-white">
               {{ props.coche.precio }}M
             </span>
           </div>
 
-          <button v-if="modoMercado" @click="confirmarCompra"
+          <!-- Botones: Detalles + Pujar -->
+          <div v-if="modoMercado" class="flex gap-2">
+            <button @click="mostrarDetalles = true"
+              class="py-2.5 px-3 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+              <i class="pi pi-eye text-white text-xs"></i>
+            </button>
+            <button @click="confirmarCompra"
+              class="flex-1 py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+              <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
+              <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
+            </button>
+          </div>
+
+          <!-- Botón detalles fuera de mercado -->
+          <button v-else @click="mostrarDetalles = true"
             class="w-full py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
-            <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
-            <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
+            <i class="pi pi-eye text-white text-xs mr-2"></i>
+            <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
           </button>
         </div>
-
-        <button @click="mostrarDetalles = true"
-          class="absolute bottom-3 left-3 z-20 p-2 bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-90">
-          <i class="pi pi-eye text-white text-base"></i>
-        </button>
 
       </div>
     </div>
