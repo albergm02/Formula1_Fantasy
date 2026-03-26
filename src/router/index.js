@@ -54,6 +54,12 @@ const rutas = [
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
+    path: '/notificaciones',
+    name: 'notificaciones',
+    component: () => import('../views/NotificacionesView.vue'),
+    meta: { requiresAuth: true, requiresLiga: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },

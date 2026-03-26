@@ -7,7 +7,8 @@ import { registrarse } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 /* Componentes UI */
-import MagicRings from '@/components/MagicRings.vue'
+import Hyperspeed from '@/components/Hyperspeed.vue'
+import { hyperspeedPresets } from '@/components/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -42,6 +43,7 @@ const storeAutenticacion = usarStoreAutenticacion()
 /* Estados del formulario de registro */
 const cargando = ref(false)
 const errorAutenticacion = ref('')
+const opcionesHyperspeed = ref(hyperspeedPresets.akira)
 const valoresInicialesFormulario = ref({
   username: '',
   email: '',
@@ -80,7 +82,9 @@ const handlerRegistro = async ({ valid, values }) => {
   <div class="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
 
     <!-- AnimaciÃ³n de fondo -->
-    <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+      <Hyperspeed :effect-options="opcionesHyperspeed" />
+    </div>
 
     <!-- Tarjeta principal de registro -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border shadow-2xl rounded-xl backdrop-blur-md border-zinc-800">

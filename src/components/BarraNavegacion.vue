@@ -1,4 +1,6 @@
-﻿<script setup>
+﻿<!-- Componente Barra de Navegación: utilizo Dock para mostrar los elementos de navegación -->
+
+<script setup>
 import { h, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Dock from '@/components/Dock.vue'
@@ -12,7 +14,7 @@ const navegar = (destino) => {
 
 const elementosNav = computed(() => [
   {
-    icon: () => h('i', { class: 'pi pi-trophy', style: { fontSize: '18px', color: ruta.path === '/dashboard' ? '#E10600' : 'white' } }),
+    icon: () => h('i', { class: 'pi pi-home', style: { fontSize: '18px', color: ruta.path === '/dashboard' ? '#E10600' : 'white' } }),
     label: 'Ligas',
     onClick: () => navegar('/dashboard'),
   },
@@ -30,6 +32,11 @@ const elementosNav = computed(() => [
     icon: () => h('i', { class: 'pi pi-shopping-cart', style: { fontSize: '18px', color: ruta.path === '/mercado' ? '#E10600' : 'white' } }),
     label: 'Mercado',
     onClick: () => navegar('/mercado'),
+  },
+  {
+    icon: () => h('i', { class: 'pi pi-bell', style: { fontSize: '18px', color: ruta.path === '/notificaciones' ? '#E10600' : 'white' } }),
+    label: 'Notificaciones',
+    onClick: () => navegar('/notificaciones'),
   },
 ])
 </script>

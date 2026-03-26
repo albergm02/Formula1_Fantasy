@@ -7,7 +7,8 @@ import { iniciarSesion, iniciarSesionConGoogle, restablecerContrasena } from '@/
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 /* Componentes UI */
-import MagicRings from '@/components/MagicRings.vue'
+import Hyperspeed from '@/components/Hyperspeed.vue'
+import { hyperspeedPresets } from '@/components/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -44,9 +45,8 @@ const valoresInicialesFormulario = ref({ email: '', password: '' })
 const modalRecuperacionVisible = ref(false)
 const correoRecuperacion = ref('')
 const cargandoRecuperacion = ref(false)
+const opcionesHyperspeed = ref(hyperspeedPresets.akira)
 
-/* Mensajes */
-const mensajeRecuperacionGenerico = 'Si el correo está registrado, recibirás un enlace de recuperación.'
 
 /* Handler Login utilizando email / contraseña */
 const handlerLogin = async ({ valid, values }) => {
@@ -119,12 +119,12 @@ const handlerRestablecerContrasena = async () => {
   cargandoRecuperacion.value = true
   try {
     await restablecerContrasena(correoAEnviar)
-    notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: mensajeRecuperacionGenerico, life: 6000 })
+    notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
     modalRecuperacionVisible.value = false
     correoRecuperacion.value = ''
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: mensajeRecuperacionGenerico, life: 6000 })
+      notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
       modalRecuperacionVisible.value = false
       correoRecuperacion.value = ''
     } else {
@@ -154,7 +154,9 @@ const alOcultarModalRecuperacion = () => {
   <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
 
     <!-- Animación de fondo -->
-    <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+      <Hyperspeed :effect-options="opcionesHyperspeed" />
+    </div>
 
     <!-- Tarjeta de inicio de sesión -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
