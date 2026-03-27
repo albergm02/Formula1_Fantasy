@@ -1,6 +1,12 @@
-﻿// Utilidades del garaje del jugador
+﻿/**
+ * Utilidades del garaje del jugador.
+ * @module garaje
+ */
 
-// Estructura vacÃ­a al unirse a una liga
+/**
+ * Devuelve la estructura de garaje vacía para un jugador al unirse a una liga.
+ * @returns {{ coche: null, pilotos: [], potenciadores: [], ruedas: null }}
+ */
 export const crearGarajeVacio = () => ({
   coche: null,
   pilotos: [],
@@ -8,5 +14,9 @@ export const crearGarajeVacio = () => ({
   ruedas: null,
 })
 
-// Reventa = 50% del precio, redondeado abajo
+/**
+ * Calcula el precio de reventa de un elemento del garaje (50% del precio de compra, redondeado hacia abajo).
+ * @param {number} price - Precio original del elemento.
+ * @returns {number}
+ */
 export const calcularValorReventa = (price = 0) => Math.floor(Number(price || 0) * 0.5)

@@ -4,11 +4,8 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-/* Stores */
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-
-/* Componentes UI */
 import Cabecera from '@/components/Cabecera.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -16,13 +13,12 @@ import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import DataView from 'primevue/dataview'
 
-const ligasStore = usarStoreLigas()
+const storeLigas = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
 const enrutador = useRouter()
 const notificacion = useToast()
 const confirmar = useConfirm()
 
-/* Estados */
 const nombreNuevaLiga = ref('')
 const codigoUnion = ref('')
 const cargando = ref(false)
@@ -32,37 +28,34 @@ const dialogoOpcionesVisible = ref(false)
 const ligaSeleccionada = ref(null)
 const cargandoAccion = ref(false)
 
-/* Abre el menÃº de opciones de una liga seleccionada */
 const abrirOpcionesLiga = (liga) => {
   ligaSeleccionada.value = liga
   dialogoOpcionesVisible.value = true
 }
 
-/* Al montar, cargamos las ligas del usuario */
 onMounted(async () => {
   cargando.value = true
-  await ligasStore.cargarLigasUsuario()
+  await storeLigas.cargarLigasUsuario()
   cargando.value = false
 })
 
-/* Handler Crear liga */
 const manejarCrearLiga = async () => {
   const nombreLigaNormalizado = nombreNuevaLiga.value.trim()
 
   // Validaciones de longitud del nombre
   if (nombreLigaNormalizado.length < 3) {
-    notificacion.add({ severity: 'warn', summary: 'Nombre invÃ¡lido', detail: 'El nombre debe tener al menos 3 caracteres' })
+    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres' })
     return
   }
 
   if (nombreLigaNormalizado.length > 15) {
-    notificacion.add({ severity: 'warn', summary: 'LÃ­mite alcanzado', detail: 'El nombre no puede exceder los 15 caracteres' })
+    notificacion.add({ severity: 'warn', summary: 'Límite alcanzado', detail: 'El nombre no puede exceder los 15 caracteres' })
     return
   }
 
-  const resultado = await ligasStore.crearLiga(nombreLigaNormalizado)
+  const resultado = await storeLigas.crearLiga(nombreLigaNormalizado)
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Â¡Liga creada!', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: '¡Liga creada!', detail: resultado.message })
     nombreNuevaLiga.value = ''
     dialogoCrearVisible.value = false
   } else {
@@ -70,7 +63,6 @@ const manejarCrearLiga = async () => {
   }
 }
 
-/* Handler Unirse a liga con cÃ³digo de invitaciÃ³n */
 const manejarUnirseLiga = async () => {
   const codigoUnionNormalizado = codigoUnion.value.trim().toUpperCase()
 
@@ -78,9 +70,9 @@ const manejarUnirseLiga = async () => {
     return
   }
 
-  const resultado = await ligasStore.unirseALiga(codigoUnionNormalizado)
+  const resultado = await storeLigas.unirseALiga(codigoUnionNormalizado)
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Â¡Bienvenido!', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: '¡Bienvenido!', detail: resultado.message })
     codigoUnion.value = ''
     dialogoUnirseVisible.value = false
   } else {
@@ -88,24 +80,22 @@ const manejarUnirseLiga = async () => {
   }
 }
 
-/* Navega al dashboard de una liga concreta */
 const abrirLiga = (idLiga) => {
-  ligasStore.idLigaActiva = idLiga
+  storeLigas.idLigaActiva = idLiga
   enrutador.push({ name: 'inicio', query: { liga: idLiga } })
 }
 
-/* Handler Abandonar liga: pide confirmaciÃ³n antes de salir */
 const manejarAbandonarLiga = () => {
   confirmar.require({
     icon: 'pi pi-exclamation-triangle',
-    message: `Â¿EstÃ¡s seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
-    header: 'CONFIRMACIÃ“N DE SALIDA',
+    message: `¿Estás seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
+    header: 'CONFIRMACIÓN DE SALIDA',
     acceptLabel: 'Abandonar',
     rejectClass: '!bg-transparent !border-none !text-white',
     acceptClass: '!bg-[#D4A843] !border-none !text-[#1A1A1F]',
     accept: async () => {
       cargandoAccion.value = true
-      const resultado = await ligasStore.abandonarLiga(ligaSeleccionada.value.id)
+      const resultado = await storeLigas.abandonarLiga(ligaSeleccionada.value.id)
       cargandoAccion.value = false
 
       if (resultado.success) {
@@ -118,18 +108,17 @@ const manejarAbandonarLiga = () => {
   })
 }
 
-/* Handler Eliminar liga: acciÃ³n destructiva, borra la liga para todos */
 const manejarEliminarLiga = () => {
   confirmar.require({
     icon: 'pi pi-trash',
-    message: 'Todos los participantes serÃ¡n expulsados y los datos serÃ¡n borrados permanentemente.',
+    message: 'Todos los participantes serán expulsados y los datos serán borrados permanentemente.',
     header: 'ELIMINAR LIGA',
     acceptLabel: 'Eliminar para todos',
     rejectClass: '!bg-transparent !border-none !text-white',
     acceptClass: '!bg-[#E10600] !border-none !text-white',
     accept: async () => {
       cargandoAccion.value = true
-      const resultado = await ligasStore.eliminarLiga(ligaSeleccionada.value.id)
+      const resultado = await storeLigas.eliminarLiga(ligaSeleccionada.value.id)
       cargandoAccion.value = false
 
       if (resultado.success) {
@@ -168,12 +157,12 @@ const manejarEliminarLiga = () => {
 
         <!-- Listado de ligas del usuario -->
         <section>
-          <div v-if="ligasStore.detallesLigas.length > 0" class="flex flex-col justify-center w-full">
+          <div v-if="storeLigas.detallesLigas.length > 0" class="flex flex-col justify-center w-full">
             <div class="mb-4 text-center text-[#F0ECEC] font-bold uppercase tracking-wider">
-              Ligas disponibles: {{ ligasStore.detallesLigas.length }}/8
+              Ligas disponibles: {{ storeLigas.detallesLigas.length }}/8
             </div>
 
-            <DataView :value="ligasStore.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
+            <DataView :value="storeLigas.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
               <template #list="slotProps">
                 <div class="flex flex-col gap-4 w-full">
                   <div v-for="(item, index) in slotProps.items" :key="index"
@@ -207,7 +196,7 @@ const manejarEliminarLiga = () => {
           <div v-else-if="!cargando" class="flex justify-center mt-10">
             <Message severity="secondary"
               class="!bg-transparent !text-center !text-[#F0ECEC] !border !border-[#F0ECEC]/20">
-              No perteneces a ninguna liga todavÃ­a. Crea o Ãºnete a una.
+              No perteneces a ninguna liga todavía. Crea o únete a una.
             </Message>
           </div>
         </section>
@@ -222,8 +211,8 @@ const manejarEliminarLiga = () => {
       closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
     }">
       <div class="flex flex-col gap-4">
-        <span class="text-[#F0ECEC]"> Puedes crear un mÃ¡ximo de 8 ligas</span>
-        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquÃ­ el nombre"
+        <span class="text-[#F0ECEC]"> Puedes crear un máximo de 8 ligas</span>
+        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre"
           class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#E10600]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"
@@ -242,7 +231,7 @@ const manejarEliminarLiga = () => {
       closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
     }">
       <div class="flex flex-col gap-4">
-        <span class="text-[#F0ECEC] text-sm">Introduce el cÃ³digo de invitaciÃ³n de 6 dÃ­gitos.</span>
+        <span class="text-[#F0ECEC] text-sm">Introduce el código de invitación de 6 dígitos.</span>
         <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3"
           class="w-full !bg-[#121218] uppercase focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
@@ -263,20 +252,17 @@ const manejarEliminarLiga = () => {
     }">
       <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
         <p class="mb-2 text-center text-[#F0ECEC] text-sm">
-          Â¿QuÃ© deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
+          ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
         </p>
 
         <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
           class="w-full !bg-[#F0ECEC] !text-black font-bold !border-none" @click="manejarAbandonarLiga"
           :loading="cargandoAccion" />
 
-        <Button v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion" label="ELIMINAR LIGA" icon="pi pi-trash"
-          class="w-full !bg-[#E10600] !text-white font-bold !border-none" @click="manejarEliminarLiga"
-          :loading="cargandoAccion" />
+        <Button v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion"
+          label="ELIMINAR LIGA" icon="pi pi-trash" class="w-full !bg-[#E10600] !text-white font-bold !border-none"
+          @click="manejarEliminarLiga" :loading="cargandoAccion" />
       </div>
     </Dialog>
   </div>
 </template>
-
-
-

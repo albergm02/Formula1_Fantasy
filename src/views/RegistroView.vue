@@ -100,10 +100,10 @@ const manejarRegistro = async ({ valid, values }) => {
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
           :resolver="esquemaValidacion" @submit="manejarRegistro">
 
-          <!-- Campo: Nombre de Piloto -->
+          <!-- Campo: Nombre de usuario -->
           <div class="flex flex-col gap-1">
             <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de
-              Piloto</label>
+              usuario</label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
               class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
@@ -114,7 +114,7 @@ const manejarRegistro = async ({ valid, values }) => {
           <!-- Campo: Email -->
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
-            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="piloto@escuderia.com"
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="usuario@email.com"
               class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
