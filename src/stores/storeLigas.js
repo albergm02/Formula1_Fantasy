@@ -15,7 +15,11 @@ import {
 import { db } from '../services/servicioFirebase'
 import { usarStoreAutenticacion } from './storeAutenticacion'
 import { crearGarajeVacio } from '@/utils/garaje'
-import { generarCodigoInvitacionLiga, alcanzoLimiteLigas } from '@/utils/ligas'
+
+const MAX_LIGAS = 8
+const alcanzoLimiteLigas = (idsLigas = []) =>
+  Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
+const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 8).toUpperCase()
 
 export const usarStoreLigas = defineStore('ligas', {
   state: () => ({
@@ -72,7 +76,11 @@ export const usarStoreLigas = defineStore('ligas', {
         }
         await addDoc(collection(db, 'participaciones'), participacion)
 
-        const referenciaUsuario = doc(db, 'usuarios', storeAutenticacion.usuarioActual.correoAutenticacion)
+        const referenciaUsuario = doc(
+          db,
+          'usuarios',
+          storeAutenticacion.usuarioActual.correoAutenticacion,
+        )
         await updateDoc(referenciaUsuario, {
           ligasIds: arrayUnion(idLiga),
         })
@@ -122,7 +130,10 @@ export const usarStoreLigas = defineStore('ligas', {
       try {
         const codigoInvitacionNormalizado = codigoInvitacion.toUpperCase()
         const referenciaLigas = collection(db, 'ligas')
-        const consultaLiga = query(referenciaLigas, where('codigo_invitacion', '==', codigoInvitacionNormalizado))
+        const consultaLiga = query(
+          referenciaLigas,
+          where('codigo_invitacion', '==', codigoInvitacionNormalizado),
+        )
         const instantaneaConsulta = await getDocs(consultaLiga)
 
         if (instantaneaConsulta.empty) {
@@ -151,7 +162,11 @@ export const usarStoreLigas = defineStore('ligas', {
           participantes: documentoLiga.data().participantes + 1,
         })
 
-        const referenciaUsuario = doc(db, 'usuarios', storeAutenticacion.usuarioActual.correoAutenticacion)
+        const referenciaUsuario = doc(
+          db,
+          'usuarios',
+          storeAutenticacion.usuarioActual.correoAutenticacion,
+        )
         await updateDoc(referenciaUsuario, {
           ligasIds: arrayUnion(idLiga),
         })
@@ -186,9 +201,15 @@ export const usarStoreLigas = defineStore('ligas', {
 
         instantaneaParticipaciones.forEach((documentoParticipacion) => {
           if (documentoParticipacion.data().email_usuario === correoUsuario) {
-            participacionActual = { id: documentoParticipacion.id, ...documentoParticipacion.data() }
+            participacionActual = {
+              id: documentoParticipacion.id,
+              ...documentoParticipacion.data(),
+            }
           } else {
-            participacionesRestantes.push({ id: documentoParticipacion.id, ...documentoParticipacion.data() })
+            participacionesRestantes.push({
+              id: documentoParticipacion.id,
+              ...documentoParticipacion.data(),
+            })
           }
         })
 
@@ -219,9 +240,8 @@ export const usarStoreLigas = defineStore('ligas', {
         const referenciaUsuario = doc(db, 'usuarios', correoUsuario)
         await updateDoc(referenciaUsuario, { ligasIds: arrayRemove(idLiga) })
 
-        storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
-          (id) => id !== idLiga,
-        )
+        storeAutenticacion.usuarioActual.idsLigas =
+          storeAutenticacion.usuarioActual.idsLigas.filter((id) => id !== idLiga)
 
         if (this.idLigaActiva === idLiga) {
           this.idLigaActiva = null
@@ -265,9 +285,8 @@ export const usarStoreLigas = defineStore('ligas', {
 
         await deleteDoc(referenciaLiga)
 
-        storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
-          (id) => id !== idLiga,
-        )
+        storeAutenticacion.usuarioActual.idsLigas =
+          storeAutenticacion.usuarioActual.idsLigas.filter((id) => id !== idLiga)
 
         if (this.idLigaActiva === idLiga) {
           this.idLigaActiva = null
@@ -283,6 +302,3 @@ export const usarStoreLigas = defineStore('ligas', {
     },
   },
 })
-
-
-

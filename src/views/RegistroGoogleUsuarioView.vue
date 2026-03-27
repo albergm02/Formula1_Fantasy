@@ -2,66 +2,68 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-/* Servicios de autenticaciÃ³n */
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
-/* Componentes UI */
 import MagicRings from '@/components/MagicRings.vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 
-/* ValidaciÃ³n con Zod */
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
-import { esquemaNombreUsuario } from '@/utils/validacionesAutenticacion'
 
-/* Esquema de validaciÃ³n con Zod */
 const esquemaValidacion = zodResolver(
   z.object({
-    username: esquemaNombreUsuario,
+    username: z.string().trim().min(3, 'El nombre debe tener al menos 3 caracteres').max(10, 'El nombre no debe exceder los 10 caracteres'),
   })
 )
 
 const enrutador = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 
-/* Estados */
 const cargando = ref(false)
 const errorAutenticacion = ref('')
 const valoresInicialesFormulario = ref({
   username: '',
 })
 
-/* Handler Completar perfil de Google (elegir nombre de piloto) */
-const handlerCompletarPerfilGoogle = async ({ valid, values }) => {
+/**
+ * Maneja el envío del formulario de completar perfil para usuarios de Google.
+ * El correo ya está en el store (cargado por verificarExistenciaPerfil al iniciar con Google).
+ * Solo necesita el nombre de piloto elegido para crear el documento en Firestore.
+ * @param {{ valid: boolean, values: { username: string } }} formulario
+ */
+const manejarCompletarPerfilGoogle = async ({ valid, values }) => {
   if (!valid) return
-
-  const usuarioNormalizado = values.username.trim()
+  const nombreNormalizado = values.username.trim()
   cargando.value = true
   errorAutenticacion.value = ''
 
   try {
-    // Verificamos que exista una sesiÃ³n de Google activa antes de continuar
     if (!storeAutenticacion.usuarioActual.correoAutenticacion) {
-      throw new Error('No se encontrÃ³ una sesiÃ³n vÃ¡lida de Google.')
+      throw new Error('No se encontró una sesión válida de Google.')
     }
 
-    // Creamos el perfil del usuario en Firestore con el nombre elegido
-    await storeAutenticacion.cargarOCrearPerfil(storeAutenticacion.usuarioActual.correoAutenticacion, usuarioNormalizado)
+    await storeAutenticacion.cargarOCrearPerfil(
+      storeAutenticacion.usuarioActual.correoAutenticacion,
+      nombreNormalizado
+    )
     enrutador.push('/ligas')
   } catch (error) {
-    errorAutenticacion.value = 'Error al completar el registro con Google: ' + error.message
+    errorAutenticacion.value = `Error al completar el registro con Google: ${error.message}`
   } finally {
     cargando.value = false
   }
 }
 
-/* Handler Cancelar registro con Google */
-const cancelarRegistroGoogle = async () => {
+/**
+ * Cancela el proceso de registro con Google, cierra la sesión activa y vuelve al login.
+ * No actúa si hay una operación en curso para evitar estados inconsistentes.
+ */
+const cancelarRegistroConGoogle = async () => {
   if (cargando.value) return
 
   await cerrarSesion()
@@ -78,13 +80,13 @@ const cancelarRegistroGoogle = async () => {
 <template>
   <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
 
-    <!-- AnimaciÃ³n de fondo -->
+    <!-- Animación de fondo -->
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
 
-      <!-- Encabezado con logo y tÃ­tulo -->
+      <!-- Encabezado con logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -97,7 +99,7 @@ const cancelarRegistroGoogle = async () => {
       <!-- Contenido del formulario -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
-          :resolver="esquemaValidacion" @submit="handlerCompletarPerfilGoogle">
+          :resolver="esquemaValidacion" @submit="manejarCompletarPerfilGoogle">
 
           <p class="text-sm text-[#F0ECEC] text-center">
             Es tu primera vez entrando con Google. Elige tu nombre de piloto para continuar.
@@ -124,7 +126,7 @@ const cancelarRegistroGoogle = async () => {
 
             <Button type="button" label="Cancelar" :disabled="cargando"
               class="w-full py-3 !bg-transparent font-black uppercase !text-[#D4A843] rounded-lg shadow-lg transition-colors !border border-[#D4A843] hover:!bg-[#D4A843]/10"
-              @click="cancelarRegistroGoogle" />
+              @click="cancelarRegistroConGoogle" />
           </div>
         </Form>
       </template>
