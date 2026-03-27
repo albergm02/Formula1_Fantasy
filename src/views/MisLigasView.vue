@@ -42,7 +42,6 @@ onMounted(async () => {
 const manejarCrearLiga = async () => {
   const nombreLigaNormalizado = nombreNuevaLiga.value.trim()
 
-  // Validaciones de longitud del nombre
   if (nombreLigaNormalizado.length < 3) {
     notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres' })
     return

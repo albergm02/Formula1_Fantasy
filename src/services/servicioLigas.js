@@ -167,3 +167,56 @@ export const vincularLigaAlUsuario = async (correoUsuario, idLiga) => {
 export const desvincularLigaDelUsuario = async (correoUsuario, idLiga) => {
   await updateDoc(doc(db, 'usuarios', correoUsuario), { ligasIds: arrayRemove(idLiga) })
 }
+
+/**
+ * Carga la participación de un usuario concreto en una liga concreta.
+ * Devuelve null si no existe participación (usuario no apuntado a esa liga).
+ * @param {string} idLiga
+ * @param {string} correoUsuario
+ * @returns {Promise<Object|null>}
+ */
+export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
+  const consulta = query(
+    collection(db, 'participaciones'),
+    where('id_liga', '==', idLiga),
+    where('email_usuario', '==', correoUsuario),
+  )
+  const instantanea = await getDocs(consulta)
+  if (instantanea.empty) return null
+  const documento = instantanea.docs[0]
+  return { id: documento.id, ...documento.data() }
+}
+
+/**
+ * Carga el ranking completo de una liga: une participaciones con nombres de usuario.
+ * Ordena por puntos (desc) y usa presupuesto como criterio de desempate (desc).
+ * @param {string} idLiga
+ * @returns {Promise<Array<{ id: string, correo: string, nombre: string, puntos: number, presupuesto: number }>>}
+ */
+export const cargarRankingLiga = async (idLiga) => {
+  const participaciones = await cargarParticipacionesLiga(idLiga)
+  const filasRanking = []
+
+  for (const participacion of participaciones) {
+    let nombreJugador = 'Desconocido'
+    if (participacion.email_usuario) {
+      const documentoUsuario = await getDoc(doc(db, 'usuarios', participacion.email_usuario))
+      if (documentoUsuario.exists()) {
+        const datosUsuario = documentoUsuario.data()
+        nombreJugador = datosUsuario.username || datosUsuario.nombre || 'Desconocido'
+      }
+    }
+    filasRanking.push({
+      id: participacion.id,
+      correo: participacion.email_usuario,
+      nombre: nombreJugador,
+      puntos: participacion.puntos || 0,
+      presupuesto: participacion.presupuesto || 0,
+    })
+  }
+
+  return filasRanking.sort(
+    (primero, segundo) =>
+      segundo.puntos - primero.puntos || segundo.presupuesto - primero.presupuesto,
+  )
+}

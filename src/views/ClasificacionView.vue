@@ -1,85 +1,45 @@
 ﻿<script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
-
-/* Stores */
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
-import { db } from '@/services/servicioFirebase'
-
-/* Componentes UI */
+import { cargarRankingLiga } from '@/services/servicioLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 
-const ligasStore = usarStoreLigas()
+const storeLigas = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
-const escuderiaStore = usarStoreEscuderia()
+const storeEscuderia = usarStoreEscuderia()
 const ruta = useRoute()
 
-/* Estados */
 const ranking = ref([])
 const cargando = ref(true)
 
-/* Carga la clasificaciÃ³n de la liga activa desde Firestore */
-const cargarClasificacion = async () => {
+/**
+ * Carga la clasificación de la liga activa usando el servicio.
+ * @returns {Promise<void>}
+ */
+async function cargarClasificacion() {
   cargando.value = true
 
   try {
-    const idLiga = ruta.query.liga || ligasStore.idLigaActiva
-    if (!idLiga) {
-      cargando.value = false
-      return
-    }
+    const idLiga = ruta.query.liga || storeLigas.idLigaActiva
+    if (!idLiga) return
 
-    ligasStore.idLigaActiva = idLiga
-
-    // Consultamos todas las participaciones de esta liga
-    const referenciaParticipaciones = collection(db, 'participaciones')
-    const consultaLiga = query(referenciaParticipaciones, where('id_liga', '==', idLiga))
-    const instantaneaParticipaciones = await getDocs(consultaLiga)
-    const filasParticipantes = []
-
-    // Para cada participante, buscamos su nombre de usuario en la colecciÃ³n de usuarios
-    for (const documentoParticipante of instantaneaParticipaciones.docs) {
-      const datosParticipante = documentoParticipante.data()
-      let nombreJugador = 'Desconocido'
-
-      if (datosParticipante.email_usuario) {
-        const referenciaUsuario = doc(db, 'usuarios', datosParticipante.email_usuario)
-        const instantaneaUsuario = await getDoc(referenciaUsuario)
-        if (instantaneaUsuario.exists()) {
-          const datosUsuario = instantaneaUsuario.data()
-          nombreJugador = datosUsuario.username || datosUsuario.nombre || 'Desconocido'
-        }
-      }
-
-      filasParticipantes.push({
-        id: documentoParticipante.id,
-        email: datosParticipante.email_usuario,
-        name: nombreJugador,
-        puntos: datosParticipante.puntos || 0,
-        presupuesto: datosParticipante.presupuesto || 0,
-      })
-    }
-
-    // Ordenamos: primero por puntos (desc), luego por presupuesto (desc) como desempate
-    ranking.value = filasParticipantes.sort(
-      (primerJugador, segundoJugador) =>
-        segundoJugador.puntos - primerJugador.puntos || segundoJugador.presupuesto - primerJugador.presupuesto,
-    )
+    storeLigas.idLigaActiva = idLiga
+    ranking.value = await cargarRankingLiga(idLiga)
   } catch (error) {
-    // Si falla la carga, el ranking queda vacÃ­o
+    ranking.value = []
+    throw new Error(`Error al cargar la clasificación: ${error.message}`)
   } finally {
     cargando.value = false
   }
 }
 
-/* Si no hay liga activa, la recuperamos de la query. Luego cargamos el ranking */
 onMounted(async () => {
-  if (!escuderiaStore.idLigaActiva && ruta.query.liga) {
-    await escuderiaStore.cargarEquipo(ruta.query.liga)
+  if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
+    await storeEscuderia.cargarEquipo(ruta.query.liga)
   }
 
   await cargarClasificacion()
@@ -98,42 +58,38 @@ onMounted(async () => {
 
     <main class="mx-auto w-full max-w-md p-4 flex flex-col gap-4 mt-4">
 
-      <!-- TÃ­tulo de la clasificaciÃ³n -->
       <div class="flex justify-center pb-2 border-b border-[#FFFFFF]/50">
-        <h2 class="text-2xl font-black text-white uppercase">ClasificaciÃ³n general</h2>
+        <h2 class="text-2xl font-black text-white uppercase">Clasificación general</h2>
       </div>
 
-      <!-- Spinner de carga -->
       <div v-if="cargando" class="flex flex-col items-center justify-center py-10 gap-3">
         <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
-        <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificaciÃ³n...
+        <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificación...
         </p>
       </div>
 
-      <!-- Listado de jugadores ordenados por puntos -->
       <div v-else class="flex flex-col gap-3">
-        <div v-for="(player, index) in ranking" :key="player.id"
+        <div v-for="(jugador, indice) in ranking" :key="jugador.id"
           class="flex items-center justify-between p-4 border border-white"
-          :class="{ '!border-[#E10600] !bg-[#E10600]/10': player.email === storeAutenticacion.usuarioActual.correoAutenticacion }">
+          :class="{ '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion }">
           <div class="flex items-center gap-4">
-            <div class="relative text-2xl font-black italic -top-4" :class="{ 'text-yellow-400': index === 0, 'text-gray-200': index === 1, 'text-amber-600': index === 2, 'text-[#FFFFFF]': index > 2 }">{{ index + 1 }}Âº</div>
+            <div class="relative text-2xl font-black italic -top-4" :class="{
+              'text-yellow-400': indice === 0,
+              'text-gray-200': indice === 1,
+              'text-amber-600': indice === 2,
+              'text-[#FFFFFF]': indice > 2
+            }">{{ indice + 1 }}º</div>
             <div class="flex flex-col">
-              <span class="font-bold text-lg uppercase text-white">
-                {{ player.name }}
-              </span>
+              <span class="font-bold text-lg uppercase text-white">{{ jugador.nombre }}</span>
               <span class="mt-1 text-xs text-[#F0ECEC]">
-                Presupuesto: <span class="text-[#E10600] font-bold">${{ player.presupuesto }}M</span>
+                Presupuesto: <span class="text-[#E10600] font-bold">${{ jugador.presupuesto }}M</span>
               </span>
             </div>
           </div>
 
           <div class="flex flex-col items-end justify-center text-right">
-            <span class="text-3xl font-black text-[#D4A843]">
-              {{ player.puntos }}
-            </span>
-            <span class="mt-1 text-xs uppercase font-bold text-[#F0ECEC]">
-              PTS
-            </span>
+            <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
+            <span class="mt-1 text-xs uppercase font-bold text-[#F0ECEC]">PTS</span>
           </div>
         </div>
       </div>
@@ -141,6 +97,3 @@ onMounted(async () => {
     <BarraNavegacion />
   </div>
 </template>
-
-
-

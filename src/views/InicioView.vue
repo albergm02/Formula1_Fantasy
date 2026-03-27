@@ -2,34 +2,30 @@
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-/* Stores */
-import { usarStoreEscuderia } from '@/stores/storeEquipo';
-import { usarStoreLigas } from '@/stores/storeLigas';
+import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreLigas } from '@/stores/storeLigas'
 
-/* Componentes UI */
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import WidgetGranPremio from '@/components/WidgetGranPremio.vue'
 import WidgetEstadisticasUsuario from '@/components/WidgetEstadisticasUsuario.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 
-const escuderiaStore = usarStoreEscuderia()
-const ligasStore = usarStoreLigas()
+const storeEscuderia = usarStoreEscuderia()
+const storeLigas = usarStoreLigas()
 const ruta = useRoute()
 const enrutador = useRouter()
 
-/* Al montar, comprobamos si hay una liga activa. Si no la hay, redirigimos a /ligas */
 onMounted(async () => {
-  const idLiga = ruta.query.liga || ligasStore.idLigaActiva
+  const idLiga = ruta.query.liga || storeLigas.idLigaActiva
 
   if (!idLiga) {
     enrutador.push('/ligas')
     return
   }
 
-  // Guardamos la liga activa y cargamos la escuderÃ­a del jugador
-  ligasStore.idLigaActiva = idLiga
-  await escuderiaStore.cargarEquipo(idLiga)
+  storeLigas.idLigaActiva = idLiga
+  await storeEscuderia.cargarEquipo(idLiga)
 })
 </script>
 
@@ -44,9 +40,9 @@ onMounted(async () => {
     <Cabecera />
 
     <!-- Spinner mientras carga la escuderÃ­a -->
-    <div v-if="escuderiaStore.cargandoEquipo" class="flex flex-col items-center justify-center gap-4">
+    <div v-if="storeEscuderia.cargandoEquipo" class="flex flex-col items-center justify-center gap-4">
       <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
-      <p class="text-[#D4A843] font-bold tracking-widest uppercase text-sm animate-pulse">Cargando telemetrÃ­a...</p>
+      <p class="text-[#D4A843] font-bold tracking-widest uppercase text-sm animate-pulse">Cargando telemetría...</p>
     </div>
 
     <!-- Contenido principal: widgets de stats y prÃ³ximo GP -->
@@ -58,5 +54,3 @@ onMounted(async () => {
     <BarraNavegacion />
   </div>
 </template>
-
-

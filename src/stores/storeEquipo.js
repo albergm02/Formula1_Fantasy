@@ -1,238 +1,230 @@
-﻿import { defineStore } from 'pinia'
-import { collection, doc, updateDoc, query, where, getDocs } from 'firebase/firestore'
-
-import { db } from '@/services/servicioFirebase'
+﻿import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-
-/* Utilidades para manejar el garaje del equipo */
 import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
 import { calcularSinergias, aplicarSinergia } from '@/utils/sinergia'
+import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 
-export const usarStoreEscuderia = defineStore('escuderia', {
-  state: () => ({
-    idLigaActiva: null,
-    idParticipanteActivo: null,
-    presupuesto: 0,
-    puntos: 0,
-    garaje: crearGarajeVacio(),
-    cargandoEquipo: false,
-  }),
+export const usarStoreEscuderia = defineStore('escuderia', () => {
+  const idLigaActiva = ref(null)
+  const idParticipanteActivo = ref(null)
+  const presupuesto = ref(0)
+  const puntos = ref(0)
+  const garaje = ref(crearGarajeVacio())
+  const cargandoEquipo = ref(false)
 
-  getters: {
-    /**
-     * Calcula las sinergias activas del garaje actual.
-     * @returns {{ sinergias: Array, multiplicadorTotal: number }}
-     */
-    sinergias: (state) => calcularSinergias(state.garaje),
+  /**
+   * Calcula las sinergias activas del garaje actual.
+   * @returns {{ sinergias: Array, multiplicadorTotal: number }}
+   */
+  const sinergias = computed(() => calcularSinergias(garaje.value))
 
-    /**
-     * Calcula los puntos totales del garaje aplicando sinergias.
-     * @returns {number}
-     */
-    puntosConSinergia() {
-      const base = this.garaje.pilotos.reduce((acc, p) => acc + (p.puntuacionBase || 0), 0)
-      return aplicarSinergia(base, this.sinergias.multiplicadorTotal)
-    },
-  },
+  /**
+   * Calcula los puntos totales del garaje aplicando el multiplicador de sinergias.
+   * @returns {number}
+   */
+  const puntosConSinergia = computed(() => {
+    const base = garaje.value.pilotos.reduce((acc, piloto) => acc + (piloto.puntuacionBase || 0), 0)
+    return aplicarSinergia(base, sinergias.value.multiplicadorTotal)
+  })
 
-  actions: {
-    /**
-     * Carga los datos del equipo para la liga especificada.
-     * @param {string} idLiga - El ID de la liga.
-     * @returns {Promise<void>} - Una promesa que se resuelve cuando los datos del equipo han sido cargados.
-     */
-    async cargarEquipo(idLiga) {
-      this.cargandoEquipo = true
-      const storeAutenticacion = usarStoreAutenticacion()
+  /**
+   * Carga los datos del equipo del usuario para la liga especificada.
+   * @param {string} idLiga - El ID de la liga activa.
+   * @returns {Promise<void>}
+   */
+  async function cargarEquipo(idLiga) {
+    cargandoEquipo.value = true
+    const storeAutenticacion = usarStoreAutenticacion()
 
-      try {
-        // Pillo el ID de la liga activa, busco el participante activo para esa liga y cargo su equipo
-        this.idLigaActiva = idLiga
-        const referenciaParticipaciones = collection(db, 'participaciones')
-        const consultaParticipante = query(
-          referenciaParticipaciones,
-          where('id_liga', '==', idLiga),
-          where('email_usuario', '==', storeAutenticacion.usuarioActual.correoAutenticacion),
-        )
-        const instantaneaConsulta = await getDocs(consultaParticipante)
-
-        // Si encuentro un participante activo, cargo su equipo. Si no, inicializo el equipo con valores por defecto.
-        if (!instantaneaConsulta.empty) {
-          const documentoParticipante = instantaneaConsulta.docs[0]
-          this.idParticipanteActivo = documentoParticipante.id
-          const datosParticipante = documentoParticipante.data()
-          this.presupuesto = datosParticipante.presupuesto
-          this.puntos = datosParticipante.puntos
-          this.garaje = datosParticipante.garaje || crearGarajeVacio()
-          return
-        }
-        console.warn(
-          'Error en cargarEquipo (storeEquipo.js): participante activo no encontrado para la liga seleccionada',
-        )
-        this.presupuesto = 50.0
-        this.puntos = 0
-        this.garaje = crearGarajeVacio()
-      } catch (error) {
-        console.warn('Error en cargarEquipo (storeEquipo.js):', error)
-        this.presupuesto = 50.0
-        this.puntos = 0
-        this.garaje = crearGarajeVacio()
-      } finally {
-        this.cargandoEquipo = false
-      }
-    },
-
-    /**
-     * Guarda el estado actual del equipo en Firestore.
-     * @returns {Promise<void>} - Una promesa que se resuelve cuando el estado del equipo ha sido guardado.
-     */
-    async guardarEstadoEquipo() {
-      if (!this.idParticipanteActivo) {
-        console.warn(
-          'Error en guardarEstadoEquipo (storeEquipo.js): falta el ID del participante activo, no se puede guardar el estado del equipo',
-        )
-        return
-      }
-
-      try {
-        const referenciaParticipante = doc(db, 'participaciones', this.idParticipanteActivo)
-        await updateDoc(referenciaParticipante, {
-          presupuesto: this.presupuesto,
-          puntos: this.puntos,
-          garaje: this.garaje,
-        })
-      } catch (error) {
-        console.error('Error en guardarEstadoEquipo (storeEquipo.js):', error)
-      }
-    },
-
-    /**
-     * Compra un elemento para el equipo.
-     * @param {Object} elemento - El elemento a comprar.
-     * @returns {Promise<Object>} - Una promesa que se resuelve con el resultado de la compra.
-     */
-    async comprarElemento(elemento) {
-      if (this.presupuesto < elemento.precio) {
-        return {
-          success: false,
-          message: 'No tienes suficiente presupuesto para fichar este elemento.',
-        }
-      }
-
-      if (elemento.tipo === 'coche' && this.garaje.coche) {
-        return {
-          success: false,
-          message: 'Ya tienes un coche fichado. Vende el actual para fichar uno nuevo.',
-        }
-      }
-
-      if (elemento.tipo === 'piloto' && this.garaje.pilotos.length >= 2) {
-        return {
-          success: false,
-          message: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
-        }
-      }
-
-      if (elemento.tipo === 'rueda' && this.garaje.ruedas) {
-        return {
-          success: false,
-          message: 'Ya tienes ruedas equipadas. Vende las actuales para elegir otras.',
-        }
-      }
-
-      this.presupuesto -= elemento.precio
-      const elementoComprado = { ...elemento, instancia_id: Date.now() }
-
-      if (elemento.tipo === 'coche') {
-        this.garaje.coche = elementoComprado
-      } else if (elemento.tipo === 'piloto') {
-        this.garaje.pilotos.push(elementoComprado)
-      } else if (elemento.tipo === 'potenciador') {
-        this.garaje.potenciadores.push(elementoComprado)
-      } else if (elemento.tipo === 'rueda') {
-        this.garaje.ruedas = elementoComprado
-      }
-
-      await this.guardarEstadoEquipo()
-      return { success: true, message: `Has fichado: ${elemento.nombre} exitosamente.` }
-    },
-
-    /**
-     * Vende un elemento del equipo.
-     * @param {Object} elemento - El elemento a vender.
-     * @returns {Promise<Object>} - Una promesa que se resuelve con el resultado de la venta.
-     */
-    async venderElemento(elemento) {
-      if (!elemento) {
-        return { success: false, message: 'Elemento no encontrado para vender.' }
-      }
-
-      try {
-        this.presupuesto += calcularValorReventa(elemento.precio)
-
-        if (elemento.tipo === 'coche') {
-          this.garaje.coche = null
-          this.garaje.potenciadores.forEach((potenciador) => {
-            potenciador.equipado = false
-          })
-        } else if (elemento.tipo === 'piloto') {
-          this.garaje.pilotos = this.garaje.pilotos.filter(
-            (piloto) => piloto.instancia_id !== elemento.instancia_id,
-          )
-        } else if (elemento.tipo === 'potenciador') {
-          this.garaje.potenciadores = this.garaje.potenciadores.filter(
-            (potenciador) => potenciador.instancia_id !== elemento.instancia_id,
-          )
-        } else if (elemento.tipo === 'rueda') {
-          this.garaje.ruedas = null
-        }
-
-        await this.guardarEstadoEquipo()
-        return {
-          success: true,
-          message: `Has obtenido ${calcularValorReventa(elemento.precio)} de presupuesto, Â¡Hasta pronto, ${elemento.nombre}.!`,
-        }
-      } catch (error) {
-        console.error('Error in venderElemento (storeEquipo.js):', error)
-        return { success: false, message: 'Error al vender el elemento. IntÃ©ntalo de nuevo.' }
-      }
-    },
-
-    /**
-     * Alterna el estado de un potenciador (equipado/desequipado).
-     * @param {number} idInstancia - El ID de instancia del potenciador.
-     * @returns {Promise<Object>} - Una promesa que se resuelve con el resultado de la operación.
-     */
-    async alternarPotenciador(idInstancia) {
-      const potenciador = this.garaje.potenciadores.find(
-        (elemento) => elemento.instancia_id === idInstancia,
+    try {
+      idLigaActiva.value = idLiga
+      const participacion = await cargarParticipacionDeUsuario(
+        idLiga,
+        storeAutenticacion.usuarioActual.correoAutenticacion,
       )
 
-      if (!potenciador) {
-        return { success: false, message: 'Potenciador no encontrado para equipar.' }
+      if (participacion) {
+        idParticipanteActivo.value = participacion.id
+        presupuesto.value = participacion.presupuesto
+        puntos.value = participacion.puntos
+        garaje.value = participacion.garaje || crearGarajeVacio()
+      } else {
+        presupuesto.value = 50.0
+        puntos.value = 0
+        garaje.value = crearGarajeVacio()
+      }
+    } catch (error) {
+      presupuesto.value = 50.0
+      puntos.value = 0
+      garaje.value = crearGarajeVacio()
+      throw new Error(`Error al cargar el equipo para la liga ${idLiga}: ${error.message}`)
+    } finally {
+      cargandoEquipo.value = false
+    }
+  }
+
+  /**
+   * Persiste el estado actual del equipo (presupuesto, puntos, garaje) en Firestore.
+   * @returns {Promise<void>}
+   */
+  async function guardarEstadoEquipo() {
+    if (!idParticipanteActivo.value) {
+      throw new Error('Error al guardar: falta el ID del participante activo.')
+    }
+
+    try {
+      await actualizarParticipacion(idParticipanteActivo.value, {
+        presupuesto: presupuesto.value,
+        puntos: puntos.value,
+        garaje: garaje.value,
+      })
+    } catch (error) {
+      throw new Error(`Error al guardar el estado del equipo: ${error.message}`)
+    }
+  }
+
+  /**
+   * Compra un elemento y lo añade al garaje del jugador.
+   * @param {Object} elemento - El elemento del mercado a fichar.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function comprarElemento(elemento) {
+    if (presupuesto.value < elemento.precio) {
+      return {
+        success: false,
+        message: 'No tienes suficiente presupuesto para fichar este elemento.',
+      }
+    }
+    if (elemento.tipo === 'coche' && garaje.value.coche) {
+      return {
+        success: false,
+        message: 'Ya tienes un coche fichado. Vende el actual para fichar uno nuevo.',
+      }
+    }
+    if (elemento.tipo === 'piloto' && garaje.value.pilotos.length >= 2) {
+      return {
+        success: false,
+        message: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
+      }
+    }
+    if (elemento.tipo === 'rueda' && garaje.value.ruedas) {
+      return {
+        success: false,
+        message: 'Ya tienes ruedas equipadas. Vende las actuales para elegir otras.',
+      }
+    }
+
+    presupuesto.value -= elemento.precio
+    const elementoComprado = { ...elemento, instancia_id: Date.now() }
+
+    if (elemento.tipo === 'coche') {
+      garaje.value.coche = elementoComprado
+    } else if (elemento.tipo === 'piloto') {
+      garaje.value.pilotos.push(elementoComprado)
+    } else if (elemento.tipo === 'potenciador') {
+      garaje.value.potenciadores.push(elementoComprado)
+    } else if (elemento.tipo === 'rueda') {
+      garaje.value.ruedas = elementoComprado
+    }
+
+    await guardarEstadoEquipo()
+    return { success: true, message: `Has fichado: ${elemento.nombre} exitosamente.` }
+  }
+
+  /**
+   * Vende un elemento del garaje y recupera el 50% de su valor de compra.
+   * @param {Object} elemento - El elemento del garaje a vender.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function venderElemento(elemento) {
+    if (!elemento) {
+      return { success: false, message: 'Elemento no encontrado para vender.' }
+    }
+
+    try {
+      presupuesto.value += calcularValorReventa(elemento.precio)
+
+      if (elemento.tipo === 'coche') {
+        garaje.value.coche = null
+        garaje.value.potenciadores.forEach((potenciador) => {
+          potenciador.equipado = false
+        })
+      } else if (elemento.tipo === 'piloto') {
+        garaje.value.pilotos = garaje.value.pilotos.filter(
+          (piloto) => piloto.instancia_id !== elemento.instancia_id,
+        )
+      } else if (elemento.tipo === 'potenciador') {
+        garaje.value.potenciadores = garaje.value.potenciadores.filter(
+          (potenciador) => potenciador.instancia_id !== elemento.instancia_id,
+        )
+      } else if (elemento.tipo === 'rueda') {
+        garaje.value.ruedas = null
       }
 
-      if (!this.garaje.coche) {
-        return {
-          success: false,
-          message: 'Debes tener un coche fichado para equipar un potenciador.',
-        }
-      }
-
-      potenciador.equipado = !potenciador.equipado
-      await this.guardarEstadoEquipo()
+      await guardarEstadoEquipo()
       return {
         success: true,
-        message: `Has ${potenciador.equipado ? 'equipado' : 'desequipado'} el potenciador: ${potenciador.nombre}.`,
+        message: `Has obtenido ${calcularValorReventa(elemento.precio)} de presupuesto. ¡Hasta pronto, ${elemento.nombre}!`,
       }
-    },
+    } catch (error) {
+      return { success: false, message: 'Error al vender el elemento. Inténtalo de nuevo.' }
+    }
+  }
 
-    limpiarEstadoLigaActiva() {
-      this.idLigaActiva = null
-      this.idParticipanteActivo = null
-      this.presupuesto = 0
-      this.puntos = 0
-      this.garaje = crearGarajeVacio()
-    },
-  },
+  /**
+   * Alterna el estado equipado/desequipado de un potenciador del garaje.
+   * @param {number} idInstancia - El ID de instancia del potenciador.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function alternarPotenciador(idInstancia) {
+    const potenciador = garaje.value.potenciadores.find(
+      (elemento) => elemento.instancia_id === idInstancia,
+    )
+
+    if (!potenciador) {
+      return { success: false, message: 'Potenciador no encontrado para equipar.' }
+    }
+    if (!garaje.value.coche) {
+      return {
+        success: false,
+        message: 'Debes tener un coche fichado para equipar un potenciador.',
+      }
+    }
+
+    potenciador.equipado = !potenciador.equipado
+    await guardarEstadoEquipo()
+    return {
+      success: true,
+      message: `Has ${potenciador.equipado ? 'equipado' : 'desequipado'} el potenciador: ${potenciador.nombre}.`,
+    }
+  }
+
+  /**
+   * Limpia el estado de la escudería al cerrar sesión o cambiar de liga.
+   */
+  function limpiarEstadoLigaActiva() {
+    idLigaActiva.value = null
+    idParticipanteActivo.value = null
+    presupuesto.value = 0
+    puntos.value = 0
+    garaje.value = crearGarajeVacio()
+  }
+
+  return {
+    idLigaActiva,
+    idParticipanteActivo,
+    presupuesto,
+    puntos,
+    garaje,
+    cargandoEquipo,
+    sinergias,
+    puntosConSinergia,
+    cargarEquipo,
+    guardarEstadoEquipo,
+    comprarElemento,
+    venderElemento,
+    alternarPotenciador,
+    limpiarEstadoLigaActiva,
+  }
 })

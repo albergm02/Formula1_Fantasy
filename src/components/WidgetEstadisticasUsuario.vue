@@ -3,14 +3,14 @@ import { computed } from 'vue'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
-const escuderiaStore = usarStoreEscuderia()
-const ligasStore = usarStoreLigas()
+const storeEscuderia = usarStoreEscuderia()
+const storeLigas = usarStoreLigas()
 /**
- * Calcula el nombre de la liga activa. 
+ * Calcula el nombre de la liga activa.
  */
 const nombreLigaActiva = computed(() => {
-  const ligaActiva = ligasStore.detallesLigas.find(
-    (liga) => liga.id === ligasStore.idLigaActiva,
+  const ligaActiva = storeLigas.detallesLigas.find(
+    (liga) => liga.id === storeLigas.idLigaActiva,
   )
   return ligaActiva ? ligaActiva.nombre : 'Mi Campeonato'
 })
@@ -25,19 +25,16 @@ const nombreLigaActiva = computed(() => {
         {{ nombreLigaActiva }}
       </h1>
     </div>
-    <!-- EstadÃ­sticas del usuario -->
+    <!-- Estadísticas del usuario -->
     <div class="flex flex-col items-end gap-1 pl-4">
       <div class="flex items-center gap-2">
         <span class="text-[#F0ECEC] text-xs font-medium uppercase">Puntos:</span>
-        <span class="px-2 bg-[#D4A843] text-white font-black text-lg">{{ escuderiaStore.puntos || 0 }}</span>
+        <span class="px-2 bg-[#D4A843] text-white font-black text-lg">{{ storeEscuderia.puntos || 0 }}</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="text-[#F0ECEC] text-xs font-medium uppercase">Presupuesto:</span>
-        <span class="text-[#E10600] font-black text-lg">${{ escuderiaStore.presupuesto || 50 }}M</span>
+        <span class="text-[#E10600] font-black text-lg">${{ storeEscuderia.presupuesto || 50 }}M</span>
       </div>
     </div>
   </div>
 </template>
-
-
-
