@@ -77,9 +77,7 @@ enrutador.beforeEach(async (to) => {
 
   // Si hay usuario pero aÃºn no se han cargado sus datos, los inicializamos
   if (usuario && !storeAutenticacion.datosCargados) {
-    await storeAutenticacion.inicializarDatosUsuario(usuario.email, usuario.displayName, {
-      createIfMissing: false,
-    })
+    await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
   }
 
   // Si no hay sesiÃ³n activa, limpiamos el store para ocultar el spinner
@@ -108,7 +106,10 @@ enrutador.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresLiga) {
-    if (storeAutenticacion.usuarioActual.idsLigas.length > 0 && storeLigas.detallesLigas.length === 0) {
+    if (
+      storeAutenticacion.usuarioActual.idsLigas.length > 0 &&
+      storeLigas.detallesLigas.length === 0
+    ) {
       await storeLigas.cargarLigasUsuario()
     }
 
@@ -138,6 +139,3 @@ function obtenerUsuarioActual() {
 }
 
 export default enrutador
-
-
-

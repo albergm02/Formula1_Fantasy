@@ -2,11 +2,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-/* Servicios de autenticación */
 import { iniciarSesion, iniciarSesionConGoogle, restablecerContraseña } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
-/* Componentes UI */
 import Hyperspeed from '@/components/Hyperspeed.vue'
 import { hyperspeedPresets } from '@/utils/HyperspeedPresets'
 import Card from 'primevue/card'
@@ -17,15 +15,12 @@ import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
 
-/* Utilidades */
 import { obtenerMensajeErrorGoogle, obtenerMensajeErrorInicioSesion, popupGoogleCerrado } from '@/utils/erroresAutenticacion'
 
-/* Validación con Zod */
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 
-/* Esquema de validación con Zod */
 const esquemaValidacion = zodResolver(
   z.object({
     email: z.string().min(1, 'El correo es obligatorio').email('Formato de correo inválido'),
@@ -33,12 +28,10 @@ const esquemaValidacion = zodResolver(
   })
 )
 
-/* Router, store de autenticación y toast */
 const enrutador = useRouter()
 const notificacion = useToast()
 const storeAutenticacion = usarStoreAutenticacion()
 
-/* Estados */
 const cargando = ref(false)
 const errorAutenticacion = ref('')
 const valoresInicialesFormulario = ref({ email: '', password: '' })
@@ -47,19 +40,20 @@ const correoRecuperacion = ref('')
 const cargandoRecuperacion = ref(false)
 const opcionesHyperspeed = ref(hyperspeedPresets.akira)
 
-
-/* Handler Login utilizando email / contraseña */
-const handlerLogin = async ({ valid, values }) => {
-  // Zod se encarga de mostrar errores.
+/**
+ * Maneja el envío del formulario de inicio de sesión con email y contraseña.
+ * Delega la autenticación al servicio y la carga de perfil al store.
+ * Si el perfil no existe, el guardia del router redirige a completar registro.
+ * @param {{ valid: boolean, values: { email: string, password: string } }} formulario
+ */
+const manejarInicioSesion = async ({ valid, values }) => {
   if (!valid) return
   cargando.value = true
   errorAutenticacion.value = ''
 
   try {
-    // Intentamos iniciar sesión con email y contraseña
     const credencialUsuario = await iniciarSesion(values.email, values.password)
-    // Si el inicio de sesión es exitoso, inicializamos los datos del usuario en el store
-    await storeAutenticacion.inicializarDatosUsuario(credencialUsuario.user.email, credencialUsuario.user.displayName)
+    await storeAutenticacion.verificarExistenciaPerfil(credencialUsuario.user.email)
     enrutador.push('/ligas')
   } catch (error) {
     errorAutenticacion.value = obtenerMensajeErrorInicioSesion(error)
@@ -68,8 +62,12 @@ const handlerLogin = async ({ valid, values }) => {
   }
 }
 
-/* Handler login vía Google */
-const handlerGoogleLogin = async () => {
+/**
+ * Maneja el inicio de sesión con Google mediante popup.
+ * Si el perfil existe, navega a ligas. Si no, redirige a completar el registro.
+ * El cierre manual del popup de Google no se trata como un error para el usuario.
+ */
+const manejarInicioSesionGoogle = async () => {
   errorAutenticacion.value = ''
   cargando.value = true
 
@@ -77,26 +75,19 @@ const handlerGoogleLogin = async () => {
     const credencialUsuario = await iniciarSesionConGoogle()
     const correoGoogle = credencialUsuario.user.email.trim()
 
-    // Si no obtenemos un correo válido de Google, mostramos un error
     if (!correoGoogle) {
       throw new Error('No se pudo obtener el correo de Google.')
     }
 
-    // Intentamos inicializar los datos del usuario.
-    const perfilExiste = await storeAutenticacion.inicializarDatosUsuario(correoGoogle, credencialUsuario.user.displayName, {
-      crearNuevo: false,
-    })
+    const perfilEncontrado = await storeAutenticacion.verificarExistenciaPerfil(correoGoogle)
 
-    // Si el perfil existe, vamos a ligas. Si no, vamos a completar registro.
-    if (perfilExiste) {
+    if (perfilEncontrado) {
       enrutador.push('/ligas')
       return
     }
 
-    // Si no existe perfil, redirigimos a completar registro con Google
     enrutador.push('/registro-google')
   } catch (error) {
-    // Si el error se debe a que el usuario cerró la ventana emergente de Google, no mostramos un mensaje de error.
     if (!popupGoogleCerrado(error)) {
       errorAutenticacion.value = obtenerMensajeErrorGoogle(error)
     }
@@ -105,17 +96,19 @@ const handlerGoogleLogin = async () => {
   }
 }
 
-/* Handler Recuperar Contraseña (Mejorado) */
-const handlerRestablecerContraseña = async () => {
+/**
+ * Maneja el envío del formulario de recuperación de contraseña.
+ * Por seguridad (evitar enumeración de usuarios), siempre muestra el mismo
+ * mensaje de éxito independientemente de si el correo está registrado o no.
+ */
+const manejarRestablecerContraseña = async () => {
   const correoAEnviar = correoRecuperacion.value.trim()
 
-  // Validamos el formato del correo antes de intentar enviar el email de recuperación
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoAEnviar)) {
     notificacion.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
     return
   }
-  // Intentamos enviar el correo de recuperación. 
-  // Para evitar revelar si un correo está registrado o no, mostramos el mismo mensaje de éxito tanto para correos válidos como para no registrados.
+
   cargandoRecuperacion.value = true
   try {
     await restablecerContraseña(correoAEnviar)
@@ -135,7 +128,10 @@ const handlerRestablecerContraseña = async () => {
   }
 }
 
-/* Handler para limpiar el estado del modal de recuperación al cerrarlo */
+/**
+ * Limpia el estado del modal de recuperación al cerrarlo.
+ * Aplica Filosofía Yin-Yang: el modal se abre, por tanto debe limpiarse al cerrarse.
+ */
 const alOcultarModalRecuperacion = () => {
   correoRecuperacion.value = ''
   cargandoRecuperacion.value = false
@@ -174,7 +170,7 @@ const alOcultarModalRecuperacion = () => {
       <!-- Contenido: Formulario de inicio de sesión -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
-          :resolver="esquemaValidacion" @submit="handlerLogin">
+          :resolver="esquemaValidacion" @submit="manejarInicioSesion">
 
           <!-- Campo de correo electrónico -->
           <div class="flex flex-col gap-1">
@@ -213,7 +209,7 @@ const alOcultarModalRecuperacion = () => {
             <!-- Botón de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
               class="flex w-full items-center justify-center gap-2 py-3 !bg-white font-bold uppercase !text-black rounded-lg shadow-lg transition-colors !border-none hover:!bg-gray-300"
-              @click="handlerGoogleLogin" />
+              @click="manejarInicioSesionGoogle" />
 
             <!-- Botón de contraseña olvidada -->
             <Button type="button" label="¿Olvidaste tu contraseña?" text
@@ -234,7 +230,8 @@ const alOcultarModalRecuperacion = () => {
     </Card>
 
     <!-- Modal de recuperación de contraseña -->
-    <Dialog v-model:visible="modalRecuperacionVisible" modal header="Recuperar Contraseña" @hide="alOcultarModalRecuperacion"
+    <Dialog v-model:visible="modalRecuperacionVisible" modal header="Recuperar Contraseña"
+      @hide="alOcultarModalRecuperacion"
       :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
@@ -244,14 +241,12 @@ const alOcultarModalRecuperacion = () => {
 
         <InputText v-model="correoRecuperacion" type="email" placeholder="tu@correo.com"
           class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700"
-          @keyup.enter="handlerRestablecerContraseña" />
+          @keyup.enter="manejarRestablecerContraseña" />
 
         <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="cargandoRecuperacion"
           class="mt-2 w-full py-3 !bg-[#D4A843] font-black tracking-widest !text-[#121218] rounded-lg !border-none hover:!bg-[#C09638]"
-          @click="handlerRestablecerContraseña" />
+          @click="manejarRestablecerContraseña" />
       </div>
     </Dialog>
   </div>
 </template>
-
-

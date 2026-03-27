@@ -51,7 +51,7 @@ const handlerCompletarPerfilGoogle = async ({ valid, values }) => {
     }
 
     // Creamos el perfil del usuario en Firestore con el nombre elegido
-    await storeAutenticacion.inicializarDatosUsuario(storeAutenticacion.usuarioActual.correoAutenticacion, usuarioNormalizado)
+    await storeAutenticacion.cargarOCrearPerfil(storeAutenticacion.usuarioActual.correoAutenticacion, usuarioNormalizado)
     enrutador.push('/ligas')
   } catch (error) {
     errorAutenticacion.value = 'Error al completar el registro con Google: ' + error.message
@@ -131,6 +131,3 @@ const cancelarRegistroGoogle = async () => {
     </Card>
   </div>
 </template>
-
-
-

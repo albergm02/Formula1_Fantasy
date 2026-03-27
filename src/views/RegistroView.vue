@@ -62,7 +62,7 @@ const handlerRegistro = async ({ valid, values }) => {
   errorAutenticacion.value = ''
   try {
     const credencialUsuario = await registrarse(correoNormalizado, values.password)
-    await storeAutenticacion.inicializarDatosUsuario(credencialUsuario.user.email, usuarioNormalizado)
+    await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.email, usuarioNormalizado)
     enrutador.push('/ligas')
   } catch (error) {
     errorAutenticacion.value = obtenerMensajeErrorRegistro(error)
@@ -175,5 +175,3 @@ const handlerRegistro = async ({ valid, values }) => {
     </Card>
   </div>
 </template>
-
-
