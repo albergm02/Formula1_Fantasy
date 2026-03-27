@@ -3,12 +3,9 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-
-/* Stores y utilidades */
+import Button from 'primevue/button'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { calcularValorReventa } from '@/utils/garaje'
-
-/* Componentes UI */
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
@@ -16,19 +13,22 @@ import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 import TarjetaRueda from '@/components/TarjetaRueda.vue'
 
-const escuderiaStore = usarStoreEscuderia()
+const storeEscuderia = usarStoreEscuderia()
 const notificacion = useToast()
 const confirmar = useConfirm()
 const ruta = useRoute()
 
-/* Si no hay liga activa en el store, intentamos recuperarla de la query */
 onMounted(async () => {
-  if (!escuderiaStore.idLigaActiva && ruta.query.liga) {
-    await escuderiaStore.cargarEquipo(ruta.query.liga)
+  if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
+    await storeEscuderia.cargarEquipo(ruta.query.liga)
   }
 })
 
-/* Handler Venta de coche: pide confirmaciÃ³n y ejecuta la venta */
+/**
+ * Solicita confirmación antes de vender el coche del garaje.
+ * En caso afirmativo, delega la operación al store y notifica el resultado.
+ * @param {Object} coche - El objeto coche que se desea vender.
+ */
 const confirmarVentaCoche = (coche) => {
   const valorReventa = calcularValorReventa(coche.precio)
 
@@ -39,7 +39,7 @@ const confirmarVentaCoche = (coche) => {
     acceptLabel: 'Sí, vender',
     rejectLabel: 'Cancelar',
     accept: async () => {
-      const resultado = await escuderiaStore.venderElemento(coche)
+      const resultado = await storeEscuderia.venderElemento(coche)
       if (resultado.success) {
         notificacion.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M` })
       } else {
@@ -49,19 +49,21 @@ const confirmarVentaCoche = (coche) => {
   })
 }
 
-/* Handler Despido de piloto: pide confirmaciÃ³n y ejecuta el despido */
+/**
+ * Solicita confirmación antes de rescindir el contrato de un piloto.
+ * @param {Object} piloto - El objeto piloto que se desea despedir.
+ */
 const confirmarVentaPiloto = (piloto) => {
   const valorReventa = calcularValorReventa(piloto.precio)
 
   confirmar.require({
-    icon: 'pi pi-exclamation-triangle',
+    icon: 'pi pi-user-minus',
     message: `¿Estás seguro de que quieres rescindir el contrato de ${piloto.nombre} por ${valorReventa}M?`,
     header: 'Confirmar Despido',
-    icon: 'pi pi-user-minus',
     acceptLabel: 'Sí, despedir',
     rejectLabel: 'Cancelar',
     accept: async () => {
-      const resultado = await escuderiaStore.venderElemento(piloto)
+      const resultado = await storeEscuderia.venderElemento(piloto)
       if (resultado.success) {
         notificacion.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M` })
       } else {
@@ -71,9 +73,12 @@ const confirmarVentaPiloto = (piloto) => {
   })
 }
 
-/* Handler Instalar/Desinstalar potenciador */
+/**
+ * Alterna el estado de instalación de un potenciador (instalar / desinstalar).
+ * @param {string} idInstancia - El identificador único de la instancia del potenciador.
+ */
 const alternarInstalacionPotenciador = async (idInstancia) => {
-  const resultado = await escuderiaStore.alternarPotenciador(idInstancia)
+  const resultado = await storeEscuderia.alternarPotenciador(idInstancia)
   if (resultado.success) {
     notificacion.add({ severity: 'success', summary: 'Acción completada', detail: resultado.message })
   } else {
@@ -81,96 +86,96 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
   }
 }
 
+/**
+ * Solicita confirmación antes de retirar los neumáticos activos del garaje.
+ * @param {Object} ruedas - El objeto ruedas que se desea retirar.
+ */
 const confirmarVentaRuedas = (ruedas) => {
   const valorReventa = calcularValorReventa(ruedas.precio)
 
   confirmar.require({
     icon: 'pi pi-exclamation-triangle',
-    message: `Quitar ${ruedas.nombre} y recuperar ${valorReventa}M?`,
+    message: `¿Quitar ${ruedas.nombre} y recuperar ${valorReventa}M?`,
     header: 'Confirmar Cambio de Ruedas',
-    acceptLabel: 'Si, quitar',
+    acceptLabel: 'Sí, quitar',
     rejectLabel: 'Cancelar',
     accept: async () => {
-      const resultado = await escuderiaStore.venderElemento(ruedas)
+      const resultado = await storeEscuderia.venderElemento(ruedas)
       if (resultado.success) {
         notificacion.add({ severity: 'success', summary: 'Ruedas retiradas', detail: `Has recuperado ${valorReventa}M` })
       } else {
-        notificacion.add({ severity: 'warn', summary: 'Accion denegada', detail: resultado.message })
+        notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
       }
     },
   })
 }
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
+<!---------------------------------------------------------------------------------------------------------------------------->
 
 <!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
 
-<!------------------------------------------------------------------------------------------------------------------------->
+<!---------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <Cabecera />
 
   <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-md mx-auto w-full">
-    <!-- Seccion: Coche -->
+
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
         <i class="pi pi-car text-white text-lg"></i>
         <h2 class="text-sm font-black text-white uppercase tracking-widest">Coche</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
-      <div v-if="escuderiaStore.garaje.coche" class="flex flex-col w-full h-full">
-        <TarjetaCoche :coche="escuderiaStore.garaje.coche" :modoMercado="false" />
 
-        <!-- Botón de venta del coche -->
+      <div v-if="storeEscuderia.garaje.coche" class="flex flex-col w-full h-full">
+        <TarjetaCoche :coche="storeEscuderia.garaje.coche" :modoMercado="false" />
         <div class="px-6 pb-2 -mt-1">
-          <button @click="confirmarVentaCoche(escuderiaStore.garaje.coche)"
-            class="w-full py-4 flex items-center justify-center bg-[#121218] border border-zinc-800 hover:border-red-900/50 cursor-pointer transition-colors shadow-lg rounded-xl group">
-            <i class="mr-2 text-sm text-red-500 pi pi-shopping-bag group-hover:scale-110 transition-transform"></i>
-            <span class="text-white text-[10px] font-black uppercase tracking-widest">
-              VENDER POR {{ calcularValorReventa(escuderiaStore.garaje.coche.precio) }}M
-            </span>
-          </button>
+          <Button :label="`VENDER POR ${calcularValorReventa(storeEscuderia.garaje.coche.precio)}M`"
+            icon="pi pi-shopping-bag" @click="confirmarVentaCoche(storeEscuderia.garaje.coche)"
+            class="w-full !bg-[#121218] !border-zinc-800 hover:!border-red-900/50 shadow-lg !rounded-xl transition-colors"
+            :pt="{
+              label: { class: 'text-[10px] font-black uppercase tracking-widest' },
+              icon: { class: '!text-red-500' },
+            }" />
         </div>
       </div>
 
       <div v-else
         class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
         <i class="mb-3 text-3xl text-zinc-600 pi pi-car"></i>
-        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Garaje VacÃ­o</span>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Garaje Vacío</span>
       </div>
     </section>
 
-    <!-- Seccion: Pilotos -->
     <section class="grid grid-cols-1 gap-6">
       <div class="flex items-center gap-3 px-6">
         <i class="pi pi-users text-white text-lg"></i>
         <h2 class="text-sm font-black text-white uppercase tracking-widest">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
-      <template v-if="escuderiaStore.garaje.pilotos.length > 0">
-        <div v-for="piloto in escuderiaStore.garaje.pilotos" :key="piloto.instancia_id"
+
+      <template v-if="storeEscuderia.garaje.pilotos.length > 0">
+        <div v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col w-full h-full">
           <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
-
-          <!-- BotÃ³n de despido del piloto -->
           <div class="px-6 pb-2 -mt-1">
-            <button @click="confirmarVentaPiloto(piloto)"
-              class="w-full py-4 flex items-center justify-center bg-[#121218] border border-zinc-800 hover:border-red-900/50 cursor-pointer transition-colors shadow-lg rounded-xl group">
-              <i class="mr-2 text-sm text-red-500 pi pi-user-minus group-hover:scale-110 transition-transform"></i>
-              <span class="text-white text-[10px] font-black uppercase tracking-widest">
-                DESPEDIR ({{ calcularValorReventa(piloto.precio) }}M)
-              </span>
-            </button>
+            <Button :label="`DESPEDIR (${calcularValorReventa(piloto.precio)}M)`" icon="pi pi-user-minus"
+              @click="confirmarVentaPiloto(piloto)"
+              class="w-full !bg-[#121218] !border-zinc-800 hover:!border-red-900/50 shadow-lg !rounded-xl transition-colors"
+              :pt="{
+                label: { class: 'text-[10px] font-black uppercase tracking-widest' },
+                icon: { class: '!text-red-500' },
+              }" />
           </div>
         </div>
       </template>
 
-      <!-- Estado vacÃ­o: sin pilotos -->
       <div v-else
         class="col-span-full flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
         <i class="mb-3 text-3xl text-zinc-600 pi pi-users"></i>
-        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Asientos VacÃ­os</span>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Asientos Vacíos</span>
       </div>
     </section>
 
@@ -181,23 +186,21 @@ const confirmarVentaRuedas = (ruedas) => {
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
-      <div v-if="escuderiaStore.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-6 px-6">
-        <div v-for="potenciador in escuderiaStore.garaje.potenciadores" :key="potenciador.instancia_id"
+      <div v-if="storeEscuderia.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-6 px-6">
+        <div v-for="potenciador in storeEscuderia.garaje.potenciadores" :key="potenciador.instancia_id"
           class="flex flex-col w-full h-full">
           <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
-
-          <button @click="alternarInstalacionPotenciador(potenciador.instancia_id)"
-            class="w-full py-3 mt-2 flex items-center justify-center cursor-pointer transition-colors rounded-xl shadow-lg group"
-            :class="potenciador.equipado
-              ? 'bg-emerald-900/20 border border-emerald-500/50 text-emerald-400'
-              : 'bg-[#121218] border border-zinc-800 text-zinc-400 hover:text-white'">
-            <i class="mr-2 text-[10px]"
-              :class="potenciador.equipado ? 'pi pi-check-circle text-emerald-400' : 'pi pi-cog text-zinc-500 group-hover:text-white transition-colors'"></i>
-            <span class="text-[10px] font-black uppercase tracking-widest"
-              :class="potenciador.equipado ? 'text-emerald-400' : 'text-white'">
-              {{ potenciador.equipado ? 'INSTALADO' : 'INSTALAR' }}
-            </span>
-          </button>
+          <Button :label="potenciador.equipado ? 'INSTALADO' : 'INSTALAR'"
+            :icon="potenciador.equipado ? 'pi pi-check-circle' : 'pi pi-cog'"
+            @click="alternarInstalacionPotenciador(potenciador.instancia_id)" :class="[
+              'w-full mt-2 shadow-lg !rounded-xl',
+              potenciador.equipado
+                ? '!bg-emerald-900/20 !border-emerald-500/50'
+                : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+            ]" :pt="{
+              label: { class: ['text-[10px] font-black uppercase tracking-widest', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
+              icon: { class: potenciador.equipado ? 'text-emerald-400' : 'text-zinc-500' },
+            }" />
         </div>
       </div>
 
@@ -208,33 +211,33 @@ const confirmarVentaRuedas = (ruedas) => {
       </div>
     </section>
 
-    <!-- Seccion: Ruedas -->
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
         <i class="pi pi-circle-fill text-white text-lg"></i>
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Neumaticos</h2>
+        <h2 class="text-sm font-black text-white uppercase tracking-widest">Neumáticos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
-      <div v-if="escuderiaStore.garaje.ruedas" class="flex flex-col w-full h-full px-6">
-        <TarjetaRueda :rueda="escuderiaStore.garaje.ruedas" :modoMercado="false" />
+      <div v-if="storeEscuderia.garaje.ruedas" class="flex flex-col w-full h-full px-6">
+        <TarjetaRueda :rueda="storeEscuderia.garaje.ruedas" :modoMercado="false" />
         <div class="pb-2 mt-2">
-          <button @click="confirmarVentaRuedas(escuderiaStore.garaje.ruedas)"
-            class="w-full py-4 flex items-center justify-center bg-[#121218] border border-zinc-800 hover:border-red-900/50 cursor-pointer transition-colors shadow-lg rounded-xl group">
-            <i class="mr-2 text-sm text-red-500 pi pi-shopping-bag group-hover:scale-110 transition-transform"></i>
-            <span class="text-white text-[10px] font-black uppercase tracking-widest">
-              QUITAR ({{ calcularValorReventa(escuderiaStore.garaje.ruedas.precio) }}M)
-            </span>
-          </button>
+          <Button :label="`QUITAR (${calcularValorReventa(storeEscuderia.garaje.ruedas.precio)}M)`"
+            icon="pi pi-shopping-bag" @click="confirmarVentaRuedas(storeEscuderia.garaje.ruedas)"
+            class="w-full !bg-[#121218] !border-zinc-800 hover:!border-red-900/50 shadow-lg !rounded-xl transition-colors"
+            :pt="{
+              label: { class: 'text-[10px] font-black uppercase tracking-widest' },
+              icon: { class: '!text-red-500' },
+            }" />
         </div>
       </div>
 
       <div v-else
         class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
         <i class="mb-3 text-3xl text-zinc-600 pi pi-circle"></i>
-        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Neumaticos</span>
+        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Neumáticos</span>
       </div>
     </section>
+
   </main>
 
   <BarraNavegacion />

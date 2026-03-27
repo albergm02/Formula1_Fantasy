@@ -39,13 +39,13 @@ onMounted(async () => {
   <div class="min-h-screen pb-24 bg-[#1A1A1F] font-sans">
     <Cabecera />
 
-    <!-- Spinner mientras carga la escuderÃ­a -->
+    <!-- Spinner mientras carga la escudería -->
     <div v-if="storeEscuderia.cargandoEquipo" class="flex flex-col items-center justify-center gap-4">
       <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
       <p class="text-[#D4A843] font-bold tracking-widest uppercase text-sm animate-pulse">Cargando telemetría...</p>
     </div>
 
-    <!-- Contenido principal: widgets de stats y prÃ³ximo GP -->
+    <!-- Contenido principal: widgets de stats y próximo GP -->
     <main v-else class="p-4 max-w-md mx-auto w-full flex flex-col gap-6 mt-2">
       <WidgetEstadisticasUsuario />
       <WidgetGranPremio />

@@ -36,7 +36,7 @@ const confirmarCompra = () => {
         message: `Equipar ${props.rueda.nombre} por ${props.rueda.precio}M?`,
         header: 'Confirmar Compuesto',
         icon: 'pi pi-exclamation-triangle',
-        acceptLabel: 'Si, equipar',
+        acceptLabel: 'Sí, equipar',
         rejectLabel: 'No, cancelar',
         accept() {
             emit('fichar', props.rueda)

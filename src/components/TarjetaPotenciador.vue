@@ -37,7 +37,7 @@ const confirmarCompra = () => {
     message: `Pujar por ${props.potenciador.nombre} por ${props.potenciador.precio}M?`,
     header: 'Confirmar Puja',
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Si, pujar',
+    acceptLabel: 'Sí, pujar',
     rejectLabel: 'No, cancelar',
     accept() {
       emit('fichar', props.potenciador)
@@ -81,8 +81,6 @@ const confirmarCompra = () => {
               {{ m.signo }}{{ m.valor }} {{ m.atributo.slice(0, 3) }}
             </span>
           </div>
-
-          <!-- Precio (ya movido arriba) -->
 
           <!-- Botones: Detalles + Pujar -->
           <div v-if="modoMercado" class="flex gap-2">
