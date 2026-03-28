@@ -75,12 +75,12 @@ enrutador.beforeEach(async (to) => {
   const storeAutenticacion = usarStoreAutenticacion()
   const storeLigas = usarStoreLigas()
 
-  // Si hay usuario pero aÃºn no se han cargado sus datos, los inicializamos
+  // Si hay usuario pero aún no se han cargado sus datos, los inicializamos
   if (usuario && !storeAutenticacion.datosCargados) {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
   }
 
-  // Si no hay sesiÃ³n activa, limpiamos el store para ocultar el spinner
+  // Si no hay sesión activa, limpiamos el store para ocultar el spinner
   if (!usuario && !storeAutenticacion.datosCargados) {
     storeAutenticacion.limpiarSesion()
   }

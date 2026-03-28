@@ -1,5 +1,5 @@
 ﻿<!-------------------------------------------------------------------------------------------------------------------------->
-<!-- ElectricBorder.vue: Componente de borde elÃ©ctrico animado para resaltar elementos con un efecto de electricidad. -->
+<!-- ElectricBorder.vue: Componente de borde eléctrico animado para resaltar elementos con un efecto de electricidad. -->
 <!-- Creditos a: @BalintFerenczy on X - https://codepen.io/BalintFerenczy/pen/KwdoyEN -->
 <!-- Y a: https://vue-bits.dev/animations/electric-border, open source de componentes primevue -->
 <!-------------------------------------------------------------------------------------------------------------------------->
@@ -219,4 +219,3 @@ const bgGlowStyle = computed<CSSProperties>(() => ({
         </div>
     </div>
 </template>
-

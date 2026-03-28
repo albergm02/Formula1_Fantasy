@@ -18,7 +18,7 @@ const handlerCerrarSesion = async () => {
         await cerrarSesion()
         enrutador.push({ name: 'login' })
     } catch (error) {
-        console.error('Error en cerrar sesiÃ³n (Cabecera.vue):', error)
+        console.error('Error en cerrar sesión (Cabecera.vue):', error)
     }
 }
 
@@ -34,7 +34,7 @@ const irADashboard = () => {
 </script>
 
 <template>
-    <!-- z-10 para que el header estÃ© por encima de otros elementos / border-b (border-bottom) -->
+    <!-- z-10 para que el header esté por encima de otros elementos / border-b (border-bottom) -->
     <header class="w-full p-3 flex justify-between sticky top-0 z-40 bg-[#1A1A1F] border-b border-[#E10600]">
         <div class="flex items-center gap-2">
             <img src="/logo.png" class="h-16 w-16 object-contain cursor-pointer" @click="irADashboard" />
@@ -56,6 +56,3 @@ const irADashboard = () => {
         </div>
     </header>
 </template>
-
-
-

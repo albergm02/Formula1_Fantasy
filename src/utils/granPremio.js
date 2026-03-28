@@ -1,6 +1,6 @@
-﻿// Info del prÃ³ximo Gran Premio via API OpenF1
+﻿// Info del próximo Gran Premio via API OpenF1
 
-// Fecha ISO â†’ formato legible en espaÃ±ol
+// Fecha ISO → formato legible en español
 const formatearFechaGranPremio = (fechaIso) => {
   const fecha = new Date(fechaIso)
 
@@ -17,7 +17,7 @@ const formatearFechaGranPremio = (fechaIso) => {
   }
 }
 
-// PrÃ³ximo GP del aÃ±o. Devuelve null si no quedan carreras.
+// Próximo GP del año. Devuelve null si no quedan carreras.
 export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   const reuniones = await respuesta.json()
@@ -44,13 +44,13 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
   }
 }
 
-// Cuenta atrÃ¡s hasta el GP â†’ "Xd Xh Xm Xs"
+// Cuenta atrás hasta el GP → "Xd Xh Xm Xs"
 export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   const inicioCarrera = new Date(fechaInicio)
   const tiempoRestante = inicioCarrera - ahora
 
   if (tiempoRestante <= 0) {
-    return 'Â¡El gran premio ya ha comenzado!'
+    return '¡El gran premio ya ha comenzado!'
   }
 
   const dias = Math.floor(tiempoRestante / (1000 * 60 * 60 * 24))
@@ -60,5 +60,3 @@ export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
 
   return `${dias}d ${horas}h ${minutos}m ${segundos}s`
 }
-
-
