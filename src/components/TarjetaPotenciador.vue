@@ -108,7 +108,9 @@ const confirmarCompra = () => {
 
     <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.potenciador.nombre" modal
-      :pt="{ root: { class: 'bg-zinc-900 border border-zinc-700 max-w-sm w-full' }, header: { class: 'bg-zinc-900 text-white font-black uppercase p-4 pb-2' }, content: { class: 'bg-zinc-900 p-4 pt-2' }, closeButton: { class: 'text-white hover:text-zinc-200' } }">
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-3">
 
         <!-- Descripcion -->

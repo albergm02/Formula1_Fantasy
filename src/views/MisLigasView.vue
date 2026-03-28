@@ -202,13 +202,10 @@ const manejarEliminarLiga = () => {
       </div>
     </div>
 
-    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO" :pt="{
-      root: { class: '!bg-[#1A1A1F] !border-none mx-4 w-full max-w-sm' },
-      header: { class: '!bg-[#1A1A1F] !rounded' },
-      title: { class: 'font-bold tracking-widest text-[#E10600]' },
-      content: { class: '!bg-[#1A1A1F] pt-4' },
-      closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
-    }">
+    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO"
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: '#E10600', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <span class="text-[#F0ECEC]"> Puedes crear un máximo de 8 ligas</span>
         <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre"
@@ -222,13 +219,10 @@ const manejarEliminarLiga = () => {
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA" :pt="{
-      root: { class: '!bg-[#1A1A1F] !border-none mx-4 w-full max-w-sm' },
-      header: { class: '!bg-[#1A1A1F] !rounded ' },
-      title: { class: 'font-bold tracking-widest text-[#D4A843]' },
-      content: { class: '!bg-[#1A1A1F] pt-4' },
-      closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
-    }">
+    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA"
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: '#D4A843', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <span class="text-[#F0ECEC] text-sm">Introduce el código de invitación de 6 dígitos.</span>
         <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3"
@@ -242,13 +236,10 @@ const manejarEliminarLiga = () => {
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA" :pt="{
-      root: { class: '!bg-[#1A1A1F] !border-none mx-4 w-full max-w-sm' },
-      header: { class: '!bg-[#1A1A1F] !rounded' },
-      title: { class: 'font-bold tracking-widest text-[#F0ECEC]' },
-      content: { class: '!bg-[#1A1A1F] pt-4 pb-6' },
-      closeButton: { class: 'hover:!bg-[#F0ECEC] !text-[#F0ECEC]' },
-    }">
+    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA"
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
         <p class="mb-2 text-center text-[#F0ECEC] text-sm">
           ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
