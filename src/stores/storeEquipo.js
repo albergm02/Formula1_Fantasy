@@ -4,6 +4,7 @@ import { usarStoreAutenticacion } from './storeAutenticacion'
 import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
 import { calcularSinergias, aplicarSinergia } from '@/utils/sinergia'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
+import { usarStoreNotificaciones } from './storeNotificaciones'
 
 export const usarStoreEscuderia = defineStore('escuderia', () => {
   const idLigaActiva = ref(null)
@@ -129,6 +130,10 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     }
 
     await guardarEstadoEquipo()
+
+    const storeNotificaciones = usarStoreNotificaciones()
+    storeNotificaciones.registrarFichaje(elemento.nombre, elemento.tipo).catch(() => {})
+
     return { success: true, message: `Has fichado: ${elemento.nombre} exitosamente.` }
   }
 
@@ -163,6 +168,10 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       }
 
       await guardarEstadoEquipo()
+
+      const storeNotificaciones = usarStoreNotificaciones()
+      storeNotificaciones.registrarVenta(elemento.nombre, elemento.tipo).catch(() => {})
+
       return {
         success: true,
         message: `Has obtenido ${calcularValorReventa(elemento.precio)} de presupuesto. ¡Hasta pronto, ${elemento.nombre}!`,

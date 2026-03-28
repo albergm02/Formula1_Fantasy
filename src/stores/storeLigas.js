@@ -18,6 +18,7 @@ import {
   desvincularLigaDelUsuario,
   cargarRankingLiga,
 } from '@/services/servicioLigas'
+import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
 
 const MAX_LIGAS = 8
 const alcanzoLimiteLigas = (idsLigas = []) =>
@@ -133,6 +134,13 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await actualizarLiga(liga.id, { participantes: liga.participantes + 1 })
       await vincularLigaAlUsuario(correoUsuario, liga.id)
       storeAutenticacion.usuarioActual.idsLigas.push(liga.id)
+
+      registrarActividad(liga.id, {
+        nombreUsuario: storeAutenticacion.usuarioActual.nombreVisible,
+        tipo: TIPOS_ACTIVIDAD.INCORPORACION,
+        descripcion: `se ha unido al campeonato ${liga.nombre}`,
+      }).catch(() => {})
+
       await cargarLigasUsuario()
       return { success: true, message: 'Te has unido a la liga.' }
     } catch (error) {
@@ -183,6 +191,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
       } else {
         await actualizarLiga(idLiga, { participantes: datosLiga.participantes - 1 })
       }
+
+      registrarActividad(idLiga, {
+        nombreUsuario: storeAutenticacion.usuarioActual.nombreVisible,
+        tipo: TIPOS_ACTIVIDAD.ABANDONO,
+        descripcion: `ha abandonado el campeonato ${datosLiga.nombre}`,
+      }).catch(() => {})
 
       await eliminarParticipacion(participacionPropia.id)
       await desvincularLigaDelUsuario(correoUsuario, idLiga)
