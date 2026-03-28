@@ -43,12 +43,12 @@ const manejarCrearLiga = async () => {
   const nombreLigaNormalizado = nombreNuevaLiga.value.trim()
 
   if (nombreLigaNormalizado.length < 3) {
-    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 caracteres' })
+    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 carácteres' })
     return
   }
 
-  if (nombreLigaNormalizado.length > 15) {
-    notificacion.add({ severity: 'warn', summary: 'Límite alcanzado', detail: 'El nombre no puede exceder los 15 caracteres' })
+  if (nombreLigaNormalizado.length > 12) {
+    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre no puede exceder los 12 carácteres' })
     return
   }
 
