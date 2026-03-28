@@ -43,6 +43,20 @@ export const cerrarSesion = () => firebaseSignOut(auth)
  */
 export const escucharCambioEstadoAutenticacion = (callback) => onAuthStateChanged(auth, callback)
 
+/**
+ * Obtiene el usuario autenticado actual como una promesa de resolución única.
+ * Pensado para guards de navegación y el bootstrap de la app,
+ * donde no se necesita un observador continuo sino una lectura puntual.
+ * @returns {Promise<import('firebase/auth').User|null>}
+ */
+export const obtenerUsuarioActual = () =>
+  new Promise((resolve, reject) => {
+    const cancelar = onAuthStateChanged(auth, (usuario) => {
+      cancelar()
+      resolve(usuario)
+    }, reject)
+  })
+
 /* ─── Firestore – Perfiles de usuario ───────────────────────────────────── */
 
 /**

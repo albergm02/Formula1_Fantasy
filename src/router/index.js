@@ -1,6 +1,5 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../services/servicioFirebase'
+import { obtenerUsuarioActual } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
@@ -124,18 +123,5 @@ enrutador.beforeEach(async (to) => {
 
   return true
 })
-
-function obtenerUsuarioActual() {
-  return new Promise((resolve, reject) => {
-    const desuscribir = onAuthStateChanged(
-      auth,
-      (usuario) => {
-        desuscribir()
-        resolve(usuario)
-      },
-      reject,
-    )
-  })
-}
 
 export default enrutador

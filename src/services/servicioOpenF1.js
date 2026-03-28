@@ -1,6 +1,17 @@
-﻿// Info del próximo Gran Premio via API OpenF1
+/**
+ * Servicio de comunicación con la API pública de OpenF1.
+ * Centraliza TODAS las llamadas HTTP a api.openf1.org.
+ * Los componentes y widgets importan únicamente desde este módulo.
+ * @module servicioOpenF1
+ */
 
-// Fecha ISO → formato legible en español
+/* ─── Utilidades internas ───────────────────────────────────────────────── */
+
+/**
+ * Convierte una fecha ISO a un objeto con fecha y hora legibles en español.
+ * @param {string} fechaIso - Fecha en formato ISO 8601.
+ * @returns {{ fecha: string, hora: string }}
+ */
 const formatearFechaGranPremio = (fechaIso) => {
   const fecha = new Date(fechaIso)
 
@@ -17,7 +28,14 @@ const formatearFechaGranPremio = (fechaIso) => {
   }
 }
 
-// Próximo GP del año. Devuelve null si no quedan carreras.
+/* ─── Exportaciones públicas ────────────────────────────────────────────── */
+
+/**
+ * Obtiene los datos del próximo Gran Premio del año en curso.
+ * Devuelve null si no quedan reuniones futuras en el calendario.
+ * @param {{ fetchImpl?: Function, anio?: number }} opciones
+ * @returns {Promise<Object|null>}
+ */
 export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   const reuniones = await respuesta.json()
@@ -44,7 +62,12 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
   }
 }
 
-// Cuenta atrás hasta el GP → "Xd Xh Xm Xs"
+/**
+ * Calcula la cuenta regresiva hasta el inicio de un Gran Premio.
+ * @param {string} fechaInicio - Fecha ISO del inicio de la carrera.
+ * @param {Date} ahora - Fecha de referencia (inyectable para tests).
+ * @returns {string} Texto con el formato "Xd Xh Xm Xs" o mensaje de inicio.
+ */
 export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   const inicioCarrera = new Date(fechaInicio)
   const tiempoRestante = inicioCarrera - ahora

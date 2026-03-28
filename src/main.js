@@ -11,8 +11,8 @@ import Aura from '@primevue/themes/aura'
 import 'primeicons/primeicons.css'
 import './assets/main.css'
 
-import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from './services/servicioFirebase'
+import { escucharCambioEstadoAutenticacion } from './services/servicioAutenticacion'
 
 const app = createApp(App)
 const gestorPinia = createPinia()
@@ -25,7 +25,7 @@ app.use(ConfirmationService)
 
 let appMontada = false
 
-onAuthStateChanged(auth, () => {
+escucharCambioEstadoAutenticacion(() => {
   if (!appMontada) {
     app.mount('#app')
     appMontada = true

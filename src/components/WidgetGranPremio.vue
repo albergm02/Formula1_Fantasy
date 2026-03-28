@@ -1,6 +1,6 @@
 ﻿<script setup>
 import { ref, onMounted } from 'vue'
-import { obtenerCuentaRegresiva, obtenerSiguienteGranPremio } from '@/utils/granPremio'
+import { obtenerCuentaRegresiva, obtenerSiguienteGranPremio } from '@/services/servicioOpenF1'
 
 const siguienteGranPremio = ref(null)
 const cuentaRegresiva = ref('')

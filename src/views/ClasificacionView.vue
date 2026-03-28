@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
-import { cargarRankingLiga } from '@/services/servicioLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 
@@ -17,7 +16,7 @@ const ranking = ref([])
 const cargando = ref(true)
 
 /**
- * Carga la clasificación de la liga activa usando el servicio.
+ * Carga la clasificación de la liga activa delegando al store.
  * @returns {Promise<void>}
  */
 async function cargarClasificacion() {
@@ -28,7 +27,7 @@ async function cargarClasificacion() {
     if (!idLiga) return
 
     storeLigas.idLigaActiva = idLiga
-    ranking.value = await cargarRankingLiga(idLiga)
+    ranking.value = await storeLigas.cargarClasificacion(idLiga)
   } catch (error) {
     ranking.value = []
     throw new Error(`Error al cargar la clasificación: ${error.message}`)

@@ -16,6 +16,7 @@ import {
   contarLigasAdministradas,
   vincularLigaAlUsuario,
   desvincularLigaDelUsuario,
+  cargarRankingLiga,
 } from '@/services/servicioLigas'
 
 const MAX_LIGAS = 8
@@ -243,6 +244,19 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
+  /**
+   * Carga el ranking de puntos de todos los participantes de una liga.
+   * @param {string} idLiga - ID de la liga cuya clasificación se quiere obtener.
+   * @returns {Promise<Array>} Array de participantes ordenado por puntos descendente.
+   */
+  async function cargarClasificacion(idLiga) {
+    try {
+      return await cargarRankingLiga(idLiga)
+    } catch (error) {
+      throw new Error(`Error al cargar la clasificación de la liga ${idLiga}: ${error.message}`)
+    }
+  }
+
   return {
     detallesLigas,
     idLigaActiva,
@@ -251,5 +265,6 @@ export const usarStoreLigas = defineStore('ligas', () => {
     unirseALiga,
     abandonarLiga,
     eliminarLiga,
+    cargarClasificacion,
   }
 })
