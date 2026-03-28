@@ -9,7 +9,7 @@
  *
  * @module servicioNotificaciones
  */
-import { collection, addDoc, query, where, orderBy, limit, getDocs, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, query, where, limit, getDocs, serverTimestamp } from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
 /* ─── Tipos de actividad ────────────────────────────────────────────────── */
@@ -50,16 +50,17 @@ export const cargarActividadLiga = async (idLiga, maximo = 30) => {
   const consulta = query(
     collection(db, 'actividad'),
     where('idLiga', '==', idLiga),
-    orderBy('fecha', 'desc'),
     limit(maximo),
   )
 
   const instantanea = await getDocs(consulta)
 
-  return instantanea.docs.map((documento) => ({
-    id: documento.id,
-    ...documento.data(),
-    fecha: documento.data().fecha?.toDate() ?? new Date(),
-  }))
+  return instantanea.docs
+    .map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+      fecha: documento.data().fecha?.toDate() ?? new Date(),
+    }))
+    .sort((primero, segundo) => segundo.fecha - primero.fecha)
 }
 
