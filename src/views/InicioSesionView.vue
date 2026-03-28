@@ -14,8 +14,8 @@ import {
   popupGoogleCerrado
 } from '@/utils/erroresAutenticacion'
 
-import Hyperspeed from '@/components/Hyperspeed.vue'
-import { hyperspeedPresets } from '@/utils/HyperspeedPresets'
+import Hyperspeed from '@/components/vue-bits/Hyperspeed.vue'
+import { hyperspeedPresets } from '@/components/vue-bits/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'

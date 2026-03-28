@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
-import MagicRings from '@/components/MagicRings.vue'
+import MagicRings from '@/components/vue-bits/MagicRings.vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'

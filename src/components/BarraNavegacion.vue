@@ -3,7 +3,7 @@
 <script setup>
 import { h, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Dock from '@/components/Dock.vue'
+import Dock from '@/components/vue-bits/Dock.vue'
 
 const ruta = useRoute()
 const enrutador = useRouter()

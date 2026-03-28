@@ -37,7 +37,7 @@ const irADashboard = () => {
     <!-- z-10 para que el header esté por encima de otros elementos / border-b (border-bottom) -->
     <header class="w-full p-3 flex justify-between sticky top-0 z-40 bg-[#1A1A1F] border-b border-[#E10600]">
         <div class="flex items-center gap-2">
-            <img src="/logo.png" class="h-16 w-16 object-contain cursor-pointer" @click="irADashboard" />
+            <img src="/logo.png" class="h-8 w-8 object-contain cursor-pointer" @click="irADashboard" />
             <span class="sm:block font-black italic text-[#E10600] text-lg cursor-pointer" @click="irADashboard">F1
                 FANTASY</span>
         </div>
