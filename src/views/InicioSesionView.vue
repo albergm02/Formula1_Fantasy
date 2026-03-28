@@ -2,8 +2,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { iniciarSesion, iniciarSesionConGoogle, restablecerContraseña } from '@/services/servicioAutenticacion'
+import {
+  iniciarSesion,
+  iniciarSesionConGoogle,
+  restablecerContraseña
+} from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import {
+  obtenerMensajeErrorGoogle,
+  obtenerMensajeErrorInicioSesion,
+  popupGoogleCerrado
+} from '@/utils/erroresAutenticacion'
 
 import Hyperspeed from '@/components/Hyperspeed.vue'
 import { hyperspeedPresets } from '@/utils/HyperspeedPresets'
@@ -14,10 +23,8 @@ import Button from 'primevue/button'
 import Message from 'primevue/message'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
-
-import { obtenerMensajeErrorGoogle, obtenerMensajeErrorInicioSesion, popupGoogleCerrado } from '@/utils/erroresAutenticacion'
-
 import { Form } from '@primevue/forms'
+
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 
@@ -75,20 +82,24 @@ const manejarInicioSesionGoogle = async () => {
     const credencialUsuario = await iniciarSesionConGoogle()
     const correoGoogle = credencialUsuario.user.email.trim()
 
+    // Verificamos que se haya obtenido un correo válido del proveedor de autenticación.
     if (!correoGoogle) {
       throw new Error('No se pudo obtener el correo de Google.')
     }
 
+    // ¿Estaba ya registrado? ->
     const perfilEncontrado = await storeAutenticacion.verificarExistenciaPerfil(correoGoogle)
 
+    // Sí.
     if (perfilEncontrado) {
       enrutador.push('/ligas')
       return
     }
-
+    // No, es su primera vez, pedimos que complete su registro.
     enrutador.push('/registro-google')
   } catch (error) {
     if (!popupGoogleCerrado(error)) {
+      // mostramos el error solo si no fue causado por el usuario cerrando el popup de Google
       errorAutenticacion.value = obtenerMensajeErrorGoogle(error)
     }
   } finally {
@@ -104,6 +115,7 @@ const manejarInicioSesionGoogle = async () => {
 const manejarRestablecerContraseña = async () => {
   const correoAEnviar = correoRecuperacion.value.trim()
 
+  // Regex para validación básica del formato del correo electrónico.
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoAEnviar)) {
     notificacion.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
     return
@@ -117,6 +129,8 @@ const manejarRestablecerContraseña = async () => {
     correoRecuperacion.value = ''
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
+      // Importante para la defensa: aunque el correo no exista, muestro el mensaje de éxito para evitar 
+      // que un atacante pueda verificar qué correos están registrados en el sistema (enumeración de usuarios).
       notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
       modalRecuperacionVisible.value = false
       correoRecuperacion.value = ''
@@ -129,8 +143,7 @@ const manejarRestablecerContraseña = async () => {
 }
 
 /**
- * Limpia el estado del modal de recuperación al cerrarlo.
- * Aplica Filosofía Yin-Yang: el modal se abre, por tanto debe limpiarse al cerrarse.
+ * Limpiamos el estado del modal de recuperación al cerrarlo.
  */
 const alOcultarModalRecuperacion = () => {
   correoRecuperacion.value = ''
@@ -240,7 +253,7 @@ const alOcultarModalRecuperacion = () => {
         <p class="text-sm text-[#F0ECEC]">Introduce tu correo y te enviaremos un enlace de recuperación.</p>
 
         <InputText v-model="correoRecuperacion" type="email" placeholder="tu@correo.com"
-          class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:ring-1 focus:!border-[#D4A843] focus:ring-[#D4A843] !border-zinc-700"
+          class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:!border-[#D4A843] !border-zinc-700"
           @keyup.enter="manejarRestablecerContraseña" />
 
         <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="cargandoRecuperacion"
