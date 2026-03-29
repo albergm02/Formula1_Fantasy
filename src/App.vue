@@ -53,7 +53,8 @@ onUnmounted(() => {
   <div class="fixed inset-0 h-full w-full bg-[#1A1A1F] -z-30"></div>
 
   <!-- Fondo animado: visible solo en vistas autenticadas -->
-  <div v-if="mostrarFondoBeams" class="fixed inset-0 -z-20 opacity-60">
+  <div v-if="mostrarFondoBeams" class="fixed inset-0 -z-20 opacity-60 will-change-transform"
+    style="transform: translateZ(0); backface-visibility: hidden;">
     <Beams :beam-width="1" :beam-height="20" :beam-number="10" :light-color="'#888888'" :speed="3"
       :noise-intensity="1.75" :scale="0.15" :rotation="20" />
   </div>
