@@ -138,7 +138,7 @@ const manejarEliminarLiga = () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen pb-10 bg-[#1A1A1F] font-sans">
+  <div class="min-h-screen pb-10 font-sans">
     <Cabecera />
 
     <div class="p-4 mt-4 max-w-4xl mx-auto">

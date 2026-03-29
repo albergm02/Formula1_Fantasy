@@ -36,7 +36,7 @@ onMounted(async () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="min-h-screen pb-24 bg-[#1A1A1F] font-sans">
+  <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
 
     <!-- Spinner mientras carga la escudería -->
