@@ -11,7 +11,6 @@ export const ruedasBase = [
     imagen: '/Ruedas/blandos.webp',
     color: '#ef4444',
     mejoras: { ritmo: 10, consistencia: -5, adaptabilidad: 0 },
-    descripcion: 'Grip maximo en clasificacion y primeras vueltas. Degradacion alta.',
   },
   {
     id: 'medio',
@@ -20,7 +19,6 @@ export const ruedasBase = [
     imagen: '/Ruedas/medios.webp',
     color: '#eab308',
     mejoras: { ritmo: 4, consistencia: 4, adaptabilidad: 0 },
-    descripcion: 'Equilibrio entre rendimiento y durabilidad.',
   },
   {
     id: 'duro',
@@ -29,7 +27,6 @@ export const ruedasBase = [
     imagen: '/Ruedas/hard.webp',
     color: '#e5e7eb',
     mejoras: { ritmo: -5, consistencia: 10, adaptabilidad: 0 },
-    descripcion: 'Maxima durabilidad. Menos grip pero muy consistente.',
   },
   {
     id: 'intermedio',
@@ -38,7 +35,6 @@ export const ruedasBase = [
     imagen: '/Ruedas/intermedios.webp',
     color: '#22c55e',
     mejoras: { ritmo: 0, consistencia: 0, adaptabilidad: 10 },
-    descripcion: 'Rendimiento optimo en pista mixta seca/mojada.',
   },
   {
     id: 'lluvia',
@@ -47,6 +43,5 @@ export const ruedasBase = [
     imagen: '/Ruedas/wet.webp',
     color: '#3b82f6',
     mejoras: { ritmo: -3, consistencia: 3, adaptabilidad: 8 },
-    descripcion: 'Agarre maximo en condiciones de lluvia fuerte.',
   },
 ]
