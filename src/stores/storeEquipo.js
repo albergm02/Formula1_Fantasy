@@ -5,6 +5,7 @@ import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
 import { calcularSinergias, aplicarSinergia } from '@/utils/sinergia'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import { usarStoreNotificaciones } from './storeNotificaciones'
+import { ruedasBase } from '@/data/bases/ruedasBase'
 
 export const usarStoreEscuderia = defineStore('escuderia', () => {
   const idLigaActiva = ref(null)
@@ -109,13 +110,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
         message: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
       }
     }
-    if (elemento.tipo === 'rueda' && garaje.value.ruedas) {
-      return {
-        success: false,
-        message: 'Ya tienes ruedas equipadas. Vende las actuales para elegir otras.',
-      }
-    }
-
     presupuesto.value -= elemento.precio
     const elementoComprado = { ...elemento, instancia_id: Date.now() }
 
@@ -125,8 +119,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       garaje.value.pilotos.push(elementoComprado)
     } else if (elemento.tipo === 'potenciador') {
       garaje.value.potenciadores.push(elementoComprado)
-    } else if (elemento.tipo === 'rueda') {
-      garaje.value.ruedas = elementoComprado
     }
 
     await guardarEstadoEquipo()
@@ -160,8 +152,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
         garaje.value.potenciadores = garaje.value.potenciadores.filter(
           (potenciador) => potenciador.instancia_id !== elemento.instancia_id,
         )
-      } else if (elemento.tipo === 'rueda') {
-        garaje.value.ruedas = null
       }
 
       await guardarEstadoEquipo()
@@ -215,6 +205,38 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
   }
 
   /**
+   * Equipa un compuesto de neumáticos en el garaje.
+   * Requiere tener al menos un piloto y un coche fichados.
+   * @param {string} idRueda - El id del compuesto a equipar (ej. 'blando', 'medio').
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function equiparNeumatico(idRueda) {
+    const rueda = ruedasBase.find((r) => r.id === idRueda)
+    if (!rueda) {
+      return { success: false, message: `Compuesto con id ${idRueda} no encontrado.` }
+    }
+
+    garaje.value.ruedas = { ...rueda }
+    await guardarEstadoEquipo()
+    return { success: true, message: `Compuesto ${rueda.nombre} equipado.` }
+  }
+
+  /**
+   * Retira los neumáticos actualmente equipados del garaje.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function desequiparNeumatico() {
+    if (!garaje.value.ruedas) {
+      return { success: false, message: 'No hay neumáticos equipados para retirar.' }
+    }
+
+    const nombreRueda = garaje.value.ruedas.nombre
+    garaje.value.ruedas = null
+    await guardarEstadoEquipo()
+    return { success: true, message: `Compuesto ${nombreRueda} retirado.` }
+  }
+
+  /**
    * Limpia el estado de la escudería al cerrar sesión o cambiar de liga.
    */
   function limpiarEstadoLigaActiva() {
@@ -239,6 +261,8 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     comprarElemento,
     venderElemento,
     alternarPotenciador,
+    equiparNeumatico,
+    desequiparNeumatico,
     limpiarEstadoLigaActiva,
   }
 })
