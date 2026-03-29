@@ -56,22 +56,19 @@ const confirmarCompra = () => {
           class="absolute inset-0 w-full h-full object-cover" style="object-position: 65% center;" />
 
         <!-- Overlay de info (lado derecho) -->
-        <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
-          <!-- Precio en la esquina superior derecha -->
-          <div v-if="modoMercado" class="absolute top-2 right-2 z-30">
-            <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black border border-white">
-              {{ props.potenciador.precio }}M
-            </span>
-          </div>
-
-          <!-- Header: nombre -->
-          <div>
+        <div class="absolute inset-y-0 right-0 w-[70%] flex flex-col justify-between p-3">
+          <!-- Header: nombre + precio -->
+          <div class="flex items-start justify-between gap-2">
             <div class="flex flex-col min-w-0">
               <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
                 {{ props.potenciador.nombre }}
               </span>
               <span class="text-xs text-zinc-300 uppercase font-bold">POTENCIADOR</span>
             </div>
+            <span v-if="modoMercado"
+              class="shrink-0 px-2 py-1 text-sm font-black text-[#D4A843] bg-black/50 border border-white/50">
+              {{ Number(props.potenciador.precio).toFixed(2) }}M
+            </span>
           </div>
 
           <!-- Etiquetas de mejora -->
@@ -85,11 +82,11 @@ const confirmarCompra = () => {
           <!-- Botones: Detalles + Pujar -->
           <div v-if="modoMercado" class="flex gap-2">
             <button @click="mostrarDetalles = true"
-              class="py-2.5 px-3 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+              class="py-2.5 px-3 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
               <i class="pi pi-eye text-white text-xs"></i>
             </button>
             <button @click="confirmarCompra"
-              class="flex-1 py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+              class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
               <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
               <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
             </button>
@@ -97,7 +94,7 @@ const confirmarCompra = () => {
 
           <!-- Boton detalles fuera de mercado -->
           <button v-else @click="mostrarDetalles = true"
-            class="w-full py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+            class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
             <i class="pi pi-eye text-white text-xs mr-2"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
           </button>

@@ -11,7 +11,6 @@ import Aura from '@primevue/themes/aura'
 import 'primeicons/primeicons.css'
 import './assets/main.css'
 
-import { auth } from './services/servicioFirebase'
 import { escucharCambioEstadoAutenticacion } from './services/servicioAutenticacion'
 
 const app = createApp(App)

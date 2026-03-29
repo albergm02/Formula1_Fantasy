@@ -84,26 +84,33 @@ enrutador.beforeEach(async (to) => {
     storeAutenticacion.limpiarSesion()
   }
 
+  // Si la ruta requiere autenticación pero no hay usuario, redirigimos al login
   if (to.meta.requiresAuth && !usuario) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
+  // Si la ruta requiere ser invitado pero hay usuario, redirigimos a ligas o registro según el perfil
   if (to.meta.requiresGuest && usuario) {
+    // Intuimos que si el perfil no existe y hay usuario,
+    // es porque el usuario se autenticó pero no completó su perfil mediante Google.
     if (!storeAutenticacion.perfilExiste) {
       return { name: 'registro-google' }
     }
-
     return { name: 'ligas' }
   }
 
+  // Si el usuario tiene sesión pero no ha completado su perfil, redirigimos al registro de Google
   if (usuario && !storeAutenticacion.perfilExiste && !to.meta.requiresIncompleteProfile) {
     return { name: 'registro-google' }
   }
 
+  // Si la ruta requiere perfil incompleto pero el perfil ya existe, redirigimos a ligas
   if (to.meta.requiresIncompleteProfile && storeAutenticacion.perfilExiste) {
     return { name: 'ligas' }
   }
 
+  // Si la ruta requiere liga pero el usuario no tiene ligas, redirigimos a ligas,
+  // si el usuario tiene ligas pero no se han cargado, las cargamos antes de permitir el acceso
   if (to.meta.requiresLiga) {
     if (
       storeAutenticacion.usuarioActual.idsLigas.length > 0 &&

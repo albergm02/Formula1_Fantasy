@@ -189,7 +189,7 @@ const alOcultarModalRecuperacion = () => {
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="tu@correo.com"
-              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg  !border-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>

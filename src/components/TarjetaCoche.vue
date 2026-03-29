@@ -58,19 +58,19 @@ const confirmarCompra = () => {
 
           <!-- Precio -->
           <div v-if="modoMercado" class="flex justify-end mb-1">
-            <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black border border-white">
-              {{ props.coche.precio }}M
+            <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black/50 border border-white/50">
+              {{ Number(props.coche.precio).toFixed(2) }}M
             </span>
           </div>
 
           <!-- Botones: Detalles + Pujar -->
           <div v-if="modoMercado" class="flex gap-2">
             <button @click="mostrarDetalles = true"
-              class="py-2.5 px-3 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+              class="py-2.5 px-3 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
               <i class="pi pi-eye text-white text-xs"></i>
             </button>
             <button @click="confirmarCompra"
-              class="flex-1 py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+              class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
               <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
               <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
             </button>
@@ -78,7 +78,7 @@ const confirmarCompra = () => {
 
           <!-- Botón detalles fuera de mercado -->
           <button v-else @click="mostrarDetalles = true"
-            class="w-full py-2.5 flex items-center justify-center bg-black border border-white cursor-pointer transition-all hover:bg-zinc-900 active:scale-[0.98]">
+            class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
             <i class="pi pi-eye text-white text-xs mr-2"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
           </button>

@@ -98,7 +98,7 @@ const confirmarCompra = () => {
                 </main>
 
                 <Button v-if="modoMercado" @click="confirmarCompra" unstyled
-                    class="w-full py-3 z-20 shrink-0 flex items-center justify-center bg-black border-none cursor-pointer">
+                    class="w-full py-3 z-20 shrink-0 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer hover:bg-black/80 transition-all active:scale-[0.98]">
                     <i class="mr-1 font-bold text-[10px] text-white pi pi-money-bill"></i>
                     <span class="text-white text-[10px] font-black uppercase tracking-widest">EQUIPAR</span>
                 </Button>

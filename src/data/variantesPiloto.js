@@ -4,7 +4,7 @@ import { calcularPuntuacionBase } from '@/utils/puntuacion'
 
 export const variantesPiloto = [
   {
-    variante: 'clasificador',
+    variante: 'clasi',
     perfil: 'clasificador',
     incrementoPrecio: 0,
     nombreHabilidad: 'Especialista en Clasificacion',

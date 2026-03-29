@@ -77,7 +77,6 @@ const manejarCompra = async (elemento) => {
 
     <section class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <i class="pi pi-car text-white text-lg"></i>
         <h2 class="text-sm font-black text-white uppercase tracking-widest">Coches</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
@@ -90,7 +89,6 @@ const manejarCompra = async (elemento) => {
 
     <section class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <i class="pi pi-users text-white text-lg"></i>
         <h2 class="text-sm font-black text-white uppercase tracking-widest">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
@@ -103,7 +101,6 @@ const manejarCompra = async (elemento) => {
 
     <section class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <i class="pi pi-bolt text-white text-lg"></i>
         <h2 class="text-sm font-black text-white uppercase tracking-widest">Potenciadores</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
