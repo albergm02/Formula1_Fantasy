@@ -54,9 +54,9 @@ onUnmounted(() => {
 
   <!-- Fondo animado: visible solo en vistas autenticadas -->
   <div v-if="mostrarFondoBeams" class="fixed inset-0 -z-20 opacity-60 will-change-transform"
-    style="transform: translateZ(0); backface-visibility: hidden;">
-    <Beams :beam-width="1" :beam-height="20" :beam-number="10" :light-color="'#888888'" :speed="3"
-      :noise-intensity="1.75" :scale="0.15" :rotation="20" />
+    style="transform: translateZ(0); backface-visibility: hidden; contain: strict;">
+    <Beams :beam-width="1" :beam-height="10" :beam-number="5" :light-color="'#888888'" :speed="2"
+      :noise-intensity="1.75" :scale="0.55" :rotation="40" />
   </div>
 
   <!-- Componentes de PrimeVue -->
