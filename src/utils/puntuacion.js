@@ -88,17 +88,19 @@ export function calcularFactorJornada(actuacion, condiciones, variante) {
     return calcularFactorCarrera(actuacion)
   }
   if (variante === 'todo_terreno') {
-    return calcularFactorTodoTerreno(condiciones)
+    return calcularFactorTodoTerreno(condiciones, actuacion.posicionCarrera)
   }
 
   const factorQ = calcularFactorQualy(actuacion)
   const factorC = calcularFactorCarrera(actuacion)
-  const factorT = calcularFactorTodoTerreno(condiciones)
+  const factorT = calcularFactorTodoTerreno(condiciones, actuacion.posicionCarrera)
   return Math.round(((factorQ + factorC + factorT) / 3) * 100) / 100
 }
 
-function calcularFactorQualy({ posicionQualy }) {
-  return resolverFactorPosicionQualy(posicionQualy)
+function calcularFactorQualy({ posicionQualy, posicionCarrera }) {
+  const factorPrincipal = resolverFactorPosicionQualy(posicionQualy)
+  const factorCarreraBase = resolverFactorPosicionCarrera(posicionCarrera)
+  return Math.round((factorPrincipal * 0.75 + factorCarreraBase * 0.25) * 100) / 100
 }
 
 function calcularFactorCarrera({ posicionCarrera, posicionSalida }) {
@@ -108,12 +110,10 @@ function calcularFactorCarrera({ posicionCarrera, posicionSalida }) {
   return Math.round(factorPosicion * factorAdelantos * 100) / 100
 }
 
-function calcularFactorTodoTerreno({
-  llovio,
-  numeroDNFs,
-  numeroSafetyCarActivos,
-  numeroVirtualSafetyCarActivos,
-}) {
+function calcularFactorTodoTerreno(
+  { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos },
+  posicionCarrera,
+) {
   const factorClima = llovio ? 1.4 : 0.9
 
   let bonusCaos = 0
@@ -125,7 +125,9 @@ function calcularFactorTodoTerreno({
     bonusCaos = 0.3
   }
 
-  return Math.round(factorClima * (1 + bonusCaos) * 100) / 100
+  const factorPrincipal = Math.round(factorClima * (1 + bonusCaos) * 100) / 100
+  const factorCarreraBase = resolverFactorPosicionCarrera(posicionCarrera)
+  return Math.round((factorPrincipal * 0.75 + factorCarreraBase * 0.25) * 100) / 100
 }
 
 /**
@@ -188,16 +190,13 @@ export function calcularPuntuacionBase(atributos, pesos) {
 
 /**
  * Escala la puntuacion base (0-100) a puntos de fantasy para una jornada.
- * Se aplica un factor de escala y un componente aleatorio para simular la varianza real.
  * @param {number} puntuacionBase - Valor ponderado (0-100)
  * @param {number} factorJornada - Multiplicador individual del piloto, calculado con calcularFactorJornada()
  * @returns {number} Puntos de fantasy para esa jornada (0-50 aprox.)
  */
 export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
   const escala = puntuacionBase / 100
-  const puntosBase = Math.round(escala * 50 * factorJornada)
-  const varianza = Math.floor(Math.random() * 11) - 5
-  return Math.max(0, puntosBase + varianza)
+  return Math.max(0, Math.round(escala * 50 * factorJornada))
 }
 
 /**
