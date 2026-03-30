@@ -66,6 +66,110 @@ function acumularMejorasPotenciadores(potenciadores) {
   return mejoras
 }
 
+/* ─── Factores de jornada por variante ──────────────────────────────────── */
+
+/**
+ * @param {number} posicion - Posición final en clasificación (1-20)
+ * @returns {number}
+ */
+function resolverFactorPosicionQualy(posicion) {
+  if (posicion <= 3) return 1.5
+  if (posicion <= 6) return 1.3
+  if (posicion <= 10) return 1.15
+  if (posicion <= 15) return 0.85
+  return 0.65
+}
+
+/**
+ * @param {number} posicion - Posición final en carrera (1-20; >20 = DNF)
+ * @returns {number}
+ */
+function resolverFactorPosicionCarrera(posicion) {
+  if (posicion === 1) return 1.5
+  if (posicion === 2) return 1.4
+  if (posicion === 3) return 1.3
+  if (posicion <= 5) return 1.2
+  if (posicion <= 10) return 1.0
+  if (posicion <= 15) return 0.75
+  if (posicion <= 20) return 0.5
+  return 0.2
+}
+
+/**
+ * @param {number} posicionesGanadas - posicionSalida - posicionFinal (positivo = adelantó)
+ * @returns {number}
+ */
+function resolverFactorAdelantos(posicionesGanadas) {
+  if (posicionesGanadas >= 5) return 1.2
+  if (posicionesGanadas >= 1) return 1.1
+  if (posicionesGanadas === 0) return 1.0
+  if (posicionesGanadas >= -3) return 0.85
+  return 0.7
+}
+
+function calcularFactorQualy({ posicionQualy }) {
+  return resolverFactorPosicionQualy(posicionQualy)
+}
+
+function calcularFactorCarrera({ posicionCarrera, posicionSalida }) {
+  const posicionesGanadas = posicionSalida - posicionCarrera
+  const factorPosicion = resolverFactorPosicionCarrera(posicionCarrera)
+  const factorAdelantos = resolverFactorAdelantos(posicionesGanadas)
+  return Math.round(factorPosicion * factorAdelantos * 100) / 100
+}
+
+function calcularFactorTodoTerreno({
+  llovio,
+  numeroDNFs,
+  numeroSafetyCarActivos,
+  numeroVirtualSafetyCarActivos,
+}) {
+  const factorClima = llovio ? 1.4 : 0.9
+
+  let bonusCaos = 0
+  bonusCaos += numeroSafetyCarActivos * 0.1
+  bonusCaos += numeroVirtualSafetyCarActivos * 0.05
+  bonusCaos += numeroDNFs * 0.03
+
+  if (bonusCaos > 0.3) {
+    bonusCaos = 0.3
+  }
+
+  return Math.round(factorClima * (1 + bonusCaos) * 100) / 100
+}
+
+/**
+ * Calcula el factor de jornada individual para un piloto según su actuación real en el GP.
+ * Cada variante amplifica un tipo diferente de actuación:
+ *   - 'qualy'        → posición final en clasificación
+ *   - 'carrera'      → posición final + posiciones ganadas respecto a la salida
+ *   - 'todo_terreno' → lluvia, safety cars y DNFs de otros pilotos
+ *   - 'base'         → promedio de los tres factores anteriores
+ *
+ * @param {{ posicionQualy: number, posicionCarrera: number, posicionSalida: number }} actuacion
+ * @param {{ llovio: boolean, numeroDNFs: number, numeroSafetyCarActivos: number, numeroVirtualSafetyCarActivos: number }} condiciones
+ * @param {string} variante - 'qualy' | 'carrera' | 'todo_terreno' | 'base'
+ * @returns {number}
+ */
+export function calcularFactorJornada(actuacion, condiciones, variante) {
+  if (variante === 'qualy') {
+    return calcularFactorQualy(actuacion)
+  }
+  if (variante === 'carrera') {
+    return calcularFactorCarrera(actuacion)
+  }
+  if (variante === 'todo_terreno') {
+    return calcularFactorTodoTerreno(condiciones)
+  }
+
+  const factorQ = calcularFactorQualy(actuacion)
+  const factorC = calcularFactorCarrera(actuacion)
+  const factorT = calcularFactorTodoTerreno(condiciones)
+  return Math.round(((factorQ + factorC + factorT) / 3) * 100) / 100
+}
+
+/* ─── Pipeline principal del garaje ─────────────────────────────────────── */
+
 /**
  * Calcula la puntuación total del garaje para una jornada.
  *
@@ -73,13 +177,13 @@ function acumularMejorasPotenciadores(potenciadores) {
  *   1. Se acumulan las mejoras de ruedas + potenciadores equipados.
  *   2. Se aplican al mapa de atributos del piloto (clampeado a 0-100).
  *   3. Se recalcula la puntuacionBase con los atributos ya modificados.
- *   4. Se escala a puntos de jornada con calcularPuntosJornada().
+ *   4. Se escala a puntos de jornada usando el factor individual del piloto.
+ *      Si no se provee factor para un piloto, se usa 1.0 (modo simulación).
  *
- * El coche aporta una contribución plana basada en su stat de puntos.
- * Fórmula coche: Math.round(coche.puntos / 40) → un coche con 200 pts aporta 5 pts/jornada.
+ * El coche aporta una contribución plana: Math.round(coche.puntos / 40).
  *
  * @param {{ coche: Object|null, pilotos: Array, potenciadores: Array, ruedas: Object|null }} garaje
- * @param {number} [factorJornada=1.0] - Multiplicador externo del GP (1.0 por defecto)
+ * @param {Object.<string, number>} [factoresPorPiloto={}] - Mapa id-piloto → factor calculado con calcularFactorJornada()
  * @returns {{
  *   puntosTotal: number,
  *   desglose: {
@@ -88,7 +192,7 @@ function acumularMejorasPotenciadores(potenciadores) {
  *   }
  * }}
  */
-export function calcularPuntuacionGaraje(garaje, factorJornada = 1.0) {
+export function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   let mejorasRuedas = { ritmo: 0, consistencia: 0, adaptabilidad: 0 }
   if (garaje.ruedas && garaje.ruedas.mejoras) {
     mejorasRuedas = garaje.ruedas.mejoras
@@ -108,7 +212,8 @@ export function calcularPuntuacionGaraje(garaje, factorJornada = 1.0) {
   for (const piloto of garaje.pilotos || []) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
     const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
-    const puntosJornada = calcularPuntosJornada(puntuacionBase, factorJornada)
+    const factorEstePiloto = factoresPorPiloto[piloto.id] ?? 1.0
+    const puntosJornada = calcularPuntosJornada(puntuacionBase, factorEstePiloto)
 
     desglosePilotos.push({ nombre: piloto.nombre, atributosModificados, puntosJornada })
     puntosPilotos += puntosJornada

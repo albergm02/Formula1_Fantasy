@@ -7,13 +7,14 @@
  * Rango resultante: 0-100 → se escala a puntos de fantasy
  */
 export const perfilesPuntuacion = {
-  clasificador: {
-    clave: 'clasificador',
-    nombre: 'Clasificador',
-    descripcion: 'Prioriza la velocidad pura en clasificacion.',
+  qualy: {
+    clave: 'qualy',
+    nombre: 'Qualy',
+    descripcion:
+      'Prioriza la velocidad pura en clasificación. El factor de jornada depende de la posición en qualy.',
     pesos: { ritmo: 0.6, consistencia: 0.3, adaptabilidad: 0.1 },
     reglasUsuario: [
-      'Ritmo x0.6 — penaliza pilotos lentos, premia la vuelta rapida.',
+      'Ritmo x0.6 — premia la vuelta rápida y la velocidad pura.',
       'Consistencia x0.3 — un piloto regular suma puntos estables.',
       'Adaptabilidad x0.1 — poco peso, no importa el clima o la estrategia.',
     ],
@@ -29,13 +30,14 @@ export const perfilesPuntuacion = {
       'Adaptabilidad x0.2 — bonus moderado en condiciones cambiantes.',
     ],
   },
-  lluvia: {
-    clave: 'lluvia',
-    nombre: 'Lluvia',
-    descripcion: 'Apuesta por condiciones extremas y caos en pista.',
+  todo_terreno: {
+    clave: 'todo_terreno',
+    nombre: 'Todo Terreno',
+    descripcion:
+      'Apuesta por el caos: lluvia, safety cars y abandonos amplifican su factor de jornada.',
     pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.6 },
     reglasUsuario: [
-      'Adaptabilidad x0.6 — los pilotos que brillan en lluvia y caos dominan.',
+      'Adaptabilidad x0.6 — brilla en lluvia, caos y condiciones cambiantes.',
       'Ritmo x0.2 — la velocidad base aporta algo.',
       'Consistencia x0.2 — no es lo principal cuando todo cambia.',
     ],

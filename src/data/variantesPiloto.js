@@ -4,10 +4,10 @@ import { calcularPuntuacionBase } from '@/utils/puntuacion'
 
 export const variantesPiloto = [
   {
-    variante: 'clasi',
-    perfil: 'clasificador',
+    variante: 'qualy',
+    perfil: 'qualy',
     incrementoPrecio: 0,
-    nombreHabilidad: 'Especialista en Clasificacion',
+    nombreHabilidad: 'Especialista en Qualy',
     color: '#38bdf8',
     icono: 'pi-stopwatch',
   },
@@ -20,10 +20,10 @@ export const variantesPiloto = [
     icono: 'pi-flag-fill',
   },
   {
-    variante: 'lluvia',
-    perfil: 'lluvia',
+    variante: 'todo_terreno',
+    perfil: 'todo_terreno',
     incrementoPrecio: 0,
-    nombreHabilidad: 'Especialista en Lluvia',
+    nombreHabilidad: 'Especialista Todo Terreno',
     color: '#a78bfa',
     icono: 'pi-cloud',
   },
