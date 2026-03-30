@@ -55,15 +55,15 @@ onMounted(async () => {
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
 
-    <main class="mx-auto w-full max-w-md p-4 flex flex-col gap-4 mt-4">
+    <main class="flex flex-col w-full max-w-md mx-auto mt-4 p-4 gap-4">
 
       <div class="flex justify-center pb-2 border-b border-[#FFFFFF]/50">
-        <h2 class="text-2xl font-black text-white uppercase">Clasificación general</h2>
+        <h2 class="text-2xl font-black uppercase text-white">Clasificación general</h2>
       </div>
 
       <div v-if="cargando" class="flex flex-col items-center justify-center py-10 gap-3">
-        <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
-        <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando clasificación...
+        <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
+        <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando clasificación...
         </p>
       </div>
 
@@ -72,23 +72,23 @@ onMounted(async () => {
           class="flex items-center justify-between p-4 border border-white"
           :class="{ '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion }">
           <div class="flex items-center gap-4">
-            <div class="relative text-2xl font-black italic -top-4" :class="{
+            <div class="relative -top-4 text-2xl font-black italic" :class="{
               'text-yellow-400': indice === 0,
               'text-gray-200': indice === 1,
               'text-amber-600': indice === 2,
               'text-[#FFFFFF]': indice > 2
             }">{{ indice + 1 }}º</div>
             <div class="flex flex-col">
-              <span class="font-bold text-lg uppercase text-white">{{ jugador.nombre }}</span>
+              <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
               <span class="mt-1 text-xs text-[#F0ECEC]">
-                Presupuesto: <span class="text-[#E10600] font-bold">${{ jugador.presupuesto }}M</span>
+                Presupuesto: <span class="font-bold text-[#E10600]">${{ jugador.presupuesto }}M</span>
               </span>
             </div>
           </div>
 
           <div class="flex flex-col items-end justify-center text-right">
             <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
-            <span class="mt-1 text-xs uppercase font-bold text-[#F0ECEC]">PTS</span>
+            <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
           </div>
         </div>
       </div>

@@ -66,11 +66,11 @@ onMounted(async () => {
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
 
-    <main class="p-4 max-w-md mx-auto w-full flex flex-col gap-4 mt-2">
+    <main class="flex flex-col w-full max-w-md mx-auto mt-2 p-4 gap-4">
 
       <!-- Cabecera de sección -->
       <div class="flex justify-between items-center pb-2 border-b border-[#FFFFFF]/10">
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Actividad del campeonato</h2>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Actividad del campeonato</h2>
         <span v-if="storeNotificaciones.actividad.length" class="text-xs text-zinc-500">
           {{ storeNotificaciones.actividad.length }} movimientos
         </span>
@@ -78,19 +78,19 @@ onMounted(async () => {
 
       <!-- Spinner de carga -->
       <div v-if="storeNotificaciones.cargando" class="flex flex-col items-center justify-center py-16 gap-3">
-        <i class="text-3xl text-[#D4A843] pi pi-spinner animate-spin"></i>
-        <p class="text-[#D4A843] text-xs font-bold uppercase tracking-widest animate-pulse">Cargando actividad...</p>
+        <i class="pi pi-spinner text-3xl text-[#D4A843] animate-spin"></i>
+        <p class="text-xs font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando actividad...</p>
       </div>
 
       <!-- Feed de actividad -->
       <div v-else-if="storeNotificaciones.actividad.length" class="flex flex-col gap-2">
         <div v-for="evento in storeNotificaciones.actividad" :key="evento.id"
-          class="flex justify-between items-start p-3 border border-white/5">
+          class="flex items-start justify-between p-3 border border-white/5">
           <p class="text-sm text-[#F0ECEC]">
-            <span class="font-black text-white uppercase">{{ etiquetaPorTipo(evento.tipo) }}: </span>
+            <span class="font-black uppercase text-white">{{ etiquetaPorTipo(evento.tipo) }}: </span>
             {{ evento.nombreUsuario }} {{ evento.descripcion }}
           </p>
-          <span class="ml-4 shrink-0 text-[10px] text-zinc-500 uppercase tracking-wide">
+          <span class="shrink-0 ml-4 text-[10px] uppercase tracking-wide text-zinc-500">
             {{ formatearFecha(evento.fecha) }}
           </span>
         </div>
@@ -99,7 +99,7 @@ onMounted(async () => {
       <!-- Estado vacío -->
       <div v-else class="flex flex-col items-center justify-center py-16 gap-3">
         <i class="pi pi-flag text-3xl text-zinc-700"></i>
-        <p class="text-xs text-zinc-500 uppercase tracking-widest text-center">
+        <p class="text-center text-xs uppercase tracking-widest text-zinc-500">
           Aún no hay movimientos en este campeonato
         </p>
       </div>

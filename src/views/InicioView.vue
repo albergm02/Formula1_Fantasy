@@ -42,11 +42,11 @@ onMounted(async () => {
     <!-- Spinner mientras carga la escudería -->
     <div v-if="storeEscuderia.cargandoEquipo" class="flex flex-col items-center justify-center gap-4">
       <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
-      <p class="text-[#D4A843] font-bold tracking-widest uppercase text-sm animate-pulse">Cargando telemetría...</p>
+      <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando telemetría...</p>
     </div>
 
     <!-- Contenido principal: widgets de stats y próximo GP -->
-    <main v-else class="p-4 max-w-md mx-auto w-full flex flex-col gap-6 mt-2">
+    <main v-else class="flex flex-col w-full max-w-md mx-auto mt-2 p-4 gap-6">
       <WidgetEstadisticasUsuario />
       <WidgetGranPremio />
     </main>

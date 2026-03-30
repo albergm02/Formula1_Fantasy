@@ -72,12 +72,12 @@ const manejarCompra = async (elemento) => {
 <template>
   <Cabecera />
 
-  <main class="p-4 flex flex-col gap-6 mt-4 mb-20 max-w-lg mx-auto w-full">
+  <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-20 p-4 gap-6">
 
 
     <section class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Coches</h2>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
       <div class="grid grid-cols-1 gap-4">
@@ -89,7 +89,7 @@ const manejarCompra = async (elemento) => {
 
     <section class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Pilotos</h2>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
       <div class="grid grid-cols-1 gap-4">
@@ -101,7 +101,7 @@ const manejarCompra = async (elemento) => {
 
     <section class="flex flex-col gap-4">
       <div class="flex items-center gap-3">
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Potenciadores</h2>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
       <div class="grid grid-cols-1 gap-4">

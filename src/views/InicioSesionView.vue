@@ -160,7 +160,7 @@ const alOcultarModalRecuperacion = () => {
 
 <template>
   <!-- Contenedor principal -->
-  <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
+  <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
     <!-- Animación de fondo -->
     <div class="absolute inset-0 -z-10 pointer-events-none">
@@ -168,7 +168,7 @@ const alOcultarModalRecuperacion = () => {
     </div>
 
     <!-- Tarjeta de inicio de sesión -->
-    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
 
       <!-- Encabezado: Logo y título -->
       <template #title>
@@ -189,7 +189,7 @@ const alOcultarModalRecuperacion = () => {
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="tu@correo.com"
-              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg  !border-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
@@ -201,7 +201,7 @@ const alOcultarModalRecuperacion = () => {
               class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="current-password" placeholder="********"
               toggle-mask :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full rounded-lg p-3 focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
@@ -217,23 +217,23 @@ const alOcultarModalRecuperacion = () => {
 
             <!-- Botón de inicio de sesión -->
             <Button type="submit" label="Iniciar sesión" :loading="cargando"
-              class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] rounded-lg shadow-lg transition-colors !border-none hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] !border-none rounded-lg shadow-lg font-black uppercase !text-[#F0ECEC] transition-colors hover:!bg-[#C00500]" />
 
             <!-- Botón de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
-              class="flex w-full items-center justify-center gap-2 py-3 !bg-white font-bold uppercase !text-black rounded-lg shadow-lg transition-colors !border-none hover:!bg-gray-300"
+              class="flex items-center justify-center w-full py-3 gap-2 !bg-white !border-none rounded-lg shadow-lg font-bold uppercase !text-black transition-colors hover:!bg-gray-300"
               @click="manejarInicioSesionGoogle" />
 
             <!-- Botón de contraseña olvidada -->
             <Button type="button" label="¿Olvidaste tu contraseña?" text
-              class="w-full mt-1 !bg-transparent font-bold !text-[#D4A843] transition-colors !border-none hover:!text-[#C09638]"
+              class="w-full mt-1 !bg-transparent !border-none font-bold !text-[#D4A843] transition-colors hover:!text-[#C09638]"
               @click="modalRecuperacionVisible = true" />
 
             <!-- Enlace de registro -->
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿No tienes equipo? </span>
               <router-link to="/registro"
-                class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] hover:text-white transition-colors">
+                class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] transition-colors hover:text-white">
                 Regístrate aquí
               </router-link>
             </div>
@@ -253,11 +253,11 @@ const alOcultarModalRecuperacion = () => {
         <p class="text-sm text-[#F0ECEC]">Introduce tu correo y te enviaremos un enlace de recuperación.</p>
 
         <InputText v-model="correoRecuperacion" type="email" placeholder="tu@correo.com"
-          class="w-full p-3 !bg-[#121218] text-white rounded-lg focus:!border-[#D4A843] !border-zinc-700"
+          class="w-full p-3 !bg-[#121218] !border-zinc-700 rounded-lg text-white focus:!border-[#D4A843]"
           @keyup.enter="manejarRestablecerContraseña" />
 
         <Button label="ENVIAR CORREO" icon="pi pi-envelope" :loading="cargandoRecuperacion"
-          class="mt-2 w-full py-3 !bg-[#D4A843] font-black tracking-widest !text-[#121218] rounded-lg !border-none hover:!bg-[#C09638]"
+          class="w-full mt-2 py-3 !bg-[#D4A843] !border-none rounded-lg font-black tracking-widest !text-[#121218] hover:!bg-[#C09638]"
           @click="manejarRestablecerContraseña" />
       </div>
     </Dialog>

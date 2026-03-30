@@ -78,13 +78,13 @@ const cancelarRegistroConGoogle = async () => {
 <!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="relative flex items-center justify-center min-h-screen overflow-hidden p-4">
+  <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
     <!-- Animación de fondo -->
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal -->
-    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border rounded-xl shadow-2xl backdrop-blur-md border-zinc-800">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
 
       <!-- Encabezado con logo y título -->
       <template #title>
@@ -101,7 +101,7 @@ const cancelarRegistroConGoogle = async () => {
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
           :resolver="esquemaValidacion" @submit="manejarCompletarPerfilGoogle">
 
-          <p class="text-sm text-[#F0ECEC] text-center">
+          <p class="text-center text-sm text-[#F0ECEC]">
             Es tu primera vez entrando con Google. Elige tu nombre de piloto para continuar.
           </p>
 
@@ -110,7 +110,7 @@ const cancelarRegistroConGoogle = async () => {
               Nombre de Piloto
             </label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -122,10 +122,10 @@ const cancelarRegistroConGoogle = async () => {
 
           <div class="flex flex-col gap-3 mt-4">
             <Button type="submit" label="Continuar" :loading="cargando"
-              class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] rounded-lg shadow-lg transition-colors !border-none hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] !border-none rounded-lg shadow-lg font-black uppercase !text-[#F0ECEC] transition-colors hover:!bg-[#C00500]" />
 
             <Button type="button" label="Cancelar" :disabled="cargando"
-              class="w-full py-3 !bg-transparent font-black uppercase !text-[#D4A843] rounded-lg shadow-lg transition-colors !border border-[#D4A843] hover:!bg-[#D4A843]/10"
+              class="w-full py-3 !bg-transparent !border border-[#D4A843] rounded-lg shadow-lg font-black uppercase !text-[#D4A843] transition-colors hover:!bg-[#D4A843]/10"
               @click="cancelarRegistroConGoogle" />
           </div>
         </Form>

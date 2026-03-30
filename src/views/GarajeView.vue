@@ -127,12 +127,12 @@ const seleccionarNeumatico = async (idRueda) => {
 <template>
   <Cabecera />
 
-  <main class="p-4 flex flex-col gap-6 mt-4 mb-24 max-w-md mx-auto w-full">
+  <main class="flex flex-col w-full max-w-md mx-auto mt-4 mb-24 p-4 gap-6">
 
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="pi pi-car text-white text-lg"></i>
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Coche</h2>
+        <i class="pi pi-car text-lg text-white"></i>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Coche</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
@@ -141,7 +141,7 @@ const seleccionarNeumatico = async (idRueda) => {
         <div class="px-6 pb-2 -mt-1">
           <Button :label="`VENDER POR ${calcularValorReventa(storeEscuderia.garaje.coche.precio)}M`"
             icon="pi pi-shopping-bag" @click="confirmarVentaCoche(storeEscuderia.garaje.coche)"
-            class="w-full !bg-[#121218] !border-zinc-800 hover:!border-red-900/50 shadow-lg !rounded-xl transition-colors"
+            class="w-full !bg-[#121218] !border-zinc-800 !rounded-xl shadow-lg transition-colors hover:!border-red-900/50"
             :pt="{
               label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
               icon: { class: '!text-red-500' },
@@ -150,23 +150,23 @@ const seleccionarNeumatico = async (idRueda) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
-        <i class="mb-3 text-3xl text-zinc-600 pi pi-car"></i>
-        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Garaje Vacío</span>
+        class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="pi pi-car mb-3 text-3xl text-zinc-600"></i>
+        <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Garaje Vacío</span>
       </div>
     </section>
 
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="pi pi-circle-fill text-white text-lg"></i>
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Neumáticos</h2>
+        <i class="pi pi-circle-fill text-lg text-white"></i>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Neumáticos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
       <div class="flex flex-col gap-3 px-6">
         <!-- Imagen pura del compuesto equipado, sin texto superpuesto -->
         <div v-if="storeEscuderia.garaje.ruedas"
-          class="w-full h-[60px] overflow-hidden border border-emerald-500/50 bg-black relative">
+          class="relative w-full h-16 overflow-hidden bg-black border border-emerald-500/50">
           <img :src="storeEscuderia.garaje.ruedas.imagen" :alt="storeEscuderia.garaje.ruedas.nombre"
             class="absolute inset-0 w-full h-full object-cover" style="object-position: 65% center;" />
         </div>
@@ -174,14 +174,14 @@ const seleccionarNeumatico = async (idRueda) => {
         <!-- Sin neumáticos -->
         <div v-else
           class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
-          <i class="mb-3 text-3xl text-zinc-600 pi pi-circle"></i>
-          <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Neumáticos</span>
+          <i class="pi pi-circle mb-3 text-3xl text-zinc-600"></i>
+          <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Neumáticos</span>
         </div>
 
         <!-- Botón selector -->
         <Button :label="storeEscuderia.garaje.ruedas ? 'CAMBIAR NEUMÁTICOS' : 'EQUIPAR NEUMÁTICOS'"
           icon="pi pi-circle-fill" @click="mostrarSelectorNeumatico = true"
-          class="w-full !bg-[#121218] !border-zinc-800 hover:!border-zinc-600 shadow-lg !rounded-xl" :pt="{
+          class="w-full !bg-[#121218] !border-zinc-800 !rounded-xl shadow-lg hover:!border-zinc-600" :pt="{
             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
             icon: { class: 'text-zinc-500' },
           }" />
@@ -189,12 +189,12 @@ const seleccionarNeumatico = async (idRueda) => {
         <!-- Nombre y mejoras del compuesto equipado, desacoplado de la imagen -->
         <div v-if="storeEscuderia.garaje.ruedas" class="flex items-center gap-2 px-1">
           <i class="pi pi-circle-fill text-[8px]" :style="{ color: storeEscuderia.garaje.ruedas.color }"></i>
-          <span class="text-xs font-black text-white uppercase tracking-wide">
+          <span class="text-xs font-black uppercase tracking-wide text-white">
             {{ storeEscuderia.garaje.ruedas.nombre }}
           </span>
-          <div class="flex flex-wrap gap-1 ml-1">
+          <div class="flex flex-wrap ml-1 gap-1">
             <span v-for="m in calcularEtiquetasRueda(storeEscuderia.garaje.ruedas)" :key="m.atributo"
-              class="px-1.5 py-0.5 text-[8px] font-black uppercase bg-black/80 border border-zinc-700" :class="m.color">
+              class="px-1.5 py-0.5 bg-black/80 border border-zinc-700 text-[8px] font-black uppercase" :class="m.color">
               {{ m.signo }}{{ m.valor }} {{ m.atributo.slice(0, 3) }}
             </span>
           </div>
@@ -211,7 +211,7 @@ const seleccionarNeumatico = async (idRueda) => {
         <div v-for="rueda in ruedasBase" :key="rueda.id" class="flex flex-col gap-1 cursor-pointer"
           @click="seleccionarNeumatico(rueda.id)">
           <!-- Imagen pura -->
-          <div class="relative w-full h-[60px] overflow-hidden bg-black transition-colors border" :class="storeEscuderia.garaje.ruedas?.id === rueda.id
+          <div class="relative w-full h-16 overflow-hidden bg-black border transition-colors" :class="storeEscuderia.garaje.ruedas?.id === rueda.id
             ? 'border-emerald-500/70'
             : 'border-zinc-700 hover:border-zinc-500'">
             <img :src="rueda.imagen" :alt="rueda.nombre" class="absolute inset-0 w-full h-full object-cover"
@@ -220,10 +220,10 @@ const seleccionarNeumatico = async (idRueda) => {
           <!-- Nombre y mejoras desacoplados -->
           <div class="flex items-center gap-2 px-1">
             <i class="pi pi-circle-fill text-[8px]" :style="{ color: rueda.color }"></i>
-            <span class="text-xs font-black text-white uppercase tracking-wide">{{ rueda.nombre }}</span>
-            <div class="flex flex-wrap gap-1 ml-1">
+            <span class="text-xs font-black uppercase tracking-wide text-white">{{ rueda.nombre }}</span>
+            <div class="flex flex-wrap ml-1 gap-1">
               <span v-for="m in calcularEtiquetasRueda(rueda)" :key="m.atributo"
-                class="px-1.5 py-0.5 text-[8px] font-black uppercase bg-black/80 border border-zinc-700"
+                class="px-1.5 py-0.5 bg-black/80 border border-zinc-700 text-[8px] font-black uppercase"
                 :class="m.color">
                 {{ m.signo }}{{ m.valor }} {{ m.atributo.slice(0, 3) }}
               </span>
@@ -235,8 +235,8 @@ const seleccionarNeumatico = async (idRueda) => {
 
     <section class="grid grid-cols-1 gap-6">
       <div class="flex items-center gap-3 px-6">
-        <i class="pi pi-users text-white text-lg"></i>
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Pilotos</h2>
+        <i class="pi pi-users text-lg text-white"></i>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
@@ -247,7 +247,7 @@ const seleccionarNeumatico = async (idRueda) => {
           <div class="px-6 pb-2 -mt-1">
             <Button :label="`DESPEDIR (${calcularValorReventa(piloto.precio)}M)`" icon="pi pi-user-minus"
               @click="confirmarVentaPiloto(piloto)"
-              class="w-full !bg-[#121218] !border-zinc-800 hover:!border-red-900/50 shadow-lg !rounded-xl transition-colors"
+              class="w-full !bg-[#121218] !border-zinc-800 !rounded-xl shadow-lg transition-colors hover:!border-red-900/50"
               :pt="{
                 label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                 icon: { class: '!text-red-500' },
@@ -257,17 +257,17 @@ const seleccionarNeumatico = async (idRueda) => {
       </template>
 
       <div v-else
-        class="col-span-full flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
-        <i class="mb-3 text-3xl text-zinc-600 pi pi-users"></i>
-        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Asientos Vacíos</span>
+        class="flex flex-col items-center justify-center col-span-full mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="pi pi-users mb-3 text-3xl text-zinc-600"></i>
+        <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Asientos Vacíos</span>
       </div>
     </section>
 
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="pi pi-bolt text-white text-lg"></i>
-        <h2 class="text-sm font-black text-white uppercase tracking-widest">Potenciadores</h2>
-        <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border rounded-full" :class="storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length >= 3
+        <i class="pi pi-bolt text-lg text-white"></i>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
+        <span class="px-2 py-0.5 border rounded-full text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length >= 3
           ? 'text-amber-400 border-amber-500/50'
           : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length
           }}/3</span>
@@ -293,9 +293,9 @@ const seleccionarNeumatico = async (idRueda) => {
       </div>
 
       <div v-else
-        class="flex flex-col items-center justify-center p-12 mx-6 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
-        <i class="mb-3 text-3xl text-zinc-600 pi pi-box"></i>
-        <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Sin Mejoras Compradas</span>
+        class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <i class="pi pi-box mb-3 text-3xl text-zinc-600"></i>
+        <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Mejoras Compradas</span>
       </div>
     </section>
 

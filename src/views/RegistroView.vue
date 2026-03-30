@@ -75,7 +75,7 @@ const manejarRegistro = async ({ valid, values }) => {
 <!---------------------------------------------------------------------------------------------------------------------------->
 
 <template>
-  <div class="relative flex items-center justify-center min-h-screen p-4 overflow-hidden">
+  <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
     <!-- Animación de fondo -->
     <div class="absolute inset-0 -z-10 pointer-events-none">
@@ -83,7 +83,7 @@ const manejarRegistro = async ({ valid, values }) => {
     </div>
 
     <!-- Tarjeta principal de registro -->
-    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 border shadow-2xl rounded-xl backdrop-blur-md border-zinc-800">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
 
       <!-- Encabezado con logo y título -->
       <template #title>
@@ -105,7 +105,7 @@ const manejarRegistro = async ({ valid, values }) => {
             <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de
               usuario</label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -115,7 +115,7 @@ const manejarRegistro = async ({ valid, values }) => {
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="usuario@email.com"
-              class="w-full p-3 !bg-[#1A1A1F] !text-[#F0ECEC] rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC]" />
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
@@ -127,7 +127,7 @@ const manejarRegistro = async ({ valid, values }) => {
               class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
             <Password inputId="password" name="password" autocomplete="new-password" placeholder="********" toggle-mask
               :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
@@ -139,7 +139,7 @@ const manejarRegistro = async ({ valid, values }) => {
               class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar Contraseña</label>
             <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
               placeholder="********" toggle-mask :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 rounded-lg focus:ring-1 focus:ring-[#E10600] !border-[#F0ECEC] !bg-[#1A1A1F] !text-[#F0ECEC]" />
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.confirmPassword.error.message }}
             </Message>
@@ -154,13 +154,13 @@ const manejarRegistro = async ({ valid, values }) => {
           <div class="flex flex-col gap-3 mt-4">
 
             <Button type="submit" label="CREAR EQUIPO" :loading="cargando"
-              class="w-full py-3 !bg-[#E10600] font-black uppercase !text-[#F0ECEC] transition-colors shadow-lg rounded-lg !border-none hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] !border-none rounded-lg shadow-lg font-black uppercase !text-[#F0ECEC] transition-colors hover:!bg-[#C00500]" />
 
             <!-- Enlace a login -->
-            <div class="pt-5 pb-2 mt-2 text-center border-t border-zinc-800">
+            <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿Ya tienes equipo? </span>
               <router-link to="/"
-                class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] hover:text-white transition-colors">
+                class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843] transition-colors hover:text-white">
                 Inicia sesión aquí
               </router-link>
             </div>
