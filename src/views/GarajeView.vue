@@ -141,16 +141,14 @@ const seleccionarNeumatico = async (idRueda) => {
         <div class="px-6 pb-2 -mt-1">
           <Button :label="`VENDER POR ${calcularValorReventa(storeEscuderia.garaje.coche.precio)}M`"
             icon="pi pi-shopping-bag" @click="confirmarVentaCoche(storeEscuderia.garaje.coche)"
-            class="w-full !bg-[#121218] !border-zinc-800 !rounded-xl shadow-lg transition-colors hover:!border-red-900/50"
-            :pt="{
+            class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
               label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
               icon: { class: '!text-red-500' },
             }" />
         </div>
       </div>
 
-      <div v-else
-        class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+      <div v-else class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
         <i class="pi pi-car mb-3 text-3xl text-zinc-600"></i>
         <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Garaje Vacío</span>
       </div>
@@ -172,8 +170,7 @@ const seleccionarNeumatico = async (idRueda) => {
         </div>
 
         <!-- Sin neumáticos -->
-        <div v-else
-          class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
           <i class="pi pi-circle mb-3 text-3xl text-zinc-600"></i>
           <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Neumáticos</span>
         </div>
@@ -181,7 +178,7 @@ const seleccionarNeumatico = async (idRueda) => {
         <!-- Botón selector -->
         <Button :label="storeEscuderia.garaje.ruedas ? 'CAMBIAR NEUMÁTICOS' : 'EQUIPAR NEUMÁTICOS'"
           icon="pi pi-circle-fill" @click="mostrarSelectorNeumatico = true"
-          class="w-full !bg-[#121218] !border-zinc-800 !rounded-xl shadow-lg hover:!border-zinc-600" :pt="{
+          class="w-full !bg-[#121218] !border-zinc-800 shadow-lg hover:!border-zinc-600" :pt="{
             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
             icon: { class: 'text-zinc-500' },
           }" />
@@ -247,8 +244,7 @@ const seleccionarNeumatico = async (idRueda) => {
           <div class="px-6 pb-2 -mt-1">
             <Button :label="`DESPEDIR (${calcularValorReventa(piloto.precio)}M)`" icon="pi pi-user-minus"
               @click="confirmarVentaPiloto(piloto)"
-              class="w-full !bg-[#121218] !border-zinc-800 !rounded-xl shadow-lg transition-colors hover:!border-red-900/50"
-              :pt="{
+              class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
                 label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                 icon: { class: '!text-red-500' },
               }" />
@@ -257,7 +253,7 @@ const seleccionarNeumatico = async (idRueda) => {
       </template>
 
       <div v-else
-        class="flex flex-col items-center justify-center col-span-full mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+        class="flex flex-col items-center justify-center col-span-full mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
         <i class="pi pi-users mb-3 text-3xl text-zinc-600"></i>
         <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Asientos Vacíos</span>
       </div>
@@ -267,7 +263,7 @@ const seleccionarNeumatico = async (idRueda) => {
       <div class="flex items-center gap-3 px-6 mb-3">
         <i class="pi pi-bolt text-lg text-white"></i>
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
-        <span class="px-2 py-0.5 border rounded-full text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length >= 3
+        <span class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length >= 3
           ? 'text-amber-400 border-amber-500/50'
           : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length
           }}/3</span>
@@ -281,7 +277,7 @@ const seleccionarNeumatico = async (idRueda) => {
           <Button :label="potenciador.equipado ? 'INSTALADO' : 'INSTALAR'"
             :icon="potenciador.equipado ? 'pi pi-check-circle' : 'pi pi-cog'"
             @click="alternarInstalacionPotenciador(potenciador.instancia_id)" :class="[
-              'w-full mt-2 shadow-lg !rounded-xl',
+              'w-full mt-2 shadow-lg',
               potenciador.equipado
                 ? '!bg-emerald-900/20 !border-emerald-500/50'
                 : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
@@ -292,8 +288,7 @@ const seleccionarNeumatico = async (idRueda) => {
         </div>
       </div>
 
-      <div v-else
-        class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50 rounded-2xl">
+      <div v-else class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
         <i class="pi pi-box mb-3 text-3xl text-zinc-600"></i>
         <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Mejoras Compradas</span>
       </div>

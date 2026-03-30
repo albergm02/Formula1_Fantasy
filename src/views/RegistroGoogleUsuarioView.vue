@@ -84,7 +84,7 @@ const cancelarRegistroConGoogle = async () => {
     <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal -->
-    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 rounded-xl shadow-2xl">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 shadow-2xl">
 
       <!-- Encabezado con logo y título -->
       <template #title>
@@ -110,7 +110,7 @@ const cancelarRegistroConGoogle = async () => {
               Nombre de Piloto
             </label>
             <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] rounded-lg !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -122,10 +122,10 @@ const cancelarRegistroConGoogle = async () => {
 
           <div class="flex flex-col gap-3 mt-4">
             <Button type="submit" label="Continuar" :loading="cargando"
-              class="w-full py-3 !bg-[#E10600] !border-none rounded-lg shadow-lg font-black uppercase !text-[#F0ECEC] transition-colors hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#E10600] !border-none shadow-lg font-black uppercase !text-[#F0ECEC] transition-colors hover:!bg-[#C00500]" />
 
             <Button type="button" label="Cancelar" :disabled="cargando"
-              class="w-full py-3 !bg-transparent !border border-[#D4A843] rounded-lg shadow-lg font-black uppercase !text-[#D4A843] transition-colors hover:!bg-[#D4A843]/10"
+              class="w-full py-3 !bg-transparent !border border-[#D4A843] shadow-lg font-black uppercase !text-[#D4A843] transition-colors hover:!bg-[#D4A843]/10"
               @click="cancelarRegistroConGoogle" />
           </div>
         </Form>
