@@ -50,13 +50,13 @@ onUnmounted(() => {
 
 <template>
   <!-- Fondo base de la aplicación -->
-  <div class="fixed inset-0 h-full w-full bg-[#1A1A1F] -z-30"></div>
+  <div class="fixed inset-0 h-full w-full bg-transparent -z-40"></div>
 
   <!-- Fondo animado: visible solo en vistas autenticadas -->
-  <div v-if="mostrarFondoBeams" class="fixed inset-0 -z-20 opacity-60 will-change-transform"
+  <div v-if="mostrarFondoBeams" class="fixed inset-0 -z-20 opacity-60"
     style="transform: translateZ(0); backface-visibility: hidden; contain: strict;">
-    <Beams :beam-width="1" :beam-height="10" :beam-number="5" :light-color="'#888888'" :speed="2"
-      :noise-intensity="1.75" :scale="0.55" :rotation="40" />
+    <Beams :beam-width="1" :beam-height="10" :beam-number="10" :light-color="'red'" :speed="2" :noise-intensity="1.75"
+      :scale="0.55" />
   </div>
 
   <!-- Componentes de PrimeVue -->

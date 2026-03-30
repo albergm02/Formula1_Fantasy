@@ -38,6 +38,7 @@ let beamMesh: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial> | null = nu
 let directionalLight: THREE.DirectionalLight | null = null;
 let ambientLight: THREE.AmbientLight | null = null;
 let animationId: number | null = null;
+let temporizadorRedimension: ReturnType<typeof setTimeout> | null = null;
 
 type UniformValue = THREE.IUniform<unknown> | unknown;
 
@@ -355,7 +356,10 @@ const initThreeJS = () => {
         camera.updateProjectionMatrix();
     };
 
-    const resizeObserver = new ResizeObserver(resize);
+    const resizeObserver = new ResizeObserver(() => {
+        if (temporizadorRedimension) clearTimeout(temporizadorRedimension)
+        temporizadorRedimension = setTimeout(resize, 100)
+    });
     resizeObserver.observe(container);
 
     resize();
@@ -380,6 +384,11 @@ const cleanup = () => {
     if (animationId) {
         cancelAnimationFrame(animationId);
         animationId = null;
+    }
+
+    if (temporizadorRedimension) {
+        clearTimeout(temporizadorRedimension);
+        temporizadorRedimension = null;
     }
 
     if (containerRef.value) {

@@ -1,1 +1,7 @@
 @import 'tailwindcss';
+
+/* Se evita que el scrollbar aparezca y desaparezca al mostrar/ocultar el dock, 
+manteniendo su espacio reservado para evitar flashazos de recargas de imagenes y de posiciones */
+html {
+  scrollbar-gutter: stable;
+}
