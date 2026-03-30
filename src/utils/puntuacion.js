@@ -19,12 +19,12 @@ export const calcularPuntuacionBase = (atributos, pesos) => {
  * Se aplica un factor de escala y un componente aleatorio para simular la varianza real.
  * @param {number} puntuacionBase - Valor ponderado (0-100)
  * @param {number} factorJornada - Multiplicador del GP (default 1.0, se puede ajustar por circuito)
- * @returns {number} Puntos de fantasy para esa jornada
+ * @returns {number} Puntos de fantasy para esa jornada (0-50 aprox.)
  */
 export const calcularPuntosJornada = (puntuacionBase, factorJornada = 1.0) => {
   const escala = puntuacionBase / 100
-  const puntosBase = Math.round(escala * 25 * factorJornada)
-  const varianza = Math.floor(Math.random() * 7) - 3
+  const puntosBase = Math.round(escala * 50 * factorJornada)
+  const varianza = Math.floor(Math.random() * 11) - 5
   return Math.max(0, puntosBase + varianza)
 }
 
