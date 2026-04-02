@@ -13,6 +13,10 @@ export const variantesPiloto = [
 /**
  * Crea una carta de piloto a partir del catalogo base y una variante de puntuacion.
  * La puntuacion base se calcula con los atributos del piloto y los pesos de la variante.
+ * El precio se ajusta segun el incremento definido en la variante.
+ * @param {Object} pilotoBase - Datos base del piloto (idBase, numero, nombre, equipo, precioBase, imagen, atributos)
+ * @param {Object} variante - Variante de puntuacion (variante, perfil, incrementoPrecio, nombreHabilidad, color, icono)
+ * @returns {Object} Carta de piloto con datos combinados y puntuacion base calculada
  */
 const crearCartaPiloto = (pilotoBase, variante) => {
   const perfil = perfilesPuntuacion[variante.perfil]
@@ -38,7 +42,9 @@ const crearCartaPiloto = (pilotoBase, variante) => {
     reglasUsuario: reglas,
   }
 }
-
+/* Flatmap aplana en un nivel los arrays resultantes de mapear cada pilotoBase con todas las variantesPiloto, 
+creando una carta por cada combinacion. 
+Para cada pilotoBase, se generan cartas con todas las variantes disponibles. */
 export const mercadoPilotos = pilotosBase.flatMap((pilotoBase) =>
   variantesPiloto.map((variante) => crearCartaPiloto(pilotoBase, variante)),
 )
