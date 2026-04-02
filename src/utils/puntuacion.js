@@ -11,7 +11,7 @@
  *   4. Se escala a puntos de jornada usando el factor individual del piloto.
  *      Si no se provee factor para un piloto, se usa 1.0 (modo simulación).
  *
- * El coche aporta una contribución plana: Math.round(coche.puntos / 40).
+ * El coche aporta sus puntos directamente al total.
  *
  * @param {{ coche: Object|null, pilotos: Array, potenciadores: Array, ruedas: Object|null }} garaje
  * @param {Object.<string, number>} [factoresPorPiloto={}] - Mapa id-piloto → factor calculado con calcularFactorJornada()
@@ -24,13 +24,15 @@
  * }}
  */
 export function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
+  // Acumulo las mejoras de ruedas.
   let mejorasRuedas = { ritmo: 0, consistencia: 0, adaptabilidad: 0 }
   if (garaje.ruedas && garaje.ruedas.mejoras) {
     mejorasRuedas = garaje.ruedas.mejoras
   }
-
+  // Acumulo las mejoras de potenciadores.
   const mejorasPotenciadores = acumularMejorasPotenciadores(garaje.potenciadores || [])
 
+  // Sumo ambas mejoras para aplicarlas a los pilotos.
   const mejorasTotal = {
     ritmo: mejorasRuedas.ritmo + mejorasPotenciadores.ritmo,
     consistencia: mejorasRuedas.consistencia + mejorasPotenciadores.consistencia,
@@ -40,6 +42,10 @@ export function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   const desglosePilotos = []
   let puntosPilotos = 0
 
+  // Para cada piloto:
+  // aplico las mejoras a sus atributos,
+  // recalculo su puntuacionBase
+  // y luego calculo los puntos de jornada con su factor individual.
   for (const piloto of garaje.pilotos || []) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
     const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
@@ -54,7 +60,7 @@ export function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   let puntosCoche = 0
 
   if (garaje.coche) {
-    puntosCoche = Math.round(garaje.coche.puntos / 40)
+    puntosCoche = garaje.coche.puntos
     desgloseCoche = { nombre: garaje.coche.nombre, puntos: puntosCoche }
   }
 
@@ -184,7 +190,7 @@ export function calcularPuntuacionBase(atributos, pesos) {
     pesos.ritmo * atributos.ritmo +
     pesos.consistencia * atributos.consistencia +
     pesos.adaptabilidad * atributos.adaptabilidad
-
+  // Subo el decimal y luego lo bajo para redondear a 1 decimal sin usar toFixed (que devuelve string)
   return Math.round(valor * 10) / 10
 }
 
