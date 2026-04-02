@@ -38,11 +38,6 @@ const elementosNav = computed(() => [
     label: 'Notificaciones',
     onClick: () => navegar('/notificaciones'),
   },
-  {
-    icon: () => h('i', { class: 'pi pi-question-circle', style: { fontSize: '18px', color: ruta.path === '/como-funciona' ? '#E10600' : 'white' } }),
-    label: 'Guía',
-    onClick: () => navegar('/como-funciona'),
-  },
 ])
 </script>
 
