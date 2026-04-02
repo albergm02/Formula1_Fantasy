@@ -6,7 +6,7 @@
  *
  * Flujo de cálculo por piloto:
  *   1. Se acumulan las mejoras de ruedas + potenciadores equipados.
- *   2. Se aplican al mapa de atributos del piloto (clampeado a 0-100).
+ *   2. Se aplican al mapa de atributos del piloto (sin limite superior).
  *   3. Se recalcula la puntuacionBase con los atributos ya modificados.
  *   4. Se escala a puntos de jornada usando el factor individual del piloto.
  *      Si no se provee factor para un piloto, se usa 1.0 (modo simulación).
@@ -201,20 +201,17 @@ export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
 
 /**
  * Aplica un mapa de mejoras a los atributos base de un piloto.
- * Los valores resultantes se limitan al rango [0, 100] para evitar valores absurdos.
+ * Los atributos pueden superar 100 si las mejoras lo justifican,
+ * premiando asi al jugador que optimiza su equipamiento.
  * @param {{ ritmo: number, consistencia: number, adaptabilidad: number }} atributosBase
  * @param {{ ritmo: number, consistencia: number, adaptabilidad: number }} mejoras
  * @returns {{ ritmo: number, consistencia: number, adaptabilidad: number }}
  */
 export function aplicarMejorasAtributos(atributosBase, mejoras) {
-  const ritmoFinal = atributosBase.ritmo + (mejoras.ritmo || 0)
-  const consistenciaFinal = atributosBase.consistencia + (mejoras.consistencia || 0)
-  const adaptabilidadFinal = atributosBase.adaptabilidad + (mejoras.adaptabilidad || 0)
-
   return {
-    ritmo: Math.min(100, Math.max(0, ritmoFinal)),
-    consistencia: Math.min(100, Math.max(0, consistenciaFinal)),
-    adaptabilidad: Math.min(100, Math.max(0, adaptabilidadFinal)),
+    ritmo: atributosBase.ritmo + (mejoras.ritmo || 0),
+    consistencia: atributosBase.consistencia + (mejoras.consistencia || 0),
+    adaptabilidad: atributosBase.adaptabilidad + (mejoras.adaptabilidad || 0),
   }
 }
 
