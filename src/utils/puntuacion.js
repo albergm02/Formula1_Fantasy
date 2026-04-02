@@ -94,19 +94,17 @@ export function calcularFactorJornada(actuacion, condiciones, variante) {
     return calcularFactorCarrera(actuacion)
   }
   if (variante === 'todo_terreno') {
-    return calcularFactorTodoTerreno(condiciones, actuacion.posicionCarrera)
+    return calcularFactorTodoTerreno(condiciones)
   }
 
   const factorQ = calcularFactorQualy(actuacion)
   const factorC = calcularFactorCarrera(actuacion)
-  const factorT = calcularFactorTodoTerreno(condiciones, actuacion.posicionCarrera)
+  const factorT = calcularFactorTodoTerreno(condiciones)
   return Math.round(((factorQ + factorC + factorT) / 3) * 100) / 100
 }
 
-function calcularFactorQualy({ posicionQualy, posicionCarrera }) {
-  const factorPrincipal = resolverFactorPosicionQualy(posicionQualy)
-  const factorCarreraBase = resolverFactorPosicionCarrera(posicionCarrera)
-  return Math.round((factorPrincipal * 0.75 + factorCarreraBase * 0.25) * 100) / 100
+function calcularFactorQualy({ posicionQualy }) {
+  return resolverFactorPosicionQualy(posicionQualy)
 }
 
 function calcularFactorCarrera({ posicionCarrera, posicionSalida }) {
@@ -116,10 +114,12 @@ function calcularFactorCarrera({ posicionCarrera, posicionSalida }) {
   return Math.round(factorPosicion * factorAdelantos * 100) / 100
 }
 
-function calcularFactorTodoTerreno(
-  { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos },
-  posicionCarrera,
-) {
+function calcularFactorTodoTerreno({
+  llovio,
+  numeroDNFs,
+  numeroSafetyCarActivos,
+  numeroVirtualSafetyCarActivos,
+}) {
   const factorClima = llovio ? 1.4 : 0.9
 
   let bonusCaos = 0
@@ -130,10 +130,7 @@ function calcularFactorTodoTerreno(
   if (bonusCaos > 0.3) {
     bonusCaos = 0.3
   }
-
-  const factorPrincipal = Math.round(factorClima * (1 + bonusCaos) * 100) / 100
-  const factorCarreraBase = resolverFactorPosicionCarrera(posicionCarrera)
-  return Math.round((factorPrincipal * 0.75 + factorCarreraBase * 0.25) * 100) / 100
+  return Math.round(factorClima * (1 + bonusCaos) * 100) / 100
 }
 
 /**
