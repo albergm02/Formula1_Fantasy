@@ -14,7 +14,7 @@ export const variantesPiloto = [
  * Crea una carta de piloto a partir del catalogo base y una variante de puntuacion.
  * La puntuacion base se calcula con los atributos del piloto y los pesos de la variante.
  * El precio se ajusta segun el incremento definido en la variante.
- * @param {Object} pilotoBase - Datos base del piloto (idBase, numero, nombre, equipo, precioBase, imagen, atributos)
+ * @param {Object} pilotoBase - Datos base del piloto (numero, nombre, equipo, precioBase, imagen, atributos)
  * @param {Object} variante - Variante de puntuacion (variante, perfil, incrementoPrecio, nombreHabilidad, color, icono)
  * @returns {Object} Carta de piloto con datos combinados y puntuacion base calculada
  */
@@ -24,7 +24,7 @@ const crearCartaPiloto = (pilotoBase, variante) => {
   const ptsPonderados = calcularPuntuacionBase(pilotoBase.atributos, perfil.pesos)
 
   return {
-    id: `${pilotoBase.idBase}_${variante.variante}`,
+    id: `${pilotoBase.numero}_${variante.variante}`,
     numero: pilotoBase.numero,
     nombre: pilotoBase.nombre,
     equipo: pilotoBase.equipo,
