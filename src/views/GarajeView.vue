@@ -129,21 +129,6 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
 }
 
 /**
- * Lanza la simulación de jornada y muestra el desglose de puntos obtenidos.
- */
-const ejecutarSimulacionJornada = async () => {
-  simulandoJornada.value = true
-  try {
-    resultadoJornada.value = await storeEscuderia.simularJornada()
-    mostrarResultadoJornada.value = true
-  } catch (error) {
-    notificacion.add({ severity: 'error', summary: 'Error en simulación', detail: error.message })
-  } finally {
-    simulandoJornada.value = false
-  }
-}
-
-/**
  * Equipa el compuesto seleccionado desde el selector y cierra el diálogo.
  * @param {string} idRueda - El id del compuesto a equipar.
  */
