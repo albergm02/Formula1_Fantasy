@@ -2,8 +2,7 @@
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
 import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
-import { calcularSinergias, aplicarSinergia } from '@/utils/sinergia'
-import { calcularPuntuacionGaraje } from '@/utils/puntuacion'
+import { calcularSinergias } from '@/utils/sinergia'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 import { ruedasBase } from '@/data/bases/ruedasBase'
@@ -21,16 +20,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
    * @returns {{ sinergias: Array, multiplicadorTotal: number }}
    */
   const sinergias = computed(() => calcularSinergias(garaje.value))
-
-  /**
-   * Calcula los puntos totales del garaje para la jornada actual,
-   * aplicando mejoras de equipamiento y el multiplicador de sinergias.
-   * @returns {number}
-   */
-  const puntosConSinergia = computed(() => {
-    const { puntosTotal } = calcularPuntuacionGaraje(garaje.value)
-    return aplicarSinergia(puntosTotal, sinergias.value.multiplicadorTotal)
-  })
 
   /**
    * Carga los datos del equipo del usuario para la liga especificada.
@@ -239,22 +228,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
   }
 
   /**
-   * Simula la puntuación de una jornada para el garaje actual.
-   * Calcula los puntos con equipamiento y sinergias, los acumula y persiste.
-   * @param {number} [factorJornada=1.0] - Multiplicador del GP (ajustable por circuito).
-   * @returns {Promise<{ puntosObtenidos: number, desglose: Object }>}
-   */
-  async function simularJornada(factorJornada = 1.0) {
-    const { puntosTotal, desglose } = calcularPuntuacionGaraje(garaje.value, factorJornada)
-    const puntosObtenidos = aplicarSinergia(puntosTotal, sinergias.value.multiplicadorTotal)
-
-    puntos.value += puntosObtenidos
-    await guardarEstadoEquipo()
-
-    return { puntosObtenidos, desglose }
-  }
-
-  /**
    * Limpia el estado de la escudería al cerrar sesión o cambiar de liga.
    */
   function limpiarEstadoLigaActiva() {
@@ -273,7 +246,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     garaje,
     cargandoEquipo,
     sinergias,
-    puntosConSinergia,
     cargarEquipo,
     guardarEstadoEquipo,
     comprarElemento,
@@ -281,7 +253,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     alternarPotenciador,
     equiparNeumatico,
     desequiparNeumatico,
-    simularJornada,
     limpiarEstadoLigaActiva,
   }
 })
