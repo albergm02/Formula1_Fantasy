@@ -22,5 +22,6 @@ module.exports = {
     'brace-style': 'off',
     'block-spacing': 'off',
     'no-multi-spaces': 'off',
+    'space-before-function-paren': 'off',
   },
 }
