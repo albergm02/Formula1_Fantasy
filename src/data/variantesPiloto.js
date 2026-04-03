@@ -3,7 +3,7 @@ import { pilotosBase } from '@/data/bases/pilotosBase'
 import { calcularPuntuacionBase } from '@/utils/puntuacion'
 
 // prettier-ignore
-export const variantesPiloto = [
+const variantesPiloto = [
   { variante: 'qualy',        perfil: 'qualy',        incrementoPrecio: 0, nombreHabilidad: 'Especialista en Qualy',      color: '#38bdf8', icono: 'pi-stopwatch' },
   { variante: 'carrera',      perfil: 'carrera',      incrementoPrecio: 0, nombreHabilidad: 'Especialista en Carrera',    color: '#f97316', icono: 'pi-flag-fill' },
   { variante: 'todo_terreno', perfil: 'todo_terreno', incrementoPrecio: 0, nombreHabilidad: 'Especialista Todo Terreno', color: '#a78bfa', icono: 'pi-cloud'     },
