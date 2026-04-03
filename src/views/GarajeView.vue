@@ -1,13 +1,16 @@
 ﻿<script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
+
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { calcularValorReventa } from '@/utils/garaje'
 import { ruedasBase } from '@/data/bases/ruedasBase'
+
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
@@ -20,9 +23,6 @@ const confirmar = useConfirm()
 const ruta = useRoute()
 
 const mostrarSelectorNeumatico = ref(false)
-const mostrarResultadoJornada = ref(false)
-const simulandoJornada = ref(false)
-const resultadoJornada = ref(null)
 
 /**
  * Construye la lista de etiquetas de mejora de un compuesto para mostrar en la carta.
@@ -333,72 +333,7 @@ const seleccionarNeumatico = async (idRueda) => {
       </div>
     </section>
 
-    <section class="grid">
-      <Button label="SIMULAR JORNADA" icon="pi pi-flag-fill" :loading="simulandoJornada"
-        :disabled="storeEscuderia.garaje.pilotos.length === 0" @click="ejecutarSimulacionJornada"
-        class="mx-6 !bg-red-950/40 !border-red-800/50 shadow-lg hover:!border-red-600/70" :pt="{
-          label: { class: 'text-[10px] font-black uppercase tracking-widest text-red-400' },
-          icon: { class: 'text-red-500' },
-        }" />
-    </section>
-
   </main>
-
-  <Dialog v-model:visible="mostrarResultadoJornada" header="Resultado de la Jornada" modal
-    :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-    :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-    :style="{ width: '90vw', maxWidth: '420px', border: '1px solid #2A2A32' }">
-    <div v-if="resultadoJornada" class="flex flex-col gap-4">
-
-      <div v-for="piloto in resultadoJornada.desglose.pilotos" :key="piloto.nombre"
-        class="flex items-center justify-between px-4 py-3 bg-[#111] border border-zinc-800">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-black uppercase tracking-wide text-white">{{ piloto.nombre }}</span>
-          <div class="flex gap-2">
-            <span class="text-[9px] font-bold uppercase text-zinc-500">
-              RIT {{ piloto.atributosModificados.ritmo }}
-            </span>
-            <span class="text-[9px] font-bold uppercase text-zinc-500">
-              CON {{ piloto.atributosModificados.consistencia }}
-            </span>
-            <span class="text-[9px] font-bold uppercase text-zinc-500">
-              ADA {{ piloto.atributosModificados.adaptabilidad }}
-            </span>
-          </div>
-        </div>
-        <span class="text-lg font-black text-white">+{{ piloto.puntosJornada }}<span
-            class="text-xs text-zinc-500 ml-1">pts</span></span>
-      </div>
-
-      <div v-if="resultadoJornada.desglose.coche"
-        class="flex items-center justify-between px-4 py-3 bg-[#111] border border-zinc-800">
-        <div class="flex items-center gap-2">
-          <i class="pi pi-car text-zinc-400"></i>
-          <span class="text-xs font-black uppercase tracking-wide text-white">{{ resultadoJornada.desglose.coche.nombre
-          }}</span>
-        </div>
-        <span class="text-lg font-black text-white">+{{ resultadoJornada.desglose.coche.puntos }}<span
-            class="text-xs text-zinc-500 ml-1">pts</span></span>
-      </div>
-
-      <div v-if="storeEscuderia.sinergias.multiplicadorTotal > 1"
-        class="flex items-center justify-between px-4 py-2 bg-amber-950/30 border border-amber-700/40">
-        <div class="flex items-center gap-2">
-          <i class="pi pi-star-fill text-amber-400 text-xs"></i>
-          <span class="text-xs font-black uppercase tracking-wide text-amber-400">Sinergia</span>
-        </div>
-        <span class="text-sm font-black text-amber-400">×{{ storeEscuderia.sinergias.multiplicadorTotal.toFixed(2)
-        }}</span>
-      </div>
-
-      <div class="flex items-center justify-between px-4 py-4 bg-red-950/30 border border-red-800/50 mt-1">
-        <span class="text-sm font-black uppercase tracking-widest text-white">Total</span>
-        <span class="text-2xl font-black text-white">+{{ resultadoJornada.puntosObtenidos }}<span
-            class="text-sm text-zinc-400 ml-1">pts</span></span>
-      </div>
-
-    </div>
-  </Dialog>
 
   <BarraNavegacion />
 </template>

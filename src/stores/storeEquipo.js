@@ -1,8 +1,7 @@
-﻿import { ref, computed } from 'vue'
+﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
 import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
-import { calcularSinergias } from '@/utils/sinergia'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 import { ruedasBase } from '@/data/bases/ruedasBase'
@@ -14,12 +13,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
   const puntos = ref(0)
   const garaje = ref(crearGarajeVacio())
   const cargandoEquipo = ref(false)
-
-  /**
-   * Calcula las sinergias activas del garaje actual.
-   * @returns {{ sinergias: Array, multiplicadorTotal: number }}
-   */
-  const sinergias = computed(() => calcularSinergias(garaje.value))
 
   /**
    * Carga los datos del equipo del usuario para la liga especificada.
@@ -245,7 +238,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     puntos,
     garaje,
     cargandoEquipo,
-    sinergias,
     cargarEquipo,
     guardarEstadoEquipo,
     comprarElemento,
