@@ -61,7 +61,8 @@ const manejarInicioSesion = async ({ valid, values }) => {
   try {
     const credencialUsuario = await iniciarSesion(values.email, values.password)
     await storeAutenticacion.verificarExistenciaPerfil(credencialUsuario.user.email)
-    enrutador.push('/ligas')
+    const destino = storeAutenticacion.esAdministrador ? '/admin' : '/ligas'
+    enrutador.push(destino)
   } catch (error) {
     errorAutenticacion.value = obtenerMensajeErrorInicioSesion(error)
   } finally {
@@ -92,7 +93,8 @@ const manejarInicioSesionGoogle = async () => {
 
     // Sí.
     if (perfilEncontrado) {
-      enrutador.push('/ligas')
+      const destino = storeAutenticacion.esAdministrador ? '/admin' : '/ligas'
+      enrutador.push(destino)
       return
     }
     // No, es su primera vez, pedimos que complete su registro.

@@ -95,12 +95,13 @@ enrutador.beforeEach(async (to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // Si la ruta requiere ser invitado pero hay usuario, redirigimos a ligas o registro según el perfil
+  // Si la ruta requiere ser invitado pero hay usuario, redirigimos según su rol
   if (to.meta.requiresGuest && usuario) {
-    // Intuimos que si el perfil no existe y hay usuario,
-    // es porque el usuario se autenticó pero no completó su perfil mediante Google.
     if (!storeAutenticacion.perfilExiste) {
       return { name: 'registro-google' }
+    }
+    if (storeAutenticacion.esAdministrador) {
+      return { name: 'administracion' }
     }
     return { name: 'ligas' }
   }
