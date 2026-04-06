@@ -10,6 +10,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   })
   const perfilExiste = ref(false)
   const datosCargados = ref(false)
+  const esAdministrador = ref(false)
 
   /**
    * Carga el perfil del usuario desde Firestore y actualiza el estado.
@@ -28,6 +29,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
       if (datosPerfil.correoAutenticacion) {
         usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
         usuarioActual.value.idsLigas = datosPerfil.ligasIds || []
+        esAdministrador.value = datosPerfil.esAdministrador === true
         perfilExiste.value = true
         return
       }
@@ -58,6 +60,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
       if (datosPerfil.correoAutenticacion) {
         usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
         usuarioActual.value.idsLigas = datosPerfil.ligasIds || []
+        esAdministrador.value = datosPerfil.esAdministrador === true
         perfilExiste.value = true
         return true
       }
@@ -83,6 +86,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
       idsLigas: [],
     }
     perfilExiste.value = false
+    esAdministrador.value = false
     datosCargados.value = true
   }
 
@@ -90,6 +94,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     usuarioActual,
     perfilExiste,
     datosCargados,
+    esAdministrador,
     cargarOCrearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,
