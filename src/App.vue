@@ -1,19 +1,15 @@
 ﻿<script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 
-import Beams from '@/components/vue-bits/Beams.vue'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
 
 const storeAutenticacion = usarStoreAutenticacion()
 const enrutador = useRouter()
 const ruta = useRoute()
-
-const RUTAS_SIN_FONDO = ['login', 'registro', 'registro-google']
-const mostrarFondoBeams = computed(() => storeAutenticacion.datosCargados && !RUTAS_SIN_FONDO.includes(ruta.name))
 
 /* Iniciamos el observador para detectar cambios en el estado */
 let cancelarObservadorAutenticacion = () => { }
@@ -50,14 +46,7 @@ onUnmounted(() => {
 
 <template>
   <!-- Fondo base de la aplicación -->
-  <div class="fixed inset-0 h-full w-full bg-transparent -z-40"></div>
-
-  <!-- Fondo animado: visible solo en vistas autenticadas -->
-  <div v-if="mostrarFondoBeams" class="fixed inset-0 -z-20 opacity-60"
-    style="transform: translateZ(0); backface-visibility: hidden; contain: strict;">
-    <Beams :beam-width="1" :beam-height="10" :beam-number="10" :light-color="'red'" :speed="2" :noise-intensity="1.75"
-      :scale="0.55" />
-  </div>
+  <div class="fixed inset-0 h-full w-full bg-[#0C0C0E] -z-40"></div>
 
   <!-- Componentes de PrimeVue -->
   <Toast position="top-center" />

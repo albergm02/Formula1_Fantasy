@@ -82,6 +82,40 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
     await cargarActividad()
   }
 
+  /**
+   * Registra que el usuario se ha unido a la liga y actualiza el feed en memoria.
+   * @param {string} nombreLiga - Nombre de la liga a la que se incorpora.
+   * @returns {Promise<void>}
+   */
+  async function registrarIncorporacion(nombreLiga) {
+    const idLiga = storeLigas.idLigaActiva
+    const nombreUsuario = storeAutenticacion.usuarioActual.nombreVisible
+
+    await registrarActividad(idLiga, {
+      nombreUsuario,
+      tipo: TIPOS_ACTIVIDAD.INCORPORACION,
+      descripcion: `se ha unido al campeonato ${nombreLiga}`,
+    })
+
+    await cargarActividad()
+  }
+
+  /**
+   * Registra que el usuario ha abandonado la liga y actualiza el feed en memoria.
+   * @param {string} idLiga - ID de la liga que se abandona (puede diferir de la activa).
+   * @param {string} nombreLiga - Nombre de la liga abandonada.
+   * @returns {Promise<void>}
+   */
+  async function registrarAbandono(idLiga, nombreLiga) {
+    const nombreUsuario = storeAutenticacion.usuarioActual.nombreVisible
+
+    await registrarActividad(idLiga, {
+      nombreUsuario,
+      tipo: TIPOS_ACTIVIDAD.ABANDONO,
+      descripcion: `ha abandonado el campeonato ${nombreLiga}`,
+    })
+  }
+
   return {
     actividad,
     cargando,
@@ -89,5 +123,7 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
     cargarActividad,
     registrarFichaje,
     registrarVenta,
+    registrarIncorporacion,
+    registrarAbandono,
   }
 })
