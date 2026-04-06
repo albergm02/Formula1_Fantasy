@@ -11,19 +11,32 @@ const URL_BASE = 'https://api.openf1.org/v1'
 
 /**
  * Realiza una petición GET a la API de OpenF1 y devuelve el JSON.
- * Lanza un error descriptivo si la respuesta no es exitosa.
+ * Reintenta automáticamente ante errores 429 (rate limit) con espera progresiva.
  * @param {string} ruta - Ruta relativa (ej. '/meetings?year=2026').
  * @returns {Promise<Array|Object>}
  */
 async function consultarOpenF1(ruta) {
   const url = `${URL_BASE}${ruta}`
-  const respuesta = await fetch(url)
+  const MAXIMO_REINTENTOS = 3
 
-  if (!respuesta.ok) {
-    throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
+  // solucion al error 429 Too Many Requests: reintentos con espera progresiva (2s, 4s, 6s)
+  for (let intento = 0; intento <= MAXIMO_REINTENTOS; intento++) {
+    const respuesta = await fetch(url)
+
+    if (respuesta.status === 429 && intento < MAXIMO_REINTENTOS) {
+      const esperaMs = (intento + 1) * 2000
+      await new Promise(function (resolve) {
+        setTimeout(resolve, esperaMs)
+      })
+      continue
+    }
+
+    if (!respuesta.ok) {
+      throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
+    }
+
+    return respuesta.json()
   }
-
-  return respuesta.json()
 }
 
 /* ─── 1. Último Gran Premio finalizado ──────────────────────────────────── */
@@ -147,10 +160,8 @@ async function obtenerParrillaSalida(sessionKey) {
  * @returns {Promise<{llovio: boolean, numeroDNFs: number, numeroSafetyCarActivos: number, numeroVirtualSafetyCarActivos: number}>}
  */
 async function obtenerCondicionesCarrera(sessionKey) {
-  const [datosClima, datosControlCarrera] = await Promise.all([
-    consultarOpenF1(`/weather?session_key=${sessionKey}`),
-    consultarOpenF1(`/race_control?session_key=${sessionKey}`),
-  ])
+  const datosClima = await consultarOpenF1(`/weather?session_key=${sessionKey}`)
+  const datosControlCarrera = await consultarOpenF1(`/race_control?session_key=${sessionKey}`)
 
   const llovio = datosClima.some(function (lectura) {
     return lectura.rainfall === true || lectura.rainfall === 1
@@ -198,12 +209,10 @@ async function recopilarDatosGranPremio(meetingKey) {
     throw new Error(`No se encontró sesión de carrera para meeting_key: ${meetingKey}`)
   }
 
-  const [resultadosQualy, resultadosCarrera, parrillaSalida, condiciones] = await Promise.all([
-    sesionQualy ? obtenerResultadosSesion(sesionQualy.session_key) : Promise.resolve({}),
-    obtenerResultadosSesion(sesionCarrera.session_key),
-    obtenerParrillaSalida(sesionCarrera.session_key),
-    obtenerCondicionesCarrera(sesionCarrera.session_key),
-  ])
+  const resultadosQualy = sesionQualy ? await obtenerResultadosSesion(sesionQualy.session_key) : {}
+  const resultadosCarrera = await obtenerResultadosSesion(sesionCarrera.session_key)
+  const parrillaSalida = await obtenerParrillaSalida(sesionCarrera.session_key)
+  const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
 
   const actuacionesPorPiloto = {}
 
