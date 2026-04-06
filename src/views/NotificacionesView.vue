@@ -87,7 +87,6 @@ onMounted(async () => {
         <div v-for="evento in storeNotificaciones.actividad" :key="evento.id"
           class="flex items-start justify-between p-3 border border-white/5">
           <p class="text-sm text-[#F0ECEC]">
-            <span class="font-black uppercase text-white">{{ etiquetaPorTipo(evento.tipo) }}: </span>
             {{ evento.nombreUsuario }} {{ evento.descripcion }}
           </p>
           <span class="shrink-0 ml-4 text-[10px] uppercase tracking-wide text-zinc-500">
