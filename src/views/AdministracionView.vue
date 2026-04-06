@@ -79,26 +79,26 @@ async function procesarJornada() {
         </header>
 
         <div class="flex-1 flex items-center justify-center">
-        <Card class="!bg-[#1A1A1F] !border-none w-full max-w-md mx-4">
-            <template #content>
-                <div class="flex flex-col gap-4">
-                    <Button label="Procesar jornada" :loading="procesando" @click="procesarJornada"
-                        class="!bg-[#E10600] !border-none hover:!bg-[#B30500] w-full" />
+            <Card class="!bg-[#1A1A1F] !border-none w-full max-w-md mx-4">
+                <template #content>
+                    <div class="flex flex-col gap-4">
+                        <Button label="Procesar jornada" :loading="procesando" @click="procesarJornada"
+                            class="!bg-[#E10600] !border-none hover:!bg-[#B30500] w-full" />
 
-                    <Message v-if="jornadaProcesada" severity="success" :closable="false">
-                        <div class="flex flex-col gap-1">
-                            <span class="font-bold">{{ resultadoJornada.mensaje }}</span>
-                            <span v-if="resultadoJornada.granPremio">
-                                Gran Premio: {{ resultadoJornada.granPremio }}
-                            </span>
-                            <span v-if="resultadoJornada.participacionesProcesadas !== undefined">
-                                Participaciones procesadas: {{ resultadoJornada.participacionesProcesadas }}
-                            </span>
-                        </div>
-                    </Message>
-                </div>
-            </template>
-        </Card>
+                        <Message v-if="jornadaProcesada" severity="success" :closable="false">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold">{{ resultadoJornada.mensaje }}</span>
+                                <span v-if="resultadoJornada.granPremio">
+                                    Gran Premio: {{ resultadoJornada.granPremio }}
+                                </span>
+                                <span v-if="resultadoJornada.participacionesProcesadas !== undefined">
+                                    Participaciones procesadas: {{ resultadoJornada.participacionesProcesadas }}
+                                </span>
+                            </div>
+                        </Message>
+                    </div>
+                </template>
+            </Card>
         </div>
     </div>
 </template>
