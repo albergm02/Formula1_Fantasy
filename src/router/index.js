@@ -59,6 +59,12 @@ const rutas = [
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
+    path: '/admin',
+    name: 'administracion',
+    component: () => import('../views/AdministracionView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
@@ -107,6 +113,11 @@ enrutador.beforeEach(async (to) => {
   // Si la ruta requiere perfil incompleto pero el perfil ya existe, redirigimos a ligas
   if (to.meta.requiresIncompleteProfile && storeAutenticacion.perfilExiste) {
     return { name: 'ligas' }
+  }
+
+  // Si la ruta requiere administrador pero el usuario no lo es, redirigimos al login
+  if (to.meta.requiresAdmin && !storeAutenticacion.esAdministrador) {
+    return { name: 'login' }
   }
 
   // Si la ruta requiere liga pero el usuario no tiene ligas, redirigimos a ligas,
