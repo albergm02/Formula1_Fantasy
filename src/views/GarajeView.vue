@@ -6,7 +6,7 @@ import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
-import { calcularValorReventa } from '@/utils/garaje'
+const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
 import { ruedasBase } from '@/data/bases/ruedasBase'
 
 import Button from 'primevue/button'

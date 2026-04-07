@@ -8,11 +8,6 @@ import {
   restablecerContraseña
 } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import {
-  obtenerMensajeErrorGoogle,
-  obtenerMensajeErrorInicioSesion,
-  popupGoogleCerrado
-} from '@/utils/erroresAutenticacion'
 
 import Hyperspeed from '@/components/vue-bits/Hyperspeed.vue'
 import { hyperspeedPresets } from '@/components/vue-bits/HyperspeedPresets'
@@ -64,7 +59,14 @@ const manejarInicioSesion = async ({ valid, values }) => {
     const destino = storeAutenticacion.esAdministrador ? '/admin' : '/ligas'
     enrutador.push(destino)
   } catch (error) {
-    errorAutenticacion.value = obtenerMensajeErrorInicioSesion(error)
+    const codigosCredencialesInvalidas = ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password']
+    if (codigosCredencialesInvalidas.includes(error?.code)) {
+      errorAutenticacion.value = 'Correo o contraseña incorrectos.'
+    } else if (error?.code === 'auth/too-many-requests') {
+      errorAutenticacion.value = 'Demasiados intentos. Inténtalo más tarde.'
+    } else {
+      errorAutenticacion.value = `Error al iniciar sesión: ${error?.message || 'Error desconocido.'}`
+    }
   } finally {
     cargando.value = false
   }
@@ -100,9 +102,8 @@ const manejarInicioSesionGoogle = async () => {
     // No, es su primera vez, pedimos que complete su registro.
     enrutador.push('/registro-google')
   } catch (error) {
-    if (!popupGoogleCerrado(error)) {
-      // mostramos el error solo si no fue causado por el usuario cerrando el popup de Google
-      errorAutenticacion.value = obtenerMensajeErrorGoogle(error)
+    if (error?.code !== 'auth/popup-closed-by-user') {
+      errorAutenticacion.value = `Error al iniciar con Google: ${error?.message || 'Error desconocido.'}`
     }
   } finally {
     cargando.value = false

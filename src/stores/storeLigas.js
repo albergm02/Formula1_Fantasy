@@ -1,7 +1,7 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-import { crearGarajeVacio } from '@/utils/garaje'
+const crearGarajeVacio = () => ({ coche: null, pilotos: [], potenciadores: [], ruedas: null })
 import {
   cargarLigasPorIds,
   cargarLiga,

@@ -13,8 +13,6 @@ import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 
-import { obtenerMensajeErrorRegistro } from '@/utils/erroresAutenticacion'
-
 import { Form } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
@@ -61,7 +59,15 @@ const manejarRegistro = async ({ valid, values }) => {
     await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.email, nombreNormalizado)
     enrutador.push('/ligas')
   } catch (error) {
-    errorAutenticacion.value = obtenerMensajeErrorRegistro(error)
+    if (error?.code === 'auth/email-already-in-use') {
+      errorAutenticacion.value = 'El correo electrónico ya está registrado.'
+    } else if (error?.code === 'auth/invalid-email') {
+      errorAutenticacion.value = 'El correo electrónico no es válido.'
+    } else if (error?.code === 'auth/weak-password') {
+      errorAutenticacion.value = 'La contraseña es demasiado débil.'
+    } else {
+      errorAutenticacion.value = `Error al registrar: ${error?.message || 'Error desconocido.'}`
+    }
   } finally {
     cargando.value = false
   }

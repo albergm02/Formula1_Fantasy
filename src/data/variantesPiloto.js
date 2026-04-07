@@ -1,6 +1,13 @@
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 import { pilotosBase } from '@/data/bases/pilotosBase'
-import { calcularPuntuacionBase } from '@/utils/puntuacion'
+
+const calcularPuntuacionBase = (atributos, pesos) =>
+  Math.round(
+    (pesos.ritmo * atributos.ritmo +
+      pesos.consistencia * atributos.consistencia +
+      pesos.adaptabilidad * atributos.adaptabilidad) *
+      10,
+  ) / 10
 
 // prettier-ignore
 const variantesPiloto = [

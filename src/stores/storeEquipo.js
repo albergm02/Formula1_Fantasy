@@ -1,7 +1,8 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-import { crearGarajeVacio, calcularValorReventa } from '@/utils/garaje'
+const crearGarajeVacio = () => ({ coche: null, pilotos: [], potenciadores: [], ruedas: null })
+const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 import { ruedasBase } from '@/data/bases/ruedasBase'
