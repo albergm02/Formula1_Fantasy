@@ -113,7 +113,9 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     await guardarEstadoEquipo()
 
     const storeNotificaciones = usarStoreNotificaciones()
-    storeNotificaciones.registrarFichaje(elemento.nombre, elemento.tipo).catch(() => {})
+    storeNotificaciones
+      .registrarFichaje(elemento.nombre, elemento.tipo, elemento.precio)
+      .catch(() => {})
 
     return { success: true, message: `Has fichado: ${elemento.nombre} exitosamente.` }
   }

@@ -50,14 +50,14 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
    * @param {string} tipoElemento - Tipo legible del elemento ('piloto', 'coche', 'potenciador').
    * @returns {Promise<void>}
    */
-  async function registrarFichaje(nombreElemento, tipoElemento) {
+  async function registrarFichaje(nombreElemento, tipoElemento, precioElemento) {
     const idLiga = storeLigas.idLigaActiva
     const nombreUsuario = storeAutenticacion.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
       nombreUsuario,
       tipo: TIPOS_ACTIVIDAD.COMPRA,
-      descripcion: `ha fichado ${tipoElemento} ${nombreElemento}`,
+      descripcion: `ha fichado ${tipoElemento} ${nombreElemento} por ${precioElemento}M`,
     })
 
     await cargarActividad()
