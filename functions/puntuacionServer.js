@@ -30,7 +30,7 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
       factoresPorPiloto[piloto.id] != null ? factoresPorPiloto[piloto.id] : 1.0
     const puntosJornada = calcularPuntosJornada(puntuacionBase, factorEstePiloto)
 
-    desglosePilotos.push({ nombre: piloto.nombre, atributosModificados, puntosJornada })
+    desglosePilotos.push({ id: piloto.id, nombre: piloto.nombre, atributosModificados, puntuacionBase, factorJornada: factorEstePiloto, puntosJornada })
     puntosPilotos += puntosJornada
   }
 

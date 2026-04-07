@@ -9,6 +9,7 @@ import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import WidgetGranPremio from '@/components/WidgetGranPremio.vue'
 import WidgetEstadisticasUsuario from '@/components/WidgetEstadisticasUsuario.vue'
+import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 
 const storeEscuderia = usarStoreEscuderia()
@@ -48,6 +49,7 @@ onMounted(async () => {
     <!-- Contenido principal: widgets de stats y próximo GP -->
     <main v-else class="flex flex-col w-full max-w-md mx-auto mt-2 p-4 gap-6">
       <WidgetEstadisticasUsuario />
+      <WidgetDesgloseJornada />
       <WidgetGranPremio />
     </main>
 

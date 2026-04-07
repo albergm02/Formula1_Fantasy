@@ -13,6 +13,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
   const puntos = ref(0)
   const garaje = ref(crearGarajeVacio())
   const cargandoEquipo = ref(false)
+  const ultimaJornada = ref(null)
 
   /**
    * Carga los datos del equipo del usuario para la liga especificada.
@@ -35,15 +36,18 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
         presupuesto.value = participacion.presupuesto
         puntos.value = participacion.puntos
         garaje.value = participacion.garaje || crearGarajeVacio()
+        ultimaJornada.value = participacion.ultimaJornada || null
       } else {
         presupuesto.value = 50.0
         puntos.value = 0
         garaje.value = crearGarajeVacio()
+        ultimaJornada.value = null
       }
     } catch (error) {
       presupuesto.value = 50.0
       puntos.value = 0
       garaje.value = crearGarajeVacio()
+      ultimaJornada.value = null
       throw new Error(`Error al cargar el equipo para la liga ${idLiga}: ${error.message}`)
     } finally {
       cargandoEquipo.value = false
@@ -229,6 +233,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     presupuesto.value = 0
     puntos.value = 0
     garaje.value = crearGarajeVacio()
+    ultimaJornada.value = null
   }
 
   return {
@@ -238,6 +243,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     puntos,
     garaje,
     cargandoEquipo,
+    ultimaJornada,
     cargarEquipo,
     guardarEstadoEquipo,
     comprarElemento,

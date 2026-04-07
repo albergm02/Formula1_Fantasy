@@ -53,10 +53,11 @@ function descomponerIdCarta(idCarta) {
  * @param {Array} pilotos - Pilotos del garaje del participante.
  * @param {Object} actuacionesPorPiloto - { numeroPiloto: { posicionQualy, posicionCarrera, posicionSalida } }
  * @param {Object} condiciones - { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }
- * @returns {Object} { idCarta: factorNumerico }
+ * @returns {{ factores: Object, detalles: Object }}
  */
 function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
   const factores = {}
+  const detalles = {}
 
   for (const piloto of pilotos) {
     const { numero, variante } = descomponerIdCarta(piloto.id)
@@ -67,9 +68,10 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
     }
 
     factores[piloto.id] = calcularFactorJornada(actuacion, condiciones, variante)
+    detalles[piloto.id] = { variante, actuacion }
   }
 
-  return factores
+  return { factores, detalles }
 }
 
 /* ─── Cloud Function ────────────────────────────────────────────────────── */
@@ -114,20 +116,37 @@ exports.procesarJornadaGP = onRequest(
           continue
         }
 
-        const factoresPorPiloto = construirFactoresPorPiloto(
-          garaje.pilotos,
-          actuacionesPorPiloto,
-          condiciones,
-        )
+        const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
+          construirFactoresPorPiloto(garaje.pilotos, actuacionesPorPiloto, condiciones)
 
         const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
+
+        for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
+          const detalle = detallesPorPiloto[pilotoDesglose.id]
+          if (detalle) {
+            pilotoDesglose.variante = detalle.variante
+            pilotoDesglose.actuacion = detalle.actuacion
+          }
+        }
 
         const { multiplicadorTotal } = calcularSinergias(garaje)
         const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
 
         const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
 
-        batch.update(documento.ref, { puntos: puntosAcumulados })
+        const desgloseParticipante = {
+          nombreGranPremio: granPremio.meeting_name,
+          fechaProcesamiento: new Date().toISOString(),
+          puntosJornada,
+          multiplicadorSinergia: multiplicadorTotal,
+          condiciones,
+          desglose: resultadoGaraje.desglose,
+        }
+
+        batch.update(documento.ref, {
+          puntos: puntosAcumulados,
+          ultimaJornada: desgloseParticipante,
+        })
 
         desgloseJornada.push({
           participacionId: documento.id,
