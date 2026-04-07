@@ -23,11 +23,11 @@ app.use(router)
 app.use(ToastService)
 app.use(ConfirmationService)
 
-// La app se monta <-> cambia el estado de autenticación. 
+// La app se monta <-> cambia el estado de autenticación.
 // Evito mostrar pantallas de carga o de error innecesarias.
 let appMontada = false
-// montaje diferido: se espera una respusta de firebase sobre la autenticacion antes de 
-// montar la app. 
+// montaje diferido: se espera una respusta de firebase sobre la autenticacion antes de
+// montar la app.
 escucharCambioEstadoAutenticacion(() => {
   if (!appMontada) {
     app.mount('#app')

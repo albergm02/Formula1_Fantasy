@@ -45,23 +45,28 @@ export const escucharCambioEstadoAutenticacion = (callback) => onAuthStateChange
 
 /**
  * Obtiene el usuario autenticado actual como una promesa de resolución única.
- * Pensado para guards de navegación y el bootstrap de la app,
- * donde no se necesita un observador continuo sino una lectura puntual.
+ * Pensado para casos puntuales en los que no es necesario un observador continuo, es decir, en index.js,
+ * donde se necesita una lectura puntual del usuario actual.
  * @returns {Promise<import('firebase/auth').User|null>}
  */
 export const obtenerUsuarioActual = () =>
+  // Creo una promesa que se resuelve con el usuario actual o con null.
   new Promise((resolve, reject) => {
-    const cancelar = onAuthStateChanged(auth, (usuario) => {
-      cancelar()
-      resolve(usuario)
-    }, reject)
+    const cancelar = onAuthStateChanged(
+      auth,
+      (usuario) => {
+        cancelar() // Evito fugas de conexiones cerrando el observador inmediatamente
+        resolve(usuario)
+      },
+      reject,
+    )
   })
 
 /* ─── Firestore – Perfiles de usuario ───────────────────────────────────── */
 
 /**
  * Carga el perfil del usuario desde Firestore.
- * Devuelve un objeto vacío si el documento no existe, nunca devuelve null.
+ * Devuelve un objeto vacío si el documento no existe.
  * @param {string} correoUsuario - El correo que actúa como identificador del documento.
  * @returns {Promise<Object>} Datos del perfil o {} si no existe.
  */
