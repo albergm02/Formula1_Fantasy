@@ -212,7 +212,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: 'Has abandonado la liga.' }
     } catch (error) {
-      return { success: false, message: 'Error de telemetría al abandonar.' }
+      return { success: false, message: 'Error al abandonar la liga.' }
     }
   }
 
@@ -233,7 +233,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }
 
       if (datosLiga.admin !== correoUsuario) {
-        return { success: false, message: 'Acceso denegado: No eres la FIA (Admin).' }
+        return { success: false, message: 'Acceso denegado: No eres el administrador.' }
       }
 
       const participaciones = await cargarParticipacionesLiga(idLiga)
@@ -252,9 +252,9 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }
 
       await cargarLigasUsuario()
-      return { success: true, message: 'Campeonato disuelto con éxito.' }
+      return { success: true, message: 'Has eliminado la liga.' }
     } catch (error) {
-      return { success: false, message: 'Error al destruir la liga.' }
+      return { success: false, message: 'Error al eliminar la liga.' }
     }
   }
 
