@@ -65,6 +65,12 @@ const rutas = [
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
+    path: '/verificar-correo',
+    name: 'verificar-correo',
+    component: () => import('../views/VerificacionCorreoView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
@@ -93,6 +99,16 @@ enrutador.beforeEach(async (to) => {
   // Si la ruta requiere autenticación pero no hay usuario, redirigimos al login
   if (to.meta.requiresAuth && !usuario) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  // Si el usuario no ha verificado su correo, lo bloqueamos en la vista de verificación.
+  // Las cuentas de Google ya vienen verificadas, por lo que este guard no les afecta.
+  const rutaVerificacion = to.name === 'verificar-correo'
+  if (usuario && !usuario.emailVerified && !rutaVerificacion) {
+    return { name: 'verificar-correo' }
+  }
+  if (usuario && usuario.emailVerified && rutaVerificacion) {
+    return { name: 'ligas' }
   }
 
   // Si la ruta requiere ser invitado pero hay usuario, redirigimos según su rol

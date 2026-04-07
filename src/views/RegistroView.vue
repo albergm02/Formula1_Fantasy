@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { registrarse } from '@/services/servicioAutenticacion'
+import { registrarse, enviarVerificacionCorreo } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 import Hyperspeed from '@/components/vue-bits/Hyperspeed.vue'
@@ -56,8 +56,9 @@ const manejarRegistro = async ({ valid, values }) => {
   errorAutenticacion.value = ''
   try {
     const credencialUsuario = await registrarse(correoNormalizado, values.password)
+    await enviarVerificacionCorreo()
     await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.email, nombreNormalizado)
-    enrutador.push('/ligas')
+    enrutador.push('/verificar-correo')
   } catch (error) {
     if (error?.code === 'auth/email-already-in-use') {
       errorAutenticacion.value = 'El correo electrónico ya está registrado.'

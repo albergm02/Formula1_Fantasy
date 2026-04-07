@@ -10,6 +10,7 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth'
@@ -35,6 +36,12 @@ export const restablecerContraseña = (email) => sendPasswordResetEmail(auth, em
 
 /** @returns {Promise<void>} */
 export const cerrarSesion = () => firebaseSignOut(auth)
+
+/**
+ * Envía un correo de verificación al usuario autenticado actual.
+ * @returns {Promise<void>}
+ */
+export const enviarVerificacionCorreo = () => sendEmailVerification(auth.currentUser)
 
 /**
  * Registra un observador de cambios en el estado de autenticación.
