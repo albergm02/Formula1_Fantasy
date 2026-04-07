@@ -51,7 +51,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Crea una nueva liga y registra al usuario como administrador.
-   * Aplica dos límites: máximo 8 ligas por usuario y máximo 2 ligas creadas.
+   * Aplica dos límites: máximo 5 ligas por usuario y máximo 2 ligas creadas.
    * @param {string} nombreLiga - Nombre de la liga (3–15 caracteres, validado en la vista).
    * @returns {Promise<{ success: boolean, message: string }>}
    */
@@ -109,7 +109,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
 
     if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
-      return { success: false, message: 'Solo puedes pertenecer o crear un máximo de 8 ligas.' }
+      return { success: false, message: 'Solo puedes pertenecer o crear un máximo de 5 ligas.' }
     }
 
     try {
