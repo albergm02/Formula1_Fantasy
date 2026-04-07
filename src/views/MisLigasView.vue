@@ -158,7 +158,7 @@ const manejarEliminarLiga = () => {
         <section>
           <div v-if="storeLigas.detallesLigas.length > 0" class="flex flex-col justify-center w-full">
             <div class="mb-4 text-center font-bold uppercase tracking-wider text-[#F0ECEC]">
-              Ligas disponibles: {{ storeLigas.detallesLigas.length }}/8
+              Ligas disponibles: {{ storeLigas.detallesLigas.length }}/5
             </div>
 
             <DataView :value="storeLigas.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
@@ -207,7 +207,7 @@ const manejarEliminarLiga = () => {
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
-        <span class="text-[#F0ECEC]"> Puedes crear un máximo de 8 ligas</span>
+        <span class="text-[#F0ECEC]"> Puedes crear un máximo de 2 ligas</span>
         <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre"
           class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#E10600]" autofocus />
         <div class="flex justify-end gap-2 mt-2">

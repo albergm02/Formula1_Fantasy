@@ -20,7 +20,7 @@ import {
 } from '@/services/servicioLigas'
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
 
-const MAX_LIGAS = 8
+const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) =>
   Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
 const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -60,7 +60,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
 
     if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
-      return { success: false, message: 'Solo puedes pertenecer o crear un máximo de 8 ligas.' }
+      return { success: false, message: 'Solo puedes pertenecer o crear un máximo de 5 ligas.' }
     }
 
     try {
