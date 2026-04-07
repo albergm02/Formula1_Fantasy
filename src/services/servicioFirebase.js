@@ -1,3 +1,10 @@
+/**
+ * Servicio de inicialización de Firebase.
+ * Centraliza la configuración y exporta las instancias de Auth y Firestore.
+ * Todos los módulos que necesitan interactuar con Firebase importan desde aquí.
+ * @module servicioFirebase
+ */
+
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
