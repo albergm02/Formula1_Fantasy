@@ -9,8 +9,6 @@ import {
 } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
-import Hyperspeed from '@/components/vue-bits/Hyperspeed.vue'
-import { hyperspeedPresets } from '@/components/vue-bits/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -40,7 +38,6 @@ const valoresInicialesFormulario = ref({ email: '', password: '' })
 const modalRecuperacionVisible = ref(false)
 const correoRecuperacion = ref('')
 const cargandoRecuperacion = ref(false)
-const opcionesHyperspeed = ref(hyperspeedPresets.akira)
 
 /**
  * Maneja el envío del formulario de inicio de sesión con email y contraseña.
@@ -164,11 +161,6 @@ const alOcultarModalRecuperacion = () => {
 <template>
   <!-- Contenedor principal -->
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
-
-    <!-- Animación de fondo -->
-    <div class="absolute inset-0 -z-10 pointer-events-none">
-      <Hyperspeed :effect-options="opcionesHyperspeed" />
-    </div>
 
     <!-- Tarjeta de inicio de sesión -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 shadow-2xl">

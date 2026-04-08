@@ -5,8 +5,6 @@ import { useRouter } from 'vue-router'
 import { registrarse, enviarVerificacionCorreo } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
-import Hyperspeed from '@/components/vue-bits/Hyperspeed.vue'
-import { hyperspeedPresets } from '@/components/vue-bits/HyperspeedPresets'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -34,7 +32,6 @@ const storeAutenticacion = usarStoreAutenticacion()
 
 const cargando = ref(false)
 const errorAutenticacion = ref('')
-const opcionesHyperspeed = ref(hyperspeedPresets.akira)
 const valoresInicialesFormulario = ref({
   username: '',
   email: '',
@@ -83,11 +80,6 @@ const manejarRegistro = async ({ valid, values }) => {
 
 <template>
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
-
-    <!-- Animación de fondo -->
-    <div class="absolute inset-0 -z-10 pointer-events-none">
-      <Hyperspeed :effect-options="opcionesHyperspeed" />
-    </div>
 
     <!-- Tarjeta principal de registro -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 shadow-2xl">
