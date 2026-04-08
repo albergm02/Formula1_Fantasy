@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
-import MagicRings from '@/components/vue-bits/MagicRings.vue'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
@@ -79,9 +78,6 @@ const cancelarRegistroConGoogle = async () => {
 
 <template>
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
-
-    <!-- Animación de fondo -->
-    <MagicRings class="absolute inset-0 -z-10" color="#E10600" :ringCount="2" />
 
     <!-- Tarjeta principal -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 shadow-2xl">
