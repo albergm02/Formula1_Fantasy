@@ -1,16 +1,16 @@
 // prettier-ignore
 export const pilotosBase = [
   /* ══════════ McLAREN ══════════ */
-  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren',      precioBase: 26.0, imagen: '/Pilotos/norris.webp',     atributos: { ritmo: 93, consistencia: 88, adaptabilidad: 82, agresividad: 88, gestion: 80 } },
-  { numero: 81, nombre: 'Oscar Piastri',     equipo: 'McLaren',      precioBase: 24.0, imagen: '/Pilotos/piastri.webp',    atributos: { ritmo: 88, consistencia: 85, adaptabilidad: 78, agresividad: 76, gestion: 78 } },
+  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren',      precioBase: 26.0, imagen: '/Pilotos/norris.webp',     atributos: { ritmo: 93, consistencia: 83, adaptabilidad: 82, agresividad: 64, gestion: 82 } },
+  { numero: 81, nombre: 'Oscar Piastri',     equipo: 'McLaren',      precioBase: 24.0, imagen: '/Pilotos/piastri.webp',    atributos: { ritmo: 86, consistencia: 87, adaptabilidad: 78, agresividad: 83, gestion: 80 } },
 
   /* ══════════ RED BULL ══════════ */
-  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull',     precioBase: 25.0, imagen: '/Pilotos/verstappen.webp', atributos: { ritmo: 97, consistencia: 90, adaptabilidad: 88, agresividad: 95, gestion: 72 } },
-  { numero:  6, nombre: 'Isack Hadjar',      equipo: 'Red Bull',     precioBase: 15.0, imagen: '/Pilotos/hadjar.webp',     atributos: { ritmo: 70, consistencia: 60, adaptabilidad: 72, agresividad: 65, gestion: 58 } },
+  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull',     precioBase: 25.0, imagen: '/Pilotos/verstappen.webp', atributos: { ritmo: 90, consistencia: 90, adaptabilidad: 88, agresividad: 98, gestion: 72 } },
+  { numero:  6, nombre: 'Isack Hadjar',      equipo: 'Red Bull',     precioBase: 15.0, imagen: '/Pilotos/hadjar.webp',     atributos: { ritmo: 75, consistencia: 70, adaptabilidad: 72, agresividad: 64, gestion: 68 } },
 
   /* ══════════ FERRARI ══════════ */
-  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari',      precioBase: 24.0, imagen: '/Pilotos/leclerc.webp',    atributos: { ritmo: 94, consistencia: 78, adaptabilidad: 80, agresividad: 82, gestion: 70 } },
-  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari',      precioBase: 23.0, imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 88, consistencia: 92, adaptabilidad: 90, agresividad: 85, gestion: 93 } },
+  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari',      precioBase: 24.0, imagen: '/Pilotos/leclerc.webp',    atributos: { ritmo: 96, consistencia: 78, adaptabilidad: 80, agresividad: 87, gestion: 70 } },
+  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari',      precioBase: 23.0, imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 76, consistencia: 88, adaptabilidad: 90, agresividad: 81, gestion: 93 } },
 
   /* ══════════ MERCEDES ══════════ */
   { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes',     precioBase: 22.0, imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 90, consistencia: 84, adaptabilidad: 76, agresividad: 74, gestion: 82 } },
