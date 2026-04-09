@@ -1,6 +1,6 @@
 ﻿<script setup>
 import { onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 
@@ -9,7 +9,6 @@ import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticac
 
 const storeAutenticacion = usarStoreAutenticacion()
 const enrutador = useRouter()
-const ruta = useRoute()
 
 /* Iniciamos el observador para detectar cambios en el estado */
 let cancelarObservadorAutenticacion = () => { }
