@@ -31,18 +31,33 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Carga las ligas a las que pertenece el usuario y las guarda en el estado.
+   * Realiza limpieza lazy: si algún ID en el perfil apunta a una liga eliminada,
+   * lo desvincula automáticamente para mantener la coherencia.
    * @returns {Promise<void>}
    */
   async function cargarLigasUsuario() {
     const storeAutenticacion = usarStoreAutenticacion()
+    const idsAlmacenados = storeAutenticacion.usuarioActual.idsLigas
 
-    if (!storeAutenticacion.usuarioActual.idsLigas.length) {
+    if (!idsAlmacenados.length) {
       detallesLigas.value = []
       return
     }
 
     try {
-      detallesLigas.value = await cargarLigasPorIds(storeAutenticacion.usuarioActual.idsLigas)
+      const ligasCargadas = await cargarLigasPorIds(idsAlmacenados)
+      detallesLigas.value = ligasCargadas
+
+      const idsValidos = ligasCargadas.map((liga) => liga.id)
+      const idsHuerfanos = idsAlmacenados.filter((id) => !idsValidos.includes(id))
+
+      if (idsHuerfanos.length > 0) {
+        const correo = storeAutenticacion.usuarioActual.correoAutenticacion
+        for (const idHuerfano of idsHuerfanos) {
+          await desvincularLigaDelUsuario(correo, idHuerfano)
+        }
+        storeAutenticacion.usuarioActual.idsLigas = idsValidos
+      }
     } catch (error) {
       detallesLigas.value = []
       throw new Error(`Error al cargar las ligas del usuario: ${error.message}`)
@@ -179,7 +194,6 @@ export const usarStoreLigas = defineStore('ligas', () => {
         return await eliminarLiga(idLiga)
       }
 
-      // intento pasar el relevo de admin : TODO: NO FUNCIONA BIEN POR FIRESTORE RULES.
       if (participacionPropia.rol === 'admin') {
         const siguienteAdministrador = participacionesRestantes.sort(
           (primero, segundo) => segundo.puntos - primero.puntos,
@@ -239,10 +253,10 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       const participaciones = await cargarParticipacionesLiga(idLiga)
       for (const participacion of participaciones) {
-        await desvincularLigaDelUsuario(participacion.email_usuario, idLiga)
         await eliminarParticipacion(participacion.id)
       }
 
+      await desvincularLigaDelUsuario(correoUsuario, idLiga)
       await eliminarDocumentoLiga(idLiga)
       storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,
