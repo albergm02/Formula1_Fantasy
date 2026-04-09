@@ -13,19 +13,19 @@ export const pilotosBase = [
   { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari',      precioBase: 23.0, imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 76, consistencia: 88, adaptabilidad: 90, agresividad: 81, gestion: 93 } },
 
   /* ══════════ MERCEDES ══════════ */
-  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes',     precioBase: 22.0, imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 90, consistencia: 84, adaptabilidad: 76, agresividad: 74, gestion: 82 } },
-  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes',     precioBase: 20.0, imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 82, consistencia: 62, adaptabilidad: 74, agresividad: 68, gestion: 62 } },
+  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes',     precioBase: 22.0, imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 92, consistencia: 90, adaptabilidad: 70, agresividad: 69, gestion: 90 } },
+  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes',     precioBase: 20.0, imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 89, consistencia: 81, adaptabilidad: 87, agresividad: 86, gestion: 72 } },
 
   /* ══════════ ASTON MARTIN ══════════ */
-  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', precioBase: 19.0, imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 80, consistencia: 93, adaptabilidad: 92, agresividad: 78, gestion: 91 } },
-  { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', precioBase: 13.0, imagen: '/Pilotos/stroll.webp',     atributos: { ritmo: 62, consistencia: 58, adaptabilidad: 65, agresividad: 55, gestion: 62 } },
+  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', precioBase: 19.0, imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 85, consistencia: 87, adaptabilidad: 75, agresividad: 89, gestion: 96 } },
+  { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', precioBase: 13.0, imagen: '/Pilotos/stroll.webp',     atributos: { ritmo: 62, consistencia: 58, adaptabilidad: 72, agresividad: 81, gestion: 62 } },
 
   /* ══════════ WILLIAMS ══════════ */
-  { numero: 55, nombre: 'Carlos Sainz',      equipo: 'Williams',     precioBase: 17.0, imagen: '/Pilotos/sainz.webp',      atributos: { ritmo: 85, consistencia: 90, adaptabilidad: 82, agresividad: 80, gestion: 88 } },
-  { numero: 23, nombre: 'Alexander Albon',   equipo: 'Williams',     precioBase: 15.0, imagen: '/Pilotos/albon.webp',      atributos: { ritmo: 75, consistencia: 80, adaptabilidad: 78, agresividad: 68, gestion: 76 } },
+  { numero: 55, nombre: 'Carlos Sainz',      equipo: 'Williams',     precioBase: 17.0, imagen: '/Pilotos/sainz.webp',      atributos: { ritmo: 81, consistencia: 66, adaptabilidad: 82, agresividad: 70, gestion: 88 } },
+  { numero: 23, nombre: 'Alexander Albon',   equipo: 'Williams',     precioBase: 15.0, imagen: '/Pilotos/albon.webp',      atributos: { ritmo: 85, consistencia: 69, adaptabilidad: 78, agresividad: 78, gestion: 66 } },
 
   /* ══════════ HAAS ══════════ */
-  { numero: 31, nombre: 'Esteban Ocon',      equipo: 'Haas',         precioBase: 14.0, imagen: '/Pilotos/ocon.webp',       atributos: { ritmo: 72, consistencia: 76, adaptabilidad: 70, agresividad: 66, gestion: 70 } },
+  { numero: 31, nombre: 'Esteban Ocon',      equipo: 'Haas',         precioBase: 14.0, imagen: '/Pilotos/ocon.webp',       atributos: { ritmo: 62, consistencia: 66, adaptabilidad: 80, agresividad: 94, gestion: 61 } },
   { numero: 87, nombre: 'Oliver Bearman',    equipo: 'Haas',         precioBase: 13.0, imagen: '/Pilotos/bearman.webp',    atributos: { ritmo: 68, consistencia: 62, adaptabilidad: 70, agresividad: 70, gestion: 60 } },
 
   /* ══════════ AUDI ══════════ */
