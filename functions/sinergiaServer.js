@@ -33,12 +33,12 @@ function calcularSinergias(garaje) {
     }
   }
 
-  if (pilotos.length === 2 && pilotos[0].variante !== pilotos[1].variante) {
+  if (pilotos.length === 2 && pilotos[0].variante == pilotos[1].variante) {
     sinergias.push({
       nombre: 'Combo Variante',
       bonus: BONUS_COMBO_VARIANTE,
       descripcion:
-        '+' + BONUS_COMBO_VARIANTE * 100 + '% por tener 2 pilotos con variantes distintas.',
+        '+' + BONUS_COMBO_VARIANTE * 100 + '% por tener 2 pilotos con la misma variante.',
     })
   }
 

@@ -83,7 +83,7 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
  */
 exports.procesarJornadaGP = onRequest(
   { region: 'europe-west1', cors: true },
-  async (peticion, respuesta) => {
+  async (_peticion, respuesta) => {
     try {
       const granPremio = await obtenerUltimoGranPremioFinalizado(TEMPORADA_ACTUAL)
 
