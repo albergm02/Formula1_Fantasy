@@ -179,6 +179,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         return await eliminarLiga(idLiga)
       }
 
+      // intento pasar el relevo de admin : TODO: NO FUNCIONA BIEN POR FIRESTORE RULES.
       if (participacionPropia.rol === 'admin') {
         const siguienteAdministrador = participacionesRestantes.sort(
           (primero, segundo) => segundo.puntos - primero.puntos,
