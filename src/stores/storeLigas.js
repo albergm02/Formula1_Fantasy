@@ -60,7 +60,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
 
     if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
-      return { success: false, message: 'Solo puedes pertenecer o crear un máximo de 5 ligas.' }
+      return { success: false, message: 'Solo puedes pertenecer a un máximo de 5 ligas.' }
     }
 
     try {
@@ -68,7 +68,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       if (ligasAdministradas >= 2) {
         return {
           success: false,
-          message: 'Reglamento FIA: Has alcanzado el límite máximo de 2 ligas creadas.',
+          message: 'Has alcanzado el límite máximo de 2 ligas creadas.',
         }
       }
 
@@ -109,7 +109,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
 
     if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
-      return { success: false, message: 'Solo puedes pertenecer o crear un máximo de 5 ligas.' }
+      return { success: false, message: 'Solo puedes pertenecer a un máximo de 5 ligas.' }
     }
 
     try {
