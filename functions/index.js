@@ -94,6 +94,7 @@ exports.procesarJornadaGP = onRequest(
 
       const idJornada = `gp_${granPremio.meeting_key}`
 
+      // TEMPORAL PARA HACER PRUEBAS
       const jornadaExistente = await db.collection('jornadas').doc(idJornada).get()
       if (jornadaExistente.exists) {
         await db.collection('jornadas').doc(idJornada).delete()
