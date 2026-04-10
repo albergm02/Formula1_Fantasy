@@ -256,9 +256,9 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
     }
 
     const porcentajeStintMaximo =
-      vueltasTotalPiloto > 0
-        ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100
-        : 0.5
+      vueltasTotalPiloto > 0 ?
+        Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 :
+        0.5
 
     resultado[numero] = { numeroPitStops, porcentajeStintMaximo }
   }
