@@ -25,7 +25,7 @@ const potenciadoresSemanales = ref([])
 const generarMercadoSemanal = () => {
   pilotosSemanales.value = [...mercadoPilotos]
     .sort(() => 0.5 - Math.random())
-    .slice(0, 3)
+    .slice(0, 8)
     .map((piloto) => ({ ...piloto, tipo: 'piloto' }))
 
   cochesSemanales.value = [...mercadoCoches]
@@ -35,7 +35,7 @@ const generarMercadoSemanal = () => {
 
   potenciadoresSemanales.value = [...mercadoPotenciadores]
     .sort(() => 0.5 - Math.random())
-    .slice(0, 4)
+    .slice(0, 8)
     .map((potenciador) => ({ ...potenciador, tipo: 'potenciador' }))
 }
 

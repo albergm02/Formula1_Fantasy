@@ -56,6 +56,12 @@ const confirmarCompra = () => {
         <img v-if="props.piloto.imagen" :src="props.piloto.imagen" :alt="props.piloto.nombre"
           class="w-full h-full object-cover block" />
 
+        <!-- Puntuacion base (esquina superior derecha) -->
+        <div class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-600">
+          <span class="text-[10px] font-black text-white">{{ props.piloto.puntuacionBase }}</span>
+          <span class="text-[7px] text-zinc-400 uppercase font-bold">PTS</span>
+        </div>
+
         <!-- Overlay de info (lado derecho, siempre visible) -->
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 
