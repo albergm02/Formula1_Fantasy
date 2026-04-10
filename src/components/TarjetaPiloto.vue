@@ -27,6 +27,8 @@ const barrasAtributos = computed(() => {
     { nombre: 'Ritmo', valor: a.ritmo, peso: p.ritmo, color: '#38bdf8' },
     { nombre: 'Consistencia', valor: a.consistencia, peso: p.consistencia, color: '#22c55e' },
     { nombre: 'Adaptabilidad', valor: a.adaptabilidad, peso: p.adaptabilidad, color: '#a78bfa' },
+    { nombre: 'Agresividad', valor: a.agresividad, peso: p.agresividad, color: '#ef4444' },
+    { nombre: 'Gestión', valor: a.gestion, peso: p.gestion, color: '#f59e0b' },
   ]
 })
 
@@ -137,12 +139,13 @@ const confirmarCompra = () => {
           <div v-for="barra in barrasAtributos" :key="barra.nombre" class="space-y-0.5">
             <div class="flex justify-between items-center">
               <span class="text-[10px] font-bold text-zinc-300 uppercase">{{ barra.nombre }}</span>
-              <span class="text-[10px] font-black text-white">{{ barra.valor }} <span class="text-zinc-500">× {{
+              <span class="text-[10px] font-black" :class="barra.peso > 0 ? 'text-white' : 'text-zinc-600'">{{ barra.valor }} <span
+                :class="barra.peso > 0 ? 'text-zinc-500' : 'text-red-500'">× {{
                 barra.peso }}</span></span>
             </div>
             <div class="w-full h-1.5 bg-zinc-700 overflow-hidden">
               <div class="h-full transition-all duration-500"
-                :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: 0.4 + barra.peso }"></div>
+                :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: barra.peso > 0 ? 0.4 + barra.peso : 0.15 }"></div>
             </div>
           </div>
         </div>

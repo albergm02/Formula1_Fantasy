@@ -22,6 +22,13 @@ const confirmar = useConfirm()
 const etiquetasMejora = computed(() => {
   const mejoras = props.potenciador.mejoras
   if (!mejoras) return []
+  const coloresAtributo = {
+    ritmo: '#38bdf8',
+    consistencia: '#22c55e',
+    adaptabilidad: '#a78bfa',
+    agresividad: '#ef4444',
+    gestion: '#f59e0b',
+  }
   return Object.entries(mejoras)
     .filter(([, valor]) => valor !== 0)
     .map(([atributo, valor]) => ({
@@ -29,6 +36,7 @@ const etiquetasMejora = computed(() => {
       valor,
       signo: valor > 0 ? '+' : '',
       color: valor > 0 ? 'text-emerald-400' : 'text-red-400',
+      colorAtributo: coloresAtributo[atributo] || '#a1a1aa',
     }))
 })
 
@@ -122,7 +130,7 @@ const confirmarCompra = () => {
           <p class="text-sm font-black text-sky-400 uppercase leading-tight mb-2">Mejoras de Atributos</p>
           <div class="space-y-2">
             <div v-for="m in etiquetasMejora" :key="m.atributo" class="flex justify-between items-center">
-              <span class="text-xs text-zinc-300 uppercase">{{ m.atributo }}</span>
+              <span class="text-xs font-bold uppercase" :style="{ color: m.colorAtributo }">{{ m.atributo }}</span>
               <span class="text-sm font-black" :class="m.color">{{ m.signo }}{{ m.valor }}</span>
             </div>
           </div>
