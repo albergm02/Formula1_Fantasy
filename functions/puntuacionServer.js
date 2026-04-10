@@ -76,11 +76,8 @@ function calcularFactorQualy({ posicionQualy }) {
   return resolverFactorPosicionQualy(posicionQualy)
 }
 
-function calcularFactorCarrera({ posicionCarrera, posicionSalida }) {
-  const posicionesGanadas = posicionSalida - posicionCarrera
-  const factorPosicion = resolverFactorPosicionCarrera(posicionCarrera)
-  const factorAdelantos = resolverFactorAdelantosPosicion(posicionesGanadas)
-  return Math.round(factorPosicion * factorAdelantos * 100) / 100
+function calcularFactorCarrera({ posicionCarrera }) {
+  return resolverFactorPosicionCarrera(posicionCarrera)
 }
 
 function calcularFactorTodoTerreno({
@@ -182,13 +179,7 @@ function resolverFactorPosicionCarrera(posicion) {
   return 0.2
 }
 
-function resolverFactorAdelantosPosicion(posicionesGanadas) {
-  if (posicionesGanadas >= 5) return 1.2
-  if (posicionesGanadas >= 1) return 1.1
-  if (posicionesGanadas === 0) return 1.0
-  if (posicionesGanadas >= -3) return 0.85
-  return 0.7
-}
+
 
 /* ─── 5. Utilidades base ────────────────────────────────────────────────── */
 
