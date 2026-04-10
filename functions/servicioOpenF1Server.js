@@ -191,7 +191,82 @@ async function obtenerCondicionesCarrera(sessionKey) {
   return { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }
 }
 
-/* ─── 6. Orquestación: actuación completa de un GP ─────────────────────── */
+/* ─── 6. Adelantamientos reales (Remontador) ────────────────────────────── */
+
+/**
+ * Obtiene el número de adelantamientos realizados por cada piloto en una sesión.
+ * Usa el endpoint /overtakes de OpenF1.
+ * @param {number} sessionKey - Clave de la sesión de carrera.
+ * @returns {Promise<Object>} Mapa { numeroPiloto → cantidadAdelantos }. Ej: { 1: 5, 44: 3 }
+ */
+async function obtenerAdelantamientosPorPiloto(sessionKey) {
+  const adelantamientos = await consultarOpenF1(`/overtakes?session_key=${sessionKey}`)
+  const conteo = {}
+
+  for (const evento of adelantamientos) {
+    const numero = evento.overtaking_driver_number
+    if (numero != null) {
+      conteo[numero] = (conteo[numero] || 0) + 1
+    }
+  }
+
+  return conteo
+}
+
+/* ─── 7. Datos de stints (Estratega) ────────────────────────────────────── */
+
+/**
+ * Obtiene las métricas de gestión de stints de cada piloto en una sesión.
+ * Calcula el número de pit stops y el porcentaje de vueltas en el stint más largo.
+ * Usa el endpoint /stints de OpenF1.
+ * @param {number} sessionKey - Clave de la sesión de carrera.
+ * @returns {Promise<Object>} Mapa { numeroPiloto → { numeroPitStops, porcentajeStintMaximo } }
+ */
+async function obtenerDatosStintsPorPiloto(sessionKey) {
+  const stints = await consultarOpenF1(`/stints?session_key=${sessionKey}`)
+  const stintsPorPiloto = {}
+
+  for (const stint of stints) {
+    const numero = stint.driver_number
+    if (numero == null) continue
+
+    if (!stintsPorPiloto[numero]) {
+      stintsPorPiloto[numero] = []
+    }
+    stintsPorPiloto[numero].push(stint)
+  }
+
+  const resultado = {}
+
+  for (const numero in stintsPorPiloto) {
+    if (!Object.prototype.hasOwnProperty.call(stintsPorPiloto, numero)) continue
+
+    const stintsDelPiloto = stintsPorPiloto[numero]
+    const numeroPitStops = Math.max(0, stintsDelPiloto.length - 1)
+
+    let vueltasMaxStint = 0
+    let vueltasTotalPiloto = 0
+
+    for (const stint of stintsDelPiloto) {
+      const vueltasStint = (stint.lap_end || 0) - (stint.lap_start || 0) + 1
+      if (vueltasStint > vueltasMaxStint) {
+        vueltasMaxStint = vueltasStint
+      }
+      vueltasTotalPiloto += vueltasStint
+    }
+
+    const porcentajeStintMaximo =
+      vueltasTotalPiloto > 0
+        ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100
+        : 0.5
+
+    resultado[numero] = { numeroPitStops, porcentajeStintMaximo }
+  }
+
+  return resultado
+}
+
+/* ─── 8. Orquestación: actuación completa de un GP ─────────────────────── */
 
 /**
  * Recopila todos los datos necesarios de un GP finalizado para calcular factores.
@@ -213,15 +288,25 @@ async function recopilarDatosGranPremio(meetingKey) {
   const resultadosCarrera = await obtenerResultadosSesion(sesionCarrera.session_key)
   const parrillaSalida = await obtenerParrillaSalida(sesionCarrera.session_key)
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
+  const adelantamientos = await obtenerAdelantamientosPorPiloto(sesionCarrera.session_key)
+  const datosStints = await obtenerDatosStintsPorPiloto(sesionCarrera.session_key)
 
   const actuacionesPorPiloto = {}
 
   for (const numeroPiloto in resultadosCarrera) {
     if (Object.prototype.hasOwnProperty.call(resultadosCarrera, numeroPiloto)) {
+      const stintsPiloto = datosStints[numeroPiloto] || {
+        numeroPitStops: 1,
+        porcentajeStintMaximo: 0.5,
+      }
+
       actuacionesPorPiloto[numeroPiloto] = {
         posicionQualy: resultadosQualy[numeroPiloto] || 20,
         posicionCarrera: resultadosCarrera[numeroPiloto],
         posicionSalida: parrillaSalida[numeroPiloto] || resultadosCarrera[numeroPiloto],
+        numeroAdelantos: adelantamientos[numeroPiloto] || 0,
+        numeroPitStops: stintsPiloto.numeroPitStops,
+        porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
       }
     }
   }
@@ -237,5 +322,7 @@ module.exports = {
   obtenerResultadosSesion,
   obtenerParrillaSalida,
   obtenerCondicionesCarrera,
+  obtenerAdelantamientosPorPiloto,
+  obtenerDatosStintsPorPiloto,
   recopilarDatosGranPremio,
 }
