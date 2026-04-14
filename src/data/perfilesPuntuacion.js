@@ -56,7 +56,7 @@ export const perfilesPuntuacion = {
   remontador: {
     pesos: { ritmo: 0.25, consistencia: 0, adaptabilidad: 0.1, agresividad: 0.55, gestion: 0.1 },
     reglasUsuario: [
-      'Factor según adelantamientos reales (OpenF1):',
+      'Factor según adelantamientos:',
       '7+ adelantamientos → ×1.80',
       '5 – 6 adelantamientos → ×1.50',
       '3 – 4 adelantamientos → ×1.30',
