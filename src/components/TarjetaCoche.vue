@@ -46,6 +46,13 @@ const confirmarPuja = () => {
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
 
+        <!-- Puntos base (esquina superior derecha) -->
+        <div
+          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-600">
+          <span class="text-[10px] font-black text-white">{{ props.coche.puntos }}</span>
+          <span class="text-[7px] text-zinc-400 uppercase font-bold">PTS</span>
+        </div>
+
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 
           <div>
@@ -63,7 +70,8 @@ const confirmarPuja = () => {
 
           <!-- Precio + puja máxima -->
           <div v-if="modoMercado" class="flex items-center justify-end gap-1.5 mb-1">
-            <span v-if="mejorPuja > 0" class="px-1.5 py-0.5 text-[9px] font-bold text-amber-300 bg-black/60 border border-amber-500/40">
+            <span v-if="mejorPuja > 0"
+              class="px-1.5 py-0.5 text-[9px] font-bold text-amber-300 bg-black/60 border border-amber-500/40">
               <i class="pi pi-arrow-up text-[8px]"></i> {{ mejorPuja.toFixed(2) }}M
             </span>
             <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black/50 border border-white/50">
@@ -81,7 +89,8 @@ const confirmarPuja = () => {
               class="flex-1 py-2.5 flex items-center justify-center border cursor-pointer transition-all active:scale-[0.98]"
               :class="miPuja ? 'bg-amber-900/50 border-amber-500/60 hover:bg-amber-900/70' : 'bg-black/50 border-white/50 hover:bg-black/80'">
               <i class="mr-2 text-xs pi pi-money-bill" :class="miPuja ? 'text-amber-400' : 'text-white'"></i>
-              <span class="text-[10px] font-black uppercase tracking-widest drop-shadow-sm" :class="miPuja ? 'text-amber-400' : 'text-white'">
+              <span class="text-[10px] font-black uppercase tracking-widest drop-shadow-sm"
+                :class="miPuja ? 'text-amber-400' : 'text-white'">
                 {{ miPuja ? `${miPuja.toFixed(2)}M` : 'PUJAR' }}
               </span>
             </button>
@@ -104,27 +113,38 @@ const confirmarPuja = () => {
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-3">
-        <div v-if="props.coche.reglasUsuario?.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-sky-400 uppercase leading-tight">
-            Reglas de puntuacion
-          </p>
-          <ul class="mt-2 space-y-1.5">
-            <li v-for="(regla, indice) in props.coche.reglasUsuario" :key="`${props.coche.id}-regla-${indice}`"
-              class="text-xs text-zinc-300 leading-relaxed">
-              • {{ regla }}
-            </li>
-          </ul>
+
+        <!-- Puntos base por jornada -->
+        <div class="px-3 py-3 bg-zinc-800 border border-zinc-700">
+          <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-2">Puntos por jornada</p>
+          <div class="flex items-center gap-3">
+            <span class="text-4xl font-black text-white leading-none">{{ props.coche.puntos }}</span>
+            <p class="text-xs text-zinc-300 leading-relaxed">
+              Este chasis aporta <strong class="text-white">{{ props.coche.puntos }} puntos base</strong> a tu equipo en
+              cada Gran Premio.
+            </p>
+          </div>
         </div>
 
-        <div v-if="props.coche.habilidad" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-emerald-400 uppercase leading-tight">
-            {{ props.coche.habilidad.nombre }}
-            <span class="text-white">+{{ props.coche.habilidad.puntos }}</span>
-          </p>
-          <p class="mt-1.5 text-xs text-zinc-300 leading-relaxed">
-            {{ props.coche.habilidad.descripcion }}
+        <!-- Sinergia de equipo -->
+        <div v-if="props.coche.habilidad" class="px-3 py-3 bg-zinc-800 border border-zinc-700">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="pi pi-link text-emerald-400 text-xs"></i>
+            <p class="text-xs font-black text-emerald-400 uppercase tracking-wide leading-tight">
+              {{ props.coche.habilidad.nombre }}
+            </p>
+            <span
+              class="ml-auto px-2 py-0.5 bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 text-[10px] font-black">
+              +{{ props.coche.habilidad.puntos }} PTS
+            </span>
+          </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            Si alineas pilotos del mismo equipo que este chasis, recibirás
+            <strong class="text-emerald-300">+{{ props.coche.habilidad.puntos }} puntos extra</strong>
+            en cada Gran Premio.
           </p>
         </div>
+
       </div>
     </Dialog>
 
