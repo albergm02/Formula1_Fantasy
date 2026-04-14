@@ -10,7 +10,6 @@
 // prettier-ignore
 export const perfilesPuntuacion = {
   qualy: {
-    clave: 'qualy', nombre: 'Qualy', descripcion: 'Prioriza la velocidad pura en clasificación. El factor de jornada depende de la posición en qualy.',
     pesos: { ritmo: 0.45, consistencia: 0.2, adaptabilidad: 0.05, agresividad: 0.25, gestion: 0.05 },
     reglasUsuario: [
       'Factor según posición en clasificación:',
@@ -22,7 +21,6 @@ export const perfilesPuntuacion = {
     ],
   },
   carrera: {
-    clave: 'carrera', nombre: 'Carrera', descripcion: 'Prioriza la regularidad y la gestión a lo largo de la carrera.',
     pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0.05, agresividad: 0.1, gestion: 0.25 },
     reglasUsuario: [
       'Factor según posición final en carrera:',
@@ -37,7 +35,6 @@ export const perfilesPuntuacion = {
     ],
   },
   todo_terreno: {
-    clave: 'todo_terreno', nombre: 'Todo Terreno', descripcion: 'Apuesta por el caos: lluvia, safety cars y abandonos amplifican su factor de jornada.',
     pesos: { ritmo: 0.1, consistencia: 0.15, adaptabilidad: 0.45, agresividad: 0.2, gestion: 0.1 },
     reglasUsuario: [
       'Factor según condiciones de carrera:',
@@ -49,7 +46,6 @@ export const perfilesPuntuacion = {
     ],
   },
   base: {
-    clave: 'base', nombre: 'Base', descripcion: 'Perfil equilibrado sin priorizar ningún atributo.',
     pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 },
     reglasUsuario: [
       'Media de los factores Qualy, Carrera y Todo Terreno:',
@@ -58,7 +54,6 @@ export const perfilesPuntuacion = {
     ],
   },
   remontador: {
-    clave: 'remontador', nombre: 'Remontador', descripcion: 'Brilla cuando más adelanta. El factor de jornada usa los adelantamientos reales registrados por OpenF1.',
     pesos: { ritmo: 0.25, consistencia: 0, adaptabilidad: 0.1, agresividad: 0.55, gestion: 0.1 },
     reglasUsuario: [
       'Factor según adelantamientos reales (OpenF1):',
@@ -71,7 +66,6 @@ export const perfilesPuntuacion = {
     ],
   },
   estratega: {
-    clave: 'estratega', nombre: 'Estratega', descripcion: 'Maximiza puntos con stints largos y pocas paradas. El factor de jornada mide la gestión de neumáticos real.',
     pesos: { ritmo: 0.05, consistencia: 0.3, adaptabilidad: 0.15, agresividad: 0, gestion: 0.5 },
     reglasUsuario: [
       'Factor compuesto por posición, stints y paradas:',
