@@ -1,9 +1,9 @@
 ﻿<script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { mercadoPilotos, mercadoCoches, mercadoPotenciadores } from '@/data/datosMercado'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreMercado } from '@/stores/storeMercado'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
@@ -11,40 +11,25 @@ import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
 
 const storeEscuderia = usarStoreEscuderia()
+const storeMercado = usarStoreMercado()
 const notificacion = useToast()
 const ruta = useRoute()
-
-const pilotosSemanales = ref([])
-const cochesSemanales = ref([])
-const potenciadoresSemanales = ref([])
-
-/**
- * Genera una selección aleatoria semanal de elementos disponibles en el mercado.
- * Mezcla el catálogo completo y extrae una muestra representativa de cada categoría.
- */
-const generarMercadoSemanal = () => {
-  pilotosSemanales.value = [...mercadoPilotos]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 8)
-    .map((piloto) => ({ ...piloto, tipo: 'piloto' }))
-
-  cochesSemanales.value = [...mercadoCoches]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 2)
-    .map((coche) => ({ ...coche, tipo: 'coche' }))
-
-  potenciadoresSemanales.value = [...mercadoPotenciadores]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 8)
-    .map((potenciador) => ({ ...potenciador, tipo: 'potenciador' }))
-}
 
 onMounted(async () => {
   if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
     await storeEscuderia.cargarEquipo(ruta.query.liga)
   }
 
-  generarMercadoSemanal()
+  /* Carga el mercado activo de la liga desde Firestore e inicia la cuenta atrás */
+  const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
+  if (idLiga) {
+    await storeMercado.inicializarMercado(idLiga)
+  }
+})
+
+/** Limpia la cuenta atrás al abandonar la vista */
+onUnmounted(() => {
+  storeMercado.detenerCuentaAtras()
 })
 
 /**
@@ -74,41 +59,66 @@ const manejarCompra = async (elemento) => {
 
   <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-20 p-4 gap-6">
 
+    <!-- Estado de carga -->
+    <div v-if="storeMercado.cargandoMercado" class="flex justify-center items-center py-20">
+      <i class="pi pi-spin pi-spinner text-3xl text-zinc-400"></i>
+    </div>
 
-    <section class="flex flex-col gap-4">
-      <div class="flex items-center gap-3">
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
-        <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
-      <div class="grid grid-cols-1 gap-4">
-        <TarjetaCoche v-for="coche in cochesSemanales" :key="coche.id" :coche="coche" :modoMercado="true"
-          @fichar="manejarCompra" />
-      </div>
-    </section>
+    <!-- Sin mercado abierto -->
+    <div v-else-if="!storeMercado.hayMercadoAbierto" class="flex flex-col items-center gap-3 py-20 text-zinc-400">
+      <i class="pi pi-shop text-4xl"></i>
+      <p class="text-sm">No hay mercado abierto en este momento.</p>
+    </div>
+
+    <!-- Mercado activo -->
+    <template v-else>
+
+      <!-- Cuenta atrás hasta el cierre -->
+      <section class="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-clock text-amber-400"></i>
+          <span class="text-xs font-semibold uppercase tracking-widest text-zinc-300">Cierre del mercado</span>
+        </div>
+        <span class="text-sm font-mono font-bold text-amber-400">{{ storeMercado.textoCuentaAtras }}</span>
+      </section>
 
 
-    <section class="flex flex-col gap-4">
-      <div class="flex items-center gap-3">
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
-        <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
-      <div class="grid grid-cols-1 gap-4">
-        <TarjetaPiloto v-for="piloto in pilotosSemanales" :key="piloto.id" :piloto="piloto" :modoMercado="true"
-          @fichar="manejarCompra" />
-      </div>
-    </section>
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
+          <div class="flex-1 h-px bg-zinc-700"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+          <TarjetaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
+            @fichar="manejarCompra" />
+        </div>
+      </section>
 
 
-    <section class="flex flex-col gap-4">
-      <div class="flex items-center gap-3">
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
-        <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
-      <div class="grid grid-cols-1 gap-4">
-        <TarjetaPotenciador v-for="potenciador in potenciadoresSemanales" :key="potenciador.id"
-          :potenciador="potenciador" :modoMercado="true" @fichar="manejarCompra" />
-      </div>
-    </section>
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
+          <div class="flex-1 h-px bg-zinc-700"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+          <TarjetaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto" :modoMercado="true"
+            @fichar="manejarCompra" />
+        </div>
+      </section>
+
+
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
+          <div class="flex-1 h-px bg-zinc-700"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+          <TarjetaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
+            :potenciador="potenciador" :modoMercado="true" @fichar="manejarCompra" />
+        </div>
+      </section>
+
+    </template>
   </main>
 
   <BarraNavegacion />

@@ -18,6 +18,7 @@
  */
 
 const { onRequest } = require('firebase-functions/v2/https')
+const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore } = require('firebase-admin/firestore')
 
@@ -27,6 +28,7 @@ const {
 } = require('./servicioOpenF1Server')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacionServer')
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
+const { generarCatalogo, seleccionarCartasDiarias } = require('./mercadoServer')
 
 initializeApp()
 const db = getFirestore()
@@ -186,6 +188,160 @@ exports.procesarJornadaGP = onRequest(
       respuesta.status(500).json({
         error: `Error al procesar la jornada: ${error.message}`,
       })
+    }
+  },
+)
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MERCADO DIARIO — Generación automática de cartas disponibles cada día.
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Flujo:
+   1. Se ejecuta diariamente a las 06:00 UTC (Cloud Scheduler).
+   2. Para CADA liga existente, genera un mercado independiente.
+   3. Selecciona una muestra aleatoria diaria (8 pilotos, 2 coches, 8 potenciadores).
+   4. Cierra el mercado del día anterior de esa liga (si existe).
+   5. Crea un nuevo documento en 'mercados/{idLiga}_{YYYY-MM-DD}' con estado 'abierto'.
+
+   Esquema Firestore → mercados/{idLiga}_{YYYY-MM-DD}:
+   {
+     idLiga: string,
+     estado: 'abierto' | 'cerrado',
+     fechaApertura: string (ISO),
+     fechaCierre: string (ISO),   ← siguiente día a las 06:00 UTC
+     totalCartas: 18,
+     cartas: [ { id, nombre, tipoCarta, precio, imagen, ... } ]
+   }
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Calcula el ID del mercado para una liga y una fecha.
+ * Formato: '{idLiga}_{YYYY-MM-DD}' para mercados diarios por liga.
+ * @param {string} idLiga
+ * @param {Date} fecha
+ * @returns {string} Ej: 'xi060FGM9iG33KvBuBQv_2026-04-14'
+ */
+function calcularIdMercado(idLiga, fecha) {
+  const fechaStr = fecha.toISOString().split('T')[0]
+  return `${idLiga}_${fechaStr}`
+}
+
+/**
+ * Calcula la fecha de cierre del mercado: el día siguiente a las 06:00 UTC.
+ * @param {Date} fechaApertura
+ * @returns {Date}
+ */
+function calcularFechaCierre(fechaApertura) {
+  const cierre = new Date(fechaApertura)
+  cierre.setUTCDate(cierre.getUTCDate() + 1)
+  cierre.setUTCHours(6, 0, 0, 0)
+  return cierre
+}
+
+/**
+ * Genera el mercado diario para UNA liga específica.
+ * Crea un documento en 'mercados/{idLiga}_{YYYY-MM-DD}'.
+ * Es idempotente: si el mercado de hoy ya existe para esa liga, no lo recrea.
+ * @param {string} idLiga - ID de la liga en Firestore.
+ * @returns {Promise<Object>} Resultado con el ID del mercado y el total de cartas.
+ */
+async function ejecutarGeneracionMercadoParaLiga(idLiga) {
+  const ahora = new Date()
+  const idMercadoHoy = calcularIdMercado(idLiga, ahora)
+
+  /* ── Idempotencia: si el mercado de hoy ya existe para esta liga, no lo recreamos ── */
+  const mercadoExistente = await db.collection('mercados').doc(idMercadoHoy).get()
+  if (mercadoExistente.exists) {
+    return { mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`, idMercado: idMercadoHoy, omitido: true }
+  }
+
+  /* ── Cerrar el mercado del día anterior de esta liga (si existe y sigue abierto) ── */
+  const ayer = new Date(ahora)
+  ayer.setUTCDate(ayer.getUTCDate() - 1)
+  const idMercadoAyer = calcularIdMercado(idLiga, ayer)
+  const mercadoAyer = await db.collection('mercados').doc(idMercadoAyer).get()
+
+  if (mercadoAyer.exists && mercadoAyer.data().estado === 'abierto') {
+    await db.collection('mercados').doc(idMercadoAyer).update({ estado: 'cerrado' })
+  }
+
+  /* ── Generar catálogo completo y seleccionar cartas del día ── */
+  const catalogo = generarCatalogo()
+  const cartasDelDia = seleccionarCartasDiarias(catalogo)
+
+  /* ── Crear documento del mercado de hoy para esta liga ── */
+  const fechaApertura = ahora
+  const fechaCierre = calcularFechaCierre(ahora)
+
+  await db.collection('mercados').doc(idMercadoHoy).set({
+    idLiga,
+    estado: 'abierto',
+    fechaApertura: fechaApertura.toISOString(),
+    fechaCierre: fechaCierre.toISOString(),
+    totalCartas: cartasDelDia.length,
+    cartas: cartasDelDia,
+  })
+
+  return {
+    mensaje: `Mercado generado para liga ${idLiga}.`,
+    idMercado: idMercadoHoy,
+    totalCartas: cartasDelDia.length,
+    fechaCierre: fechaCierre.toISOString(),
+  }
+}
+
+/**
+ * Cloud Function programada — se ejecuta cada día a las 06:00 UTC.
+ * Genera el mercado diario para TODAS las ligas existentes.
+ */
+exports.generarMercadoDiario = onSchedule(
+  {
+    schedule: 'every day 06:00',
+    timeZone: 'UTC',
+    region: 'europe-west1',
+  },
+  async () => {
+    const todasLigas = await db.collection('ligas').get()
+    const resultados = []
+
+    for (const docLiga of todasLigas.docs) {
+      const resultado = await ejecutarGeneracionMercadoParaLiga(docLiga.id)
+      resultados.push(resultado)
+    }
+
+    console.log(`[Mercado Diario] ${resultados.length} ligas procesadas.`)
+  },
+)
+
+/**
+ * Endpoint HTTP para generar el mercado diario de TODAS las ligas.
+ * Uso desde Admin: GET/POST https://<REGION>-<PROJECT>.cloudfunctions.net/generarMercadoDiarioHttp
+ */
+exports.generarMercadoDiarioHttp = onRequest(
+  { region: 'europe-west1', cors: true },
+  async (_peticion, respuesta) => {
+    try {
+      const todasLigas = await db.collection('ligas').get()
+
+      if (todasLigas.empty) {
+        respuesta.status(200).json({ mensaje: 'No hay ligas registradas.', ligasProcesadas: 0 })
+        return
+      }
+
+      const resultados = []
+      for (const docLiga of todasLigas.docs) {
+        const resultado = await ejecutarGeneracionMercadoParaLiga(docLiga.id)
+        resultados.push(resultado)
+      }
+
+      respuesta.status(200).json({
+        mensaje: `Mercado generado para ${resultados.length} liga(s).`,
+        ligasProcesadas: resultados.length,
+        detalle: resultados,
+      })
+    } catch (error) {
+      console.error('Error al generar mercado diario:', error)
+      respuesta.status(500).json({ error: `Error al generar mercado: ${error.message}` })
     }
   },
 )
