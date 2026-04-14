@@ -9,10 +9,77 @@
  */
 // prettier-ignore
 export const perfilesPuntuacion = {
-  qualy:        { clave: 'qualy',        nombre: 'Qualy',        descripcion: 'Prioriza la velocidad pura en clasificación. El factor de jornada depende de la posición en qualy.',               pesos: { ritmo: 0.45, consistencia: 0.2, adaptabilidad: 0.05, agresividad: 0.25, gestion: 0.05 }, reglasUsuario: ['Ritmo x0.45 — vuelta rápida al límite absoluto.', 'Agresividad x0.25 — arriesgar en frenadas y curvas marca la pole.', 'Consistencia x0.2 — no cometer errores al empujar al máximo.', 'Adaptabilidad x0.05 — la evolución del asfalto apenas influye.', 'Gestión x0.05 — una sola vuelta, casi no hay desgaste.'] },
-  carrera:      { clave: 'carrera',      nombre: 'Carrera',      descripcion: 'Prioriza la regularidad y la gestión a lo largo de la carrera.',                                                    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0.05, agresividad: 0.1, gestion: 0.25 }, reglasUsuario: ['Consistencia x0.4 — 60 vueltas sin errores definen el resultado.', 'Gestión x0.25 — cuidar neumáticos y energía prolonga los stints.', 'Ritmo x0.2 — la velocidad base sigue importando.', 'Agresividad x0.1 — adelantar en momentos clave suma posiciones.', 'Adaptabilidad x0.05 — los cambios de condiciones rara vez deciden.'] },
-  todo_terreno: { clave: 'todo_terreno', nombre: 'Todo Terreno', descripcion: 'Apuesta por el caos: lluvia, safety cars y abandonos amplifican su factor de jornada.',                             pesos: { ritmo: 0.1, consistencia: 0.15, adaptabilidad: 0.45, agresividad: 0.2, gestion: 0.1 }, reglasUsuario: ['Adaptabilidad x0.45 — brilla en lluvia, caos y condiciones cambiantes.', 'Agresividad x0.2 — explotar el desorden para adelantar en el momento justo.', 'Consistencia x0.15 — sobrevivir al caos sin abandonar.', 'Ritmo x0.1 — la velocidad base aporta algo.', 'Gestión x0.1 — adaptar la estrategia sobre la marcha.'] },
-  base:         { clave: 'base',         nombre: 'Base',         descripcion: 'Perfil equilibrado sin priorizar ningún atributo.',                                                                 pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 }, reglasUsuario: ['Ritmo x0.2 — contribucion equilibrada de velocidad.', 'Consistencia x0.2 — contribucion equilibrada de regularidad.', 'Adaptabilidad x0.2 — contribucion equilibrada de versatilidad.', 'Agresividad x0.2 — contribucion equilibrada de combatividad.', 'Gestión x0.2 — contribucion equilibrada de estrategia.'] },
-  remontador:   { clave: 'remontador',   nombre: 'Remontador',   descripcion: 'Brilla cuando más adelanta. El factor de jornada usa los adelantamientos reales registrados por OpenF1.',          pesos: { ritmo: 0.25, consistencia: 0, adaptabilidad: 0.1, agresividad: 0.55, gestion: 0.1 }, reglasUsuario: ['Agresividad x0.55 — adelantamientos reales en pista determinan el factor.', 'Ritmo x0.25 — necesita velocidad para completar los adelantamientos.', 'Adaptabilidad x0.1 — aprovecha situaciones de caos para remontar.', 'Gestión x0.1 — dosificar neumáticos para atacar en el momento justo.', 'Consistencia x0 — este perfil vive al límite, no busca regularidad.'] },
-  estratega:    { clave: 'estratega',    nombre: 'Estratega',    descripcion: 'Maximiza puntos con stints largos y pocas paradas. El factor de jornada mide la gestión de neumáticos real.',     pesos: { ritmo: 0.05, consistencia: 0.3, adaptabilidad: 0.15, agresividad: 0, gestion: 0.5 }, reglasUsuario: ['Gestión x0.5 — stints más largos y menos paradas disparan el factor.', 'Consistencia x0.3 — ejecutar el plan sin errores es clave.', 'Adaptabilidad x0.15 — reaccionar a safety cars para optimizar la estrategia.', 'Ritmo x0.05 — la velocidad pura importa muy poco aquí.', 'Agresividad x0 — la paciencia es el arma de este perfil.'] },
+  qualy: {
+    clave: 'qualy', nombre: 'Qualy', descripcion: 'Prioriza la velocidad pura en clasificación. El factor de jornada depende de la posición en qualy.',
+    pesos: { ritmo: 0.45, consistencia: 0.2, adaptabilidad: 0.05, agresividad: 0.25, gestion: 0.05 },
+    reglasUsuario: [
+      'Factor según posición en clasificación:',
+      'P1 – P3 → ×1.50',
+      'P4 – P6 → ×1.30',
+      'P7 – P10 → ×1.15',
+      'P11 – P15 → ×0.85',
+      'P16+ → ×0.65',
+    ],
+  },
+  carrera: {
+    clave: 'carrera', nombre: 'Carrera', descripcion: 'Prioriza la regularidad y la gestión a lo largo de la carrera.',
+    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0.05, agresividad: 0.1, gestion: 0.25 },
+    reglasUsuario: [
+      'Factor según posición final en carrera:',
+      'P1 → ×1.50',
+      'P2 → ×1.40',
+      'P3 → ×1.30',
+      'P4 – P5 → ×1.20',
+      'P6 – P10 → ×1.00',
+      'P11 – P15 → ×0.75',
+      'P16 – P20 → ×0.50',
+      'P20+ → ×0.20',
+    ],
+  },
+  todo_terreno: {
+    clave: 'todo_terreno', nombre: 'Todo Terreno', descripcion: 'Apuesta por el caos: lluvia, safety cars y abandonos amplifican su factor de jornada.',
+    pesos: { ritmo: 0.1, consistencia: 0.15, adaptabilidad: 0.45, agresividad: 0.2, gestion: 0.1 },
+    reglasUsuario: [
+      'Factor según condiciones de carrera:',
+      'Lluvia → ×1.40 | Sin lluvia → ×0.90',
+      'Cada Safety Car → +0.10',
+      'Cada Virtual SC → +0.05',
+      'Cada abandono (DNF) → +0.03',
+      'Bonus caos máximo: +0.30',
+    ],
+  },
+  base: {
+    clave: 'base', nombre: 'Base', descripcion: 'Perfil equilibrado sin priorizar ningún atributo.',
+    pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 },
+    reglasUsuario: [
+      'Media de los factores Qualy, Carrera y Todo Terreno:',
+      'Factor = (factorQualy + factorCarrera + factorTodoTerreno) / 3',
+      'Perfil equilibrado sin especialización.',
+    ],
+  },
+  remontador: {
+    clave: 'remontador', nombre: 'Remontador', descripcion: 'Brilla cuando más adelanta. El factor de jornada usa los adelantamientos reales registrados por OpenF1.',
+    pesos: { ritmo: 0.25, consistencia: 0, adaptabilidad: 0.1, agresividad: 0.55, gestion: 0.1 },
+    reglasUsuario: [
+      'Factor según adelantamientos reales (OpenF1):',
+      '7+ adelantamientos → ×1.80',
+      '5 – 6 adelantamientos → ×1.50',
+      '3 – 4 adelantamientos → ×1.30',
+      '1 – 2 adelantamientos → ×1.10',
+      '0 adelantamientos → ×0.70',
+      'Bonus posición: P1–P5 → +0.10 | P6–P10 → +0.05',
+    ],
+  },
+  estratega: {
+    clave: 'estratega', nombre: 'Estratega', descripcion: 'Maximiza puntos con stints largos y pocas paradas. El factor de jornada mide la gestión de neumáticos real.',
+    pesos: { ritmo: 0.05, consistencia: 0.3, adaptabilidad: 0.15, agresividad: 0, gestion: 0.5 },
+    reglasUsuario: [
+      'Factor compuesto por posición, stints y paradas:',
+      'Base: factor posición carrera × 0.50',
+      'Stint ≥ 60% de la carrera → +0.35',
+      'Stint ≥ 40% → +0.20 | ≥ 25% → +0.10',
+      '1 parada → +0.20 | 2 paradas → +0.10 | 3+ → +0.00',
+      'Cada SC → +0.08 | Cada VSC → +0.04 (máx +0.20)',
+    ],
+  },
 }

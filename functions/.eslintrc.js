@@ -23,5 +23,6 @@ module.exports = {
     'block-spacing': 'off',
     'no-multi-spaces': 'off',
     'space-before-function-paren': 'off',
+    'key-spacing': 'off',
   },
 }
