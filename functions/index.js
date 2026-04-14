@@ -239,6 +239,70 @@ function calcularFechaCierre(fechaApertura) {
 }
 
 /**
+ * Resuelve todas las pujas de un mercado cerrado.
+ * Para cada carta con pujas, la mayor puja gana: se añade la carta al garaje
+ * del ganador y se le descuenta el importe del presupuesto.
+ * @param {string} idMercado - ID del mercado cuyas pujas se resuelven.
+ */
+async function resolverPujasMercado(idMercado) {
+  const pujasSnapshot = await db.collection('mercados').doc(idMercado).collection('pujas').get()
+
+  if (pujasSnapshot.empty) return
+
+  /* Agrupar pujas por idCarta y encontrar la mayor de cada una */
+  const pujasPorCarta = {}
+  for (const doc of pujasSnapshot.docs) {
+    const puja = doc.data()
+    const actual = pujasPorCarta[puja.idCarta]
+    if (!actual || puja.cantidad > actual.cantidad) {
+      pujasPorCarta[puja.idCarta] = puja
+    }
+  }
+
+  const batch = db.batch()
+
+  for (const [idCarta, pujaGanadora] of Object.entries(pujasPorCarta)) {
+    const { idParticipante, cantidad, tipoCarta } = pujaGanadora
+
+    /* Leer participación del ganador */
+    const participacionRef = db.collection('participaciones').doc(idParticipante)
+    const participacionSnap = await participacionRef.get()
+    if (!participacionSnap.exists) continue
+
+    const participacion = participacionSnap.data()
+    const presupuesto = participacion.presupuesto || 0
+
+    /* Verificar que aún tiene presupuesto */
+    if (cantidad > presupuesto) continue
+
+    const garaje = participacion.garaje || { pilotos: [], coches: [], potenciadores: [], ruedas: [] }
+
+    /* Construir el objeto de la carta ganada */
+    const cartaGanada = {
+      id: idCarta,
+      nombre: pujaGanadora.nombreCarta,
+      tipoCarta,
+      precio: pujaGanadora.precioCarta,
+    }
+
+    /* Añadir la carta al array correspondiente del garaje */
+    const claveGaraje = tipoCarta === 'piloto' ? 'pilotos'
+      : tipoCarta === 'coche' ? 'coches'
+        : tipoCarta === 'potenciador' ? 'potenciadores'
+          : 'ruedas'
+
+    garaje[claveGaraje] = [...(garaje[claveGaraje] || []), cartaGanada]
+
+    batch.update(participacionRef, {
+      presupuesto: presupuesto - cantidad,
+      garaje,
+    })
+  }
+
+  await batch.commit()
+}
+
+/**
  * Genera el mercado diario para UNA liga específica.
  * Crea un documento en 'mercados/{idLiga}_{YYYY-MM-DD}'.
  * Es idempotente: si el mercado de hoy ya existe para esa liga, no lo recrea.
@@ -262,6 +326,7 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   const mercadoAyer = await db.collection('mercados').doc(idMercadoAyer).get()
 
   if (mercadoAyer.exists && mercadoAyer.data().estado === 'abierto') {
+    await resolverPujasMercado(idMercadoAyer)
     await db.collection('mercados').doc(idMercadoAyer).update({ estado: 'cerrado' })
   }
 

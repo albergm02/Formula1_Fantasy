@@ -10,7 +10,9 @@
  */
 import { ref, computed, onUnmounted } from 'vue'
 import { defineStore } from 'pinia'
-import { cargarMercadoActivo } from '@/services/servicioMercado'
+import { cargarMercadoActivo, registrarPuja, cargarMisPujas, cargarResumenPujas } from '@/services/servicioMercado'
+import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreEscuderia } from '@/stores/storeEquipo'
 
 export const usarStoreMercado = defineStore('mercado', () => {
   /* ─── Estado reactivo ─────────────────────────────────────────────────── */
@@ -23,6 +25,12 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   /** Milisegundos restantes hasta el cierre del mercado (se actualiza cada segundo) */
   const milisegundosRestantes = ref(0)
+
+  /** Mapa idCarta → cantidad de la puja del usuario actual */
+  const misPujas = ref({})
+
+  /** Mapa idCarta → { mejorPuja, totalPujas } con el resumen de todas las pujas */
+  const resumenPujas = ref({})
 
   /** ID del intervalo de la cuenta atrás (para limpiarlo al desmontar) */
   let intervaloId = null
@@ -111,10 +119,53 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
       if (mercadoActivo.value) {
         iniciarCuentaAtras()
+
+        const storeAuth = usarStoreAutenticacion()
+        const email = storeAuth.usuarioActual?.correoAutenticacion
+        if (email) {
+          misPujas.value = await cargarMisPujas(mercadoActivo.value.id, email)
+        }
+        resumenPujas.value = await cargarResumenPujas(mercadoActivo.value.id)
       }
     } finally {
       cargandoMercado.value = false
     }
+  }
+
+  /**
+   * Realiza una puja sobre una carta del mercado.
+   * Valida que la cantidad sea >= precio base y que el usuario tenga presupuesto.
+   * @param {Object} carta - La carta sobre la que se puja.
+   * @param {number} cantidad - Cantidad ofertada.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function pujarPorCarta(carta, cantidad) {
+    const storeAuth = usarStoreAutenticacion()
+    const storeEscuderia = usarStoreEscuderia()
+
+    const cantidadNum = Number(cantidad)
+    if (isNaN(cantidadNum) || cantidadNum < carta.precio) {
+      return { success: false, message: `La puja mínima es ${carta.precio}M (precio base).` }
+    }
+    if (cantidadNum > storeEscuderia.presupuesto) {
+      return { success: false, message: 'No tienes suficiente presupuesto para esta puja.' }
+    }
+
+    const email = storeAuth.usuarioActual.correoAutenticacion
+    const idParticipante = storeEscuderia.idParticipanteActivo
+
+    await registrarPuja(mercadoActivo.value.id, carta, email, idParticipante, cantidadNum)
+
+    misPujas.value[carta.id] = cantidadNum
+
+    if (!resumenPujas.value[carta.id] || cantidadNum > resumenPujas.value[carta.id].mejorPuja) {
+      resumenPujas.value[carta.id] = {
+        mejorPuja: cantidadNum,
+        totalPujas: (resumenPujas.value[carta.id]?.totalPujas || 0) + (misPujas.value[carta.id] ? 0 : 1),
+      }
+    }
+
+    return { success: true, message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.` }
   }
 
   /** Limpia el intervalo cuando el componente que usa el store se desmonta */
@@ -127,6 +178,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
     mercadoActivo,
     cargandoMercado,
     milisegundosRestantes,
+    misPujas,
+    resumenPujas,
 
     /* Computed */
     hayMercadoAbierto,
@@ -137,6 +190,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
     /* Acciones */
     inicializarMercado,
+    pujarPorCarta,
     detenerCuentaAtras,
   }
 })

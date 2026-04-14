@@ -9,6 +9,7 @@ import Cabecera from '@/components/Cabecera.vue'
 import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
+import TarjetaRueda from '@/components/TarjetaRueda.vue'
 
 const storeEscuderia = usarStoreEscuderia()
 const storeMercado = usarStoreMercado()
@@ -33,17 +34,17 @@ onUnmounted(() => {
 })
 
 /**
- * Gestiona la compra de un elemento del mercado (piloto, coche o potenciador).
+ * Gestiona la puja de un usuario sobre una carta del mercado.
  * Delega la lógica de negocio al store y notifica el resultado al usuario.
- * @param {Object} elemento - El elemento del mercado que se desea fichar.
+ * @param {{ carta: Object, cantidad: number }} payload - Carta y cantidad de la puja.
  */
-const manejarCompra = async (elemento) => {
-  const resultado = await storeEscuderia.comprarElemento(elemento)
+const manejarPuja = async ({ carta, cantidad }) => {
+  const resultado = await storeMercado.pujarPorCarta(carta, cantidad)
 
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Fichaje exitoso', detail: `Has fichado a ${elemento.nombre} por ${elemento.precio}M` })
+    notificacion.add({ severity: 'success', summary: 'Puja registrada', detail: resultado.message })
   } else {
-    notificacion.add({ severity: 'error', summary: 'Fichaje fallido', detail: resultado.message })
+    notificacion.add({ severity: 'error', summary: 'Puja fallida', detail: resultado.message })
   }
 }
 </script>
@@ -90,7 +91,9 @@ const manejarCompra = async (elemento) => {
         </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
-            @fichar="manejarCompra" />
+            :miPuja="storeMercado.misPujas[coche.id] || null"
+            :mejorPuja="storeMercado.resumenPujas[coche.id]?.mejorPuja || 0"
+            @pujar="manejarPuja" />
         </div>
       </section>
 
@@ -102,7 +105,9 @@ const manejarCompra = async (elemento) => {
         </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto" :modoMercado="true"
-            @fichar="manejarCompra" />
+            :miPuja="storeMercado.misPujas[piloto.id] || null"
+            :mejorPuja="storeMercado.resumenPujas[piloto.id]?.mejorPuja || 0"
+            @pujar="manejarPuja" />
         </div>
       </section>
 
@@ -114,7 +119,10 @@ const manejarCompra = async (elemento) => {
         </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
-            :potenciador="potenciador" :modoMercado="true" @fichar="manejarCompra" />
+            :potenciador="potenciador" :modoMercado="true"
+            :miPuja="storeMercado.misPujas[potenciador.id] || null"
+            :mejorPuja="storeMercado.resumenPujas[potenciador.id]?.mejorPuja || 0"
+            @pujar="manejarPuja" />
         </div>
       </section>
 

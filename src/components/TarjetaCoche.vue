@@ -1,9 +1,10 @@
 <script setup>
 import { ref } from 'vue'
-import { useConfirm } from 'primevue/useconfirm'
 import Dialog from 'primevue/dialog'
 
 const mostrarDetalles = ref(false)
+const mostrarPuja = ref(false)
+const cantidadPuja = ref(null)
 
 const props = defineProps({
   coche: {
@@ -14,22 +15,26 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  miPuja: {
+    type: Number,
+    default: null,
+  },
+  mejorPuja: {
+    type: Number,
+    default: 0,
+  },
 })
 
-const emit = defineEmits(['fichar'])
-const confirmar = useConfirm()
+const emit = defineEmits(['pujar'])
 
-const confirmarCompra = () => {
-  confirmar.require({
-    message: `¿Estás seguro de que quieres fichar a ${props.coche.nombre} por ${props.coche.precio}M?`,
-    header: 'Confirmar Fichaje',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Sí, fichar',
-    rejectLabel: 'No, cancelar',
-    accept() {
-      emit('fichar', props.coche)
-    },
-  })
+const abrirPuja = () => {
+  cantidadPuja.value = props.coche.precio
+  mostrarPuja.value = true
+}
+
+const confirmarPuja = () => {
+  emit('pujar', { carta: props.coche, cantidad: cantidadPuja.value })
+  mostrarPuja.value = false
 }
 </script>
 
@@ -56,8 +61,11 @@ const confirmarCompra = () => {
 
           <div class="flex-1"></div>
 
-          <!-- Precio -->
-          <div v-if="modoMercado" class="flex justify-end mb-1">
+          <!-- Precio + puja máxima -->
+          <div v-if="modoMercado" class="flex items-center justify-end gap-1.5 mb-1">
+            <span v-if="mejorPuja > 0" class="px-1.5 py-0.5 text-[9px] font-bold text-amber-300 bg-black/60 border border-amber-500/40">
+              <i class="pi pi-arrow-up text-[8px]"></i> {{ mejorPuja.toFixed(2) }}M
+            </span>
             <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black/50 border border-white/50">
               {{ Number(props.coche.precio).toFixed(2) }}M
             </span>
@@ -69,10 +77,13 @@ const confirmarCompra = () => {
               class="py-2.5 px-3 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
               <i class="pi pi-eye text-white text-xs"></i>
             </button>
-            <button @click="confirmarCompra"
-              class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
-              <i class="mr-2 text-xs text-white pi pi-money-bill"></i>
-              <span class="text-white text-[10px] font-black uppercase tracking-widest drop-shadow-sm">PUJAR</span>
+            <button @click="abrirPuja"
+              class="flex-1 py-2.5 flex items-center justify-center border cursor-pointer transition-all active:scale-[0.98]"
+              :class="miPuja ? 'bg-amber-900/50 border-amber-500/60 hover:bg-amber-900/70' : 'bg-black/50 border-white/50 hover:bg-black/80'">
+              <i class="mr-2 text-xs pi pi-money-bill" :class="miPuja ? 'text-amber-400' : 'text-white'"></i>
+              <span class="text-[10px] font-black uppercase tracking-widest drop-shadow-sm" :class="miPuja ? 'text-amber-400' : 'text-white'">
+                {{ miPuja ? `${miPuja.toFixed(2)}M` : 'PUJAR' }}
+              </span>
             </button>
           </div>
 
@@ -114,6 +125,35 @@ const confirmarCompra = () => {
             {{ props.coche.habilidad.descripcion }}
           </p>
         </div>
+      </div>
+    </Dialog>
+
+    <!-- Dialog de puja -->
+    <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '360px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+      <div class="space-y-4">
+        <p class="text-sm text-zinc-300">
+          Pujando por <strong class="text-white">{{ props.coche.nombre }}</strong>
+        </p>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-zinc-400">Precio base:</span>
+          <span class="text-sm font-black text-[#D4A843]">{{ props.coche.precio }}M</span>
+        </div>
+        <div v-if="mejorPuja > 0" class="flex items-center gap-2">
+          <span class="text-xs text-zinc-400">Puja más alta:</span>
+          <span class="text-sm font-black text-amber-400">{{ mejorPuja.toFixed(2) }}M</span>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400 mb-1 block">Tu puja (M)</label>
+          <input v-model.number="cantidadPuja" type="number" :min="props.coche.precio" step="0.1"
+            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 text-white text-sm font-bold focus:border-amber-500 focus:outline-none" />
+        </div>
+        <button @click="confirmarPuja" :disabled="!cantidadPuja || cantidadPuja < props.coche.precio"
+          class="w-full py-3 flex items-center justify-center bg-amber-600 hover:bg-amber-700 disabled:bg-zinc-700 disabled:text-zinc-500 border-none cursor-pointer transition-all text-white text-sm font-black uppercase tracking-widest">
+          <i class="pi pi-money-bill mr-2"></i> CONFIRMAR PUJA
+        </button>
       </div>
     </Dialog>
   </div>
