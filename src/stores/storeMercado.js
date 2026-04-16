@@ -10,7 +10,13 @@
  */
 import { ref, computed, onUnmounted } from 'vue'
 import { defineStore } from 'pinia'
-import { cargarMercadoActivo, registrarPuja, cargarMisPujas, cargarResumenPujas } from '@/services/servicioMercado'
+import {
+  cargarMercadoActivo,
+  registrarPuja,
+  eliminarPuja,
+  cargarMisPujas,
+  cargarResumenPujas,
+} from '@/services/servicioMercado'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 
@@ -70,6 +76,11 @@ export const usarStoreMercado = defineStore('mercado', () => {
     const segundos = Math.floor((ms % (1000 * 60)) / 1000)
 
     return `${String(horas).padStart(2, '0')}h ${String(minutos).padStart(2, '0')}m ${String(segundos).padStart(2, '0')}s`
+  })
+
+  /** Suma total del dinero comprometido en pujas activas del usuario */
+  const totalPujasComprometidas = computed(() => {
+    return Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0)
   })
 
   /* ─── Acciones ────────────────────────────────────────────────────────── */
@@ -147,8 +158,16 @@ export const usarStoreMercado = defineStore('mercado', () => {
     if (isNaN(cantidadNum) || cantidadNum < carta.precio) {
       return { success: false, message: `La puja mínima es ${carta.precio}M (precio base).` }
     }
-    if (cantidadNum > storeEscuderia.presupuesto) {
-      return { success: false, message: 'No tienes suficiente presupuesto para esta puja.' }
+
+    const pujaAnteriorEstaCarta = misPujas.value[carta.id] || 0
+    const totalComprometidoSinEstaCarta = totalPujasComprometidas.value - pujaAnteriorEstaCarta
+    const presupuestoDisponible = storeEscuderia.presupuesto - totalComprometidoSinEstaCarta
+
+    if (cantidadNum > presupuestoDisponible) {
+      return {
+        success: false,
+        message: `No tienes presupuesto suficiente. Disponible: ${presupuestoDisponible.toFixed(2)}M.`,
+      }
     }
 
     const email = storeAuth.usuarioActual.correoAutenticacion
@@ -161,11 +180,38 @@ export const usarStoreMercado = defineStore('mercado', () => {
     if (!resumenPujas.value[carta.id] || cantidadNum > resumenPujas.value[carta.id].mejorPuja) {
       resumenPujas.value[carta.id] = {
         mejorPuja: cantidadNum,
-        totalPujas: (resumenPujas.value[carta.id]?.totalPujas || 0) + (misPujas.value[carta.id] ? 0 : 1),
+        totalPujas:
+          (resumenPujas.value[carta.id]?.totalPujas || 0) + (misPujas.value[carta.id] ? 0 : 1),
       }
     }
 
-    return { success: true, message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.` }
+    return {
+      success: true,
+      message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.`,
+    }
+  }
+
+  /**
+   * Elimina la puja del usuario actual sobre una carta del mercado.
+   * @param {Object} carta - La carta cuya puja se elimina.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function eliminarPujaCarta(carta) {
+    const storeAuth = usarStoreAutenticacion()
+    const email = storeAuth.usuarioActual.correoAutenticacion
+
+    await eliminarPuja(mercadoActivo.value.id, carta.id, email)
+
+    delete misPujas.value[carta.id]
+
+    if (resumenPujas.value[carta.id]) {
+      resumenPujas.value[carta.id].totalPujas = Math.max(
+        0,
+        resumenPujas.value[carta.id].totalPujas - 1,
+      )
+    }
+
+    return { success: true, message: `Puja eliminada sobre ${carta.nombre}.` }
   }
 
   /** Limpia el intervalo cuando el componente que usa el store se desmonta */
@@ -187,10 +233,12 @@ export const usarStoreMercado = defineStore('mercado', () => {
     cochesMercado,
     potenciadoresMercado,
     textoCuentaAtras,
+    totalPujasComprometidas,
 
     /* Acciones */
     inicializarMercado,
     pujarPorCarta,
+    eliminarPujaCarta,
     detenerCuentaAtras,
   }
 })

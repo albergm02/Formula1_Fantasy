@@ -25,15 +25,20 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['pujar'])
+const emit = defineEmits(['pujar', 'eliminarPuja'])
 
 const abrirPuja = () => {
-  cantidadPuja.value = props.coche.precio
+  cantidadPuja.value = props.miPuja || props.coche.precio
   mostrarPuja.value = true
 }
 
 const confirmarPuja = () => {
   emit('pujar', { carta: props.coche, cantidad: cantidadPuja.value })
+  mostrarPuja.value = false
+}
+
+const confirmarEliminarPuja = () => {
+  emit('eliminarPuja', props.coche)
   mostrarPuja.value = false
 }
 </script>
@@ -46,11 +51,11 @@ const confirmarPuja = () => {
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Puntos base (esquina superior derecha) -->
-        <div
-          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-600">
-          <span class="text-[10px] font-black text-white">{{ props.coche.puntos }}</span>
-          <span class="text-[7px] text-zinc-400 uppercase font-bold">PTS</span>
+        <!-- Badge precio (esquina superior derecha) -->
+        <div v-if="modoMercado"
+          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-[#D4A843]/40">
+          <span class="text-[10px] font-black text-[#D4A843]">{{ Number(props.coche.precio).toFixed(2) }}</span>
+          <span class="text-[7px] text-zinc-400 uppercase font-bold">M</span>
         </div>
 
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
@@ -68,38 +73,26 @@ const confirmarPuja = () => {
 
           <div class="flex-1"></div>
 
-          <!-- Precio + puja máxima -->
-          <div v-if="modoMercado" class="flex items-center justify-end gap-1.5 mb-1">
-            <span v-if="mejorPuja > 0"
-              class="px-1.5 py-0.5 text-[9px] font-bold text-amber-300 bg-black/60 border border-amber-500/40">
-              <i class="pi pi-arrow-up text-[8px]"></i> {{ mejorPuja.toFixed(2) }}M
-            </span>
-            <span class="px-2 py-1 text-sm font-black text-[#D4A843] bg-black/50 border border-white/50">
-              {{ Number(props.coche.precio).toFixed(2) }}M
-            </span>
-          </div>
-
           <!-- Botones: Detalles + Pujar -->
           <div v-if="modoMercado" class="flex gap-2">
             <button @click="mostrarDetalles = true"
-              class="py-2.5 px-3 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
-              <i class="pi pi-eye text-white text-xs"></i>
+              class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
+              <i class="pi pi-info-circle text-white text-xs"></i>
+              <span class="text-white text-[9px] font-black uppercase">INFO</span>
             </button>
             <button @click="abrirPuja"
-              class="flex-1 py-2.5 flex items-center justify-center border cursor-pointer transition-all active:scale-[0.98]"
-              :class="miPuja ? 'bg-amber-900/50 border-amber-500/60 hover:bg-amber-900/70' : 'bg-black/50 border-white/50 hover:bg-black/80'">
-              <i class="mr-2 text-xs pi pi-money-bill" :class="miPuja ? 'text-amber-400' : 'text-white'"></i>
-              <span class="text-[10px] font-black uppercase tracking-widest drop-shadow-sm"
+              class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
+              <span class="text-[10px] font-black uppercase tracking-widest"
                 :class="miPuja ? 'text-amber-400' : 'text-white'">
-                {{ miPuja ? `${miPuja.toFixed(2)}M` : 'PUJAR' }}
+                {{ miPuja ? 'EDITAR PUJA' : 'PUJAR' }}
               </span>
             </button>
           </div>
 
           <!-- Botón detalles fuera de mercado -->
           <button v-else @click="mostrarDetalles = true"
-            class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer transition-all hover:bg-black/80 active:scale-[0.98]">
-            <i class="pi pi-eye text-white text-xs mr-2"></i>
+            class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
+            <i class="pi pi-info-circle text-white text-xs mr-2"></i>
             <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
           </button>
         </div>
@@ -171,8 +164,12 @@ const confirmarPuja = () => {
             class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 text-white text-sm font-bold focus:border-amber-500 focus:outline-none" />
         </div>
         <button @click="confirmarPuja" :disabled="!cantidadPuja || cantidadPuja < props.coche.precio"
-          class="w-full py-3 flex items-center justify-center bg-amber-600 hover:bg-amber-700 disabled:bg-zinc-700 disabled:text-zinc-500 border-none cursor-pointer transition-all text-white text-sm font-black uppercase tracking-widest">
+          class="w-full py-3 flex items-center justify-center bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 border-none rounded-sm cursor-pointer text-white text-sm font-black uppercase tracking-widest">
           <i class="pi pi-money-bill mr-2"></i> CONFIRMAR PUJA
+        </button>
+        <button v-if="miPuja" @click="confirmarEliminarPuja"
+          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 rounded-sm cursor-pointer text-red-400 text-sm font-black uppercase tracking-widest">
+          <i class="pi pi-trash mr-2"></i> ELIMINAR PUJA
         </button>
       </div>
     </Dialog>

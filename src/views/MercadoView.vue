@@ -47,6 +47,20 @@ const manejarPuja = async ({ carta, cantidad }) => {
     notificacion.add({ severity: 'error', summary: 'Puja fallida', detail: resultado.message })
   }
 }
+
+/**
+ * Elimina la puja del usuario sobre una carta del mercado.
+ * @param {Object} carta - La carta cuya puja se elimina.
+ */
+const manejarEliminarPuja = async (carta) => {
+  const resultado = await storeMercado.eliminarPujaCarta(carta)
+
+  if (resultado.success) {
+    notificacion.add({ severity: 'success', summary: 'Puja eliminada', detail: resultado.message })
+  } else {
+    notificacion.add({ severity: 'error', summary: 'Error', detail: resultado.message })
+  }
+}
 </script>
 
 <!-------------------------------------------------------------------------------------------------------------------------->
@@ -92,8 +106,8 @@ const manejarPuja = async ({ carta, cantidad }) => {
         <div class="grid grid-cols-1 gap-4">
           <TarjetaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
             :miPuja="storeMercado.misPujas[coche.id] || null"
-            :mejorPuja="storeMercado.resumenPujas[coche.id]?.mejorPuja || 0"
-            @pujar="manejarPuja" />
+            :mejorPuja="storeMercado.resumenPujas[coche.id]?.mejorPuja || 0" @pujar="manejarPuja"
+            @eliminarPuja="manejarEliminarPuja" />
         </div>
       </section>
 
@@ -104,10 +118,10 @@ const manejarPuja = async ({ carta, cantidad }) => {
           <div class="flex-1 h-px bg-zinc-700"></div>
         </div>
         <div class="grid grid-cols-1 gap-4">
-          <TarjetaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto" :modoMercado="true"
-            :miPuja="storeMercado.misPujas[piloto.id] || null"
-            :mejorPuja="storeMercado.resumenPujas[piloto.id]?.mejorPuja || 0"
-            @pujar="manejarPuja" />
+          <TarjetaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto"
+            :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
+            :totalPujas="storeMercado.resumenPujas[piloto.id]?.totalPujas || 0" @pujar="manejarPuja"
+            @eliminarPuja="manejarEliminarPuja" />
         </div>
       </section>
 
@@ -119,10 +133,9 @@ const manejarPuja = async ({ carta, cantidad }) => {
         </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
-            :potenciador="potenciador" :modoMercado="true"
-            :miPuja="storeMercado.misPujas[potenciador.id] || null"
-            :mejorPuja="storeMercado.resumenPujas[potenciador.id]?.mejorPuja || 0"
-            @pujar="manejarPuja" />
+            :potenciador="potenciador" :modoMercado="true" :miPuja="storeMercado.misPujas[potenciador.id] || null"
+            :mejorPuja="storeMercado.resumenPujas[potenciador.id]?.mejorPuja || 0" @pujar="manejarPuja"
+            @eliminarPuja="manejarEliminarPuja" />
         </div>
       </section>
 

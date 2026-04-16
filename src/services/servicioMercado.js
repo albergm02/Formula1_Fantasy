@@ -11,7 +11,16 @@
  *
  * @module servicioMercado
  */
-import { doc, getDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
 /* ─── Utilidades ────────────────────────────────────────────────────────── */
@@ -77,6 +86,18 @@ export const registrarPuja = async (idMercado, carta, emailUsuario, idParticipan
     cantidad: Number(cantidad),
     fecha: new Date().toISOString(),
   })
+}
+
+/**
+ * Elimina la puja de un usuario sobre una carta del mercado.
+ * @param {string} idMercado - ID del documento del mercado.
+ * @param {string} idCarta - ID de la carta sobre la que se pujó.
+ * @param {string} emailUsuario - Email del usuario que elimina su puja.
+ */
+export const eliminarPuja = async (idMercado, idCarta, emailUsuario) => {
+  const idPuja = `${sanitizarEmail(emailUsuario)}_${idCarta}`
+  const refPuja = doc(db, 'mercados', idMercado, 'pujas', idPuja)
+  await deleteDoc(refPuja)
 }
 
 /**

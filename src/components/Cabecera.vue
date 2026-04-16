@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreMercado } from '@/stores/storeMercado'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import Button from 'primevue/button'
 import { useRoute } from 'vue-router'
@@ -11,6 +12,7 @@ const enrutador = useRouter()
 const ruta = useRoute()
 const storeAutenticacion = usarStoreAutenticacion()
 const escuderiaStore = usarStoreEscuderia()
+const storeMercado = usarStoreMercado()
 
 
 const handlerCerrarSesion = async () => {
@@ -48,6 +50,9 @@ const irADashboard = () => {
                 <p v-if="ruta.name !== 'ligas'" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ escuderiaStore.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ escuderiaStore.presupuesto }}M</span>
+                    <span v-if="storeMercado.totalPujasComprometidas > 0" class="text-amber-400 font-bold">
+                        (-{{ storeMercado.totalPujasComprometidas.toFixed(2) }}M)
+                    </span>
                 </p>
             </div>
             <!-- hover es utilizado para cambiar el color al clickear -->
