@@ -173,16 +173,17 @@ export const usarStoreMercado = defineStore('mercado', () => {
     const email = storeAuth.usuarioActual.correoAutenticacion
     const idParticipante = storeEscuderia.idParticipanteActivo
 
+    const esPujaExistente = misPujas.value[carta.id] !== undefined
+
     await registrarPuja(mercadoActivo.value.id, carta, email, idParticipante, cantidadNum)
 
-    misPujas.value[carta.id] = cantidadNum
+    misPujas.value = { ...misPujas.value, [carta.id]: cantidadNum }
 
-    if (!resumenPujas.value[carta.id] || cantidadNum > resumenPujas.value[carta.id].mejorPuja) {
-      resumenPujas.value[carta.id] = {
-        mejorPuja: cantidadNum,
-        totalPujas:
-          (resumenPujas.value[carta.id]?.totalPujas || 0) + (misPujas.value[carta.id] ? 0 : 1),
-      }
+    resumenPujas.value = {
+      ...resumenPujas.value,
+      [carta.id]: {
+        totalPujas: (resumenPujas.value[carta.id]?.totalPujas || 0) + (esPujaExistente ? 0 : 1),
+      },
     }
 
     return {
@@ -202,13 +203,16 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
     await eliminarPuja(mercadoActivo.value.id, carta.id, email)
 
-    delete misPujas.value[carta.id]
+    const { [carta.id]: _, ...restoPujas } = misPujas.value
+    misPujas.value = restoPujas
 
     if (resumenPujas.value[carta.id]) {
-      resumenPujas.value[carta.id].totalPujas = Math.max(
-        0,
-        resumenPujas.value[carta.id].totalPujas - 1,
-      )
+      resumenPujas.value = {
+        ...resumenPujas.value,
+        [carta.id]: {
+          totalPujas: Math.max(0, resumenPujas.value[carta.id].totalPujas - 1),
+        },
+      }
     }
 
     return { success: true, message: `Puja eliminada sobre ${carta.nombre}.` }

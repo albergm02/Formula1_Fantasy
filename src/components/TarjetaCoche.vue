@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import Dialog from 'primevue/dialog'
+import InputNumber from 'primevue/inputnumber'
 
 const mostrarDetalles = ref(false)
 const mostrarPuja = ref(false)
@@ -19,7 +20,7 @@ const props = defineProps({
     type: Number,
     default: null,
   },
-  mejorPuja: {
+  totalPujas: {
     type: Number,
     default: 0,
   },
@@ -51,11 +52,17 @@ const confirmarEliminarPuja = () => {
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Badge precio (esquina superior derecha) -->
-        <div v-if="modoMercado"
-          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-[#D4A843]/40">
-          <span class="text-[10px] font-black text-[#D4A843]">{{ Number(props.coche.precio).toFixed(2) }}</span>
-          <span class="text-[7px] text-zinc-400 uppercase font-bold">M</span>
+        <!-- Badges superiores (precio + total pujas) -->
+        <div v-if="modoMercado" class="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+          <div v-if="totalPujas > 0"
+            class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
+            <i class="pi pi-users text-[8px] text-zinc-300"></i>
+            <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
+          </div>
+          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-[#D4A843]/40">
+            <span class="text-[10px] font-black text-[#D4A843]">{{ Number(props.coche.precio).toFixed(2) }}</span>
+            <span class="text-[7px] text-zinc-400 uppercase font-bold">M</span>
+          </div>
         </div>
 
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
@@ -83,8 +90,8 @@ const confirmarEliminarPuja = () => {
             <button @click="abrirPuja"
               class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
               <span class="text-[10px] font-black uppercase tracking-widest"
-                :class="miPuja ? 'text-amber-400' : 'text-white'">
-                {{ miPuja ? 'EDITAR PUJA' : 'PUJAR' }}
+                :class="miPuja != null ? 'text-amber-400' : 'text-white'">
+                {{ miPuja != null ? 'EDITAR PUJA' : 'PUJAR' }}
               </span>
             </button>
           </div>
@@ -147,27 +154,21 @@ const confirmarEliminarPuja = () => {
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '360px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">
-        <p class="text-sm text-zinc-300">
-          Pujando por <strong class="text-white">{{ props.coche.nombre }}</strong>
-        </p>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-zinc-400">Precio base:</span>
-          <span class="text-sm font-black text-[#D4A843]">{{ props.coche.precio }}M</span>
+        <div class="text-center">
+          <p class="text-white font-bold text-sm">{{ props.coche.nombre }}</p>
+          <p class="text-zinc-400 text-xs mt-1">Precio base: <span class="text-[#D4A843] font-bold">{{
+            Number(props.coche.precio).toFixed(2) }}M</span></p>
         </div>
-        <div v-if="mejorPuja > 0" class="flex items-center gap-2">
-          <span class="text-xs text-zinc-400">Puja más alta:</span>
-          <span class="text-sm font-black text-amber-400">{{ mejorPuja.toFixed(2) }}M</span>
+        <div class="flex flex-col items-center gap-2">
+          <label class="text-zinc-300 text-xs font-bold uppercase">Tu puja (M)</label>
+          <InputNumber v-model="cantidadPuja" :min="Number(props.coche.precio)" :step="0.1" :minFractionDigits="2"
+            :maxFractionDigits="2" inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32" />
         </div>
-        <div>
-          <label class="text-xs text-zinc-400 mb-1 block">Tu puja (M)</label>
-          <input v-model.number="cantidadPuja" type="number" :min="props.coche.precio" step="0.1"
-            class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 text-white text-sm font-bold focus:border-amber-500 focus:outline-none" />
-        </div>
-        <button @click="confirmarPuja" :disabled="!cantidadPuja || cantidadPuja < props.coche.precio"
-          class="w-full py-3 flex items-center justify-center bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 border-none rounded-sm cursor-pointer text-white text-sm font-black uppercase tracking-widest">
-          <i class="pi pi-money-bill mr-2"></i> CONFIRMAR PUJA
+        <button @click="confirmarPuja"
+          class="w-full py-3 bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 border-none rounded-sm cursor-pointer text-white font-black uppercase text-xs tracking-widest">
+          CONFIRMAR PUJA
         </button>
-        <button v-if="miPuja" @click="confirmarEliminarPuja"
+        <button v-if="miPuja != null" @click="confirmarEliminarPuja"
           class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 rounded-sm cursor-pointer text-red-400 text-sm font-black uppercase tracking-widest">
           <i class="pi pi-trash mr-2"></i> ELIMINAR PUJA
         </button>
