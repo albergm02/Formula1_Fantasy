@@ -4,25 +4,29 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { usarStoreMercado } from '@/stores/storeMercado'
+import { usarStoreLigas } from '@/stores/storeLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
-import TarjetaRueda from '@/components/TarjetaRueda.vue'
 
 const storeEscuderia = usarStoreEscuderia()
 const storeMercado = usarStoreMercado()
+const storeLigas = usarStoreLigas()
 const notificacion = useToast()
 const ruta = useRoute()
 
 onMounted(async () => {
+  const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
+  if (idLiga && !storeLigas.idLigaActiva) {
+    storeLigas.idLigaActiva = idLiga
+  }
   if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
     await storeEscuderia.cargarEquipo(ruta.query.liga)
   }
 
   /* Carga el mercado activo de la liga desde Firestore e inicia la cuenta atrás */
-  const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
   if (idLiga) {
     await storeMercado.inicializarMercado(idLiga)
   }

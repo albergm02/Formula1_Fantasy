@@ -6,6 +6,7 @@ import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreLigas } from '@/stores/storeLigas'
 const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
 import { ruedasBase } from '@/data/bases/ruedasBase'
 
@@ -18,6 +19,7 @@ import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 
 const storeEscuderia = usarStoreEscuderia()
+const storeLigas = usarStoreLigas()
 const notificacion = useToast()
 const confirmar = useConfirm()
 const ruta = useRoute()
@@ -63,6 +65,10 @@ const calcularEtiquetasRueda = (rueda) => {
 }
 
 onMounted(async () => {
+  const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
+  if (idLiga && !storeLigas.idLigaActiva) {
+    storeLigas.idLigaActiva = idLiga
+  }
   if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
     await storeEscuderia.cargarEquipo(ruta.query.liga)
   }

@@ -81,19 +81,20 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
    * @returns {Promise<{ success: boolean, message: string }>}
    */
   async function comprarElemento(elemento) {
+    const tipoElemento = elemento.tipo || elemento.tipoCarta
     if (presupuesto.value < elemento.precio) {
       return {
         success: false,
         message: 'No tienes suficiente presupuesto para fichar este elemento.',
       }
     }
-    if (elemento.tipo === 'coche' && garaje.value.coche) {
+    if (tipoElemento === 'coche' && garaje.value.coche) {
       return {
         success: false,
         message: 'Ya tienes un coche fichado. Vende el actual para fichar uno nuevo.',
       }
     }
-    if (elemento.tipo === 'piloto' && garaje.value.pilotos.length >= 2) {
+    if (tipoElemento === 'piloto' && garaje.value.pilotos.length >= 2) {
       return {
         success: false,
         message: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
@@ -102,11 +103,11 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     presupuesto.value -= elemento.precio
     const elementoComprado = { ...elemento, instancia_id: Date.now() }
 
-    if (elemento.tipo === 'coche') {
+    if (tipoElemento === 'coche') {
       garaje.value.coche = elementoComprado
-    } else if (elemento.tipo === 'piloto') {
+    } else if (tipoElemento === 'piloto') {
       garaje.value.pilotos.push(elementoComprado)
-    } else if (elemento.tipo === 'potenciador') {
+    } else if (tipoElemento === 'potenciador') {
       garaje.value.potenciadores.push(elementoComprado)
     }
 
@@ -114,7 +115,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
 
     const storeNotificaciones = usarStoreNotificaciones()
     storeNotificaciones
-      .registrarFichaje(elemento.nombre, elemento.tipo, elemento.precio)
+      .registrarFichaje(elemento.nombre, tipoElemento, elemento.precio)
       .catch(() => {})
 
     return { success: true, message: `Has fichado: ${elemento.nombre} exitosamente.` }
@@ -132,14 +133,15 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
 
     try {
       presupuesto.value += calcularValorReventa(elemento.precio)
+      const tipoElemento = elemento.tipo || elemento.tipoCarta
 
-      if (elemento.tipo === 'coche') {
+      if (tipoElemento === 'coche') {
         garaje.value.coche = null
-      } else if (elemento.tipo === 'piloto') {
+      } else if (tipoElemento === 'piloto') {
         garaje.value.pilotos = garaje.value.pilotos.filter(
           (piloto) => piloto.instancia_id !== elemento.instancia_id,
         )
-      } else if (elemento.tipo === 'potenciador') {
+      } else if (tipoElemento === 'potenciador') {
         garaje.value.potenciadores = garaje.value.potenciadores.filter(
           (potenciador) => potenciador.instancia_id !== elemento.instancia_id,
         )
@@ -148,7 +150,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       await guardarEstadoEquipo()
 
       const storeNotificaciones = usarStoreNotificaciones()
-      storeNotificaciones.registrarVenta(elemento.nombre, elemento.tipo).catch(() => {})
+      storeNotificaciones.registrarVenta(elemento.nombre, tipoElemento).catch(() => {})
 
       return {
         success: true,

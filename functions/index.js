@@ -20,7 +20,7 @@
 const { onRequest } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
-const { getFirestore } = require('firebase-admin/firestore')
+const { getFirestore, FieldValue } = require('firebase-admin/firestore')
 
 const {
   recopilarDatosGranPremio,
@@ -242,12 +242,21 @@ function calcularFechaCierre(fechaApertura) {
  * Resuelve todas las pujas de un mercado cerrado.
  * Para cada carta con pujas, la mayor puja gana: se añade la carta al garaje
  * del ganador y se le descuenta el importe del presupuesto.
+ * Respeta los límites del garaje: máx. 1 coche y 2 pilotos.
  * @param {string} idMercado - ID del mercado cuyas pujas se resuelven.
  */
 async function resolverPujasMercado(idMercado) {
   const pujasSnapshot = await db.collection('mercados').doc(idMercado).collection('pujas').get()
 
   if (pujasSnapshot.empty) return
+
+  /* Leer el documento del mercado para obtener los datos completos de cada carta */
+  const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
+  const cartasMercado = mercadoSnap.exists ? mercadoSnap.data().cartas || [] : []
+  const mapaCartas = {}
+  for (const carta of cartasMercado) {
+    mapaCartas[carta.id] = carta
+  }
 
   /* Agrupar pujas por idCarta y encontrar la mayor de cada una */
   const pujasPorCarta = {}
@@ -275,27 +284,51 @@ async function resolverPujasMercado(idMercado) {
     /* Verificar que aún tiene presupuesto */
     if (cantidad > presupuesto) continue
 
-    const garaje = participacion.garaje || { pilotos: [], coches: [], potenciadores: [], ruedas: [] }
+    const garaje = participacion.garaje || { coche: null, pilotos: [], potenciadores: [], ruedas: null }
 
-    /* Construir el objeto de la carta ganada */
-    const cartaGanada = {
-      id: idCarta,
-      nombre: pujaGanadora.nombreCarta,
-      tipoCarta,
-      precio: pujaGanadora.precioCarta,
+    /* Respetar límites del garaje */
+    if (tipoCarta === 'coche' && garaje.coche) continue
+    if (tipoCarta === 'piloto' && (garaje.pilotos || []).length >= 2) continue
+
+    /* Construir el objeto completo de la carta ganada usando los datos del mercado */
+    const cartaCompleta = mapaCartas[idCarta]
+    const cartaGanada = cartaCompleta
+      ? { ...cartaCompleta, tipo: tipoCarta, instancia_id: Date.now() + Math.random() }
+      : { id: idCarta, nombre: pujaGanadora.nombreCarta, tipoCarta, tipo: tipoCarta, precio: pujaGanadora.precioCarta, instancia_id: Date.now() + Math.random() }
+
+    /* Añadir la carta al slot correspondiente del garaje */
+    if (tipoCarta === 'coche') {
+      garaje.coche = cartaGanada
+    } else if (tipoCarta === 'piloto') {
+      garaje.pilotos = [...(garaje.pilotos || []), cartaGanada]
+    } else if (tipoCarta === 'potenciador') {
+      garaje.potenciadores = [...(garaje.potenciadores || []), cartaGanada]
     }
-
-    /* Añadir la carta al array correspondiente del garaje */
-    const claveGaraje = tipoCarta === 'piloto' ? 'pilotos'
-      : tipoCarta === 'coche' ? 'coches'
-        : tipoCarta === 'potenciador' ? 'potenciadores'
-          : 'ruedas'
-
-    garaje[claveGaraje] = [...(garaje[claveGaraje] || []), cartaGanada]
 
     batch.update(participacionRef, {
       presupuesto: presupuesto - cantidad,
       garaje,
+    })
+
+    /* Registrar notificación de puja ganada en la colección 'actividad' */
+    const idLiga = participacion.id_liga
+    const emailUsuario = participacion.email_usuario
+    let nombreUsuario = emailUsuario
+    try {
+      const usuarioSnap = await db.collection('usuarios').doc(emailUsuario).get()
+      if (usuarioSnap.exists) {
+        const datosUsuario = usuarioSnap.data()
+        nombreUsuario = datosUsuario.username || datosUsuario.nombre || emailUsuario
+      }
+    } catch (_) { /* si falla la lectura del nombre, usamos el email */ }
+
+    const nombreCarta = cartaGanada.nombre || pujaGanadora.nombreCarta
+    batch.create(db.collection('actividad').doc(), {
+      idLiga,
+      nombreUsuario,
+      tipo: 'compra',
+      descripcion: `ha ganado la puja por ${tipoCarta} ${nombreCarta} por ${cantidad}M`,
+      fecha: FieldValue.serverTimestamp(),
     })
   }
 
