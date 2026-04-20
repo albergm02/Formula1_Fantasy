@@ -1,9 +1,10 @@
 ﻿<script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { obtenerCuentaRegresiva, obtenerSiguienteGranPremio } from '@/services/servicioOpenF1'
 
 const siguienteGranPremio = ref(null)
 const cuentaRegresiva = ref('')
+let intervaloId = null
 
 async function cargarSiguienteGranPremio() {
   return obtenerSiguienteGranPremio()
@@ -21,7 +22,14 @@ function actualizarCuentaRegresiva() {
 onMounted(async () => {
   siguienteGranPremio.value = await cargarSiguienteGranPremio()
   actualizarCuentaRegresiva()
-  setInterval(actualizarCuentaRegresiva, 1000)
+  intervaloId = setInterval(actualizarCuentaRegresiva, 1000)
+})
+
+onUnmounted(() => {
+  if (intervaloId) {
+    clearInterval(intervaloId)
+    intervaloId = null
+  }
 })
 </script>
 

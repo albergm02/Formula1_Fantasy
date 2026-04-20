@@ -94,10 +94,11 @@ export const eliminarDocumentoLiga = async (idLiga) => {
 /**
  * Crea una nueva participación de usuario en una liga.
  * @param {Object} datosParticipacion - Campos: id_liga, email_usuario, rol, presupuesto, puntos, garaje.
- * @returns {Promise<void>}
+ * @returns {Promise<string>} El ID del documento de participación creado.
  */
 export const crearParticipacion = async (datosParticipacion) => {
-  await addDoc(collection(db, 'participaciones'), datosParticipacion)
+  const referencia = await addDoc(collection(db, 'participaciones'), datosParticipacion)
+  return referencia.id
 }
 
 /**

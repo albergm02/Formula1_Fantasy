@@ -8,7 +8,7 @@
  *
  * @module storeMercado
  */
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import {
   cargarMercadoActivo,
@@ -179,10 +179,12 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
     misPujas.value = { ...misPujas.value, [carta.id]: cantidadNum }
 
+    const resumenActual = resumenPujas.value[carta.id] || { mejorPuja: 0, totalPujas: 0 }
     resumenPujas.value = {
       ...resumenPujas.value,
       [carta.id]: {
-        totalPujas: (resumenPujas.value[carta.id]?.totalPujas || 0) + (esPujaExistente ? 0 : 1),
+        mejorPuja: Math.max(resumenActual.mejorPuja, cantidadNum),
+        totalPujas: resumenActual.totalPujas + (esPujaExistente ? 0 : 1),
       },
     }
 
@@ -217,11 +219,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
     return { success: true, message: `Puja eliminada sobre ${carta.nombre}.` }
   }
-
-  /** Limpia el intervalo cuando el componente que usa el store se desmonta */
-  onUnmounted(() => {
-    detenerCuentaAtras()
-  })
 
   return {
     /* Estado */
