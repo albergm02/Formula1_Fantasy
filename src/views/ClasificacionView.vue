@@ -1,19 +1,29 @@
 ﻿<script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { cargarGarajeDeParticipante } from '@/services/servicioLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
+import VistaEquipoRival from '@/components/VistaEquipoRival.vue'
+import Dialog from 'primevue/dialog'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const storeLigas = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
 const storeEscuderia = usarStoreEscuderia()
 const ruta = useRoute()
+const toast = useToast()
 
 const ranking = ref([])
 const cargando = ref(true)
+
+const dialogoRivalVisible = ref(false)
+const participacionRival = ref(null)
+const cargandoRival = ref(false)
 
 /**
  * Carga la clasificación de la liga activa delegando al store.
@@ -33,6 +43,27 @@ async function cargarClasificacion() {
     throw new Error(`Error al cargar la clasificación: ${error.message}`)
   } finally {
     cargando.value = false
+  }
+}
+
+/**
+ * Carga y muestra el garaje de un rival al hacer click en su fila del ranking.
+ * @param {Object} jugador - Entrada del ranking con id, correo, nombre, puntos, presupuesto.
+ */
+async function verEquipoRival(jugador) {
+  const esUsuarioActual = jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion
+  if (esUsuarioActual) return
+
+  cargandoRival.value = true
+  dialogoRivalVisible.value = true
+
+  try {
+    participacionRival.value = await cargarGarajeDeParticipante(jugador.id)
+  } catch {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el equipo rival.', life: 3000 })
+    dialogoRivalVisible.value = false
+  } finally {
+    cargandoRival.value = false
   }
 }
 
@@ -69,8 +100,12 @@ onMounted(async () => {
 
       <div v-else class="flex flex-col gap-3">
         <div v-for="(jugador, indice) in ranking" :key="jugador.id"
-          class="flex items-center justify-between p-4 border border-white"
-          :class="{ '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion }">
+          class="flex items-center justify-between p-4 border border-white transition-colors"
+          :class="{
+            '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion,
+            'cursor-pointer hover:border-[#D4A843]/60 hover:bg-[#D4A843]/5': jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion,
+          }"
+          @click="verEquipoRival(jugador)">
           <div class="flex items-center gap-4">
             <div class="relative -top-4 text-2xl font-black italic" :class="{
               'text-yellow-400': indice === 0,
@@ -86,12 +121,37 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="flex flex-col items-end justify-center text-right">
-            <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
-            <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col items-end justify-center text-right">
+              <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
+              <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
+            </div>
+            <i
+              v-if="jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion"
+              class="pi pi-eye text-zinc-500 text-sm"
+            ></i>
           </div>
         </div>
       </div>
+
+      <Dialog
+        v-model:visible="dialogoRivalVisible"
+        modal
+        :draggable="false"
+        class="w-full max-w-md mx-auto"
+        :pt="{ root: { class: '!bg-[#0C0C0E] !border-zinc-700' }, header: { class: '!bg-[#0C0C0E] !p-3' }, content: { class: '!bg-[#0C0C0E] !p-0' } }"
+      >
+        <template #header>
+          <span class="text-sm font-bold uppercase tracking-widest text-zinc-400">Equipo rival</span>
+        </template>
+
+        <div v-if="cargandoRival" class="flex flex-col items-center justify-center py-10 gap-3">
+          <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" />
+          <p class="text-sm text-zinc-500">Cargando equipo...</p>
+        </div>
+
+        <VistaEquipoRival v-else-if="participacionRival" :participacion="participacionRival" />
+      </Dialog>
     </main>
     <BarraNavegacion />
   </div>

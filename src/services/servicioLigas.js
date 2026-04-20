@@ -188,6 +188,47 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
   return { id: documento.id, ...documento.data() }
 }
 
+/* ─── Garaje de participante ─────────────────────────────────────────────── */
+
+/**
+ * Carga el garaje y datos públicos de un participante por su ID de participación.
+ * Se usa para visualizar el equipo de un rival desde la clasificación.
+ * @param {string} idParticipacion - ID del documento de participación.
+ * @returns {Promise<Object|null>} Datos del participante o null si no existe.
+ */
+export const cargarGarajeDeParticipante = async (idParticipacion) => {
+  const documento = await getDoc(doc(db, 'participaciones', idParticipacion))
+  if (!documento.exists()) return null
+
+  const datos = documento.data()
+  const garajeOriginal = datos.garaje || {
+    coches: [],
+    pilotos: [],
+    potenciadores: [],
+    ruedas: null,
+  }
+
+  const garajeMigrado = { ...garajeOriginal }
+  if (garajeMigrado.coche !== undefined || !garajeMigrado.coches) {
+    garajeMigrado.coches = garajeMigrado.coche ? [{ ...garajeMigrado.coche, equipado: true }] : []
+    delete garajeMigrado.coche
+  }
+  garajeMigrado.pilotos = (garajeMigrado.pilotos || []).map((p) => ({
+    ...p,
+    equipado: p.equipado !== undefined ? p.equipado : true,
+  }))
+  garajeMigrado.potenciadores = garajeMigrado.potenciadores || []
+  garajeMigrado.ruedas = garajeMigrado.ruedas || null
+
+  return {
+    id: documento.id,
+    nombreUsuario: datos.nombre_usuario || 'Desconocido',
+    presupuesto: datos.presupuesto || 0,
+    puntos: datos.puntos || 0,
+    garaje: garajeMigrado,
+  }
+}
+
 /**
  * Carga el ranking completo de una liga: une participaciones con nombres de usuario.
  * Ordena por puntos (desc) y usa presupuesto como criterio de desempate (desc).
@@ -196,25 +237,14 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
  */
 export const cargarRankingLiga = async (idLiga) => {
   const participaciones = await cargarParticipacionesLiga(idLiga)
-  const filasRanking = []
 
-  for (const participacion of participaciones) {
-    let nombreJugador = 'Desconocido'
-    if (participacion.email_usuario) {
-      const documentoUsuario = await getDoc(doc(db, 'usuarios', participacion.email_usuario))
-      if (documentoUsuario.exists()) {
-        const datosUsuario = documentoUsuario.data()
-        nombreJugador = datosUsuario.username || datosUsuario.nombre || 'Desconocido'
-      }
-    }
-    filasRanking.push({
-      id: participacion.id,
-      correo: participacion.email_usuario,
-      nombre: nombreJugador,
-      puntos: participacion.puntos || 0,
-      presupuesto: participacion.presupuesto || 0,
-    })
-  }
+  const filasRanking = participaciones.map((participacion) => ({
+    id: participacion.id,
+    correo: participacion.email_usuario,
+    nombre: participacion.nombre_usuario || 'Desconocido',
+    puntos: participacion.puntos || 0,
+    presupuesto: participacion.presupuesto || 0,
+  }))
 
   return filasRanking.sort(
     (primero, segundo) =>

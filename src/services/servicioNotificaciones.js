@@ -9,7 +9,15 @@
  *
  * @module servicioNotificaciones
  */
-import { collection, addDoc, query, where, limit, getDocs, serverTimestamp } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  limit,
+  getDocs,
+  serverTimestamp,
+} from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
 /* ─── Tipos de actividad ────────────────────────────────────────────────── */
@@ -19,6 +27,7 @@ export const TIPOS_ACTIVIDAD = {
   VENTA: 'venta',
   INCORPORACION: 'incorporacion',
   ABANDONO: 'abandono',
+  CLAUSULA: 'clausula',
 }
 
 /* ─── Exportaciones públicas ────────────────────────────────────────────── */
@@ -47,11 +56,7 @@ export const registrarActividad = async (idLiga, { nombreUsuario, tipo, descripc
  * @returns {Promise<Array<{ id: string, idLiga: string, nombreUsuario: string, tipo: string, descripcion: string, fecha: Date }>>}
  */
 export const cargarActividadLiga = async (idLiga, maximo = 30) => {
-  const consulta = query(
-    collection(db, 'actividad'),
-    where('idLiga', '==', idLiga),
-    limit(maximo),
-  )
+  const consulta = query(collection(db, 'actividad'), where('idLiga', '==', idLiga), limit(maximo))
 
   const instantanea = await getDocs(consulta)
 
@@ -63,4 +68,3 @@ export const cargarActividadLiga = async (idLiga, maximo = 30) => {
     }))
     .sort((primero, segundo) => segundo.fecha - primero.fecha)
 }
-

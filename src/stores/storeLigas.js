@@ -1,7 +1,7 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-const crearGarajeVacio = () => ({ coche: null, pilotos: [], potenciadores: [], ruedas: null })
+const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [], ruedas: null })
 import {
   cargarLigasPorIds,
   cargarLiga,
@@ -99,6 +99,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await crearParticipacion({
         id_liga: idLiga,
         email_usuario: correoUsuario,
+        nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
         rol: 'admin',
         presupuesto: 50.0,
         puntos: 0,
@@ -140,6 +141,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await crearParticipacion({
         id_liga: liga.id,
         email_usuario: correoUsuario,
+        nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
         rol: 'miembro',
         presupuesto: 50.0,
         puntos: 0,

@@ -25,7 +25,9 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   const desglosePilotos = []
   let puntosPilotos = 0
 
-  for (const piloto of garaje.pilotos || []) {
+  const pilotosEquipados = (garaje.pilotos || []).filter((p) => p.equipado !== false)
+
+  for (const piloto of pilotosEquipados) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
     const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
     const factorEstePiloto =
@@ -46,9 +48,11 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   let desgloseCoche = null
   let puntosCoche = 0
 
-  if (garaje.coche) {
-    puntosCoche = garaje.coche.puntos
-    desgloseCoche = { nombre: garaje.coche.nombre, puntos: puntosCoche }
+  const cocheEquipado = garaje.coches ? garaje.coches.find((c) => c.equipado) : garaje.coche || null
+
+  if (cocheEquipado) {
+    puntosCoche = cocheEquipado.puntos
+    desgloseCoche = { nombre: cocheEquipado.nombre, puntos: puntosCoche }
   }
 
   return {
@@ -178,8 +182,6 @@ function resolverFactorPosicionCarrera(posicion) {
   if (posicion <= 20) return 0.5
   return 0.2
 }
-
-
 
 /* ─── 5. Utilidades base ────────────────────────────────────────────────── */
 

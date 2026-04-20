@@ -14,8 +14,14 @@ const BONUS_COMBO_VARIANTE = 0.2
  */
 function calcularSinergias(garaje) {
   const sinergias = []
-  const coche = garaje.coche
-  const pilotos = garaje.pilotos || []
+  const coche = garaje.coches
+    ? garaje.coches.find(function (c) {
+        return c.equipado
+      })
+    : garaje.coche || null
+  const pilotos = (garaje.pilotos || []).filter(function (p) {
+    return p.equipado !== false
+  })
 
   if (coche && pilotos.length > 0) {
     const cocheId = coche.id || ''

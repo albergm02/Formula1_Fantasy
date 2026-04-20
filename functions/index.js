@@ -115,12 +115,16 @@ exports.procesarJornadaGP = onRequest(
         const participacion = documento.data()
         const garaje = participacion.garaje
 
-        if (!garaje || !garaje.pilotos || garaje.pilotos.length === 0) {
+        const pilotosEquipados = garaje
+          ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
+          : []
+
+        if (!garaje || pilotosEquipados.length === 0) {
           continue
         }
 
         const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
-          construirFactoresPorPiloto(garaje.pilotos, actuacionesPorPiloto, condiciones)
+          construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
 
         const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
 
@@ -268,50 +272,40 @@ async function resolverPujasMercado(idMercado) {
     }
   }
 
+  /* ── Agrupar cartas ganadas por participante para evitar sobrescrituras en el batch ── */
+  const cartasPorParticipante = {}
+  for (const [idCarta, pujaGanadora] of Object.entries(pujasPorCarta)) {
+    const { idParticipante } = pujaGanadora
+    if (!cartasPorParticipante[idParticipante]) {
+      cartasPorParticipante[idParticipante] = []
+    }
+    cartasPorParticipante[idParticipante].push({ idCarta, pujaGanadora })
+  }
+
   const batch = db.batch()
 
-  for (const [idCarta, pujaGanadora] of Object.entries(pujasPorCarta)) {
-    const { idParticipante, cantidad, tipoCarta } = pujaGanadora
-
-    /* Leer participación del ganador */
+  for (const [idParticipante, cartasGanadas] of Object.entries(cartasPorParticipante)) {
     const participacionRef = db.collection('participaciones').doc(idParticipante)
     const participacionSnap = await participacionRef.get()
     if (!participacionSnap.exists) continue
 
     const participacion = participacionSnap.data()
-    const presupuesto = participacion.presupuesto || 0
+    let presupuestoRestante = participacion.presupuesto || 0
 
-    /* Verificar que aún tiene presupuesto */
-    if (cantidad > presupuesto) continue
-
-    const garaje = participacion.garaje || { coche: null, pilotos: [], potenciadores: [], ruedas: null }
-
-    /* Respetar límites del garaje */
-    if (tipoCarta === 'coche' && garaje.coche) continue
-    if (tipoCarta === 'piloto' && (garaje.pilotos || []).length >= 2) continue
-
-    /* Construir el objeto completo de la carta ganada usando los datos del mercado */
-    const cartaCompleta = mapaCartas[idCarta]
-    const cartaGanada = cartaCompleta
-      ? { ...cartaCompleta, tipo: tipoCarta, instancia_id: Date.now() + Math.random() }
-      : { id: idCarta, nombre: pujaGanadora.nombreCarta, tipoCarta, tipo: tipoCarta, precio: pujaGanadora.precioCarta, instancia_id: Date.now() + Math.random() }
-
-    /* Añadir la carta al slot correspondiente del garaje */
-    if (tipoCarta === 'coche') {
-      garaje.coche = cartaGanada
-    } else if (tipoCarta === 'piloto') {
-      garaje.pilotos = [...(garaje.pilotos || []), cartaGanada]
-    } else if (tipoCarta === 'potenciador') {
-      garaje.potenciadores = [...(garaje.potenciadores || []), cartaGanada]
+    const garaje = participacion.garaje || {
+      coches: [],
+      pilotos: [],
+      potenciadores: [],
+      ruedas: null,
     }
 
-    batch.update(participacionRef, {
-      presupuesto: presupuesto - cantidad,
-      garaje,
-    })
+    /* Migrar formato antiguo (coche singular) al nuevo (coches array) */
+    if (garaje.coche !== undefined || !garaje.coches) {
+      garaje.coches = garaje.coche ? [garaje.coche] : []
+      delete garaje.coche
+    }
 
-    /* Registrar notificación de puja ganada en la colección 'actividad' */
-    const idLiga = participacion.id_liga
+    /* Resolver nombre del usuario una sola vez por participante */
     const emailUsuario = participacion.email_usuario
     let nombreUsuario = emailUsuario
     try {
@@ -320,15 +314,65 @@ async function resolverPujasMercado(idMercado) {
         const datosUsuario = usuarioSnap.data()
         nombreUsuario = datosUsuario.username || datosUsuario.nombre || emailUsuario
       }
-    } catch (_) { /* si falla la lectura del nombre, usamos el email */ }
+    } catch (_) {
+      /* si falla la lectura del nombre, usamos el email */
+    }
 
-    const nombreCarta = cartaGanada.nombre || pujaGanadora.nombreCarta
-    batch.create(db.collection('actividad').doc(), {
-      idLiga,
-      nombreUsuario,
-      tipo: 'compra',
-      descripcion: `ha ganado la puja por ${tipoCarta} ${nombreCarta} por ${cantidad}M`,
-      fecha: FieldValue.serverTimestamp(),
+    for (const { idCarta, pujaGanadora } of cartasGanadas) {
+      const { cantidad, tipoCarta } = pujaGanadora
+
+      if (cantidad > presupuestoRestante) continue
+
+      const cartaCompleta = mapaCartas[idCarta]
+      const propiedadesClausula = {
+        clausulaInvertida: 0,
+        fechaAdquisicion: new Date().toISOString(),
+      }
+      const cartaGanada = cartaCompleta
+        ? {
+            ...cartaCompleta,
+            tipo: tipoCarta,
+            instancia_id: Date.now() + Math.random(),
+            ...propiedadesClausula,
+          }
+        : {
+            id: idCarta,
+            nombre: pujaGanadora.nombreCarta,
+            tipoCarta,
+            tipo: tipoCarta,
+            precio: pujaGanadora.precioCarta,
+            instancia_id: Date.now() + Math.random(),
+            ...propiedadesClausula,
+          }
+
+      if (tipoCarta === 'coche') {
+        const hayEquipado = garaje.coches.some((c) => c.equipado)
+        garaje.coches.push({ ...cartaGanada, equipado: !hayEquipado })
+      } else if (tipoCarta === 'piloto') {
+        const pilotosEquipados = (garaje.pilotos || []).filter((p) => p.equipado).length
+        garaje.pilotos = [
+          ...(garaje.pilotos || []),
+          { ...cartaGanada, equipado: pilotosEquipados < 2 },
+        ]
+      } else if (tipoCarta === 'potenciador') {
+        garaje.potenciadores = [...(garaje.potenciadores || []), cartaGanada]
+      }
+
+      presupuestoRestante -= cantidad
+
+      const nombreCarta = cartaGanada.nombre || pujaGanadora.nombreCarta
+      batch.create(db.collection('actividad').doc(), {
+        idLiga: participacion.id_liga,
+        nombreUsuario,
+        tipo: 'compra',
+        descripcion: `ha ganado la puja por ${tipoCarta} ${nombreCarta} por ${cantidad}M`,
+        fecha: FieldValue.serverTimestamp(),
+      })
+    }
+
+    batch.update(participacionRef, {
+      presupuesto: presupuestoRestante,
+      garaje,
     })
   }
 
@@ -349,7 +393,11 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   /* ── Idempotencia: si el mercado de hoy ya existe para esta liga, no lo recreamos ── */
   const mercadoExistente = await db.collection('mercados').doc(idMercadoHoy).get()
   if (mercadoExistente.exists) {
-    return { mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`, idMercado: idMercadoHoy, omitido: true }
+    return {
+      mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`,
+      idMercado: idMercadoHoy,
+      omitido: true,
+    }
   }
 
   /* ── Cerrar el mercado del día anterior de esta liga (si existe y sigue abierto) ── */
@@ -415,6 +463,42 @@ exports.generarMercadoDiario = onSchedule(
  * Endpoint HTTP para generar el mercado diario de TODAS las ligas.
  * Uso desde Admin: GET/POST https://<REGION>-<PROJECT>.cloudfunctions.net/generarMercadoDiarioHttp
  */
+/**
+ * Endpoint HTTP de testing — resuelve las pujas de todos los mercados abiertos.
+ * Cierra cada mercado tras resolver sus pujas.
+ */
+exports.resolverPujasMercadoHttp = onRequest(
+  { region: 'europe-west1', cors: true },
+  async (_peticion, respuesta) => {
+    try {
+      const mercadosAbiertos = await db
+        .collection('mercados')
+        .where('estado', '==', 'abierto')
+        .get()
+
+      if (mercadosAbiertos.empty) {
+        respuesta.status(200).json({ mensaje: 'No hay mercados abiertos.', mercadosResueltos: 0 })
+        return
+      }
+
+      let mercadosResueltos = 0
+      for (const doc of mercadosAbiertos.docs) {
+        await resolverPujasMercado(doc.id)
+        await db.collection('mercados').doc(doc.id).update({ estado: 'cerrado' })
+        mercadosResueltos++
+      }
+
+      respuesta.status(200).json({
+        mensaje: `Se resolvieron las pujas de ${mercadosResueltos} mercado(s).`,
+        mercadosResueltos,
+      })
+    } catch (error) {
+      console.error('Error al resolver pujas:', error)
+      respuesta.status(500).json({ error: `Error al resolver pujas: ${error.message}` })
+    }
+  },
+)
+
 exports.generarMercadoDiarioHttp = onRequest(
   { region: 'europe-west1', cors: true },
   async (_peticion, respuesta) => {

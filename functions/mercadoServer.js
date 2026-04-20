@@ -216,6 +216,46 @@ function calcularPuntuacionBase(atributos, pesos) {
 }
 
 /**
+ * Calcula una puntuación base para un potenciador a partir de sus mejoras.
+ * @param {Object} mejoras - Modificadores de atributos del potenciador.
+ * @returns {number}
+ */
+function calcularPuntuacionBasePotenciador(mejoras = {}) {
+  const ritmo = mejoras.ritmo || 0
+  const consistencia = mejoras.consistencia || 0
+  const adaptabilidad = mejoras.adaptabilidad || 0
+  const agresividad = mejoras.agresividad || 0
+  const gestion = mejoras.gestion || 0
+
+  return Math.round((ritmo + consistencia + adaptabilidad + agresividad + gestion) * 10) / 10
+}
+
+/**
+ * Calcula el precio final de una carta normalizando su puntuación base entre mínimos y máximos.
+ * @param {number} puntuacionBase - Valor de referencia de la carta.
+ * @param {number} puntuacionMinima - Mínimo del conjunto.
+ * @param {number} puntuacionMaxima - Máximo del conjunto.
+ * @param {number} precioMinimo - Precio mínimo permitido.
+ * @param {number} precioMaximo - Precio máximo permitido.
+ * @returns {number}
+ */
+function calcularPrecioPorPuntuacion(
+  puntuacionBase,
+  puntuacionMinima,
+  puntuacionMaxima,
+  precioMinimo,
+  precioMaximo,
+) {
+  if (puntuacionMaxima <= puntuacionMinima) {
+    return Number(precioMinimo.toFixed(1))
+  }
+
+  const pesoNormalizado = (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
+  const precio = precioMinimo + pesoNormalizado * (precioMaximo - precioMinimo)
+  return Number(precio.toFixed(1))
+}
+
+/**
  * Crea una carta de piloto combinando un piloto base con una variante.
  * Replica exactamente la lógica de crearCartaPiloto del frontend.
  * @param {Object} pilotoBase - Datos base del piloto.
@@ -224,6 +264,7 @@ function calcularPuntuacionBase(atributos, pesos) {
  */
 function crearCartaPiloto(pilotoBase, variante) {
   const perfil = perfilesPuntuacion[variante.perfil]
+  const puntuacionBase = calcularPuntuacionBase(pilotoBase.atributos, perfil.pesos)
   return {
     id: `${pilotoBase.numero}_${variante.variante}`,
     numero: pilotoBase.numero,
@@ -239,7 +280,7 @@ function crearCartaPiloto(pilotoBase, variante) {
     perfilPuntuacion: variante.perfil,
     pesos: perfil.pesos,
     atributos: pilotoBase.atributos,
-    puntuacionBase: calcularPuntuacionBase(pilotoBase.atributos, perfil.pesos),
+    puntuacionBase,
     reglasUsuario: perfil.reglasUsuario,
   }
 }
@@ -256,10 +297,60 @@ function generarCatalogo() {
   const pilotos = pilotosBase.flatMap((pilotoBase) =>
     variantesPiloto.map((variante) => crearCartaPiloto(pilotoBase, variante)),
   )
-  const coches = cochesBase.map((coche) => ({ ...coche }))
-  const potenciadores = potenciadoresBase.map((pot) => ({ ...pot }))
 
-  return { pilotos, coches, potenciadores }
+  const puntuacionesPilotos = pilotos.map((piloto) => piloto.puntuacionBase)
+  const puntuacionPilotoMinima = Math.min(...puntuacionesPilotos)
+  const puntuacionPilotoMaxima = Math.max(...puntuacionesPilotos)
+  const pilotosConPrecioCalculado = pilotos.map((piloto) => ({
+    ...piloto,
+    precio: calcularPrecioPorPuntuacion(
+      piloto.puntuacionBase,
+      puntuacionPilotoMinima,
+      puntuacionPilotoMaxima,
+      10,
+      26,
+    ),
+  }))
+
+  const cochesConPuntuacion = cochesBase.map((coche) => ({
+    ...coche,
+    puntuacionBase: coche.puntos || 0,
+  }))
+  const puntuacionesCoches = cochesConPuntuacion.map((coche) => coche.puntuacionBase)
+  const puntuacionCocheMinima = Math.min(...puntuacionesCoches)
+  const puntuacionCocheMaxima = Math.max(...puntuacionesCoches)
+  const coches = cochesConPuntuacion.map((coche) => ({
+    ...coche,
+    precio: calcularPrecioPorPuntuacion(
+      coche.puntuacionBase,
+      puntuacionCocheMinima,
+      puntuacionCocheMaxima,
+      10,
+      30,
+    ),
+  }))
+
+  const potenciadoresConPuntuacion = potenciadoresBase.map((potenciador) => ({
+    ...potenciador,
+    puntuacionBase: calcularPuntuacionBasePotenciador(potenciador.mejoras),
+  }))
+  const puntuacionesPotenciadores = potenciadoresConPuntuacion.map(
+    (potenciador) => potenciador.puntuacionBase,
+  )
+  const puntuacionPotenciadorMinima = Math.min(...puntuacionesPotenciadores)
+  const puntuacionPotenciadorMaxima = Math.max(...puntuacionesPotenciadores)
+  const potenciadores = potenciadoresConPuntuacion.map((potenciador) => ({
+    ...potenciador,
+    precio: calcularPrecioPorPuntuacion(
+      potenciador.puntuacionBase,
+      puntuacionPotenciadorMinima,
+      puntuacionPotenciadorMaxima,
+      2,
+      5,
+    ),
+  }))
+
+  return { pilotos: pilotosConPrecioCalculado, coches, potenciadores }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

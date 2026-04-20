@@ -11,6 +11,22 @@ const calcularPuntuacionBase = (atributos, pesos) =>
       10,
   ) / 10
 
+const calcularPrecioPorPuntuacion = (
+  puntuacionBase,
+  puntuacionMinima,
+  puntuacionMaxima,
+  precioMinimo,
+  precioMaximo,
+) => {
+  if (puntuacionMaxima <= puntuacionMinima) {
+    return Number(precioMinimo.toFixed(1))
+  }
+
+  const pesoNormalizado = (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
+  const precio = precioMinimo + pesoNormalizado * (precioMaximo - precioMinimo)
+  return Number(precio.toFixed(1))
+}
+
 // prettier-ignore
 const variantesPiloto = [
   { variante: 'qualy',        perfil: 'qualy',        incrementoPrecio: 0, nombreHabilidad: 'Especialista en Qualy',      color: '#38bdf8', icono: 'pi-stopwatch'  },
@@ -56,6 +72,20 @@ const crearCartaPiloto = (pilotoBase, variante) => {
 /* Flatmap aplana en un nivel los arrays resultantes de mapear cada pilotoBase con todas las variantesPiloto, 
 creando una carta por cada combinacion. 
 Para cada pilotoBase, se generan cartas con todas las variantes disponibles. */
-export const mercadoPilotos = pilotosBase.flatMap((pilotoBase) =>
+const cartasPiloto = pilotosBase.flatMap((pilotoBase) =>
   variantesPiloto.map((variante) => crearCartaPiloto(pilotoBase, variante)),
 )
+
+const puntuacionPilotoMinima = Math.min(...cartasPiloto.map((piloto) => piloto.puntuacionBase))
+const puntuacionPilotoMaxima = Math.max(...cartasPiloto.map((piloto) => piloto.puntuacionBase))
+
+export const mercadoPilotos = cartasPiloto.map((piloto) => ({
+  ...piloto,
+  precio: calcularPrecioPorPuntuacion(
+    piloto.puntuacionBase,
+    puntuacionPilotoMinima,
+    puntuacionPilotoMaxima,
+    10,
+    26,
+  ),
+}))

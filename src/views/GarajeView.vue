@@ -10,8 +10,11 @@ import { usarStoreLigas } from '@/stores/storeLigas'
 const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
 import { ruedasBase } from '@/data/bases/ruedasBase'
 
+import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
+
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
+import InputNumber from 'primevue/inputnumber'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
@@ -25,6 +28,9 @@ const confirmar = useConfirm()
 const ruta = useRoute()
 
 const mostrarSelectorNeumatico = ref(false)
+const dialogoProteccion = ref(false)
+const elementoProtegiendo = ref(null)
+const cantidadInversion = ref(1)
 
 /**
  * Construye la lista de etiquetas de mejora de un compuesto para mostrar en la carta.
@@ -146,6 +152,53 @@ const seleccionarNeumatico = async (idRueda) => {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
   }
 }
+/**
+ * Alterna el estado equipado de un coche en el garaje.
+ * @param {number} instanciaId - instancia_id del coche.
+ */
+const alternarEquipoCoche = async (instanciaId) => {
+  const resultado = await storeEscuderia.alternarCoche(instanciaId)
+  if (!resultado.success) {
+    notificacion.add({ severity: 'warn', summary: 'Acci\u00f3n denegada', detail: resultado.message })
+  }
+}
+
+/**
+ * Alterna el estado equipado/suplente de un piloto en el garaje.
+ * @param {number} instanciaId - instancia_id del piloto.
+ */
+const alternarEquipoPiloto = async (instanciaId) => {
+  const resultado = await storeEscuderia.alternarPiloto(instanciaId)
+  if (!resultado.success) {
+    notificacion.add({ severity: 'warn', summary: 'Acci\u00f3n denegada', detail: resultado.message })
+  }
+}
+/**
+ * Abre el diálogo de inversión en cláusula para el elemento seleccionado.
+ * @param {Object} elemento - Carta del garaje a proteger.
+ */
+const abrirDialogoProteccion = (elemento) => {
+  elementoProtegiendo.value = elemento
+  cantidadInversion.value = 1
+  dialogoProteccion.value = true
+}
+
+/**
+ * Confirma la inversión en cláusula y notifica el resultado.
+ */
+const confirmarInversionClausula = async () => {
+  const resultado = await storeEscuderia.invertirEnClausula(
+    elementoProtegiendo.value.instancia_id,
+    cantidadInversion.value,
+  )
+
+  if (resultado.success) {
+    notificacion.add({ severity: 'success', summary: 'Protección aumentada', detail: resultado.message })
+    dialogoProteccion.value = false
+  } else {
+    notificacion.add({ severity: 'warn', summary: 'Inversión denegada', detail: resultado.message })
+  }
+}
 </script>
 
 <!---------------------------------------------------------------------------------------------------------------------------->
@@ -162,21 +215,54 @@ const seleccionarNeumatico = async (idRueda) => {
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
         <i class="pi pi-car text-lg text-white"></i>
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Coche</h2>
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
+        <span class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.coches.filter(c => c.equipado).length >= 1
+          ? 'text-emerald-400 border-emerald-500/50'
+          : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.coches.filter(c => c.equipado).length
+          }}/1</span>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
-      <div v-if="storeEscuderia.garaje.coche" class="flex flex-col w-full h-full">
-        <TarjetaCoche :coche="storeEscuderia.garaje.coche" :modoMercado="false" />
-        <div class="px-6 pb-2 -mt-1">
-          <Button :label="`VENDER POR ${calcularValorReventa(storeEscuderia.garaje.coche.precio)}M`"
-            icon="pi pi-shopping-bag" @click="confirmarVentaCoche(storeEscuderia.garaje.coche)"
-            class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
-              label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-              icon: { class: '!text-red-500' },
-            }" />
+      <template v-if="storeEscuderia.garaje.coches.length > 0">
+        <div v-for="coche in storeEscuderia.garaje.coches" :key="coche.instancia_id"
+          class="flex flex-col w-full h-full">
+          <TarjetaCoche :coche="coche" :modoMercado="false" />
+          <div class="flex items-center justify-between px-6 py-1.5">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-shield text-[10px] text-amber-400"></i>
+              <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                Cláusula: {{ calcularPrecioClausula(coche).toFixed(1) }}M
+              </span>
+            </div>
+            <span v-if="estaEnPeriodoDeGracia(coche)"
+              class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[9px] font-bold uppercase text-emerald-400">
+              Protegida · {{ horasRestantesDeGracia(coche) }}h
+            </span>
+          </div>
+          <div class="flex gap-2 px-6 pb-2 -mt-1">
+            <Button :label="coche.equipado ? 'EQUIPADO' : 'EQUIPAR'"
+              :icon="coche.equipado ? 'pi pi-check-circle' : 'pi pi-circle'"
+              @click="alternarEquipoCoche(coche.instancia_id)" :class="[
+                'flex-1 shadow-lg',
+                coche.equipado
+                  ? '!bg-emerald-900/20 !border-emerald-500/50'
+                  : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+              ]" :pt="{
+                label: { class: ['text-[10px] font-black uppercase tracking-widest', coche.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
+                icon: { class: coche.equipado ? 'text-emerald-400' : 'text-zinc-500' },
+              }" />
+            <Button label="PROTEGER" icon="pi pi-shield" @click="abrirDialogoProteccion(coche)"
+              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-amber-900/50" :pt="{
+                label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
+                icon: { class: '!text-amber-400' },
+              }" />
+            <Button icon="pi pi-shopping-bag" @click="confirmarVentaCoche(coche)"
+              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
+                icon: { class: '!text-red-500' },
+              }" />
+          </div>
         </div>
-      </div>
+      </template>
 
       <div v-else class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
         <i class="pi pi-car mb-3 text-3xl text-zinc-600"></i>
@@ -264,6 +350,10 @@ const seleccionarNeumatico = async (idRueda) => {
       <div class="flex items-center gap-3 px-6">
         <i class="pi pi-users text-lg text-white"></i>
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
+        <span class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.pilotos.filter(p => p.equipado).length >= 2
+          ? 'text-emerald-400 border-emerald-500/50'
+          : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.pilotos.filter(p => p.equipado).length
+          }}/2</span>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
@@ -271,11 +361,37 @@ const seleccionarNeumatico = async (idRueda) => {
         <div v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col w-full h-full">
           <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
-          <div class="px-6 pb-2 -mt-1">
-            <Button :label="`DESPEDIR (${calcularValorReventa(piloto.precio)}M)`" icon="pi pi-user-minus"
-              @click="confirmarVentaPiloto(piloto)"
-              class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
+          <div class="flex items-center justify-between px-6 py-1.5">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-shield text-[10px] text-amber-400"></i>
+              <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                Cláusula: {{ calcularPrecioClausula(piloto).toFixed(1) }}M
+              </span>
+            </div>
+            <span v-if="estaEnPeriodoDeGracia(piloto)"
+              class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[9px] font-bold uppercase text-emerald-400">
+              Protegida · {{ horasRestantesDeGracia(piloto) }}h
+            </span>
+          </div>
+          <div class="flex gap-2 px-6 pb-2 -mt-1">
+            <Button :label="piloto.equipado ? 'TITULAR' : 'SUPLENTE'"
+              :icon="piloto.equipado ? 'pi pi-check-circle' : 'pi pi-circle'"
+              @click="alternarEquipoPiloto(piloto.instancia_id)" :class="[
+                'flex-1 shadow-lg',
+                piloto.equipado
+                  ? '!bg-emerald-900/20 !border-emerald-500/50'
+                  : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+              ]" :pt="{
+                label: { class: ['text-[10px] font-black uppercase tracking-widest', piloto.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
+                icon: { class: piloto.equipado ? 'text-emerald-400' : 'text-zinc-500' },
+              }" />
+            <Button label="PROTEGER" icon="pi pi-shield" @click="abrirDialogoProteccion(piloto)"
+              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-amber-900/50" :pt="{
                 label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
+                icon: { class: '!text-amber-400' },
+              }" />
+            <Button icon="pi pi-user-minus" @click="confirmarVentaPiloto(piloto)"
+              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
                 icon: { class: '!text-red-500' },
               }" />
           </div>
@@ -304,17 +420,19 @@ const seleccionarNeumatico = async (idRueda) => {
         <div v-for="potenciador in storeEscuderia.garaje.potenciadores" :key="potenciador.instancia_id"
           class="flex flex-col w-full h-full">
           <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
-          <Button :label="potenciador.equipado ? 'INSTALADO' : 'INSTALAR'"
-            :icon="potenciador.equipado ? 'pi pi-check-circle' : 'pi pi-cog'"
-            @click="alternarInstalacionPotenciador(potenciador.instancia_id)" :class="[
-              'w-full mt-2 shadow-lg',
-              potenciador.equipado
-                ? '!bg-emerald-900/20 !border-emerald-500/50'
-                : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
-            ]" :pt="{
-              label: { class: ['text-[10px] font-black uppercase tracking-widest', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
-              icon: { class: potenciador.equipado ? 'text-emerald-400' : 'text-zinc-500' },
-            }" />
+          <div class="flex gap-2 mt-1.5">
+            <Button :label="potenciador.equipado ? 'INSTALADO' : 'INSTALAR'"
+              :icon="potenciador.equipado ? 'pi pi-check-circle' : 'pi pi-cog'"
+              @click="alternarInstalacionPotenciador(potenciador.instancia_id)" :class="[
+                'flex-1 shadow-lg',
+                potenciador.equipado
+                  ? '!bg-emerald-900/20 !border-emerald-500/50'
+                  : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+              ]" :pt="{
+                label: { class: ['text-[10px] font-black uppercase tracking-widest', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
+                icon: { class: potenciador.equipado ? 'text-emerald-400' : 'text-zinc-500' },
+              }" />
+          </div>
         </div>
       </div>
 
@@ -323,6 +441,42 @@ const seleccionarNeumatico = async (idRueda) => {
         <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Mejoras Compradas</span>
       </div>
     </section>
+
+    <!-- Diálogo de inversión en cláusula -->
+    <Dialog v-model:visible="dialogoProteccion" header="Proteger Carta" modal
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
+      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+      <div v-if="elementoProtegiendo" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-black uppercase tracking-widest text-white">
+            {{ elementoProtegiendo.nombre }}
+          </span>
+          <span class="text-[10px] text-zinc-400">
+            Cláusula actual: {{ calcularPrecioClausula(elementoProtegiendo).toFixed(1) }}M
+          </span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+            Invertir (×2 en cláusula)
+          </label>
+          <InputNumber v-model="cantidadInversion" :min="1" :max="storeEscuderia.presupuesto" suffix="M"
+            :minFractionDigits="1" :maxFractionDigits="1" inputClass="!bg-black !text-white !border-zinc-700 w-full"
+            class="w-full" />
+          <span class="text-[10px] text-zinc-500">
+            Nueva cláusula: {{ (calcularPrecioClausula(elementoProtegiendo) + cantidadInversion * 2).toFixed(1) }}M
+          </span>
+        </div>
+
+        <Button label="CONFIRMAR INVERSIÓN" icon="pi pi-shield" @click="confirmarInversionClausula"
+          :disabled="cantidadInversion <= 0 || cantidadInversion > storeEscuderia.presupuesto"
+          class="w-full !bg-amber-900/20 !border-amber-500/50 hover:!bg-amber-900/40" :pt="{
+            label: { class: 'text-[10px] font-black uppercase tracking-widest text-amber-400' },
+            icon: { class: 'text-amber-400' },
+          }" />
+      </div>
+    </Dialog>
 
   </main>
 

@@ -18,8 +18,13 @@ const generandoMercado = ref(false)
 const resultadoMercado = ref({})
 const mercadoGenerado = ref(false)
 
+const resolviendoPujas = ref(false)
+const resultadoPujas = ref({})
+const pujasResueltas = ref(false)
+
 const URL_CLOUD_FUNCTION = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/procesarJornadaGP'
 const URL_GENERAR_MERCADO = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/generarMercadoDiarioHttp'
+const URL_RESOLVER_PUJAS = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/resolverPujasMercadoHttp'
 
 async function manejarCerrarSesion() {
     await cerrarSesion()
@@ -102,6 +107,44 @@ async function generarMercado() {
         generandoMercado.value = false
     }
 }
+
+/**
+ * Invoca la Cloud Function HTTP que resuelve las pujas de todos los mercados abiertos.
+ * Permite hacer pruebas de cierre de mercado sin esperar al cron.
+ * @returns {Promise<void>}
+ */
+async function resolverPujas() {
+    resolviendoPujas.value = true
+    pujasResueltas.value = false
+
+    try {
+        const respuesta = await fetch(URL_RESOLVER_PUJAS)
+        const datos = await respuesta.json()
+
+        if (!respuesta.ok) {
+            throw new Error(datos.error || `Error del servidor: ${respuesta.status}`)
+        }
+
+        resultadoPujas.value = datos
+        pujasResueltas.value = true
+
+        toast.add({
+            severity: 'success',
+            summary: 'Pujas resueltas',
+            detail: datos.mensaje,
+            life: 5000,
+        })
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error al resolver pujas',
+            detail: error.message,
+            life: 5000,
+        })
+    } finally {
+        resolviendoPujas.value = false
+    }
+}
 </script>
 
 <!---------------------------------------------------------------------------------------------------------------------------->
@@ -126,8 +169,7 @@ async function generarMercado() {
                 <template #content>
                     <div class="flex flex-col gap-4">
                         <Button label="Procesar jornada" :loading="procesando" @click="procesarJornada"
-                            icon="pi pi-flag-fill"
-                            class="!bg-[#E10600] !border-none hover:!bg-[#B30500] w-full" />
+                            icon="pi pi-flag-fill" class="!bg-[#E10600] !border-none hover:!bg-[#B30500] w-full" />
 
                         <Message v-if="jornadaProcesada" severity="success" :closable="false">
                             <div class="flex flex-col gap-1">
@@ -144,10 +186,10 @@ async function generarMercado() {
                         <div class="h-px bg-zinc-700 my-2"></div>
 
                         <Button label="Generar mercado diario" :loading="generandoMercado" @click="generarMercado"
-                            icon="pi pi-shop"
-                            class="!bg-amber-600 !border-none hover:!bg-amber-700 w-full" />
+                            icon="pi pi-shop" class="!bg-amber-600 !border-none hover:!bg-amber-700 w-full" />
 
-                        <Message v-if="mercadoGenerado" :severity="resultadoMercado.omitido ? 'warn' : 'success'" :closable="false">
+                        <Message v-if="mercadoGenerado" :severity="resultadoMercado.omitido ? 'warn' : 'success'"
+                            :closable="false">
                             <div class="flex flex-col gap-1">
                                 <span class="font-bold">{{ resultadoMercado.mensaje }}</span>
                                 <span v-if="resultadoMercado.totalCartas">
@@ -155,6 +197,20 @@ async function generarMercado() {
                                 </span>
                                 <span v-if="resultadoMercado.fechaCierre">
                                     Cierre: {{ new Date(resultadoMercado.fechaCierre).toLocaleString() }}
+                                </span>
+                            </div>
+                        </Message>
+
+                        <div class="h-px bg-zinc-700 my-2"></div>
+
+                        <Button label="Resolver pujas (Testing)" :loading="resolviendoPujas" @click="resolverPujas"
+                            icon="pi pi-bolt" class="!bg-rose-700 !border-none hover:!bg-rose-800 w-full" />
+
+                        <Message v-if="pujasResueltas" severity="success" :closable="false">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold">{{ resultadoPujas.mensaje }}</span>
+                                <span v-if="resultadoPujas.mercadosResueltos !== undefined">
+                                    Mercados resueltos: {{ resultadoPujas.mercadosResueltos }}
                                 </span>
                             </div>
                         </Message>

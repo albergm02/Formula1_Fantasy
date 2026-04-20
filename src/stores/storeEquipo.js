@@ -1,11 +1,42 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-const crearGarajeVacio = () => ({ coche: null, pilotos: [], potenciadores: [], ruedas: null })
+const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [], ruedas: null })
 const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
+import {
+  calcularPrecioClausula,
+  estaEnPeriodoDeGracia,
+  ejecutarClausula,
+  persistirInversionClausula,
+} from '@/services/servicioClausulas'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 import { ruedasBase } from '@/data/bases/ruedasBase'
+
+/**
+ * Migra un garaje del formato anterior (coche singular) al nuevo (coches array).
+ * También asegura que pilotos tengan el campo `equipado`.
+ * @param {Object} garajeOriginal - El garaje leído de Firestore.
+ * @returns {Object} Garaje normalizado al nuevo formato.
+ */
+const migrarGaraje = (garajeOriginal) => {
+  const garaje = { ...garajeOriginal }
+
+  if (garaje.coche !== undefined || !garaje.coches) {
+    garaje.coches = garaje.coche ? [{ ...garaje.coche, equipado: true }] : []
+    delete garaje.coche
+  }
+
+  garaje.pilotos = (garaje.pilotos || []).map((piloto) => ({
+    ...piloto,
+    equipado: piloto.equipado !== undefined ? piloto.equipado : true,
+  }))
+
+  garaje.potenciadores = garaje.potenciadores || []
+  garaje.ruedas = garaje.ruedas || null
+
+  return garaje
+}
 
 export const usarStoreEscuderia = defineStore('escuderia', () => {
   const idLigaActiva = ref(null)
@@ -36,8 +67,14 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
         idParticipanteActivo.value = participacion.id
         presupuesto.value = participacion.presupuesto
         puntos.value = participacion.puntos
-        garaje.value = participacion.garaje || crearGarajeVacio()
+        garaje.value = migrarGaraje(participacion.garaje || crearGarajeVacio())
         ultimaJornada.value = participacion.ultimaJornada || null
+
+        if (!participacion.nombre_usuario) {
+          actualizarParticipacion(participacion.id, {
+            nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
+          }).catch(() => {})
+        }
       } else {
         presupuesto.value = 50.0
         puntos.value = 0
@@ -88,25 +125,20 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
         message: 'No tienes suficiente presupuesto para fichar este elemento.',
       }
     }
-    if (tipoElemento === 'coche' && garaje.value.coche) {
-      return {
-        success: false,
-        message: 'Ya tienes un coche fichado. Vende el actual para fichar uno nuevo.',
-      }
-    }
-    if (tipoElemento === 'piloto' && garaje.value.pilotos.length >= 2) {
-      return {
-        success: false,
-        message: 'Ya tienes 2 pilotos fichados. Vende uno para fichar otro.',
-      }
-    }
     presupuesto.value -= elemento.precio
-    const elementoComprado = { ...elemento, instancia_id: Date.now() }
+    const elementoComprado = {
+      ...elemento,
+      instancia_id: Date.now(),
+      clausulaInvertida: 0,
+      fechaAdquisicion: new Date().toISOString(),
+    }
 
     if (tipoElemento === 'coche') {
-      garaje.value.coche = elementoComprado
+      const hayEquipado = garaje.value.coches.some((c) => c.equipado)
+      garaje.value.coches.push({ ...elementoComprado, equipado: !hayEquipado })
     } else if (tipoElemento === 'piloto') {
-      garaje.value.pilotos.push(elementoComprado)
+      const pilotosEquipados = garaje.value.pilotos.filter((p) => p.equipado).length
+      garaje.value.pilotos.push({ ...elementoComprado, equipado: pilotosEquipados < 2 })
     } else if (tipoElemento === 'potenciador') {
       garaje.value.potenciadores.push(elementoComprado)
     }
@@ -136,7 +168,9 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       const tipoElemento = elemento.tipo || elemento.tipoCarta
 
       if (tipoElemento === 'coche') {
-        garaje.value.coche = null
+        garaje.value.coches = garaje.value.coches.filter(
+          (coche) => coche.instancia_id !== elemento.instancia_id,
+        )
       } else if (tipoElemento === 'piloto') {
         garaje.value.pilotos = garaje.value.pilotos.filter(
           (piloto) => piloto.instancia_id !== elemento.instancia_id,
@@ -241,6 +275,166 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     ultimaJornada.value = null
   }
 
+  /* ─── Cláusulas de Rescisión ─────────────────────────────────────────── */
+
+  /**
+   * Invierte presupuesto para aumentar la cláusula de rescisión de una carta del garaje.
+   * Cada €1 invertido sube la cláusula en €2.
+   * @param {number} instanciaId - instancia_id de la carta a proteger.
+   * @param {number} cantidad - Cantidad a invertir en protección.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function invertirEnClausula(instanciaId, cantidad) {
+    const cantidadNum = Number(cantidad)
+    if (isNaN(cantidadNum) || cantidadNum <= 0) {
+      return { success: false, message: 'La cantidad a invertir debe ser mayor que 0.' }
+    }
+    if (cantidadNum > presupuesto.value) {
+      return { success: false, message: 'No tienes presupuesto suficiente para esta inversión.' }
+    }
+
+    const elemento = encontrarElementoEnGaraje(instanciaId)
+    if (!elemento) {
+      return { success: false, message: 'Elemento no encontrado en tu garaje.' }
+    }
+
+    const tipoElemento = elemento.tipo || elemento.tipoCarta
+    if (tipoElemento === 'potenciador') {
+      return { success: false, message: 'Los potenciadores no pueden protegerse con cláusula.' }
+    }
+
+    elemento.clausulaInvertida = (elemento.clausulaInvertida || 0) + cantidadNum
+    presupuesto.value -= cantidadNum
+
+    await persistirInversionClausula(idParticipanteActivo.value, garaje.value, presupuesto.value)
+
+    const precioTotal = calcularPrecioClausula(elemento)
+    return {
+      success: true,
+      message: `Cláusula de ${elemento.nombre} aumentada a ${precioTotal.toFixed(1)}M.`,
+    }
+  }
+
+  /**
+   * Ejecuta la cláusula de rescisión de una carta del garaje de un rival.
+   * Valida presupuesto, periodo de gracia y límites de roster antes de proceder.
+   * @param {string} idParticipanteRival - ID de participación del rival.
+   * @param {Object} elemento - Carta del rival a fichar.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function ejecutarClausulaRival(idParticipanteRival, elemento) {
+    const precioClausulaTotal = calcularPrecioClausula(elemento)
+    const tipoElemento = elemento.tipo || elemento.tipoCarta
+
+    if (tipoElemento === 'potenciador') {
+      return {
+        success: false,
+        message: 'Los potenciadores no pueden ser fichados mediante cláusula.',
+      }
+    }
+    if (estaEnPeriodoDeGracia(elemento)) {
+      return { success: false, message: 'Esta carta está protegida por periodo de gracia.' }
+    }
+    if (precioClausulaTotal > presupuesto.value) {
+      return {
+        success: false,
+        message: `No tienes presupuesto suficiente. Necesitas ${precioClausulaTotal.toFixed(1)}M.`,
+      }
+    }
+
+    try {
+      await ejecutarClausula(
+        idParticipanteRival,
+        idParticipanteActivo.value,
+        elemento.instancia_id,
+        precioClausulaTotal,
+      )
+
+      await cargarEquipo(idLigaActiva.value)
+
+      const storeNotificaciones = usarStoreNotificaciones()
+      storeNotificaciones
+        .registrarClausula(elemento.nombre, tipoElemento, precioClausulaTotal)
+        .catch(() => {})
+
+      return {
+        success: true,
+        message: `Has fichado a ${elemento.nombre} por ${precioClausulaTotal.toFixed(1)}M de cláusula.`,
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: `Error al ejecutar la cláusula: ${error.message}`,
+      }
+    }
+  }
+
+  /**
+   * Busca un elemento en el garaje por su instancia_id.
+   * @param {number} instanciaId
+   * @returns {Object|null}
+   */
+  function encontrarElementoEnGaraje(instanciaId) {
+    const coche = garaje.value.coches.find((c) => c.instancia_id === instanciaId)
+    if (coche) return coche
+    const piloto = garaje.value.pilotos.find((p) => p.instancia_id === instanciaId)
+    if (piloto) return piloto
+    const potenciador = garaje.value.potenciadores.find((p) => p.instancia_id === instanciaId)
+    if (potenciador) return potenciador
+    return null
+  }
+
+  /**
+   * Alterna el estado equipado de un coche. Solo 1 puede estar equipado.
+   * @param {number} instanciaId - instancia_id del coche.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function alternarCoche(instanciaId) {
+    const coche = garaje.value.coches.find((c) => c.instancia_id === instanciaId)
+    if (!coche) {
+      return { success: false, message: 'Coche no encontrado en tu garaje.' }
+    }
+
+    if (coche.equipado) {
+      coche.equipado = false
+    } else {
+      garaje.value.coches.forEach((c) => {
+        c.equipado = false
+      })
+      coche.equipado = true
+    }
+
+    await guardarEstadoEquipo()
+    return {
+      success: true,
+      message: `Coche ${coche.nombre} ${coche.equipado ? 'equipado' : 'desequipado'}.`,
+    }
+  }
+
+  /**
+   * Alterna el estado equipado de un piloto. Máximo 2 pueden estar equipados.
+   * @param {number} instanciaId - instancia_id del piloto.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function alternarPiloto(instanciaId) {
+    const piloto = garaje.value.pilotos.find((p) => p.instancia_id === instanciaId)
+    if (!piloto) {
+      return { success: false, message: 'Piloto no encontrado en tu garaje.' }
+    }
+
+    const pilotosEquipados = garaje.value.pilotos.filter((p) => p.equipado).length
+    if (!piloto.equipado && pilotosEquipados >= 2) {
+      return { success: false, message: 'Solo puedes equipar 2 pilotos. Desequipa uno primero.' }
+    }
+
+    piloto.equipado = !piloto.equipado
+    await guardarEstadoEquipo()
+    return {
+      success: true,
+      message: `Piloto ${piloto.nombre} ${piloto.equipado ? 'equipado' : 'desequipado'}.`,
+    }
+  }
+
   return {
     idLigaActiva,
     idParticipanteActivo,
@@ -257,5 +451,9 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     equiparNeumatico,
     desequiparNeumatico,
     limpiarEstadoLigaActiva,
+    invertirEnClausula,
+    ejecutarClausulaRival,
+    alternarCoche,
+    alternarPiloto,
   }
 })

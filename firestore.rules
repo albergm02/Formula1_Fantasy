@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Usuarios ──────────────────────────────────────────────────────
+    // Lectura: cualquier autenticado (necesario para clasificación).
+    // Escritura: solo el propietario del documento.
+    match /usuarios/{correo} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.auth.token.email == correo;
+      allow update: if request.auth != null
+                    && request.auth.token.email == correo;
+    }
+
+    // ── Ligas ─────────────────────────────────────────────────────────
+    // Lectura/creación: cualquier autenticado.
+    // Actualización: cualquier autenticado (join incrementa participantes,
+    //   leave decrementa, admin transfer cambia admin + participantes).
+    // Eliminación: solo el administrador de la liga.
+    match /ligas/{idLiga} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null
+                    && resource.data.admin == request.auth.token.email;
+    }
+
+    // ── Participaciones ───────────────────────────────────────────────
+    // Lectura/creación: cualquier autenticado.
+    // Actualización/eliminación: cualquier autenticado (el store valida
+    //   propiedad y rol admin antes de ejecutar la operación).
+    match /participaciones/{idParticipacion} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+
+    // ── Actividad ─────────────────────────────────────────────────────
+    match /actividad/{idActividad} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+    }
+
+    // ── Jornadas (solo Cloud Functions escriben) ──────────────────────
+    match /jornadas/{idJornada} {
+      allow read: if request.auth != null;
+    }
+
+    // ── Mercados (Cloud Functions escriben, usuarios autenticados leen) ──
+    match /mercados/{idMercado} {
+      allow read: if request.auth != null;
+    }
+
+    // ── Pujas ─────────────────────────────────────────────────────────
+    // Solo el propietario de la puja puede crearla, editarla o eliminarla.
+    match /mercados/{idMercado}/pujas/{idPuja} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+                            && request.auth.token.email == request.resource.data.emailUsuario;
+      allow delete: if request.auth != null
+                    && request.auth.token.email == resource.data.emailUsuario;
+    }
+  }
+}
