@@ -91,6 +91,12 @@ enrutador.beforeEach(async (to) => {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
   }
 
+  // Si la ruta es de administración, recargamos el perfil para asegurar que
+  // el flag esAdministrador refleje el estado más reciente en Firestore.
+  if (usuario && to.meta.requiresAdmin) {
+    await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
+  }
+
   // Si no hay sesión activa, limpiamos el store para ocultar el spinner
   if (!usuario && !storeAutenticacion.datosCargados) {
     storeAutenticacion.limpiarSesion()
