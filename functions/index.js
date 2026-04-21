@@ -28,7 +28,12 @@ const {
 } = require('./servicioOpenF1Server')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacionServer')
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
-const { generarCatalogo, seleccionarCartasDiarias } = require('./mercadoServer')
+const {
+  cargarCatalogo,
+  invalidarCacheCatalogo,
+  seleccionarCartasDiarias,
+} = require('./mercadoServer')
+const { construirCatalogoCompleto } = require('./data/catalogoBase')
 
 initializeApp()
 const db = getFirestore()
@@ -411,8 +416,8 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
     await db.collection('mercados').doc(idMercadoAyer).update({ estado: 'cerrado' })
   }
 
-  /* ── Generar catálogo completo y seleccionar cartas del día ── */
-  const catalogo = generarCatalogo()
+  /* ── Cargar catálogo desde Firestore (cache de instancia) y seleccionar cartas del día ── */
+  const catalogo = await cargarCatalogo(db)
   const cartasDelDia = seleccionarCartasDiarias(catalogo)
 
   /* ── Crear documento del mercado de hoy para esta liga ── */
@@ -524,6 +529,46 @@ exports.generarMercadoDiarioHttp = onRequest(
     } catch (error) {
       console.error('Error al generar mercado diario:', error)
       respuesta.status(500).json({ error: `Error al generar mercado: ${error.message}` })
+    }
+  },
+)
+
+/**
+ * Endpoint HTTP de administración — siembra el catálogo completo en Firestore.
+ *
+ * Construye el catálogo desde /data/catalogoBase.js (precios calculados por
+ * puntuación normalizada) y lo escribe en la colección `catalogo` con tres
+ * documentos: pilotos, coches, potenciadores. Al terminar invalida la caché
+ * de módulo para que la próxima invocación traiga los datos frescos.
+ *
+ * Uso desde Admin: POST https://<REGION>-<PROJECT>.cloudfunctions.net/seedCatalogoHttp
+ */
+exports.seedCatalogoHttp = onRequest(
+  { region: 'europe-west1', cors: true },
+  async (_peticion, respuesta) => {
+    try {
+      const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
+      const fechaSiembra = new Date().toISOString()
+
+      const referencia = db.collection('catalogo')
+      const batch = db.batch()
+      batch.set(referencia.doc('pilotos'), { items: pilotos, fechaSiembra })
+      batch.set(referencia.doc('coches'), { items: coches, fechaSiembra })
+      batch.set(referencia.doc('potenciadores'), { items: potenciadores, fechaSiembra })
+      await batch.commit()
+
+      invalidarCacheCatalogo()
+
+      respuesta.status(200).json({
+        mensaje: 'Catálogo sembrado correctamente en Firestore.',
+        totalPilotos: pilotos.length,
+        totalCoches: coches.length,
+        totalPotenciadores: potenciadores.length,
+        fechaSiembra,
+      })
+    } catch (error) {
+      console.error('Error al sembrar catálogo:', error)
+      respuesta.status(500).json({ error: `Error al sembrar catálogo: ${error.message}` })
     }
   },
 )

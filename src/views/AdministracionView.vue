@@ -22,9 +22,14 @@ const resolviendoPujas = ref(false)
 const resultadoPujas = ref({})
 const pujasResueltas = ref(false)
 
+const sembrandoCatalogo = ref(false)
+const resultadoCatalogo = ref({})
+const catalogoSembrado = ref(false)
+
 const URL_CLOUD_FUNCTION = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/procesarJornadaGP'
 const URL_GENERAR_MERCADO = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/generarMercadoDiarioHttp'
 const URL_RESOLVER_PUJAS = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/resolverPujasMercadoHttp'
+const URL_SEED_CATALOGO = 'https://europe-west1-formula1-fantasy-ba348.cloudfunctions.net/seedCatalogoHttp'
 
 async function manejarCerrarSesion() {
     await cerrarSesion()
@@ -145,6 +150,45 @@ async function resolverPujas() {
         resolviendoPujas.value = false
     }
 }
+
+/**
+ * Invoca la Cloud Function HTTP que siembra el catálogo en Firestore.
+ * Solo es necesario ejecutarla la primera vez o cuando cambien los datos
+ * de pilotos / coches / potenciadores.
+ * @returns {Promise<void>}
+ */
+async function sembrarCatalogo() {
+    sembrandoCatalogo.value = true
+    catalogoSembrado.value = false
+
+    try {
+        const respuesta = await fetch(URL_SEED_CATALOGO, { method: 'POST' })
+        const datos = await respuesta.json()
+
+        if (!respuesta.ok) {
+            throw new Error(datos.error || `Error del servidor: ${respuesta.status}`)
+        }
+
+        resultadoCatalogo.value = datos
+        catalogoSembrado.value = true
+
+        toast.add({
+            severity: 'success',
+            summary: 'Catálogo sembrado',
+            detail: datos.mensaje,
+            life: 5000,
+        })
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error al sembrar catálogo',
+            detail: error.message,
+            life: 5000,
+        })
+    } finally {
+        sembrandoCatalogo.value = false
+    }
+}
 </script>
 
 <!---------------------------------------------------------------------------------------------------------------------------->
@@ -211,6 +255,22 @@ async function resolverPujas() {
                                 <span class="font-bold">{{ resultadoPujas.mensaje }}</span>
                                 <span v-if="resultadoPujas.mercadosResueltos !== undefined">
                                     Mercados resueltos: {{ resultadoPujas.mercadosResueltos }}
+                                </span>
+                            </div>
+                        </Message>
+
+                        <div class="h-px bg-zinc-700 my-2"></div>
+
+                        <Button label="Sembrar catálogo" :loading="sembrandoCatalogo" @click="sembrarCatalogo"
+                            icon="pi pi-database" class="!bg-indigo-700 !border-none hover:!bg-indigo-800 w-full" />
+
+                        <Message v-if="catalogoSembrado" severity="success" :closable="false">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold">{{ resultadoCatalogo.mensaje }}</span>
+                                <span v-if="resultadoCatalogo.totalPilotos !== undefined">
+                                    Pilotos: {{ resultadoCatalogo.totalPilotos }} ·
+                                    Coches: {{ resultadoCatalogo.totalCoches }} ·
+                                    Potenciadores: {{ resultadoCatalogo.totalPotenciadores }}
                                 </span>
                             </div>
                         </Message>
