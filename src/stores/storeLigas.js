@@ -25,6 +25,36 @@ const alcanzoLimiteLigas = (idsLigas = []) =>
   Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
 const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 8).toUpperCase()
 
+/**
+ * Devuelve el siguiente administrador por orden cronológico de incorporación a la liga.
+ * Ordena las participaciones por `fecha_union` ascendente (los más antiguos primero).
+ * Para participaciones heredadas sin este campo, se toma simplemente la primera.
+ * @param {Array} participaciones - Participaciones candidatas (sin la del saliente).
+ * @returns {Object} La participación más antigua.
+ */
+const elegirSiguienteAdministrador = (participaciones) => {
+  const ordenadas = [...participaciones].sort((primera, segunda) => {
+    const fechaPrimera = extraerTimestamp(primera.fecha_union)
+    const fechaSegunda = extraerTimestamp(segunda.fecha_union)
+    return fechaPrimera - fechaSegunda
+  })
+  return ordenadas[0]
+}
+
+/**
+ * Extrae milisegundos desde un Timestamp de Firestore, un Date o una cadena ISO.
+ * Devuelve Infinity para participaciones sin fecha, de modo que queden al final del orden.
+ * @param {*} fecha
+ * @returns {number}
+ */
+const extraerTimestamp = (fecha) => {
+  if (!fecha) return Number.POSITIVE_INFINITY
+  if (typeof fecha.toMillis === 'function') return fecha.toMillis()
+  if (fecha instanceof Date) return fecha.getTime()
+  const parseada = new Date(fecha).getTime()
+  return Number.isFinite(parseada) ? parseada : Number.POSITIVE_INFINITY
+}
+
 export const usarStoreLigas = defineStore('ligas', () => {
   const detallesLigas = ref([])
   const idLigaActiva = ref(null)
@@ -104,6 +134,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         presupuesto: 50.0,
         puntos: 0,
         garaje: crearGarajeVacio(),
+        fecha_union: new Date(),
       })
 
       await vincularLigaAlUsuario(correoUsuario, idLiga)
@@ -146,6 +177,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         presupuesto: 50.0,
         puntos: 0,
         garaje: crearGarajeVacio(),
+        fecha_union: new Date(),
       })
 
       await actualizarLiga(liga.id, { participantes: liga.participantes + 1 })
@@ -168,7 +200,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
   /**
    * Abandona una liga activa.
    * Si es el último participante, elimina la liga completa.
-   * Si es administrador, cede el rol al participante con más puntos antes de salir.
+   * Si es el creador, cede el rol al siguiente participante que se unió (por `fecha_union` ascendente).
    * @param {string} idLiga
    * @returns {Promise<{ success: boolean, message: string }>}
    */
@@ -197,9 +229,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }
 
       if (participacionPropia.rol === 'admin') {
-        const siguienteAdministrador = participacionesRestantes.sort(
-          (primero, segundo) => segundo.puntos - primero.puntos,
-        )[0]
+        const siguienteAdministrador = elegirSiguienteAdministrador(participacionesRestantes)
         await actualizarParticipacion(siguienteAdministrador.id, { rol: 'admin' })
         await actualizarLiga(idLiga, {
           admin: siguienteAdministrador.email_usuario,
