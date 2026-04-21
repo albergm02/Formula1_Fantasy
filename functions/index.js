@@ -17,7 +17,6 @@
  * @module index
  */
 
-const { onRequest } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
@@ -28,12 +27,7 @@ const {
 } = require('./servicioOpenF1Server')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacionServer')
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
-const {
-  cargarCatalogo,
-  invalidarCacheCatalogo,
-  seleccionarCartasDiarias,
-} = require('./mercadoServer')
-const { construirCatalogoCompleto } = require('./data/catalogoBase')
+const { cargarCatalogo, seleccionarCartasDiarias } = require('./mercadoServer')
 
 initializeApp()
 const db = getFirestore()
@@ -84,120 +78,111 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
 /* ─── Cloud Function ────────────────────────────────────────────────────── */
 
 /**
- * Endpoint HTTP que procesa la jornada del último GP finalizado.
- * Diseñado para invocarse desde Cloud Scheduler (semanal) o manualmente.
- * Es idempotente: si la jornada ya fue procesada, responde 200 sin repetir cálculos.
+ * Cloud Function programada — procesa la jornada del último GP finalizado.
+ * Se ejecuta cada lunes a las 02:00 UTC, una vez concluido el fin de semana de F1.
+ * Es idempotente: si la jornada ya fue procesada, no repite cálculos.
  */
-exports.procesarJornadaGP = onRequest(
-  { region: 'europe-west1', cors: true },
-  async (_peticion, respuesta) => {
-    try {
-      const granPremio = await obtenerUltimoGranPremioFinalizado(TEMPORADA_ACTUAL)
+exports.procesarJornadaGP = onSchedule(
+  {
+    schedule: 'every monday 02:00',
+    timeZone: 'UTC',
+    region: 'europe-west1',
+  },
+  async () => {
+    const granPremio = await obtenerUltimoGranPremioFinalizado(TEMPORADA_ACTUAL)
+    if (!granPremio) {
+      console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
+      return
+    }
 
-      if (!granPremio) {
-        respuesta.status(200).json({ mensaje: 'No hay Gran Premio finalizado para procesar.' })
-        return
+    const idJornada = `gp_${granPremio.meeting_key}`
+    const jornadaExistente = await db.collection('jornadas').doc(idJornada).get()
+    if (jornadaExistente.exists) {
+      console.log(`[Jornada] ${idJornada} ya fue procesada previamente. Omitida.`)
+      return
+    }
+
+    const { actuacionesPorPiloto, condiciones } = await recopilarDatosGranPremio(
+      granPremio.meeting_key,
+    )
+
+    const todasParticipaciones = await db.collection('participaciones').get()
+    const batch = db.batch()
+    let participacionesProcesadas = 0
+    const desgloseJornada = []
+
+    for (const documento of todasParticipaciones.docs) {
+      const participacion = documento.data()
+      const garaje = participacion.garaje
+
+      const pilotosEquipados = garaje
+        ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
+        : []
+
+      if (!garaje || pilotosEquipados.length === 0) {
+        continue
       }
 
-      const idJornada = `gp_${granPremio.meeting_key}`
+      const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
+        construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
 
-      // TEMPORAL PARA HACER PRUEBAS
-      const jornadaExistente = await db.collection('jornadas').doc(idJornada).get()
-      if (jornadaExistente.exists) {
-        await db.collection('jornadas').doc(idJornada).delete()
+      const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
+
+      for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
+        const detalle = detallesPorPiloto[pilotoDesglose.id]
+        if (detalle) {
+          pilotoDesglose.variante = detalle.variante
+          pilotoDesglose.actuacion = detalle.actuacion
+        }
       }
 
-      const { actuacionesPorPiloto, condiciones } = await recopilarDatosGranPremio(
-        granPremio.meeting_key,
-      )
+      const { multiplicadorTotal } = calcularSinergias(garaje)
+      const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
 
-      const todasParticipaciones = await db.collection('participaciones').get()
-      const batch = db.batch()
-      let participacionesProcesadas = 0
-      const desgloseJornada = []
+      const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
 
-      for (const documento of todasParticipaciones.docs) {
-        const participacion = documento.data()
-        const garaje = participacion.garaje
-
-        const pilotosEquipados = garaje
-          ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
-          : []
-
-        if (!garaje || pilotosEquipados.length === 0) {
-          continue
-        }
-
-        const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
-          construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
-
-        const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
-
-        for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
-          const detalle = detallesPorPiloto[pilotoDesglose.id]
-          if (detalle) {
-            pilotoDesglose.variante = detalle.variante
-            pilotoDesglose.actuacion = detalle.actuacion
-          }
-        }
-
-        const { multiplicadorTotal } = calcularSinergias(garaje)
-        const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
-
-        const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
-
-        const desgloseParticipante = {
-          nombreGranPremio: granPremio.meeting_name,
-          fechaProcesamiento: new Date().toISOString(),
-          puntosJornada,
-          multiplicadorSinergia: multiplicadorTotal,
-          condiciones,
-          desglose: resultadoGaraje.desglose,
-        }
-
-        batch.update(documento.ref, {
-          puntos: puntosAcumulados,
-          ultimaJornada: desgloseParticipante,
-        })
-
-        desgloseJornada.push({
-          participacionId: documento.id,
-          emailUsuario: participacion.email_usuario,
-          idLiga: participacion.id_liga,
-          puntosJornada,
-          puntosAcumulados,
-          multiplicadorSinergia: multiplicadorTotal,
-          desglose: resultadoGaraje.desglose,
-        })
-
-        participacionesProcesadas++
-      }
-
-      const documentoJornada = {
-        meetingKey: granPremio.meeting_key,
+      const desgloseParticipante = {
         nombreGranPremio: granPremio.meeting_name,
         fechaProcesamiento: new Date().toISOString(),
-        temporada: TEMPORADA_ACTUAL,
-        participacionesProcesadas,
+        puntosJornada,
+        multiplicadorSinergia: multiplicadorTotal,
         condiciones,
-        desglose: desgloseJornada,
+        desglose: resultadoGaraje.desglose,
       }
 
-      batch.set(db.collection('jornadas').doc(idJornada), documentoJornada)
-
-      await batch.commit()
-
-      respuesta.status(200).json({
-        mensaje: `Jornada ${idJornada} procesada correctamente.`,
-        granPremio: granPremio.meeting_name,
-        participacionesProcesadas,
+      batch.update(documento.ref, {
+        puntos: puntosAcumulados,
+        ultimaJornada: desgloseParticipante,
       })
-    } catch (error) {
-      console.error('Error al procesar jornada:', error)
-      respuesta.status(500).json({
-        error: `Error al procesar la jornada: ${error.message}`,
+
+      desgloseJornada.push({
+        participacionId: documento.id,
+        emailUsuario: participacion.email_usuario,
+        idLiga: participacion.id_liga,
+        puntosJornada,
+        puntosAcumulados,
+        multiplicadorSinergia: multiplicadorTotal,
+        desglose: resultadoGaraje.desglose,
       })
+
+      participacionesProcesadas++
     }
+
+    batch.set(db.collection('jornadas').doc(idJornada), {
+      meetingKey: granPremio.meeting_key,
+      nombreGranPremio: granPremio.meeting_name,
+      fechaProcesamiento: new Date().toISOString(),
+      temporada: TEMPORADA_ACTUAL,
+      participacionesProcesadas,
+      condiciones,
+      desglose: desgloseJornada,
+    })
+
+    await batch.commit()
+
+    console.log(
+      `[Jornada] ${idJornada} (${granPremio.meeting_name}) procesada. ${participacionesProcesadas} participaciones.`,
+    )
   },
 )
 
@@ -461,114 +446,5 @@ exports.generarMercadoDiario = onSchedule(
     }
 
     console.log(`[Mercado Diario] ${resultados.length} ligas procesadas.`)
-  },
-)
-
-/**
- * Endpoint HTTP para generar el mercado diario de TODAS las ligas.
- * Uso desde Admin: GET/POST https://<REGION>-<PROJECT>.cloudfunctions.net/generarMercadoDiarioHttp
- */
-/**
- * Endpoint HTTP de testing — resuelve las pujas de todos los mercados abiertos.
- * Cierra cada mercado tras resolver sus pujas.
- */
-exports.resolverPujasMercadoHttp = onRequest(
-  { region: 'europe-west1', cors: true },
-  async (_peticion, respuesta) => {
-    try {
-      const mercadosAbiertos = await db
-        .collection('mercados')
-        .where('estado', '==', 'abierto')
-        .get()
-
-      if (mercadosAbiertos.empty) {
-        respuesta.status(200).json({ mensaje: 'No hay mercados abiertos.', mercadosResueltos: 0 })
-        return
-      }
-
-      let mercadosResueltos = 0
-      for (const doc of mercadosAbiertos.docs) {
-        await resolverPujasMercado(doc.id)
-        await db.collection('mercados').doc(doc.id).update({ estado: 'cerrado' })
-        mercadosResueltos++
-      }
-
-      respuesta.status(200).json({
-        mensaje: `Se resolvieron las pujas de ${mercadosResueltos} mercado(s).`,
-        mercadosResueltos,
-      })
-    } catch (error) {
-      console.error('Error al resolver pujas:', error)
-      respuesta.status(500).json({ error: `Error al resolver pujas: ${error.message}` })
-    }
-  },
-)
-
-exports.generarMercadoDiarioHttp = onRequest(
-  { region: 'europe-west1', cors: true },
-  async (_peticion, respuesta) => {
-    try {
-      const todasLigas = await db.collection('ligas').get()
-
-      if (todasLigas.empty) {
-        respuesta.status(200).json({ mensaje: 'No hay ligas registradas.', ligasProcesadas: 0 })
-        return
-      }
-
-      const resultados = []
-      for (const docLiga of todasLigas.docs) {
-        const resultado = await ejecutarGeneracionMercadoParaLiga(docLiga.id)
-        resultados.push(resultado)
-      }
-
-      respuesta.status(200).json({
-        mensaje: `Mercado generado para ${resultados.length} liga(s).`,
-        ligasProcesadas: resultados.length,
-        detalle: resultados,
-      })
-    } catch (error) {
-      console.error('Error al generar mercado diario:', error)
-      respuesta.status(500).json({ error: `Error al generar mercado: ${error.message}` })
-    }
-  },
-)
-
-/**
- * Endpoint HTTP de administración — siembra el catálogo completo en Firestore.
- *
- * Construye el catálogo desde /data/catalogoBase.js (precios calculados por
- * puntuación normalizada) y lo escribe en la colección `catalogo` con tres
- * documentos: pilotos, coches, potenciadores. Al terminar invalida la caché
- * de módulo para que la próxima invocación traiga los datos frescos.
- *
- * Uso desde Admin: POST https://<REGION>-<PROJECT>.cloudfunctions.net/seedCatalogoHttp
- */
-exports.seedCatalogoHttp = onRequest(
-  { region: 'europe-west1', cors: true },
-  async (_peticion, respuesta) => {
-    try {
-      const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
-      const fechaSiembra = new Date().toISOString()
-
-      const referencia = db.collection('catalogo')
-      const batch = db.batch()
-      batch.set(referencia.doc('pilotos'), { items: pilotos, fechaSiembra })
-      batch.set(referencia.doc('coches'), { items: coches, fechaSiembra })
-      batch.set(referencia.doc('potenciadores'), { items: potenciadores, fechaSiembra })
-      await batch.commit()
-
-      invalidarCacheCatalogo()
-
-      respuesta.status(200).json({
-        mensaje: 'Catálogo sembrado correctamente en Firestore.',
-        totalPilotos: pilotos.length,
-        totalCoches: coches.length,
-        totalPotenciadores: potenciadores.length,
-        fechaSiembra,
-      })
-    } catch (error) {
-      console.error('Error al sembrar catálogo:', error)
-      respuesta.status(500).json({ error: `Error al sembrar catálogo: ${error.message}` })
-    }
   },
 )

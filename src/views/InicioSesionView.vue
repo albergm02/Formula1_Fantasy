@@ -53,8 +53,7 @@ const manejarInicioSesion = async ({ valid, values }) => {
   try {
     const credencialUsuario = await iniciarSesion(values.email, values.password)
     await storeAutenticacion.verificarExistenciaPerfil(credencialUsuario.user.email)
-    const destino = storeAutenticacion.esAdministrador ? '/admin' : '/ligas'
-    enrutador.push(destino)
+    enrutador.push('/ligas')
   } catch (error) {
     const codigosCredencialesInvalidas = ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password']
     if (codigosCredencialesInvalidas.includes(error?.code)) {
@@ -92,8 +91,7 @@ const manejarInicioSesionGoogle = async () => {
 
     // Sí.
     if (perfilEncontrado) {
-      const destino = storeAutenticacion.esAdministrador ? '/admin' : '/ligas'
-      enrutador.push(destino)
+      enrutador.push('/ligas')
       return
     }
     // No, es su primera vez, pedimos que complete su registro.
