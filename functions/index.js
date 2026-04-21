@@ -17,6 +17,7 @@
  * @module index
  */
 
+const { onRequest } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
@@ -27,7 +28,12 @@ const {
 } = require('./servicioOpenF1Server')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacionServer')
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
-const { cargarCatalogo, seleccionarCartasDiarias } = require('./mercadoServer')
+const {
+  cargarCatalogo,
+  invalidarCacheCatalogo,
+  seleccionarCartasDiarias,
+} = require('./mercadoServer')
+const { construirCatalogoCompleto } = require('./data/catalogoBase')
 
 initializeApp()
 const db = getFirestore()
@@ -82,7 +88,7 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
  * Se ejecuta cada lunes a las 02:00 UTC, una vez concluido el fin de semana de F1.
  * Es idempotente: si la jornada ya fue procesada, no repite cálculos.
  */
-exports.procesarJornadaGP = onSchedule(
+exports.procesarJornadaSemanal = onSchedule(
   {
     schedule: 'every monday 02:00',
     timeZone: 'UTC',
@@ -448,3 +454,5 @@ exports.generarMercadoDiario = onSchedule(
     console.log(`[Mercado Diario] ${resultados.length} ligas procesadas.`)
   },
 )
+
+
