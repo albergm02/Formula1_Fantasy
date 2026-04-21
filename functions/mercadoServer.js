@@ -206,13 +206,16 @@ const variantesPiloto = [
  * @returns {number}
  */
 function calcularPuntuacionBase(atributos, pesos) {
-  return Math.round(
-    ((pesos.ritmo || 0) * atributos.ritmo +
-      (pesos.consistencia || 0) * atributos.consistencia +
-      (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
-      (pesos.agresividad || 0) * (atributos.agresividad || 0) +
-      (pesos.gestion || 0) * (atributos.gestion || 0)) * 10,
-  ) / 10
+  return (
+    Math.round(
+      ((pesos.ritmo || 0) * atributos.ritmo +
+        (pesos.consistencia || 0) * atributos.consistencia +
+        (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
+        (pesos.agresividad || 0) * (atributos.agresividad || 0) +
+        (pesos.gestion || 0) * (atributos.gestion || 0)) *
+        10,
+    ) / 10
+  )
 }
 
 /**
@@ -250,7 +253,8 @@ function calcularPrecioPorPuntuacion(
     return Number(precioMinimo.toFixed(1))
   }
 
-  const pesoNormalizado = (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
+  const pesoNormalizado =
+    (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
   const precio = precioMinimo + pesoNormalizado * (precioMaximo - precioMinimo)
   return Number(precio.toFixed(1))
 }
@@ -371,8 +375,8 @@ const CARTAS_POR_DIA = {
  */
 function mezclarArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
   }
   return array
 }
@@ -391,7 +395,10 @@ function mezclarArray(array) {
 function seleccionarCartasDiarias(catalogo) {
   const pilotosDelDia = mezclarArray([...catalogo.pilotos]).slice(0, CARTAS_POR_DIA.pilotos)
   const cochesDelDia = mezclarArray([...catalogo.coches]).slice(0, CARTAS_POR_DIA.coches)
-  const potenciadoresDelDia = mezclarArray([...catalogo.potenciadores]).slice(0, CARTAS_POR_DIA.potenciadores)
+  const potenciadoresDelDia = mezclarArray([...catalogo.potenciadores]).slice(
+    0,
+    CARTAS_POR_DIA.potenciadores,
+  )
 
   return [...pilotosDelDia, ...cochesDelDia, ...potenciadoresDelDia]
 }

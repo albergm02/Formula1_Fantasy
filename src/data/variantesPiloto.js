@@ -22,7 +22,8 @@ const calcularPrecioPorPuntuacion = (
     return Number(precioMinimo.toFixed(1))
   }
 
-  const pesoNormalizado = (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
+  const pesoNormalizado =
+    (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
   const precio = precioMinimo + pesoNormalizado * (precioMaximo - precioMinimo)
   return Number(precio.toFixed(1))
 }
