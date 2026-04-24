@@ -78,10 +78,6 @@ const confirmarEjecucionClausula = (elemento) => {
                     <span class="text-xl font-black text-[#D4A843]">{{ participacion.puntos }}</span>
                     <span class="text-[10px] font-bold uppercase text-zinc-400">PTS</span>
                 </div>
-                <div class="flex flex-col items-center">
-                    <span class="text-xl font-black text-[#E10600]">{{ participacion.presupuesto.toFixed(1) }}M</span>
-                    <span class="text-[10px] font-bold uppercase text-zinc-400">Presupuesto</span>
-                </div>
             </div>
         </div>
 
