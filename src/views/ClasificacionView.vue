@@ -116,7 +116,7 @@ onMounted(async () => {
             <div class="flex flex-col">
               <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
               <span class="mt-1 text-xs text-[#F0ECEC]">
-                Presupuesto: <span class="font-bold text-[#E10600]">${{ jugador.presupuesto }}M</span>
+                Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2) }}M</span>
               </span>
             </div>
           </div>

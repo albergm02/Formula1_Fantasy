@@ -396,20 +396,36 @@ async function resolverPujasMercado(idMercado) {
  * Crea un documento en 'mercados/{idLiga}_{YYYY-MM-DD}'.
  * Es idempotente: si el mercado de hoy ya existe para esa liga, no lo recrea.
  * @param {string} idLiga - ID de la liga en Firestore.
+ * @param {Object} [opciones]
+ * @param {boolean} [opciones.forzar=false] - Si true, borra el mercado de hoy
+ *        (y sus pujas) antes de regenerarlo. Útil para testing.
  * @returns {Promise<Object>} Resultado con el ID del mercado y el total de cartas.
  */
-async function ejecutarGeneracionMercadoParaLiga(idLiga) {
+async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
+  const { forzar = false } = opciones
   const ahora = new Date()
   const idMercadoHoy = calcularIdMercado(idLiga, ahora)
 
   /* ── Idempotencia: si el mercado de hoy ya existe para esta liga, no lo recreamos ── */
   const mercadoExistente = await db.collection('mercados').doc(idMercadoHoy).get()
   if (mercadoExistente.exists) {
-    return {
-      mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`,
-      idMercado: idMercadoHoy,
-      omitido: true,
+    if (!forzar) {
+      return {
+        mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`,
+        idMercado: idMercadoHoy,
+        omitido: true,
+      }
     }
+    /* Modo forzado: borrar mercado existente y sus pujas antes de regenerar */
+    const pujasSnap = await db
+      .collection('mercados')
+      .doc(idMercadoHoy)
+      .collection('pujas')
+      .get()
+    const batchBorrado = db.batch()
+    pujasSnap.docs.forEach((doc) => batchBorrado.delete(doc.ref))
+    batchBorrado.delete(mercadoExistente.ref)
+    await batchBorrado.commit()
   }
 
   /* ── Cerrar el mercado del día anterior de esta liga (si existe y sigue abierto) ── */
@@ -506,15 +522,16 @@ exports.dispararMercadoDiarioManual = onCall(
   { region: 'europe-west1' },
   async (request) => {
     await exigirAdministrador(request)
-    const { idLiga } = request.data || {}
+    const { idLiga, forzar = false } = request.data || {}
+    const opciones = { forzar }
     const resultados = []
 
     if (idLiga) {
-      resultados.push(await ejecutarGeneracionMercadoParaLiga(idLiga))
+      resultados.push(await ejecutarGeneracionMercadoParaLiga(idLiga, opciones))
     } else {
       const todasLigas = await db.collection('ligas').get()
       for (const docLiga of todasLigas.docs) {
-        resultados.push(await ejecutarGeneracionMercadoParaLiga(docLiga.id))
+        resultados.push(await ejecutarGeneracionMercadoParaLiga(docLiga.id, opciones))
       }
     }
 
@@ -556,5 +573,117 @@ exports.dispararJornadaSemanalManual = onCall(
     await exigirAdministrador(request)
     const resultado = await ejecutarProcesarJornada()
     return resultado
+  },
+)
+
+/**
+ * Callable — RESET COMPLETO de una liga (solo testing).
+ * Devuelve a todas las participaciones a su estado inicial:
+ *   - presupuesto = 50
+ *   - puntos = 0
+ *   - garaje vacío
+ *   - elimina ultimaJornada
+ * También borra todos los mercados y pujas de esa liga, y la actividad asociada.
+ * Acepta `{ idLiga }` (obligatorio).
+ */
+exports.resetearLigaManual = onCall(
+  { region: 'europe-west1' },
+  async (request) => {
+    await exigirAdministrador(request)
+    const { idLiga } = request.data || {}
+    if (!idLiga) {
+      throw new HttpsError('invalid-argument', 'Falta idLiga.')
+    }
+
+    const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+    if (!ligaSnap.exists) {
+      throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+    }
+
+    const garajeVacio = { coches: [], pilotos: [], potenciadores: [], ruedas: null }
+    const batch = db.batch()
+
+    /* 1. Reset de participaciones de la liga */
+    const participacionesSnap = await db
+      .collection('participaciones')
+      .where('id_liga', '==', idLiga)
+      .get()
+
+    for (const doc of participacionesSnap.docs) {
+      batch.update(doc.ref, {
+        presupuesto: 50.0,
+        puntos: 0,
+        garaje: garajeVacio,
+        ultimaJornada: FieldValue.delete(),
+      })
+    }
+
+    /* 2. Borrar mercados de la liga (y sus subcolecciones de pujas) */
+    const mercadosSnap = await db
+      .collection('mercados')
+      .where('idLiga', '==', idLiga)
+      .get()
+
+    for (const docMercado of mercadosSnap.docs) {
+      const pujasSnap = await docMercado.ref.collection('pujas').get()
+      for (const pujaDoc of pujasSnap.docs) {
+        batch.delete(pujaDoc.ref)
+      }
+      batch.delete(docMercado.ref)
+    }
+
+    /* 3. Borrar actividad de la liga */
+    const actividadSnap = await db
+      .collection('actividad')
+      .where('idLiga', '==', idLiga)
+      .get()
+
+    for (const doc of actividadSnap.docs) {
+      batch.delete(doc.ref)
+    }
+
+    await batch.commit()
+
+    return {
+      ok: true,
+      idLiga,
+      participacionesReseteadas: participacionesSnap.size,
+      mercadosBorrados: mercadosSnap.size,
+      eventosActividadBorrados: actividadSnap.size,
+    }
+  },
+)
+
+/**
+ * Callable — siembra el catálogo (pilotos, coches, potenciadores) en Firestore
+ * desde /functions/data/catalogoBase.js. Sobrescribe los documentos existentes.
+ * Necesario en cada entorno la primera vez (o cuando cambien los datos base).
+ */
+exports.sembrarCatalogoManual = onCall(
+  { region: 'europe-west1' },
+  async (request) => {
+    await exigirAdministrador(request)
+
+    const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
+    const fechaSiembra = new Date().toISOString()
+
+    const batch = db.batch()
+    batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos, fechaSiembra })
+    batch.set(db.collection('catalogo').doc('coches'), { items: coches, fechaSiembra })
+    batch.set(db.collection('catalogo').doc('potenciadores'), {
+      items: potenciadores,
+      fechaSiembra,
+    })
+    await batch.commit()
+
+    invalidarCacheCatalogo()
+
+    return {
+      ok: true,
+      pilotos: pilotos.length,
+      coches: coches.length,
+      potenciadores: potenciadores.length,
+      fechaSiembra,
+    }
   },
 )

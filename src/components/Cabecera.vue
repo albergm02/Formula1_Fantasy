@@ -49,7 +49,7 @@ const irADashboard = () => {
                 <p class="text-white font-bold uppercase text">{{ storeAutenticacion.usuarioActual.nombreVisible }}</p>
                 <p v-if="ruta.name !== 'ligas'" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ escuderiaStore.puntos }}</strong>
-                    | <span class="text-emerald-500 font-bold">{{ escuderiaStore.presupuesto }}M</span>
+                    | <span class="text-emerald-500 font-bold">{{ Number(escuderiaStore.presupuesto || 0).toFixed(2) }}M</span>
                     <span v-if="storeMercado.totalPujasComprometidas > 0" class="text-amber-400 font-bold">
                         (-{{ storeMercado.totalPujasComprometidas.toFixed(2) }}M)
                     </span>
