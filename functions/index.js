@@ -17,7 +17,7 @@
  * @module index
  */
 
-const { onRequest } = require('firebase-functions/v2/https')
+const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
@@ -84,6 +84,115 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
 /* ─── Cloud Function ────────────────────────────────────────────────────── */
 
 /**
+ * Lógica pura del procesamiento de jornada. Reutilizable desde el schedule
+ * y desde el callable manual (botón de admin).
+ * @returns {Promise<Object>} Resumen del resultado.
+ */
+async function ejecutarProcesarJornada() {
+  const granPremio = await obtenerUltimoGranPremioFinalizado(TEMPORADA_ACTUAL)
+  if (!granPremio) {
+    console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
+    return { ok: false, motivo: 'sin_gp_finalizado' }
+  }
+
+  const idJornada = `gp_${granPremio.meeting_key}`
+  const jornadaExistente = await db.collection('jornadas').doc(idJornada).get()
+  if (jornadaExistente.exists) {
+    console.log(`[Jornada] ${idJornada} ya fue procesada previamente. Omitida.`)
+    return { ok: false, motivo: 'jornada_ya_procesada', idJornada }
+  }
+
+  const { actuacionesPorPiloto, condiciones } = await recopilarDatosGranPremio(
+    granPremio.meeting_key,
+  )
+
+  const todasParticipaciones = await db.collection('participaciones').get()
+  const batch = db.batch()
+  let participacionesProcesadas = 0
+  const desgloseJornada = []
+
+  for (const documento of todasParticipaciones.docs) {
+    const participacion = documento.data()
+    const garaje = participacion.garaje
+
+    const pilotosEquipados = garaje
+      ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
+      : []
+
+    if (!garaje || pilotosEquipados.length === 0) {
+      continue
+    }
+
+    const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
+      construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
+
+    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
+
+    for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
+      const detalle = detallesPorPiloto[pilotoDesglose.id]
+      if (detalle) {
+        pilotoDesglose.variante = detalle.variante
+        pilotoDesglose.actuacion = detalle.actuacion
+      }
+    }
+
+    const { multiplicadorTotal } = calcularSinergias(garaje)
+    const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
+
+    const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
+
+    const desgloseParticipante = {
+      nombreGranPremio: granPremio.meeting_name,
+      fechaProcesamiento: new Date().toISOString(),
+      puntosJornada,
+      multiplicadorSinergia: multiplicadorTotal,
+      condiciones,
+      desglose: resultadoGaraje.desglose,
+    }
+
+    batch.update(documento.ref, {
+      puntos: puntosAcumulados,
+      ultimaJornada: desgloseParticipante,
+    })
+
+    desgloseJornada.push({
+      participacionId: documento.id,
+      emailUsuario: participacion.email_usuario,
+      idLiga: participacion.id_liga,
+      puntosJornada,
+      puntosAcumulados,
+      multiplicadorSinergia: multiplicadorTotal,
+      desglose: resultadoGaraje.desglose,
+    })
+
+    participacionesProcesadas++
+  }
+
+  batch.set(db.collection('jornadas').doc(idJornada), {
+    meetingKey: granPremio.meeting_key,
+    nombreGranPremio: granPremio.meeting_name,
+    fechaProcesamiento: new Date().toISOString(),
+    temporada: TEMPORADA_ACTUAL,
+    participacionesProcesadas,
+    condiciones,
+    desglose: desgloseJornada,
+  })
+
+  await batch.commit()
+
+  console.log(
+    `[Jornada] ${idJornada} (${granPremio.meeting_name}) procesada. ${participacionesProcesadas} participaciones.`,
+  )
+
+  return {
+    ok: true,
+    idJornada,
+    nombreGranPremio: granPremio.meeting_name,
+    participacionesProcesadas,
+  }
+}
+
+/**
  * Cloud Function programada — procesa la jornada del último GP finalizado.
  * Se ejecuta cada lunes a las 02:00 UTC, una vez concluido el fin de semana de F1.
  * Es idempotente: si la jornada ya fue procesada, no repite cálculos.
@@ -95,100 +204,7 @@ exports.procesarJornadaSemanal = onSchedule(
     region: 'europe-west1',
   },
   async () => {
-    const granPremio = await obtenerUltimoGranPremioFinalizado(TEMPORADA_ACTUAL)
-    if (!granPremio) {
-      console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
-      return
-    }
-
-    const idJornada = `gp_${granPremio.meeting_key}`
-    const jornadaExistente = await db.collection('jornadas').doc(idJornada).get()
-    if (jornadaExistente.exists) {
-      console.log(`[Jornada] ${idJornada} ya fue procesada previamente. Omitida.`)
-      return
-    }
-
-    const { actuacionesPorPiloto, condiciones } = await recopilarDatosGranPremio(
-      granPremio.meeting_key,
-    )
-
-    const todasParticipaciones = await db.collection('participaciones').get()
-    const batch = db.batch()
-    let participacionesProcesadas = 0
-    const desgloseJornada = []
-
-    for (const documento of todasParticipaciones.docs) {
-      const participacion = documento.data()
-      const garaje = participacion.garaje
-
-      const pilotosEquipados = garaje
-        ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
-        : []
-
-      if (!garaje || pilotosEquipados.length === 0) {
-        continue
-      }
-
-      const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
-        construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
-
-      const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
-
-      for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
-        const detalle = detallesPorPiloto[pilotoDesglose.id]
-        if (detalle) {
-          pilotoDesglose.variante = detalle.variante
-          pilotoDesglose.actuacion = detalle.actuacion
-        }
-      }
-
-      const { multiplicadorTotal } = calcularSinergias(garaje)
-      const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
-
-      const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
-
-      const desgloseParticipante = {
-        nombreGranPremio: granPremio.meeting_name,
-        fechaProcesamiento: new Date().toISOString(),
-        puntosJornada,
-        multiplicadorSinergia: multiplicadorTotal,
-        condiciones,
-        desglose: resultadoGaraje.desglose,
-      }
-
-      batch.update(documento.ref, {
-        puntos: puntosAcumulados,
-        ultimaJornada: desgloseParticipante,
-      })
-
-      desgloseJornada.push({
-        participacionId: documento.id,
-        emailUsuario: participacion.email_usuario,
-        idLiga: participacion.id_liga,
-        puntosJornada,
-        puntosAcumulados,
-        multiplicadorSinergia: multiplicadorTotal,
-        desglose: resultadoGaraje.desglose,
-      })
-
-      participacionesProcesadas++
-    }
-
-    batch.set(db.collection('jornadas').doc(idJornada), {
-      meetingKey: granPremio.meeting_key,
-      nombreGranPremio: granPremio.meeting_name,
-      fechaProcesamiento: new Date().toISOString(),
-      temporada: TEMPORADA_ACTUAL,
-      participacionesProcesadas,
-      condiciones,
-      desglose: desgloseJornada,
-    })
-
-    await batch.commit()
-
-    console.log(
-      `[Jornada] ${idJornada} (${granPremio.meeting_name}) procesada. ${participacionesProcesadas} participaciones.`,
-    )
+    await ejecutarProcesarJornada()
   },
 )
 
@@ -455,4 +471,90 @@ exports.generarMercadoDiario = onSchedule(
   },
 )
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   CALLABLES DE ADMINISTRACIÓN — Disparo manual desde la UI
+   ───────────────────────────────────────────────────────────────────────────
+   Permiten al administrador (flag `esAdministrador` en `usuarios/{email}`)
+   disparar manualmente el mercado, la resolución de pujas y el procesamiento
+   de la jornada desde AdministracionView.vue, sin esperar al schedule.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
+/**
+ * Verifica que el invocador esté autenticado y sea administrador.
+ * Lanza HttpsError en caso contrario.
+ * @param {import('firebase-functions/v2/https').CallableRequest} request
+ */
+async function exigirAdministrador(request) {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  }
+  const email = request.auth.token.email
+  if (!email) {
+    throw new HttpsError('permission-denied', 'Token sin email.')
+  }
+  const usuarioSnap = await db.collection('usuarios').doc(email).get()
+  if (!usuarioSnap.exists || usuarioSnap.data().esAdministrador !== true) {
+    throw new HttpsError('permission-denied', 'Permisos de administrador requeridos.')
+  }
+}
+
+/**
+ * Callable — dispara la generación del mercado diario.
+ * Acepta `{ idLiga }` opcional. Sin idLiga, procesa todas las ligas.
+ */
+exports.dispararMercadoDiarioManual = onCall(
+  { region: 'europe-west1' },
+  async (request) => {
+    await exigirAdministrador(request)
+    const { idLiga } = request.data || {}
+    const resultados = []
+
+    if (idLiga) {
+      resultados.push(await ejecutarGeneracionMercadoParaLiga(idLiga))
+    } else {
+      const todasLigas = await db.collection('ligas').get()
+      for (const docLiga of todasLigas.docs) {
+        resultados.push(await ejecutarGeneracionMercadoParaLiga(docLiga.id))
+      }
+    }
+
+    return { ok: true, resultados }
+  },
+)
+
+/**
+ * Callable — fuerza la resolución de pujas y cierre de un mercado concreto.
+ * Útil para probar todo el flujo de pujas sin esperar al cierre automático.
+ * Acepta `{ idMercado }` (obligatorio).
+ */
+exports.dispararResolucionPujasManual = onCall(
+  { region: 'europe-west1' },
+  async (request) => {
+    await exigirAdministrador(request)
+    const { idMercado } = request.data || {}
+    if (!idMercado) {
+      throw new HttpsError('invalid-argument', 'Falta idMercado.')
+    }
+    const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
+    if (!mercadoSnap.exists) {
+      throw new HttpsError('not-found', `Mercado ${idMercado} no encontrado.`)
+    }
+
+    await resolverPujasMercado(idMercado)
+    await db.collection('mercados').doc(idMercado).update({ estado: 'cerrado' })
+
+    return { ok: true, idMercado, estado: 'cerrado' }
+  },
+)
+
+/**
+ * Callable — dispara el procesamiento de la jornada del último GP finalizado.
+ */
+exports.dispararJornadaSemanalManual = onCall(
+  { region: 'europe-west1' },
+  async (request) => {
+    await exigirAdministrador(request)
+    const resultado = await ejecutarProcesarJornada()
+    return resultado
+  },
+)
