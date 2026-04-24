@@ -24,7 +24,7 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore')
 
 const {
   recopilarDatosGranPremio,
-  obtenerUltimoGranPremioFinalizado,
+  obtenerGranPremiosFinalizados,
 } = require('./servicioOpenF1Server')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacionServer')
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
@@ -89,22 +89,58 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
  * @returns {Promise<Object>} Resumen del resultado.
  */
 async function ejecutarProcesarJornada() {
-  const granPremio = await obtenerUltimoGranPremioFinalizado(TEMPORADA_ACTUAL)
-  if (!granPremio) {
+  // Buscamos el GP más reciente con datos disponibles en OpenF1.
+  // Algunos GPs pueden estar marcados como finalizados pero no tener datos
+  // (cancelados por fuerza mayor, sin /position publicado, etc.). Iteramos
+  // hacia atrás hasta encontrar uno válido o agotar la lista.
+  const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
+  if (candidatos.length === 0) {
     console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
     return { ok: false, motivo: 'sin_gp_finalizado' }
   }
 
-  const idJornada = `gp_${granPremio.meeting_key}`
-  const jornadaExistente = await db.collection('jornadas').doc(idJornada).get()
-  if (jornadaExistente.exists) {
-    console.log(`[Jornada] ${idJornada} ya fue procesada previamente. Omitida.`)
-    return { ok: false, motivo: 'jornada_ya_procesada', idJornada }
+  let granPremio = null
+  let actuacionesPorPiloto = null
+  let condiciones = null
+  const omitidos = []
+
+  for (const candidato of candidatos) {
+    const idCandidato = `gp_${candidato.meeting_key}`
+    const yaProcesada = await db.collection('jornadas').doc(idCandidato).get()
+    if (yaProcesada.exists) {
+      // Si el más reciente con datos ya está procesado, no rebobinamos más.
+      console.log(`[Jornada] ${idCandidato} ya fue procesada previamente. Omitida.`)
+      return { ok: false, motivo: 'jornada_ya_procesada', idJornada: idCandidato }
+    }
+
+    try {
+      const datos = await recopilarDatosGranPremio(candidato.meeting_key)
+      if (!datos.actuacionesPorPiloto || Object.keys(datos.actuacionesPorPiloto).length === 0) {
+        omitidos.push({ meeting_key: candidato.meeting_key, motivo: 'sin_actuaciones' })
+        continue
+      }
+      granPremio = candidato
+      actuacionesPorPiloto = datos.actuacionesPorPiloto
+      condiciones = datos.condiciones
+      break
+    } catch (error) {
+      console.warn(
+        `[Jornada] GP ${candidato.meeting_key} (${candidato.meeting_name}) sin datos en OpenF1: ${error.message}. Probando el anterior.`,
+      )
+      omitidos.push({
+        meeting_key: candidato.meeting_key,
+        nombre: candidato.meeting_name,
+        motivo: error.message,
+      })
+    }
   }
 
-  const { actuacionesPorPiloto, condiciones } = await recopilarDatosGranPremio(
-    granPremio.meeting_key,
-  )
+  if (!granPremio) {
+    console.log('[Jornada] Ningún GP finalizado tiene datos disponibles en OpenF1.')
+    return { ok: false, motivo: 'sin_datos_openf1', omitidos }
+  }
+
+  const idJornada = `gp_${granPremio.meeting_key}`
 
   const todasParticipaciones = await db.collection('participaciones').get()
   const batch = db.batch()

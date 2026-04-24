@@ -33,7 +33,7 @@ const nombreLigaActiva = computed(() => {
       </div>
       <div class="flex items-center gap-2">
         <span class="text-[#F0ECEC] text-xs font-medium uppercase">Presupuesto:</span>
-        <span class="text-[#E10600] font-black text-lg">${{ storeEscuderia.presupuesto || 50 }}M</span>
+        <span class="text-[#E10600] font-black text-lg">${{ (storeEscuderia.presupuesto || 50).toFixed(2) }}M</span>
       </div>
     </div>
   </div>

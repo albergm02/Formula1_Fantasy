@@ -47,18 +47,28 @@ async function consultarOpenF1(ruta) {
  * @returns {Promise<Object|null>} meeting_key, meeting_name, date_start, date_end…
  */
 async function obtenerUltimoGranPremioFinalizado(anio) {
+  const finalizadas = await obtenerGranPremiosFinalizados(anio)
+  return finalizadas.length > 0 ? finalizadas[0] : null
+}
+
+/**
+ * Obtiene TODOS los Grandes Premios finalizados del año, ordenados del más
+ * reciente al más antiguo. Útil para iterar hacia atrás si alguno no tiene
+ * datos disponibles (GP cancelado, sin /position en OpenF1, etc.).
+ * @param {number} anio - Temporada a consultar.
+ * @returns {Promise<Array<Object>>}
+ */
+async function obtenerGranPremiosFinalizados(anio) {
   const reuniones = await consultarOpenF1(`/meetings?year=${anio}`)
   const ahora = new Date()
 
-  const finalizadas = reuniones
+  return reuniones
     .filter(function (reunion) {
       return new Date(reunion.date_end) < ahora
     })
     .sort(function (a, b) {
       return new Date(b.date_end) - new Date(a.date_end)
     })
-
-  return finalizadas.length > 0 ? finalizadas[0] : null
 }
 
 /* ─── 2. Sesiones de un Gran Premio ─────────────────────────────────────── */
@@ -316,6 +326,7 @@ async function recopilarDatosGranPremio(meetingKey) {
 
 module.exports = {
   obtenerUltimoGranPremioFinalizado,
+  obtenerGranPremiosFinalizados,
   obtenerSesiones,
   extraerSesionQualy,
   extraerSesionCarrera,

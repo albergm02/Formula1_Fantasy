@@ -339,7 +339,7 @@ function manejarResetearLiga() {
                 <template #content>
                     <p class="text-sm text-zinc-400 mb-3">
                         Recopila datos de OpenF1, calcula puntos para todas las participaciones y
-                        actualiza la clasificación. Idempotente por GP.
+                        actualiza la clasificación.
                     </p>
                     <Button @click="manejarProcesarJornada" :loading="cargandoJornada" icon="pi pi-bolt"
                         label="Procesar jornada" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
