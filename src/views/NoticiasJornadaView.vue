@@ -10,6 +10,7 @@
  */
 
 import { onMounted, onUnmounted, ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Card from 'primevue/card'
 import Message from 'primevue/message'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -19,6 +20,8 @@ import { suscribirseUltimaJornada } from '@/services/servicioJornada'
 import { pilotosBase } from '@/data/bases/pilotosBase'
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
+import { usarStoreLigas } from '@/stores/storeLigas'
+import { usarStoreEscuderia } from '@/stores/storeEquipo'
 
 const VARIANTES = [
     { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
@@ -29,12 +32,68 @@ const VARIANTES = [
     { id: 'base', etiqueta: 'Base', icono: 'pi-user', color: '#a1a1aa' },
 ]
 
+const EJEMPLOS_VARIANTE = {
+    qualy: {
+        escenario: 'Piloto con base 72 que clasifica P2.',
+        calculo: 'Factor P2 = ×1.45 → 72 × 1.45 = 104,4 pts.',
+    },
+    carrera: {
+        escenario: 'Piloto con base 68 que termina P3.',
+        calculo: 'Factor P3 = ×1.30 → 68 × 1.30 = 88,4 pts.',
+    },
+    todo_terreno: {
+        escenario: 'GP con lluvia, 1 Safety Car y 2 abandonos. Base del piloto 65.',
+        calculo: 'Factor = 1.40 + 0.10 + 0.06 = 1.50 → 65 × 1.50 = 97,5 pts.',
+    },
+    remontador: {
+        escenario: 'Piloto con base 60 que firma 11 adelantamientos y acaba P6.',
+        calculo: 'Factor = 1.30 + 0.025 (P6–P10) = 1.325 → 60 × 1.325 = 79,5 pts.',
+    },
+    estratega: {
+        escenario: 'Piloto con base 70, 1 parada, mejor stint del 50%, termina P5.',
+        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 → 70 × 1.20 = 84 pts.',
+    },
+    base: {
+        escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/TT son 1.20, 1.10 y 1.00.',
+        calculo: 'Factor = (1.20 + 1.10 + 1.00) / 3 = 1.10 → 66 × 1.10 = 72,6 pts.',
+    },
+}
+
 const jornada = ref(null)
 const cargando = ref(true)
 const pilotoExpandido = ref(null)
+const guiaAbierta = ref(false)
+const varianteGuiaExpandida = ref(null)
 let cancelarSuscripcion = null
 
-onMounted(() => {
+const ruta = useRoute()
+const storeLigas = usarStoreLigas()
+const storeEscuderia = usarStoreEscuderia()
+
+function alternarGuia() {
+    guiaAbierta.value = !guiaAbierta.value
+}
+
+function alternarVarianteGuia(id) {
+    varianteGuiaExpandida.value = varianteGuiaExpandida.value === id ? null : id
+}
+
+function obtenerReglasVariante(id) {
+    return perfilesPuntuacion[id]?.reglasUsuario || []
+}
+
+function obtenerEjemploVariante(id) {
+    return EJEMPLOS_VARIANTE[id] || null
+}
+
+onMounted(async () => {
+    const idLiga = ruta.query.liga || storeLigas.idLigaActiva
+    if (idLiga) {
+        storeLigas.idLigaActiva = idLiga
+        if (!storeEscuderia.idLigaActiva) {
+            await storeEscuderia.cargarEquipo(idLiga)
+        }
+    }
     cancelarSuscripcion = suscribirseUltimaJornada((datos) => {
         jornada.value = datos
         cargando.value = false
@@ -157,8 +216,70 @@ function formatearPorcentaje(valor) {
                 cómo ha puntuado cada piloto.
             </Message>
 
+            <!-- Guía de puntuación por clase -->
+            <div v-if="!cargando" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
+                <button type="button" @click="alternarGuia"
+                    class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left hover:bg-[#1F1F25] transition-colors">
+                    <i class="pi pi-book text-[#D4A843] text-base"></i>
+                    <div class="flex-1 flex flex-col">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                            Guía rápida
+                        </span>
+                        <span class="text-sm font-bold text-white">
+                            Cómo puntúa cada clase de carta
+                        </span>
+                    </div>
+                    <i class="pi text-zinc-500 text-xs" :class="guiaAbierta ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                </button>
+
+                <div v-if="guiaAbierta" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-2">
+                    <p class="text-[11px] text-zinc-400 leading-relaxed">
+                        Cada carta tiene una <span class="text-white font-bold">puntuación base</span>
+                        (suma ponderada de los atributos del piloto) y un
+                        <span class="text-white font-bold">factor de jornada</span> que depende de cómo le
+                        fue al piloto en este Gran Premio. Los puntos finales son
+                        <span class="text-white font-bold">base × factor</span>.
+                    </p>
+
+                    <div v-for="variante in VARIANTES" :key="variante.id"
+                        class="bg-[#121218] border border-zinc-800 overflow-hidden">
+                        <button type="button" @click="alternarVarianteGuia(variante.id)"
+                            class="w-full flex items-center gap-3 p-2.5 cursor-pointer bg-transparent border-none text-left hover:bg-[#1A1A20] transition-colors">
+                            <i class="pi text-base" :class="variante.icono" :style="{ color: variante.color }"></i>
+                            <span class="flex-1 text-xs font-bold text-white">{{ variante.etiqueta }}</span>
+                            <i class="pi text-zinc-500 text-[10px]"
+                                :class="varianteGuiaExpandida === variante.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                        </button>
+
+                        <div v-if="varianteGuiaExpandida === variante.id"
+                            class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
+                            <ul class="flex flex-col gap-0.5 list-none p-0 m-0">
+                                <li v-for="(regla, idx) in obtenerReglasVariante(variante.id)" :key="idx"
+                                    class="text-[11px] text-zinc-300 leading-snug">
+                                    {{ regla }}
+                                </li>
+                            </ul>
+                            <div v-if="obtenerEjemploVariante(variante.id)"
+                                class="flex flex-col gap-1 p-2 bg-[#1A1A1F] border-l-2"
+                                :style="{ borderColor: variante.color }">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                                    Ejemplo
+                                </span>
+                                <span class="text-[11px] text-zinc-300 leading-snug">
+                                    {{ obtenerEjemploVariante(variante.id).escenario }}
+                                </span>
+                                <span class="text-[11px] font-bold leading-snug" :style="{ color: variante.color }">
+                                    {{ obtenerEjemploVariante(variante.id).calculo }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Resumen del GP -->
-            <Card v-else :pt="{ root: { class: 'bg-[#1A1A1F] border border-zinc-800' }, body: { class: 'p-4' } }">
+            <Card v-if="hayJornada"
+                :pt="{ root: { class: 'bg-[#1A1A1F] border border-zinc-800' }, body: { class: 'p-4' } }">
                 <template #content>
                     <div class="flex items-center gap-3">
                         <i class="pi pi-flag-fill text-[#E10600] text-xl"></i>
@@ -197,8 +318,9 @@ function formatearPorcentaje(valor) {
                         <span class="w-10 text-center text-2xl font-black text-[#D4A843] tabular-nums">
                             {{ formatearPosicion(piloto.actuacion.posicionCarrera) }}
                         </span>
-                        <img :src="piloto.imagen" :alt="piloto.nombre"
-                            class="w-12 h-12 object-cover rounded-full bg-[#121218] border border-zinc-800" />
+                        <div class="w-20 h-14 overflow-hidden bg-black border border-zinc-700 shrink-0">
+                            <img :src="piloto.imagen" :alt="piloto.nombre" class="w-full h-full object-cover block" />
+                        </div>
                         <div class="flex-1 flex flex-col gap-0.5">
                             <span class="text-sm font-bold text-white">{{ piloto.nombre }}</span>
                             <span class="text-[10px] uppercase tracking-wider text-zinc-500">
