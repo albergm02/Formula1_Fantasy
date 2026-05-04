@@ -30,20 +30,20 @@ const calcularPrecioPorPuntuacion = (
 
 // prettier-ignore
 const variantesPiloto = [
-  { variante: 'qualy',        perfil: 'qualy',        incrementoPrecio: 0, nombreHabilidad: 'Especialista en Qualy',      color: '#38bdf8', icono: 'pi-stopwatch'  },
-  { variante: 'carrera',      perfil: 'carrera',      incrementoPrecio: 0, nombreHabilidad: 'Especialista en Carrera',    color: '#f97316', icono: 'pi-flag-fill'  },
-  { variante: 'todo_terreno', perfil: 'todo_terreno', incrementoPrecio: 0, nombreHabilidad: 'Especialista Todo Terreno', color: '#a78bfa', icono: 'pi-cloud'      },
-  { variante: 'base',         perfil: 'base',         incrementoPrecio: 0, nombreHabilidad: 'Piloto Base',               color: '#a1a1aa', icono: 'pi-user'       },
-  { variante: 'remontador',   perfil: 'remontador',   incrementoPrecio: 0, nombreHabilidad: 'Remontador',               color: '#ef4444', icono: 'pi-arrow-up'   },
-  { variante: 'estratega',    perfil: 'estratega',    incrementoPrecio: 0, nombreHabilidad: 'Estratega',                color: '#10b981', icono: 'pi-chart-bar'  },
+  { variante: 'qualy',        perfil: 'qualy',        nombreHabilidad: 'Especialista en Qualy',      color: '#38bdf8', icono: 'pi-stopwatch'  },
+  { variante: 'carrera',      perfil: 'carrera',      nombreHabilidad: 'Especialista en Carrera',    color: '#f97316', icono: 'pi-flag-fill'  },
+  { variante: 'todo_terreno', perfil: 'todo_terreno', nombreHabilidad: 'Especialista Todo Terreno', color: '#a78bfa', icono: 'pi-cloud'      },
+  { variante: 'base',         perfil: 'base',         nombreHabilidad: 'Piloto Base',               color: '#a1a1aa', icono: 'pi-user'       },
+  { variante: 'remontador',   perfil: 'remontador',   nombreHabilidad: 'Remontador',               color: '#ef4444', icono: 'pi-arrow-up'   },
+  { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega',                color: '#10b981', icono: 'pi-chart-bar'  },
 ]
 
 /**
  * Crea una carta de piloto a partir del catalogo base y una variante de puntuacion.
  * La puntuacion base se calcula con los atributos del piloto y los pesos de la variante.
- * El precio se ajusta segun el incremento definido en la variante.
- * @param {Object} pilotoBase - Datos base del piloto (numero, nombre, equipo, precioBase, imagen, atributos)
- * @param {Object} variante - Variante de puntuacion (variante, perfil, incrementoPrecio, nombreHabilidad, color, icono)
+ * El precio definitivo se asigna posteriormente por interpolacion sobre la puntuacion.
+ * @param {Object} pilotoBase - Datos base del piloto (numero, nombre, equipo, imagen, atributos)
+ * @param {Object} variante - Variante de puntuacion (variante, perfil, nombreHabilidad, color, icono)
  * @returns {Object} Carta de piloto con datos combinados y puntuacion base calculada
  */
 const crearCartaPiloto = (pilotoBase, variante) => {
@@ -56,7 +56,6 @@ const crearCartaPiloto = (pilotoBase, variante) => {
     numero: pilotoBase.numero,
     nombre: pilotoBase.nombre,
     equipo: pilotoBase.equipo,
-    precio: Number((pilotoBase.precioBase + variante.incrementoPrecio).toFixed(1)),
     imagen: pilotoBase.imagen,
     tipoCarta: 'piloto',
     variante: variante.variante,

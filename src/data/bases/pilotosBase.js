@@ -1,46 +1,46 @@
 // prettier-ignore
 export const pilotosBase = [
   /* ══════════ McLAREN ══════════ */
-  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren',      precioBase: 26.0, imagen: '/Pilotos/norris.webp',     atributos: { ritmo: 93, consistencia: 83, adaptabilidad: 82, agresividad: 64, gestion: 82 } },
-  { numero: 81, nombre: 'Oscar Piastri',     equipo: 'McLaren',      precioBase: 24.0, imagen: '/Pilotos/piastri.webp',    atributos: { ritmo: 86, consistencia: 87, adaptabilidad: 78, agresividad: 83, gestion: 80 } },
+  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren', imagen: '/Pilotos/norris.webp',     atributos: { ritmo: 96, consistencia: 88, adaptabilidad: 87, agresividad: 72, gestion: 87 } },
+  { numero: 81, nombre: 'Oscar Piastri',     equipo: 'McLaren', imagen: '/Pilotos/piastri.webp',    atributos: { ritmo: 86, consistencia: 87, adaptabilidad: 76, agresividad: 84, gestion: 80 } },
 
   /* ══════════ RED BULL ══════════ */
-  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull',     precioBase: 25.0, imagen: '/Pilotos/verstappen.webp', atributos: { ritmo: 90, consistencia: 90, adaptabilidad: 88, agresividad: 98, gestion: 72 } },
-  { numero:  6, nombre: 'Isack Hadjar',      equipo: 'Red Bull',     precioBase: 15.0, imagen: '/Pilotos/hadjar.webp',     atributos: { ritmo: 75, consistencia: 70, adaptabilidad: 72, agresividad: 64, gestion: 68 } },
+  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull', imagen: '/Pilotos/verstappen.webp', atributos: { ritmo: 90, consistencia: 90, adaptabilidad: 88, agresividad: 98, gestion: 64 } },
+  { numero:  6, nombre: 'Isack Hadjar',      equipo: 'Red Bull', imagen: '/Pilotos/hadjar.webp',     atributos: { ritmo: 70, consistencia: 60, adaptabilidad: 64, agresividad: 52, gestion: 56 } },
 
   /* ══════════ FERRARI ══════════ */
-  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari',      precioBase: 24.0, imagen: '/Pilotos/leclerc.webp',    atributos: { ritmo: 96, consistencia: 78, adaptabilidad: 80, agresividad: 87, gestion: 70 } },
-  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari',      precioBase: 23.0, imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 76, consistencia: 88, adaptabilidad: 90, agresividad: 81, gestion: 93 } },
+  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari', imagen: '/Pilotos/leclerc.webp',    atributos: { ritmo: 96, consistencia: 72, adaptabilidad: 78, agresividad: 88, gestion: 58 } },
+  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari', imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 70, consistencia: 88, adaptabilidad: 90, agresividad: 78, gestion: 93 } },
 
   /* ══════════ MERCEDES ══════════ */
-  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes',     precioBase: 22.0, imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 92, consistencia: 90, adaptabilidad: 70, agresividad: 69, gestion: 90 } },
-  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes',     precioBase: 20.0, imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 89, consistencia: 81, adaptabilidad: 87, agresividad: 86, gestion: 72 } },
+  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes', imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 92, consistencia: 90, adaptabilidad: 60, agresividad: 56, gestion: 90 } },
+  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes', imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 93, consistencia: 86, adaptabilidad: 90, agresividad: 88, gestion: 78 } },
 
   /* ══════════ ASTON MARTIN ══════════ */
-  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', precioBase: 19.0, imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 85, consistencia: 87, adaptabilidad: 75, agresividad: 89, gestion: 96 } },
-  { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', precioBase: 13.0, imagen: '/Pilotos/stroll.webp',     atributos: { ritmo: 62, consistencia: 58, adaptabilidad: 72, agresividad: 81, gestion: 62 } },
+  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 82, consistencia: 87, adaptabilidad: 66, agresividad: 89, gestion: 96 } },
+  { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', imagen: '/Pilotos/stroll.webp',     atributos: { ritmo: 50, consistencia: 42, adaptabilidad: 58, agresividad: 78, gestion: 46 } },
 
   /* ══════════ WILLIAMS ══════════ */
-  { numero: 55, nombre: 'Carlos Sainz',      equipo: 'Williams',     precioBase: 17.0, imagen: '/Pilotos/sainz.webp',      atributos: { ritmo: 81, consistencia: 66, adaptabilidad: 82, agresividad: 70, gestion: 88 } },
-  { numero: 23, nombre: 'Alexander Albon',   equipo: 'Williams',     precioBase: 15.0, imagen: '/Pilotos/albon.webp',      atributos: { ritmo: 85, consistencia: 69, adaptabilidad: 78, agresividad: 78, gestion: 66 } },
+  { numero: 55, nombre: 'Carlos Sainz',      equipo: 'Williams', imagen: '/Pilotos/sainz.webp',      atributos: { ritmo: 80, consistencia: 54, adaptabilidad: 82, agresividad: 60, gestion: 88 } },
+  { numero: 23, nombre: 'Alexander Albon',   equipo: 'Williams', imagen: '/Pilotos/albon.webp',      atributos: { ritmo: 84, consistencia: 56, adaptabilidad: 76, agresividad: 76, gestion: 50 } },
 
   /* ══════════ HAAS ══════════ */
-  { numero: 31, nombre: 'Esteban Ocon',      equipo: 'Haas',         precioBase: 14.0, imagen: '/Pilotos/ocon.webp',       atributos: { ritmo: 62, consistencia: 66, adaptabilidad: 80, agresividad: 94, gestion: 61 } },
-  { numero: 87, nombre: 'Oliver Bearman',    equipo: 'Haas',         precioBase: 13.0, imagen: '/Pilotos/bearman.webp',    atributos: { ritmo: 68, consistencia: 62, adaptabilidad: 70, agresividad: 70, gestion: 60 } },
+  { numero: 31, nombre: 'Esteban Ocon',      equipo: 'Haas', imagen: '/Pilotos/ocon.webp',       atributos: { ritmo: 50, consistencia: 54, adaptabilidad: 78, agresividad: 94, gestion: 44 } },
+  { numero: 87, nombre: 'Oliver Bearman',    equipo: 'Haas', imagen: '/Pilotos/bearman.webp',    atributos: { ritmo: 58, consistencia: 48, adaptabilidad: 60, agresividad: 60, gestion: 44 } },
 
   /* ══════════ AUDI ══════════ */
-  { numero: 27, nombre: 'Nico Hulkenberg',   equipo: 'Audi',         precioBase: 13.0, imagen: '/Pilotos/hulkenberg.webp', atributos: { ritmo: 72, consistencia: 82, adaptabilidad: 68, agresividad: 66, gestion: 68 } },
-  { numero:  5, nombre: 'Gabriel Bortoleto', equipo: 'Audi',         precioBase: 12.0, imagen: '/Pilotos/bortoleto.webp',  atributos: { ritmo: 70, consistencia: 58, adaptabilidad: 72, agresividad: 64, gestion: 56 } },
+  { numero: 27, nombre: 'Nico Hulkenberg',   equipo: 'Audi', imagen: '/Pilotos/hulkenberg.webp', atributos: { ritmo: 64, consistencia: 82, adaptabilidad: 56, agresividad: 54, gestion: 56 } },
+  { numero:  5, nombre: 'Gabriel Bortoleto', equipo: 'Audi', imagen: '/Pilotos/bortoleto.webp',  atributos: { ritmo: 56, consistencia: 42, adaptabilidad: 64, agresividad: 50, gestion: 40 } },
 
   /* ══════════ ALPINE ══════════ */
-  { numero: 10, nombre: 'Pierre Gasly',      equipo: 'Alpine',       precioBase: 13.0, imagen: '/Pilotos/gasly.webp',      atributos: { ritmo: 76, consistencia: 78, adaptabilidad: 72, agresividad: 70, gestion: 72 } },
-  { numero: 43, nombre: 'Franco Colapinto',  equipo: 'Alpine',       precioBase: 14.0, imagen: '/Pilotos/colapinto.webp',  atributos: { ritmo: 68, consistencia: 55, adaptabilidad: 78, agresividad: 72, gestion: 55 } },
+  { numero: 10, nombre: 'Pierre Gasly',      equipo: 'Alpine', imagen: '/Pilotos/gasly.webp',      atributos: { ritmo: 72, consistencia: 76, adaptabilidad: 64, agresividad: 60, gestion: 64 } },
+  { numero: 43, nombre: 'Franco Colapinto',  equipo: 'Alpine', imagen: '/Pilotos/colapinto.webp',  atributos: { ritmo: 54, consistencia: 40, adaptabilidad: 76, agresividad: 68, gestion: 40 } },
 
   /* ══════════ RACING BULLS ══════════ */
-  { numero: 30, nombre: 'Liam Lawson',       equipo: 'Racing Bulls', precioBase: 12.0, imagen: '/Pilotos/lawson.webp',     atributos: { ritmo: 72, consistencia: 65, adaptabilidad: 74, agresividad: 68, gestion: 64 } },
-  { numero: 41, nombre: 'Arvid Lindblad',    equipo: 'Racing Bulls', precioBase: 11.0, imagen: '/Pilotos/lindblad.webp',   atributos: { ritmo: 68, consistencia: 52, adaptabilidad: 70, agresividad: 60, gestion: 52 } },
+  { numero: 30, nombre: 'Liam Lawson',       equipo: 'Racing Bulls', imagen: '/Pilotos/lawson.webp',     atributos: { ritmo: 64, consistencia: 50, adaptabilidad: 66, agresividad: 56, gestion: 48 } },
+  { numero: 41, nombre: 'Arvid Lindblad',    equipo: 'Racing Bulls', imagen: '/Pilotos/lindblad.webp',   atributos: { ritmo: 54, consistencia: 40, adaptabilidad: 60, agresividad: 46, gestion: 40 } },
 
   /* ══════════ CADILLAC ══════════ */
-  { numero: 11, nombre: 'Sergio Perez',      equipo: 'Cadillac',     precioBase: 11.0, imagen: '/Pilotos/perez.webp',      atributos: { ritmo: 65, consistencia: 70, adaptabilidad: 75, agresividad: 65, gestion: 74 } },
-  { numero: 77, nombre: 'Valtteri Bottas',   equipo: 'Cadillac',     precioBase: 10.0, imagen: '/Pilotos/bottas.webp',     atributos: { ritmo: 64, consistencia: 78, adaptabilidad: 62, agresividad: 52, gestion: 85 } },
+  { numero: 11, nombre: 'Sergio Perez',      equipo: 'Cadillac', imagen: '/Pilotos/perez.webp',      atributos: { ritmo: 54, consistencia: 64, adaptabilidad: 72, agresividad: 54, gestion: 72 } },
+  { numero: 77, nombre: 'Valtteri Bottas',   equipo: 'Cadillac', imagen: '/Pilotos/bottas.webp',     atributos: { ritmo: 50, consistencia: 76, adaptabilidad: 46, agresividad: 40, gestion: 85 } },
 ]
