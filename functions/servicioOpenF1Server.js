@@ -31,6 +31,13 @@ async function consultarOpenF1(ruta) {
       continue
     }
 
+    // OpenF1 responde 404 con `{ detail: 'No results found.' }` cuando una
+    // consulta no produce registros (en lugar de un array vacío). Lo tratamos
+    // como ausencia de datos para que el llamador decida cómo continuar.
+    if (respuesta.status === 404) {
+      return []
+    }
+
     if (!respuesta.ok) {
       throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
     }
@@ -109,19 +116,20 @@ function extraerSesionCarrera(sesiones) {
 /* ─── 3. Resultados de sesión ───────────────────────────────────────────── */
 
 /**
- * Obtiene los resultados finales de una sesión.
- * Devuelve un mapa { numeroPiloto → posicion }.
+ * Obtiene los resultados oficiales de una sesión usando el endpoint dedicado
+ * `/session_result` de OpenF1, que publica las posiciones finales tras la
+ * sesión (con sanciones, DNF, DNS y DSQ aplicados). Reemplaza al obsoleto
+ * uso de `/position`, que emite eventos en vivo y no garantiza el orden.
  * @param {number} sessionKey - Clave de la sesión.
- * @returns {Promise<Object>} Ej: { 1: 2, 44: 5, … }
+ * @returns {Promise<Object>} Mapa { numeroPiloto → posicionFinal }.
  */
 async function obtenerResultadosSesion(sessionKey) {
-  const resultados = await consultarOpenF1(`/position?session_key=${sessionKey}`)
+  const resultados = await consultarOpenF1(`/session_result?session_key=${sessionKey}`)
   const posicionFinal = {}
 
   for (const entrada of resultados) {
     const numero = entrada.driver_number
     const posicion = entrada.position
-
     if (numero != null && posicion != null) {
       posicionFinal[numero] = posicion
     }
@@ -130,29 +138,33 @@ async function obtenerResultadosSesion(sessionKey) {
   return posicionFinal
 }
 
+/**
+ * Obtiene los registros completos de `/session_result` (incluye dnf, dns, dsq,
+ * duración, número de vueltas) para análisis avanzado de la sesión.
+ * @param {number} sessionKey - Clave de la sesión.
+ * @returns {Promise<Array<Object>>}
+ */
+async function obtenerResultadosCompletosSesion(sessionKey) {
+  return consultarOpenF1(`/session_result?session_key=${sessionKey}`)
+}
+
 /* ─── 4. Parrilla de salida ─────────────────────────────────────────────── */
 
 /**
- * Obtiene las posiciones de salida de una sesión de carrera.
- * Devuelve un mapa { numeroPiloto → posicionSalida }.
+ * Obtiene la parrilla oficial de salida de una carrera usando el endpoint
+ * dedicado `/starting_grid` de OpenF1, que devuelve directamente la posición
+ * de cada piloto al apagado de luces (con sanciones aplicadas).
  * @param {number} sessionKey - Clave de la sesión de carrera.
- * @returns {Promise<Object>} Ej: { 1: 3, 44: 1, … }
+ * @returns {Promise<Object>} Mapa { numeroPiloto → posicionSalida }.
  */
 async function obtenerParrillaSalida(sessionKey) {
-  const posiciones = await consultarOpenF1(`/position?session_key=${sessionKey}`)
+  const entradas = await consultarOpenF1(`/starting_grid?session_key=${sessionKey}`)
   const parrilla = {}
 
-  const primerasPosiciones = {}
-  for (const entrada of posiciones) {
+  for (const entrada of entradas) {
     const numero = entrada.driver_number
-    if (numero != null && primerasPosiciones[numero] == null) {
-      primerasPosiciones[numero] = entrada.position
-    }
-  }
-
-  for (const numero in primerasPosiciones) {
-    if (Object.prototype.hasOwnProperty.call(primerasPosiciones, numero)) {
-      parrilla[numero] = primerasPosiciones[numero]
+    if (numero != null && entrada.position != null) {
+      parrilla[numero] = entrada.position
     }
   }
 
@@ -172,6 +184,7 @@ async function obtenerParrillaSalida(sessionKey) {
 async function obtenerCondicionesCarrera(sessionKey) {
   const datosClima = await consultarOpenF1(`/weather?session_key=${sessionKey}`)
   const datosControlCarrera = await consultarOpenF1(`/race_control?session_key=${sessionKey}`)
+  const resultadosCompletos = await obtenerResultadosCompletosSesion(sessionKey)
 
   const llovio = datosClima.some(function (lectura) {
     return lectura.rainfall === true || lectura.rainfall === 1
@@ -179,21 +192,32 @@ async function obtenerCondicionesCarrera(sessionKey) {
 
   let numeroSafetyCarActivos = 0
   let numeroVirtualSafetyCarActivos = 0
-  let numeroDNFs = 0
 
   for (const mensaje of datosControlCarrera) {
     const categoria = (mensaje.category || '').toUpperCase()
     const flag = (mensaje.flag || '').toUpperCase()
+    const texto = (mensaje.message || '').toUpperCase()
 
-    if (categoria === 'SAFETYCAR' || flag === 'SAFETY CAR') {
+    if (
+      categoria === 'SAFETYCAR' ||
+      flag === 'SAFETY CAR' ||
+      texto.includes('SAFETY CAR DEPLOYED')
+    ) {
       numeroSafetyCarActivos++
     }
-
-    if (categoria === 'VIRTUALSAFETYCAR' || flag === 'VIRTUAL SAFETY CAR') {
+    if (
+      categoria === 'VIRTUALSAFETYCAR' ||
+      flag === 'VIRTUAL SAFETY CAR' ||
+      texto.includes('VIRTUAL SAFETY CAR DEPLOYED')
+    ) {
       numeroVirtualSafetyCarActivos++
     }
+  }
 
-    if (categoria === 'RETIREMENT' || categoria === 'RETIRED') {
+  // DNFs oficiales desde /session_result (más fiable que parsear race_control).
+  let numeroDNFs = 0
+  for (const fila of resultadosCompletos) {
+    if (fila.dnf === true || fila.dns === true || fila.dsq === true) {
       numeroDNFs++
     }
   }
@@ -266,9 +290,7 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
     }
 
     const porcentajeStintMaximo =
-      vueltasTotalPiloto > 0 ?
-        Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 :
-        0.5
+      vueltasTotalPiloto > 0 ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 : 0.5
 
     resultado[numero] = { numeroPitStops, porcentajeStintMaximo }
   }
@@ -296,7 +318,7 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const resultadosQualy = sesionQualy ? await obtenerResultadosSesion(sesionQualy.session_key) : {}
   const resultadosCarrera = await obtenerResultadosSesion(sesionCarrera.session_key)
-  const parrillaSalida = await obtenerParrillaSalida(sesionCarrera.session_key)
+  const parrillaSalida = sesionQualy ? await obtenerParrillaSalida(sesionQualy.session_key) : {}
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
   const adelantamientos = await obtenerAdelantamientosPorPiloto(sesionCarrera.session_key)
   const datosStints = await obtenerDatosStintsPorPiloto(sesionCarrera.session_key)
@@ -331,6 +353,7 @@ module.exports = {
   extraerSesionQualy,
   extraerSesionCarrera,
   obtenerResultadosSesion,
+  obtenerResultadosCompletosSesion,
   obtenerParrillaSalida,
   obtenerCondicionesCarrera,
   obtenerAdelantamientosPorPiloto,

@@ -136,13 +136,16 @@ async function manejarProcesarJornada(opciones = {}) {
                 life: 5000,
             })
         } else {
+            const motivos = {
+                jornada_ya_procesada: 'La jornada ya se procesó previamente.',
+                sin_gp_finalizado: 'No hay Gran Premio finalizado en la temporada actual.',
+                sin_datos_openf1: `Ningún GP finalizado tiene datos en OpenF1 todavía. Omitidos: ${(datos.omitidos || []).map(o => o.nombre || o.meeting_key).join(', ') || 'ninguno'}.`,
+            }
             toast.add({
                 severity: 'info',
                 summary: 'Sin cambios',
-                detail: datos.motivo === 'jornada_ya_procesada'
-                    ? 'La jornada ya se procesó previamente.'
-                    : 'No hay Gran Premio finalizado.',
-                life: 4000,
+                detail: motivos[datos.motivo] || `Motivo desconocido: ${datos.motivo}`,
+                life: 8000,
             })
         }
     } catch (error) {
