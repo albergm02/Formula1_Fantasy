@@ -43,6 +43,17 @@ const TEMPORADA_ACTUAL = 2026
 /* ─── Utilidades internas ───────────────────────────────────────────────── */
 
 /**
+ * Convierte la puntuación total de una jornada en un premio económico (en M).
+ * Conversión: 10 puntos equivalen a 1M (108 pts → 10.8M).
+ * @param {number} puntosJornada - Puntos obtenidos por el participante en la jornada.
+ * @returns {number} Premio en millones, redondeado a un decimal.
+ */
+function calcularPremioJornada(puntosJornada) {
+  const premio = (puntosJornada || 0) / 10
+  return Math.round(premio * 10) / 10
+}
+
+/**
  * Extrae el número de piloto y la variante a partir del ID de carta.
  * @param {string} idCarta - Ej: '1_qualy', '44_carrera', '3_todo_terreno'.
  * @returns {{ numero: string, variante: string }}
@@ -86,9 +97,15 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
 /**
  * Lógica pura del procesamiento de jornada. Reutilizable desde el schedule
  * y desde el callable manual (botón de admin).
+ * @param {Object} [opciones]
+ * @param {boolean} [opciones.forzar=false] - Si true, reprocesa el último GP
+ *        aunque ya exista en `jornadas`, revirtiendo los puntos y premio
+ *        previos antes de aplicar los nuevos. Útil para testing.
  * @returns {Promise<Object>} Resumen del resultado.
  */
-async function ejecutarProcesarJornada() {
+async function ejecutarProcesarJornada(opciones = {}) {
+  const { forzar = false } = opciones
+
   // Buscamos el GP más reciente con datos disponibles en OpenF1.
   // Algunos GPs pueden estar marcados como finalizados pero no tener datos
   // (cancelados por fuerza mayor, sin /position publicado, etc.). Iteramos
@@ -107,7 +124,7 @@ async function ejecutarProcesarJornada() {
   for (const candidato of candidatos) {
     const idCandidato = `gp_${candidato.meeting_key}`
     const yaProcesada = await db.collection('jornadas').doc(idCandidato).get()
-    if (yaProcesada.exists) {
+    if (yaProcesada.exists && !forzar) {
       // Si el más reciente con datos ya está procesado, no rebobinamos más.
       console.log(`[Jornada] ${idCandidato} ya fue procesada previamente. Omitida.`)
       return { ok: false, motivo: 'jornada_ya_procesada', idJornada: idCandidato }
@@ -159,8 +176,11 @@ async function ejecutarProcesarJornada() {
       continue
     }
 
-    const { factores: factoresPorPiloto, detalles: detallesPorPiloto } =
-      construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
+    const { factores: factoresPorPiloto, detalles: detallesPorPiloto } = construirFactoresPorPiloto(
+      pilotosEquipados,
+      actuacionesPorPiloto,
+      condiciones,
+    )
 
     const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
 
@@ -175,12 +195,23 @@ async function ejecutarProcesarJornada() {
     const { multiplicadorTotal } = calcularSinergias(garaje)
     const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
 
-    const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
+    const reprocesoMismoGP =
+      forzar &&
+      participacion.ultimaJornada &&
+      participacion.ultimaJornada.nombreGranPremio === granPremio.meeting_name
+    const puntosPrevios = reprocesoMismoGP ? participacion.ultimaJornada.puntosJornada || 0 : 0
+    const premioPrevio = reprocesoMismoGP ? participacion.ultimaJornada.premioJornada || 0 : 0
+
+    const puntosAcumulados = (participacion.puntos || 0) - puntosPrevios + puntosJornada
+    const premioJornada = calcularPremioJornada(puntosJornada)
+    const presupuestoActualizado =
+      Math.round(((participacion.presupuesto || 0) - premioPrevio + premioJornada) * 100) / 100
 
     const desgloseParticipante = {
       nombreGranPremio: granPremio.meeting_name,
       fechaProcesamiento: new Date().toISOString(),
       puntosJornada,
+      premioJornada,
       multiplicadorSinergia: multiplicadorTotal,
       condiciones,
       desglose: resultadoGaraje.desglose,
@@ -188,6 +219,7 @@ async function ejecutarProcesarJornada() {
 
     batch.update(documento.ref, {
       puntos: puntosAcumulados,
+      presupuesto: presupuestoActualizado,
       ultimaJornada: desgloseParticipante,
     })
 
@@ -197,6 +229,8 @@ async function ejecutarProcesarJornada() {
       idLiga: participacion.id_liga,
       puntosJornada,
       puntosAcumulados,
+      premioJornada,
+      presupuesto: presupuestoActualizado,
       multiplicadorSinergia: multiplicadorTotal,
       desglose: resultadoGaraje.desglose,
     })
@@ -211,6 +245,7 @@ async function ejecutarProcesarJornada() {
     temporada: TEMPORADA_ACTUAL,
     participacionesProcesadas,
     condiciones,
+    actuacionesPorPiloto,
     desglose: desgloseJornada,
   })
 
@@ -453,11 +488,7 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
       }
     }
     /* Modo forzado: borrar mercado existente y sus pujas antes de regenerar */
-    const pujasSnap = await db
-      .collection('mercados')
-      .doc(idMercadoHoy)
-      .collection('pujas')
-      .get()
+    const pujasSnap = await db.collection('mercados').doc(idMercadoHoy).collection('pujas').get()
     const batchBorrado = db.batch()
     pujasSnap.docs.forEach((doc) => batchBorrado.delete(doc.ref))
     batchBorrado.delete(mercadoExistente.ref)
@@ -554,63 +585,55 @@ async function exigirAdministrador(request) {
  * Callable — dispara la generación del mercado diario.
  * Acepta `{ idLiga }` opcional. Sin idLiga, procesa todas las ligas.
  */
-exports.dispararMercadoDiarioManual = onCall(
-  { region: 'europe-west1' },
-  async (request) => {
-    await exigirAdministrador(request)
-    const { idLiga, forzar = false } = request.data || {}
-    const opciones = { forzar }
-    const resultados = []
+exports.dispararMercadoDiarioManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { idLiga, forzar = false } = request.data || {}
+  const opciones = { forzar }
+  const resultados = []
 
-    if (idLiga) {
-      resultados.push(await ejecutarGeneracionMercadoParaLiga(idLiga, opciones))
-    } else {
-      const todasLigas = await db.collection('ligas').get()
-      for (const docLiga of todasLigas.docs) {
-        resultados.push(await ejecutarGeneracionMercadoParaLiga(docLiga.id, opciones))
-      }
+  if (idLiga) {
+    resultados.push(await ejecutarGeneracionMercadoParaLiga(idLiga, opciones))
+  } else {
+    const todasLigas = await db.collection('ligas').get()
+    for (const docLiga of todasLigas.docs) {
+      resultados.push(await ejecutarGeneracionMercadoParaLiga(docLiga.id, opciones))
     }
+  }
 
-    return { ok: true, resultados }
-  },
-)
+  return { ok: true, resultados }
+})
 
 /**
  * Callable — fuerza la resolución de pujas y cierre de un mercado concreto.
  * Útil para probar todo el flujo de pujas sin esperar al cierre automático.
  * Acepta `{ idMercado }` (obligatorio).
  */
-exports.dispararResolucionPujasManual = onCall(
-  { region: 'europe-west1' },
-  async (request) => {
-    await exigirAdministrador(request)
-    const { idMercado } = request.data || {}
-    if (!idMercado) {
-      throw new HttpsError('invalid-argument', 'Falta idMercado.')
-    }
-    const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
-    if (!mercadoSnap.exists) {
-      throw new HttpsError('not-found', `Mercado ${idMercado} no encontrado.`)
-    }
+exports.dispararResolucionPujasManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { idMercado } = request.data || {}
+  if (!idMercado) {
+    throw new HttpsError('invalid-argument', 'Falta idMercado.')
+  }
+  const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
+  if (!mercadoSnap.exists) {
+    throw new HttpsError('not-found', `Mercado ${idMercado} no encontrado.`)
+  }
 
-    await resolverPujasMercado(idMercado)
-    await db.collection('mercados').doc(idMercado).update({ estado: 'cerrado' })
+  await resolverPujasMercado(idMercado)
+  await db.collection('mercados').doc(idMercado).update({ estado: 'cerrado' })
 
-    return { ok: true, idMercado, estado: 'cerrado' }
-  },
-)
+  return { ok: true, idMercado, estado: 'cerrado' }
+})
 
 /**
  * Callable — dispara el procesamiento de la jornada del último GP finalizado.
  */
-exports.dispararJornadaSemanalManual = onCall(
-  { region: 'europe-west1' },
-  async (request) => {
-    await exigirAdministrador(request)
-    const resultado = await ejecutarProcesarJornada()
-    return resultado
-  },
-)
+exports.dispararJornadaSemanalManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { forzar = false } = request.data || {}
+  const resultado = await ejecutarProcesarJornada({ forzar })
+  return resultado
+})
 
 /**
  * Callable — RESET COMPLETO de una liga (solo testing).
@@ -622,104 +645,92 @@ exports.dispararJornadaSemanalManual = onCall(
  * También borra todos los mercados y pujas de esa liga, y la actividad asociada.
  * Acepta `{ idLiga }` (obligatorio).
  */
-exports.resetearLigaManual = onCall(
-  { region: 'europe-west1' },
-  async (request) => {
-    await exigirAdministrador(request)
-    const { idLiga } = request.data || {}
-    if (!idLiga) {
-      throw new HttpsError('invalid-argument', 'Falta idLiga.')
+exports.resetearLigaManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+
+  const garajeVacio = { coches: [], pilotos: [], potenciadores: [], ruedas: null }
+  const batch = db.batch()
+
+  /* 1. Reset de participaciones de la liga */
+  const participacionesSnap = await db
+    .collection('participaciones')
+    .where('id_liga', '==', idLiga)
+    .get()
+
+  for (const doc of participacionesSnap.docs) {
+    batch.update(doc.ref, {
+      presupuesto: 50.0,
+      puntos: 0,
+      garaje: garajeVacio,
+      ultimaJornada: FieldValue.delete(),
+    })
+  }
+
+  /* 2. Borrar mercados de la liga (y sus subcolecciones de pujas) */
+  const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
+
+  for (const docMercado of mercadosSnap.docs) {
+    const pujasSnap = await docMercado.ref.collection('pujas').get()
+    for (const pujaDoc of pujasSnap.docs) {
+      batch.delete(pujaDoc.ref)
     }
+    batch.delete(docMercado.ref)
+  }
 
-    const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-    if (!ligaSnap.exists) {
-      throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-    }
+  /* 3. Borrar actividad de la liga */
+  const actividadSnap = await db.collection('actividad').where('idLiga', '==', idLiga).get()
 
-    const garajeVacio = { coches: [], pilotos: [], potenciadores: [], ruedas: null }
-    const batch = db.batch()
+  for (const doc of actividadSnap.docs) {
+    batch.delete(doc.ref)
+  }
 
-    /* 1. Reset de participaciones de la liga */
-    const participacionesSnap = await db
-      .collection('participaciones')
-      .where('id_liga', '==', idLiga)
-      .get()
+  await batch.commit()
 
-    for (const doc of participacionesSnap.docs) {
-      batch.update(doc.ref, {
-        presupuesto: 50.0,
-        puntos: 0,
-        garaje: garajeVacio,
-        ultimaJornada: FieldValue.delete(),
-      })
-    }
-
-    /* 2. Borrar mercados de la liga (y sus subcolecciones de pujas) */
-    const mercadosSnap = await db
-      .collection('mercados')
-      .where('idLiga', '==', idLiga)
-      .get()
-
-    for (const docMercado of mercadosSnap.docs) {
-      const pujasSnap = await docMercado.ref.collection('pujas').get()
-      for (const pujaDoc of pujasSnap.docs) {
-        batch.delete(pujaDoc.ref)
-      }
-      batch.delete(docMercado.ref)
-    }
-
-    /* 3. Borrar actividad de la liga */
-    const actividadSnap = await db
-      .collection('actividad')
-      .where('idLiga', '==', idLiga)
-      .get()
-
-    for (const doc of actividadSnap.docs) {
-      batch.delete(doc.ref)
-    }
-
-    await batch.commit()
-
-    return {
-      ok: true,
-      idLiga,
-      participacionesReseteadas: participacionesSnap.size,
-      mercadosBorrados: mercadosSnap.size,
-      eventosActividadBorrados: actividadSnap.size,
-    }
-  },
-)
+  return {
+    ok: true,
+    idLiga,
+    participacionesReseteadas: participacionesSnap.size,
+    mercadosBorrados: mercadosSnap.size,
+    eventosActividadBorrados: actividadSnap.size,
+  }
+})
 
 /**
  * Callable — siembra el catálogo (pilotos, coches, potenciadores) en Firestore
  * desde /functions/data/catalogoBase.js. Sobrescribe los documentos existentes.
  * Necesario en cada entorno la primera vez (o cuando cambien los datos base).
  */
-exports.sembrarCatalogoManual = onCall(
-  { region: 'europe-west1' },
-  async (request) => {
-    await exigirAdministrador(request)
+exports.sembrarCatalogoManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
 
-    const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
-    const fechaSiembra = new Date().toISOString()
+  const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
+  const fechaSiembra = new Date().toISOString()
 
-    const batch = db.batch()
-    batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos, fechaSiembra })
-    batch.set(db.collection('catalogo').doc('coches'), { items: coches, fechaSiembra })
-    batch.set(db.collection('catalogo').doc('potenciadores'), {
-      items: potenciadores,
-      fechaSiembra,
-    })
-    await batch.commit()
+  const batch = db.batch()
+  batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos, fechaSiembra })
+  batch.set(db.collection('catalogo').doc('coches'), { items: coches, fechaSiembra })
+  batch.set(db.collection('catalogo').doc('potenciadores'), {
+    items: potenciadores,
+    fechaSiembra,
+  })
+  await batch.commit()
 
-    invalidarCacheCatalogo()
+  invalidarCacheCatalogo()
 
-    return {
-      ok: true,
-      pilotos: pilotos.length,
-      coches: coches.length,
-      potenciadores: potenciadores.length,
-      fechaSiembra,
-    }
-  },
-)
+  return {
+    ok: true,
+    pilotos: pilotos.length,
+    coches: coches.length,
+    potenciadores: potenciadores.length,
+    fechaSiembra,
+  }
+})

@@ -45,10 +45,13 @@ export async function dispararResolucionPujas(idMercado) {
 
 /**
  * Dispara el procesamiento de la jornada del último GP finalizado.
+ * @param {Object} [opciones]
+ * @param {boolean} [opciones.forzar=false] - Si true, reprocesa la jornada
+ *        aunque ya exista, revirtiendo los puntos y premio previos.
  * @returns {Promise<Object>} { ok, idJornada, nombreGranPremio, participacionesProcesadas }
  */
-export async function dispararProcesamientoJornada() {
-  const respuesta = await llamadaJornada()
+export async function dispararProcesamientoJornada(opciones = {}) {
+  const respuesta = await llamadaJornada(opciones)
   return respuesta.data
 }
 

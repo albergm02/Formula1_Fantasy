@@ -99,6 +99,10 @@ function explicarFactor(piloto) {
           <span class="text-2xl font-black text-[#D4A843]">+{{ jornada.puntosJornada }}</span>
           <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">PTS</span>
         </div>
+        <div v-if="jornada.premioJornada" class="flex flex-col items-end">
+          <span class="text-2xl font-black text-emerald-400">+{{ jornada.premioJornada }}M</span>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Premio</span>
+        </div>
         <i class="pi pi-chevron-right text-zinc-500 text-xs"></i>
       </div>
     </div>
@@ -195,6 +199,15 @@ function explicarFactor(piloto) {
             </span>
           </div>
           <span class="text-3xl font-black text-[#D4A843]">+{{ jornada.puntosJornada }}</span>
+        </div>
+
+        <!-- Premio económico -->
+        <div v-if="jornada.premioJornada" class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Premio al presupuesto</span>
+            <span class="text-[10px] text-zinc-500">{{ jornada.puntosJornada }} pts ÷ 10</span>
+          </div>
+          <span class="text-3xl font-black text-emerald-400">+{{ jornada.premioJornada }}M</span>
         </div>
 
       </div>

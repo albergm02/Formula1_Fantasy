@@ -63,17 +63,28 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
 
 /* ─── 2. Factores de jornada por variante ───────────────────────────────── */
 
+const FACTOR_MINIMO = 0.5
+const FACTOR_MAXIMO = 1.5
+
+function acotarFactor(factor) {
+  if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
+  if (factor > FACTOR_MAXIMO) return FACTOR_MAXIMO
+  return Math.round(factor * 100) / 100
+}
+
 function calcularFactorJornada(actuacion, condiciones, variante) {
-  if (variante === 'qualy') return calcularFactorQualy(actuacion)
-  if (variante === 'carrera') return calcularFactorCarrera(actuacion)
-  if (variante === 'todo_terreno') return calcularFactorTodoTerreno(condiciones)
-  if (variante === 'remontador') return calcularFactorRemontador(actuacion)
-  if (variante === 'estratega') return calcularFactorEstrategia(actuacion, condiciones)
+  if (variante === 'qualy') return acotarFactor(calcularFactorQualy(actuacion))
+  if (variante === 'carrera') return acotarFactor(calcularFactorCarrera(actuacion))
+  if (variante === 'todo_terreno') return acotarFactor(calcularFactorTodoTerreno(condiciones))
+  if (variante === 'remontador') return acotarFactor(calcularFactorRemontador(actuacion))
+  if (variante === 'estratega') {
+    return acotarFactor(calcularFactorEstrategia(actuacion, condiciones))
+  }
 
   const factorQ = calcularFactorQualy(actuacion)
   const factorC = calcularFactorCarrera(actuacion)
   const factorT = calcularFactorTodoTerreno(condiciones)
-  return Math.round(((factorQ + factorC + factorT) / 3) * 100) / 100
+  return acotarFactor((factorQ + factorC + factorT) / 3)
 }
 
 function calcularFactorQualy({ posicionQualy }) {
@@ -106,27 +117,28 @@ function calcularFactorTodoTerreno({
 
 /**
  * Factor basado en adelantamientos reales de OpenF1 (/overtakes).
- * Un bonus de posición suaviza el resultado si el piloto también terminó bien.
+ * Umbrales calibrados con GPs de 2026 (Miami: media ~8 adelantamientos).
  * @param {{ posicionCarrera: number, numeroAdelantos: number }} actuacion
  * @returns {number}
  */
 function calcularFactorRemontador({ posicionCarrera, numeroAdelantos }) {
   const factorBase = resolverFactorPorAdelantos(numeroAdelantos || 0)
-  const bonusPosicion = posicionCarrera <= 5 ? 0.1 : posicionCarrera <= 10 ? 0.05 : 0.0
-  return Math.round((factorBase + bonusPosicion) * 100) / 100
+  const bonusPosicion = posicionCarrera <= 5 ? 0.05 : posicionCarrera <= 10 ? 0.025 : 0.0
+  return factorBase + bonusPosicion
 }
 
 function resolverFactorPorAdelantos(numeroAdelantos) {
-  if (numeroAdelantos >= 7) return 1.8
-  if (numeroAdelantos >= 5) return 1.5
-  if (numeroAdelantos >= 3) return 1.3
-  if (numeroAdelantos >= 1) return 1.1
-  return 0.7
+  if (numeroAdelantos >= 14) return 1.45
+  if (numeroAdelantos >= 10) return 1.3
+  if (numeroAdelantos >= 7) return 1.15
+  if (numeroAdelantos >= 4) return 1.0
+  if (numeroAdelantos >= 1) return 0.8
+  return 0.55
 }
 
 /**
  * Factor basado en métricas de gestión de stints de OpenF1 (/stints).
- * Premia stints largos, pocas paradas y el caos que permite extender estrategia.
+ * Premia stints largos, pocas paradas y posición final como validación.
  * @param {{ posicionCarrera: number, numeroPitStops: number, porcentajeStintMaximo: number }} actuacion
  * @param {{ numeroSafetyCarActivos: number, numeroVirtualSafetyCarActivos: number }} condiciones
  * @returns {number}
@@ -135,39 +147,49 @@ function calcularFactorEstrategia(
   { posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 },
   condiciones,
 ) {
-  const basePosicion = resolverFactorPosicionCarrera(posicionCarrera) * 0.5
-  const bonusStint = resolverBonusGestionStint(porcentajeStintMaximo)
-  const bonusParadas = resolverBonusEstrategiaParadas(numeroPitStops || 1)
+  let factor = 0.7
+  factor += resolverBonusGestionStint(porcentajeStintMaximo)
+  factor += resolverBonusEstrategiaParadas(numeroPitStops || 1)
+  factor += resolverBonusPosicionEstratega(posicionCarrera)
 
-  let bonusCaos = 0
   if (condiciones) {
-    bonusCaos += (condiciones.numeroSafetyCarActivos || 0) * 0.08
-    bonusCaos += (condiciones.numeroVirtualSafetyCarActivos || 0) * 0.04
-    if (bonusCaos > 0.2) bonusCaos = 0.2
+    let bonusCaos = 0
+    bonusCaos += (condiciones.numeroSafetyCarActivos || 0) * 0.05
+    bonusCaos += (condiciones.numeroVirtualSafetyCarActivos || 0) * 0.025
+    if (bonusCaos > 0.15) bonusCaos = 0.15
+    factor += bonusCaos
   }
 
-  return Math.round((basePosicion + bonusStint + bonusParadas + bonusCaos) * 100) / 100
+  return factor
 }
 
 function resolverBonusGestionStint(porcentajeStintMaximo) {
-  if (porcentajeStintMaximo >= 0.6) return 0.35
-  if (porcentajeStintMaximo >= 0.4) return 0.2
+  if (porcentajeStintMaximo >= 0.6) return 0.45
+  if (porcentajeStintMaximo >= 0.45) return 0.3
+  if (porcentajeStintMaximo >= 0.35) return 0.2
   if (porcentajeStintMaximo >= 0.25) return 0.1
   return 0.0
 }
 
 function resolverBonusEstrategiaParadas(numeroPitStops) {
-  if (numeroPitStops === 1) return 0.2
-  if (numeroPitStops === 2) return 0.1
+  if (numeroPitStops === 1) return 0.15
+  if (numeroPitStops === 2) return 0.05
   return 0.0
+}
+
+function resolverBonusPosicionEstratega(posicionCarrera) {
+  if (posicionCarrera <= 3) return 0.15
+  if (posicionCarrera <= 10) return 0.05
+  if (posicionCarrera <= 15) return 0.0
+  return -0.1
 }
 
 /* ─── 4. Tablas de resolución de posición ───────────────────────────────── */
 
 function resolverFactorPosicionQualy(posicion) {
-  if (posicion <= 3) return 1.5
-  if (posicion <= 6) return 1.3
-  if (posicion <= 10) return 1.15
+  if (posicion <= 3) return 1.45
+  if (posicion <= 6) return 1.25
+  if (posicion <= 10) return 1.1
   if (posicion <= 15) return 0.85
   return 0.65
 }
@@ -178,9 +200,9 @@ function resolverFactorPosicionCarrera(posicion) {
   if (posicion === 3) return 1.3
   if (posicion <= 5) return 1.2
   if (posicion <= 10) return 1.0
-  if (posicion <= 15) return 0.75
-  if (posicion <= 20) return 0.5
-  return 0.2
+  if (posicion <= 15) return 0.8
+  if (posicion <= 20) return 0.6
+  return 0.5
 }
 
 /* ─── 5. Utilidades base ────────────────────────────────────────────────── */

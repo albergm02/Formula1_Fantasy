@@ -122,16 +122,16 @@ async function manejarResolverPujas() {
     }
 }
 
-async function manejarProcesarJornada() {
+async function manejarProcesarJornada(opciones = {}) {
     cargandoJornada.value = true
     ultimoResultado.value = null
     try {
-        const datos = await dispararProcesamientoJornada()
+        const datos = await dispararProcesamientoJornada(opciones)
         ultimoResultado.value = datos
         if (datos.ok) {
             toast.add({
                 severity: 'success',
-                summary: 'Jornada procesada',
+                summary: opciones.forzar ? 'Jornada reprocesada' : 'Jornada procesada',
                 detail: `${datos.nombreGranPremio} · ${datos.participacionesProcesadas} participaciones.`,
                 life: 5000,
             })
@@ -341,8 +341,13 @@ function manejarResetearLiga() {
                         Recopila datos de OpenF1, calcula puntos para todas las participaciones y
                         actualiza la clasificación.
                     </p>
-                    <Button @click="manejarProcesarJornada" :loading="cargandoJornada" icon="pi pi-bolt"
-                        label="Procesar jornada" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                    <div class="flex flex-wrap gap-2">
+                        <Button @click="manejarProcesarJornada()" :loading="cargandoJornada" icon="pi pi-bolt"
+                            label="Procesar jornada" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                        <Button @click="manejarProcesarJornada({ forzar: true })" :loading="cargandoJornada"
+                            icon="pi pi-refresh" label="Forzar reproceso" severity="warning"
+                            class="!bg-amber-600 !border-amber-600 hover:!bg-amber-700" />
+                    </div>
                 </template>
             </Card>
 
@@ -372,8 +377,7 @@ function manejarResetearLiga() {
                 </template>
             </Card>
 
-            <Message v-if="ultimoResultado" severity="info" :closable="false"
-                class="!bg-[#1A1A1F] !border-zinc-700">
+            <Message v-if="ultimoResultado" severity="info" :closable="false" class="!bg-[#1A1A1F] !border-zinc-700">
                 <pre class="text-xs overflow-auto max-h-72">{{ JSON.stringify(ultimoResultado, null, 2) }}</pre>
             </Message>
         </main>
