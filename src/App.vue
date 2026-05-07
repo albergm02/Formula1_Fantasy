@@ -1,14 +1,17 @@
 ﻿<script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import GestorPWA from '@/components/GestorPWA.vue'
+import TourOnboarding from '@/components/TourOnboarding.vue'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreOnboarding } from '@/stores/storeOnboarding'
 import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
 
 const storeAutenticacion = usarStoreAutenticacion()
+const storeOnboarding = usarStoreOnboarding()
 const enrutador = useRouter()
 
 /* Iniciamos el observador para detectar cambios en el estado */
@@ -36,6 +39,20 @@ onMounted(() => {
 onUnmounted(() => {
   cancelarObservadorAutenticacion()
 })
+
+/**
+ * Lanza el recorrido guiado la primera vez que un usuario autenticado
+ * accede a una ruta privada. La marca de "ya visto" se persiste en
+ * localStorage dentro del propio store de onboarding.
+ */
+watch(
+  () => [storeAutenticacion.datosCargados, storeAutenticacion.usuarioActual?.uid],
+  ([cargado, uid]) => {
+    if (!cargado || !uid) return
+    setTimeout(() => storeOnboarding.iniciarSiNoVisto(), 800)
+  },
+  { immediate: true },
+)
 </script>
 
 <!---------------------------------------------------------------------------------------------------------------------------->
@@ -60,6 +77,9 @@ onUnmounted(() => {
 
   <!-- Gestor de la PWA: instalación y avisos de nueva versión -->
   <GestorPWA />
+
+  <!-- Recorrido guiado interactivo (overlay global) -->
+  <TourOnboarding />
 
   <!-- Muestra un loader mientras se cargan los datos de autenticación -->
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">

@@ -2,9 +2,6 @@
 /**
  * Componente que gestiona el ciclo de vida PWA: instalación nativa
  * (`beforeinstallprompt`) y aviso de nueva versión del Service Worker.
- *
- * No implementa modo offline: el SW solo permite que la app sea instalable
- * y se actualice automáticamente al detectar despliegues nuevos.
  */
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
