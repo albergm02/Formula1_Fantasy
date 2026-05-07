@@ -1,8 +1,0 @@
-{
-  "name": "F1 Fantasy",
-  "short_name": "F1 Fantasy",
-  "display": "standalone",
-  "start_url": "/",
-  "background_color": "#1a1a2e",
-  "theme_color": "#1a1a2e"
-}

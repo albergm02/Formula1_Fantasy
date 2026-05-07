@@ -6,6 +6,7 @@
  */
 
 const URL_BASE = 'https://api.openf1.org/v1'
+const { pilotosBase } = require('./data/catalogoBase')
 
 /* ─── Utilidad HTTP ─────────────────────────────────────────────────────── */
 
@@ -370,6 +371,23 @@ async function recopilarDatosGranPremio(meetingKey) {
         dns: false,
         dsq: false,
       }
+    }
+  }
+
+  // 3º Pilotos del catalogo canonico ausentes en /session_result — marcar como DNF.
+  for (const piloto of pilotosBase) {
+    const numeroPiloto = piloto.numero
+    if (actuacionesPorPiloto[numeroPiloto]) continue
+    actuacionesPorPiloto[numeroPiloto] = {
+      posicionQualy: resultadosQualy[numeroPiloto] || 20,
+      posicionCarrera: 99,
+      posicionSalida: parrillaSalida[numeroPiloto] || resultadosQualy[numeroPiloto] || 20,
+      numeroAdelantos: adelantamientos[numeroPiloto] || 0,
+      numeroPitStops: 0,
+      porcentajeStintMaximo: 0,
+      dnf: true,
+      dns: false,
+      dsq: false,
     }
   }
 

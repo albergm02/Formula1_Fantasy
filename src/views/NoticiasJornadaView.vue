@@ -61,28 +61,28 @@ const cargando = ref(true)
 const pilotoExpandido = ref(null)
 const guiaAbierta = ref(false)
 const varianteGuiaExpandida = ref(null)
-let cancelarSuscripcion = () => {}
+let cancelarSuscripcion = () => { }
 
 const ruta = useRoute()
 const storeLigas = usarStoreLigas()
 const storeEscuderia = usarStoreEscuderia()
 
 const jornada = computed(() => {
-  if (!historial.value.length) return null
-  return (
-    historial.value.find((j) => j.id === idJornadaSeleccionada.value) || historial.value[0]
-  )
+    if (!historial.value.length) return null
+    return (
+        historial.value.find((j) => j.id === idJornadaSeleccionada.value) || historial.value[0]
+    )
 })
 
 function seleccionarJornada(idJornada) {
-  idJornadaSeleccionada.value = idJornada
-  pilotoExpandido.value = null
+    idJornadaSeleccionada.value = idJornada
+    pilotoExpandido.value = null
 }
 
 function formatearFechaCorta(iso) {
-  if (!iso) return ''
-  const fecha = new Date(iso)
-  return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+    if (!iso) return ''
+    const fecha = new Date(iso)
+    return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
 }
 
 function alternarGuia() {
@@ -115,7 +115,7 @@ onMounted(async () => {
             idJornadaSeleccionada.value = jornadas[0].id
         }
         cargando.value = false
-    }) || (() => {})
+    }) || (() => { })
 })
 
 onUnmounted(() => {
@@ -242,10 +242,8 @@ function formatearPorcentaje(valor) {
             </Message>
 
             <!-- Selector de historial de jornadas -->
-            <div v-if="!cargando && historial.length > 1"
-                class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-                <button v-for="item in historial" :key="item.id" type="button"
-                    @click="seleccionarJornada(item.id)"
+            <div v-if="!cargando && historial.length > 1" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                <button v-for="item in historial" :key="item.id" type="button" @click="seleccionarJornada(item.id)"
                     class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 cursor-pointer transition-colors"
                     :class="item.id === jornada?.id
                         ? 'bg-[#E10600]/10 border-[#E10600] text-white'
@@ -371,8 +369,9 @@ function formatearPorcentaje(valor) {
                             </span>
                         </div>
                         <div class="flex flex-col items-end text-[10px] text-zinc-400">
-                            <span>QUALY {{ formatearPosicion(piloto.actuacion.posicionQualy) }}</span>
                             <span>SALIDA {{ formatearPosicion(piloto.actuacion.posicionSalida) }}</span>
+                            <span>CARRERA {{ obtenerEstadoCarrera(piloto.actuacion) ||
+                                formatearPosicion(piloto.actuacion.posicionCarrera) }}</span>
                         </div>
                         <i class="pi text-zinc-500 text-xs"
                             :class="pilotoExpandido === piloto.numero ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
@@ -390,13 +389,6 @@ function formatearPorcentaje(valor) {
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
-                                        qualy</span>
-                                    <span class="text-base font-black text-white">
-                                        {{ formatearPosicion(piloto.actuacion.posicionQualy) }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
                                         salida</span>
                                     <span class="text-base font-black text-white">
                                         {{ formatearPosicion(piloto.actuacion.posicionSalida) }}
@@ -408,7 +400,7 @@ function formatearPorcentaje(valor) {
                                     <span class="text-base font-black"
                                         :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500' : 'text-white'">
                                         {{ obtenerEstadoCarrera(piloto.actuacion) ||
-                                        formatearPosicion(piloto.actuacion.posicionCarrera) }}
+                                            formatearPosicion(piloto.actuacion.posicionCarrera) }}
                                     </span>
                                 </div>
                                 <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">

@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
+import GestorPWA from '@/components/GestorPWA.vue'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
@@ -56,6 +57,9 @@ onUnmounted(() => {
     footer: { class: '!bg-transparent gap-2 flex justify-end' },
     icon: { class: '!text-[#E10600]' },
   }" />
+
+  <!-- Gestor de la PWA: instalación y avisos de nueva versión -->
+  <GestorPWA />
 
   <!-- Muestra un loader mientras se cargan los datos de autenticación -->
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
