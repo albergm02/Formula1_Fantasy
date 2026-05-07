@@ -191,10 +191,11 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
 /* ─── Garaje de participante ─────────────────────────────────────────────── */
 
 /**
- * Carga el garaje y datos públicos de un participante por su ID de participación.
- * Se usa para visualizar el equipo de un rival desde la clasificación.
- * @param {string} idParticipacion - ID del documento de participación.
- * @returns {Promise<Object|null>} Datos del participante o null si no existe.
+ * Carga el garaje público de un participante por su ID de participación.
+ * Devuelve solo información visible para rivales: nunca incluye el presupuesto
+ * (el dinero de cada usuario es información privada).
+ * @param {string} idParticipacion
+ * @returns {Promise<Object|null>}
  */
 export const cargarGarajeDeParticipante = async (idParticipacion) => {
   const documento = await getDoc(doc(db, 'participaciones', idParticipacion))
@@ -223,8 +224,8 @@ export const cargarGarajeDeParticipante = async (idParticipacion) => {
   return {
     id: documento.id,
     nombreUsuario: datos.nombre_usuario || 'Desconocido',
-    presupuesto: datos.presupuesto || 0,
     puntos: datos.puntos || 0,
+    ultimaJornada: datos.ultimaJornada || null,
     garaje: garajeMigrado,
   }
 }

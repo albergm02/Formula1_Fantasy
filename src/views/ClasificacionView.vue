@@ -115,8 +115,13 @@ onMounted(async () => {
             }">{{ indice + 1 }}º</div>
             <div class="flex flex-col">
               <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
-              <span class="mt-1 text-xs text-[#F0ECEC]">
+              <span
+                v-if="jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion"
+                class="mt-1 text-xs text-[#F0ECEC]">
                 Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2) }}M</span>
+              </span>
+              <span v-else class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+                Toca para ver su equipo
               </span>
             </div>
           </div>

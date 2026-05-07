@@ -181,12 +181,28 @@ function explicarFactor(piloto) {
         <!-- Sinergias -->
         <div v-if="tieneSinergia" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Bonificaciones</span>
-          <div class="flex items-center justify-between p-3 bg-emerald-900/20 border border-emerald-500/30">
-            <div class="flex items-center gap-2">
-              <i class="pi pi-bolt text-emerald-400"></i>
-              <span class="text-sm font-bold text-emerald-400">Sinergia activa</span>
+          <div class="flex flex-col gap-2">
+            <div v-for="(sinergia, idx) in jornada.sinergias || []" :key="idx"
+              class="flex items-start justify-between gap-3 p-3 bg-emerald-900/20 border border-emerald-500/30">
+              <div class="flex flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-bolt text-emerald-400 text-xs"></i>
+                  <span class="text-sm font-bold text-emerald-400">{{ sinergia.nombre }}</span>
+                </div>
+                <span class="text-[10px] text-zinc-400 leading-snug">{{ sinergia.descripcion }}</span>
+              </div>
+              <span class="text-base font-black text-emerald-400 shrink-0">
+                +{{ Math.round(sinergia.bonus * 100) }}%
+              </span>
             </div>
-            <span class="text-lg font-black text-emerald-400">+{{ porcentajeSinergia }}%</span>
+            <div v-if="!(jornada.sinergias || []).length"
+              class="flex items-center justify-between p-3 bg-emerald-900/20 border border-emerald-500/30">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-bolt text-emerald-400"></i>
+                <span class="text-sm font-bold text-emerald-400">Sinergia activa</span>
+              </div>
+              <span class="text-lg font-black text-emerald-400">+{{ porcentajeSinergia }}%</span>
+            </div>
           </div>
         </div>
 

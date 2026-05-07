@@ -1,12 +1,8 @@
 <script setup>
 /**
- * Vista de explicación pública de la última jornada procesada.
- * Lista todos los pilotos con los datos crudos extraídos de OpenF1
- * (qualy, carrera, salida, adelantamientos, paradas, mejor stint) y, al
- * desplegar uno, muestra cuántos puntos habría sumado bajo cada variante.
- *
- * Objetivo didáctico: que el usuario entienda de dónde vienen los puntos
- * y por qué un mismo piloto rinde de forma muy distinta según su variante.
+ * Vista de explicación pública de la jornada seleccionada (por defecto la última).
+ * Permite navegar el historial de jornadas procesadas y, por cada piloto,
+ * inspeccionar los datos crudos de OpenF1 y la simulación por variante.
  */
 
 import { onMounted, onUnmounted, ref, computed } from 'vue'
@@ -16,7 +12,7 @@ import Message from 'primevue/message'
 import ProgressSpinner from 'primevue/progressspinner'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
-import { suscribirseUltimaJornada } from '@/services/servicioJornada'
+import { suscribirseHistorialJornadas } from '@/services/servicioJornada'
 import { pilotosBase } from '@/data/bases/pilotosBase'
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
@@ -59,16 +55,35 @@ const EJEMPLOS_VARIANTE = {
     },
 }
 
-const jornada = ref(null)
+const historial = ref([])
+const idJornadaSeleccionada = ref(null)
 const cargando = ref(true)
 const pilotoExpandido = ref(null)
 const guiaAbierta = ref(false)
 const varianteGuiaExpandida = ref(null)
-let cancelarSuscripcion = null
+let cancelarSuscripcion = () => {}
 
 const ruta = useRoute()
 const storeLigas = usarStoreLigas()
 const storeEscuderia = usarStoreEscuderia()
+
+const jornada = computed(() => {
+  if (!historial.value.length) return null
+  return (
+    historial.value.find((j) => j.id === idJornadaSeleccionada.value) || historial.value[0]
+  )
+})
+
+function seleccionarJornada(idJornada) {
+  idJornadaSeleccionada.value = idJornada
+  pilotoExpandido.value = null
+}
+
+function formatearFechaCorta(iso) {
+  if (!iso) return ''
+  const fecha = new Date(iso)
+  return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+}
 
 function alternarGuia() {
     guiaAbierta.value = !guiaAbierta.value
@@ -94,14 +109,17 @@ onMounted(async () => {
             await storeEscuderia.cargarEquipo(idLiga)
         }
     }
-    cancelarSuscripcion = suscribirseUltimaJornada((datos) => {
-        jornada.value = datos
+    cancelarSuscripcion = suscribirseHistorialJornadas((jornadas) => {
+        historial.value = jornadas
+        if (!idJornadaSeleccionada.value && jornadas.length > 0) {
+            idJornadaSeleccionada.value = jornadas[0].id
+        }
         cargando.value = false
-    })
+    }) || (() => {})
 })
 
 onUnmounted(() => {
-    if (cancelarSuscripcion) cancelarSuscripcion()
+    cancelarSuscripcion()
 })
 
 const hayJornada = computed(() => Boolean(jornada.value && jornada.value.actuacionesPorPiloto))
@@ -222,6 +240,22 @@ function formatearPorcentaje(valor) {
                 Aún no hay ninguna jornada procesada. Vuelve tras el próximo Gran Premio para descubrir
                 cómo ha puntuado cada piloto.
             </Message>
+
+            <!-- Selector de historial de jornadas -->
+            <div v-if="!cargando && historial.length > 1"
+                class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                <button v-for="item in historial" :key="item.id" type="button"
+                    @click="seleccionarJornada(item.id)"
+                    class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 cursor-pointer transition-colors"
+                    :class="item.id === jornada?.id
+                        ? 'bg-[#E10600]/10 border-[#E10600] text-white'
+                        : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400 hover:border-zinc-600'">
+                    <span class="text-[9px] font-black uppercase tracking-widest">
+                        {{ formatearFechaCorta(item.fechaProcesamiento) }}
+                    </span>
+                    <span class="text-xs font-bold">{{ item.nombreGranPremio }}</span>
+                </button>
+            </div>
 
             <!-- Guía de puntuación por clase -->
             <div v-if="!cargando" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">

@@ -1,7 +1,16 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [], ruedas: null })
+import { ruedasBase } from '@/data/bases/ruedasBase'
+
+const RUEDA_POR_DEFECTO = ruedasBase.find((r) => r.id === 'medio') || ruedasBase[0]
+
+const crearGarajeVacio = () => ({
+  coches: [],
+  pilotos: [],
+  potenciadores: [],
+  ruedas: { ...RUEDA_POR_DEFECTO },
+})
 const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import {
@@ -11,7 +20,6 @@ import {
   persistirInversionClausula,
 } from '@/services/servicioClausulas'
 import { usarStoreNotificaciones } from './storeNotificaciones'
-import { ruedasBase } from '@/data/bases/ruedasBase'
 
 /**
  * Migra un garaje del formato anterior (coche singular) al nuevo (coches array).
@@ -33,7 +41,7 @@ const migrarGaraje = (garajeOriginal) => {
   }))
 
   garaje.potenciadores = garaje.potenciadores || []
-  garaje.ruedas = garaje.ruedas || null
+  garaje.ruedas = garaje.ruedas || { ...RUEDA_POR_DEFECTO }
 
   return garaje
 }
@@ -249,7 +257,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
   }
 
   /**
-   * Retira los neumáticos actualmente equipados del garaje.
+   * Retira los neumáticos equipados restaurando el compuesto por defecto.
    * @returns {Promise<{ success: boolean, message: string }>}
    */
   async function desequiparNeumatico() {
@@ -258,7 +266,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     }
 
     const nombreRueda = garaje.value.ruedas.nombre
-    garaje.value.ruedas = null
+    garaje.value.ruedas = { ...RUEDA_POR_DEFECTO }
     await guardarEstadoEquipo()
     return { success: true, message: `Compuesto ${nombreRueda} retirado.` }
   }

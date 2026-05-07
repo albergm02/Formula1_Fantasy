@@ -192,7 +192,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
       }
     }
 
-    const { multiplicadorTotal } = calcularSinergias(garaje)
+    const { multiplicadorTotal, sinergias } = calcularSinergias(garaje)
     const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
 
     const reprocesoMismoGP =
@@ -213,6 +213,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
       puntosJornada,
       premioJornada,
       multiplicadorSinergia: multiplicadorTotal,
+      sinergias,
       condiciones,
       desglose: resultadoGaraje.desglose,
     }

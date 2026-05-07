@@ -12,6 +12,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    equipado: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 const emit = defineEmits(['fichar'])
@@ -31,9 +35,9 @@ const etiquetasMejora = computed(() => {
         }))
 })
 
-const confirmarCompra = () => {
+const confirmarEquipar = () => {
     confirmar.require({
-        message: `Equipar ${props.rueda.nombre} por ${props.rueda.precio}M?`,
+        message: `¿Equipar el compuesto ${props.rueda.nombre} para la próxima jornada?`,
         header: 'Confirmar Compuesto',
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: 'Sí, equipar',
@@ -57,7 +61,10 @@ const confirmarCompra = () => {
                             {{ props.rueda.nombre }}
                         </span>
                     </div>
-                    <span class="text-[10px] font-black text-[#D4A843] shrink-0">{{ props.rueda.precio }}M</span>
+                    <span v-if="props.equipado"
+                        class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[8px] font-black uppercase text-emerald-400 shrink-0">
+                        Equipado
+                    </span>
                 </header>
 
                 <main class="relative flex-1 w-full bg-transparent cursor-pointer" @click="mostrarInfo = !mostrarInfo">
@@ -97,9 +104,9 @@ const confirmarCompra = () => {
                     </div>
                 </main>
 
-                <Button v-if="modoMercado" @click="confirmarCompra" unstyled
+                <Button v-if="modoMercado" @click="confirmarEquipar" unstyled
                     class="w-full py-3 z-20 shrink-0 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer hover:bg-black/80 transition-all active:scale-[0.98]">
-                    <i class="mr-1 font-bold text-[10px] text-white pi pi-money-bill"></i>
+                    <i class="mr-1 font-bold text-[10px] text-white pi pi-cog"></i>
                     <span class="text-white text-[10px] font-black uppercase tracking-widest">EQUIPAR</span>
                 </Button>
 
