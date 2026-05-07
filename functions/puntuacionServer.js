@@ -6,7 +6,7 @@
 
 /* ─── 1. Pipeline principal del garaje ──────────────────────────────────── */
 
-function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
+function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}, rachasPorNumero = {}) {
   let mejorasRuedas = { ritmo: 0, consistencia: 0, adaptabilidad: 0, agresividad: 0, gestion: 0 }
   if (garaje.ruedas && garaje.ruedas.mejoras) {
     mejorasRuedas = garaje.ruedas.mejoras
@@ -29,7 +29,9 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
 
   for (const piloto of pilotosEquipados) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
-    const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
+    const puntuacionSinRacha = calcularPuntuacionBase(atributosModificados, piloto.pesos)
+    const racha = Number(rachasPorNumero[piloto.numero] || 0)
+    const puntuacionBase = Math.round((puntuacionSinRacha + racha) * 10) / 10
     const factorEstePiloto =
       factoresPorPiloto[piloto.id] != null ? factoresPorPiloto[piloto.id] : 1.0
     const puntosJornada = calcularPuntosJornada(puntuacionBase, factorEstePiloto)
@@ -39,6 +41,7 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
       nombre: piloto.nombre,
       atributosModificados,
       puntuacionBase,
+      racha,
       factorJornada: factorEstePiloto,
       puntosJornada,
     })

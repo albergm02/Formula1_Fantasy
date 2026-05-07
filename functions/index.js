@@ -31,9 +31,11 @@ const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
 const {
   cargarCatalogo,
   invalidarCacheCatalogo,
+  cargarRachas,
+  aplicarRachasACatalogo,
   seleccionarCartasDiarias,
+  sembrarCatalogoEnFirestore,
 } = require('./mercadoServer')
-const { construirCatalogoCompleto } = require('./data/catalogoBase')
 
 initializeApp()
 const db = getFirestore()
@@ -159,6 +161,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
 
   const idJornada = `gp_${granPremio.meeting_key}`
 
+  const rachasPorPiloto = await cargarRachas(db)
   const todasParticipaciones = await db.collection('participaciones').get()
   const batch = db.batch()
   let participacionesProcesadas = 0
@@ -182,7 +185,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
       condiciones,
     )
 
-    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
+    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto, rachasPorPiloto)
 
     for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
       const detalle = detallesPorPiloto[pilotoDesglose.id]
@@ -247,6 +250,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
     participacionesProcesadas,
     condiciones,
     actuacionesPorPiloto,
+    rachasAplicadas: rachasPorPiloto,
     desglose: desgloseJornada,
   })
 
@@ -507,9 +511,11 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
     await db.collection('mercados').doc(idMercadoAyer).update({ estado: 'cerrado' })
   }
 
-  /* ── Cargar catálogo desde Firestore (cache de instancia) y seleccionar cartas del día ── */
-  const catalogo = await cargarCatalogo(db)
-  const cartasDelDia = seleccionarCartasDiarias(catalogo)
+  /* ── Cargar catálogo (auto-seed si falta) + rachas y aplicarlas antes de mezclar ── */
+  const catalogoBase = await cargarCatalogo(db)
+  const rachasPorPiloto = await cargarRachas(db)
+  const catalogoConRachas = aplicarRachasACatalogo(catalogoBase, rachasPorPiloto)
+  const cartasDelDia = seleccionarCartasDiarias(catalogoConRachas)
 
   /* ── Crear documento del mercado de hoy para esta liga ── */
   const fechaApertura = ahora
@@ -712,26 +718,46 @@ exports.resetearLigaManual = onCall({ region: 'europe-west1' }, async (request) 
  */
 exports.sembrarCatalogoManual = onCall({ region: 'europe-west1' }, async (request) => {
   await exigirAdministrador(request)
-
-  const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
-  const fechaSiembra = new Date().toISOString()
-
-  const batch = db.batch()
-  batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos, fechaSiembra })
-  batch.set(db.collection('catalogo').doc('coches'), { items: coches, fechaSiembra })
-  batch.set(db.collection('catalogo').doc('potenciadores'), {
-    items: potenciadores,
-    fechaSiembra,
-  })
-  await batch.commit()
-
+  const { pilotos, coches, potenciadores } = await sembrarCatalogoEnFirestore(db)
   invalidarCacheCatalogo()
-
   return {
     ok: true,
     pilotos: pilotos.length,
     coches: coches.length,
     potenciadores: potenciadores.length,
-    fechaSiembra,
   }
+})
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RACHAS DE PILOTOS — Ajuste manual del admin que altera precio y puntos.
+   ───────────────────────────────────────────────────────────────────────────
+   Se persisten en `catalogo/rachas` como un único documento con la forma
+   { rachas: { '1': 3, '44': -2, ... } }. Cada punto de racha suma 0,5M al
+   precio del piloto en el siguiente mercado generado y 1 punto a su
+   `puntuacionBase` (afecta los puntos de la próxima jornada procesada).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+exports.obtenerRachasPilotos = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const rachas = await cargarRachas(db)
+  return { ok: true, rachas }
+})
+
+exports.guardarRachasPilotos = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { rachas } = request.data || {}
+  if (!rachas || typeof rachas !== 'object') {
+    throw new HttpsError('invalid-argument', 'Falta el mapa de rachas.')
+  }
+  const rachasNormalizadas = {}
+  for (const [numero, valor] of Object.entries(rachas)) {
+    const entero = Number.parseInt(valor, 10)
+    if (!Number.isFinite(entero) || entero === 0) continue
+    rachasNormalizadas[numero] = entero
+  }
+  await db.collection('catalogo').doc('rachas').set({
+    rachas: rachasNormalizadas,
+    fechaActualizacion: new Date().toISOString(),
+  })
+  return { ok: true, rachas: rachasNormalizadas }
 })

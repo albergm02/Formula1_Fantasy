@@ -9,12 +9,15 @@ import {
     dispararResolucionPujas,
     dispararProcesamientoJornada,
     resetearLiga,
-    sembrarCatalogo,
+    obtenerRachasPilotos,
+    guardarRachasPilotos,
 } from '@/services/servicioAdministracion'
+import { pilotosBase } from '@/data/bases/pilotosBase'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Select from 'primevue/select'
 import Checkbox from 'primevue/checkbox'
+import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
@@ -29,7 +32,8 @@ const cargandoMercado = ref(false)
 const cargandoPujas = ref(false)
 const cargandoJornada = ref(false)
 const cargandoReset = ref(false)
-const cargandoSeed = ref(false)
+const cargandoRachas = ref(false)
+const guardandoRachas = ref(false)
 
 const ligas = ref([])
 const ligaSeleccionada = ref(null)
@@ -37,10 +41,15 @@ const forzarRegeneracion = ref(false)
 const mercadoSeleccionado = ref(null)
 const mercadosDisponibles = ref([])
 const ligaAResetear = ref(null)
+const rachasPorPiloto = ref({})
 
 const ultimoResultado = ref(null)
 
 const fechaHoy = computed(() => new Date().toISOString().slice(0, 10))
+
+const pilotosOrdenados = computed(() =>
+    [...pilotosBase].sort((a, b) => a.equipo.localeCompare(b.equipo) || a.nombre.localeCompare(b.nombre)),
+)
 
 async function cargarLigas() {
     const snap = await getDocs(collection(db, 'ligas'))
@@ -57,8 +66,51 @@ async function cargarMercados() {
 }
 
 onMounted(async () => {
-    await Promise.all([cargarLigas(), cargarMercados()])
+    await Promise.all([cargarLigas(), cargarMercados(), cargarRachas()])
 })
+
+async function cargarRachas() {
+    cargandoRachas.value = true
+    try {
+        const datos = await obtenerRachasPilotos()
+        const mapaInicial = {}
+        for (const piloto of pilotosBase) {
+            mapaInicial[piloto.numero] = Number(datos.rachas?.[piloto.numero] || 0)
+        }
+        rachasPorPiloto.value = mapaInicial
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error cargando rachas',
+            detail: error.message,
+            life: 5000,
+        })
+    } finally {
+        cargandoRachas.value = false
+    }
+}
+
+async function manejarGuardarRachas() {
+    guardandoRachas.value = true
+    try {
+        const datos = await guardarRachasPilotos(rachasPorPiloto.value)
+        toast.add({
+            severity: 'success',
+            summary: 'Rachas guardadas',
+            detail: `${Object.keys(datos.rachas).length} pilotos con racha activa.`,
+            life: 4000,
+        })
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error guardando rachas',
+            detail: error.message,
+            life: 6000,
+        })
+    } finally {
+        guardandoRachas.value = false
+    }
+}
 
 async function manejarGenerarMercado() {
     cargandoMercado.value = true
@@ -165,29 +217,6 @@ async function manejarCerrarSesion() {
     enrutador.push({ name: 'login' })
 }
 
-async function manejarSembrarCatalogo() {
-    cargandoSeed.value = true
-    ultimoResultado.value = null
-    try {
-        const datos = await sembrarCatalogo()
-        ultimoResultado.value = datos
-        toast.add({
-            severity: 'success',
-            summary: 'Catálogo sembrado',
-            detail: `${datos.pilotos} pilotos, ${datos.coches} coches, ${datos.potenciadores} potenciadores.`,
-            life: 5000,
-        })
-    } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error sembrando catálogo',
-            detail: error.message,
-            life: 6000,
-        })
-    } finally {
-        cargandoSeed.value = false
-    }
-}
 
 function manejarResetearLiga() {
     if (!ligaAResetear.value) {
@@ -254,27 +283,9 @@ function manejarResetearLiga() {
         <main class="flex-1 p-4 max-w-4xl mx-auto w-full space-y-4">
             <h1 class="text-2xl font-bold">Panel de testing</h1>
             <p class="text-zinc-400 text-sm">
-                Disparo manual de procesos automatizados. Útil para validar el mercado,
-                las pujas y el cálculo de puntos sin esperar a los <em>schedules</em> diarios/semanales.
+                Disparo manual de procesos automatizados. Generar mercado siembra automáticamente
+                el catálogo si todavía no existe en Firestore.
             </p>
-
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-database text-[#E10600]" />
-                        <span>Sembrar catálogo</span>
-                    </div>
-                </template>
-                <template #content>
-                    <p class="text-sm text-zinc-400 mb-3">
-                        Carga (o recarga) los pilotos, coches y potenciadores en Firestore desde
-                        <code class="text-[#E10600]">data/catalogoBase.js</code>. Hazlo una vez por
-                        entorno antes de generar mercados, o cuando cambies los datos base.
-                    </p>
-                    <Button @click="manejarSembrarCatalogo" :loading="cargandoSeed" icon="pi pi-cloud-upload"
-                        label="Sembrar catálogo" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
-                </template>
-            </Card>
 
             <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
                 <template #title>
@@ -286,8 +297,8 @@ function manejarResetearLiga() {
                 <template #content>
                     <p class="text-sm text-zinc-400 mb-3">
                         Crea el mercado <code class="text-[#E10600]">{{ fechaHoy }}</code> y cierra/resuelve
-                        el del día anterior. Idempotente: si ya existe, no se recrea (a menos que marques
-                        "Forzar regeneración").
+                        el del día anterior. Si el catálogo no existe, se siembra automáticamente antes.
+                        Idempotente salvo que marques "Forzar regeneración".
                     </p>
                     <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
                         <div class="flex-1 w-full">
@@ -351,6 +362,40 @@ function manejarResetearLiga() {
                             icon="pi pi-refresh" label="Forzar reproceso" severity="warning"
                             class="!bg-amber-600 !border-amber-600 hover:!bg-amber-700" />
                     </div>
+                </template>
+            </Card>
+
+            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-chart-line text-[#E10600]" />
+                        <span>Rachas de pilotos</span>
+                    </div>
+                </template>
+                <template #content>
+                    <p class="text-sm text-zinc-400 mb-3">
+                        Cada punto de racha suma <strong class="text-[#E10600]">+0,5M</strong> al precio del piloto
+                        en el siguiente mercado generado y <strong class="text-[#E10600]">+1 punto</strong> a su
+                        puntuación de jornada. Acepta valores negativos. Aplica a todas las variantes del piloto.
+                    </p>
+                    <div v-if="cargandoRachas" class="text-sm text-zinc-500">Cargando rachas…</div>
+                    <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-2">
+                        <div v-for="piloto in pilotosOrdenados" :key="piloto.numero"
+                            class="flex items-center gap-2 p-2 bg-black/30 border border-zinc-800">
+                            <img :src="piloto.imagen" :alt="piloto.nombre"
+                                class="w-10 h-10 object-cover border border-zinc-700" />
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-white truncate">{{ piloto.nombre }}</div>
+                                <div class="text-[10px] text-zinc-500 uppercase">{{ piloto.equipo }}</div>
+                            </div>
+                            <InputNumber v-model="rachasPorPiloto[piloto.numero]" showButtons buttonLayout="horizontal"
+                                :step="1" :min="-20" :max="20" decrementButtonClass="!w-7 !h-7"
+                                incrementButtonClass="!w-7 !h-7" inputClass="!w-12 !text-center !text-xs"
+                                incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
+                        </div>
+                    </div>
+                    <Button @click="manejarGuardarRachas" :loading="guardandoRachas" icon="pi pi-save"
+                        label="Guardar rachas" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700 mt-3" />
                 </template>
             </Card>
 

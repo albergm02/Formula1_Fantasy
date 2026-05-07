@@ -1,19 +1,36 @@
 ﻿/**
- * mercadoServer.js — Acceso al catálogo y selección diaria de cartas.
+ * mercadoServer.js — Acceso al catálogo, rachas y selección diaria de cartas.
  *
  * El catálogo (pilotos, coches, potenciadores con sus precios calculados)
- * vive en Firestore como fuente única de verdad. Este módulo se encarga de:
- *   1. Leer el catálogo en frío al primer uso de la instancia (cache de módulo).
- *   2. Mezclar y seleccionar la muestra diaria del mercado.
+ * vive en Firestore como fuente única de verdad. Si Firestore no contiene
+ * el catálogo en el primer acceso, este módulo lo siembra automáticamente
+ * desde `data/catalogoBase.js` (auto-seed transparente al admin).
  *
- * Para alimentar Firestore se usa el endpoint `seedCatalogoHttp` (ver index.js),
- * que toma los datos de /functions/data/catalogoBase.js y los sube a la coleccion
- * `catalogo` con tres documentos: pilotos, coches, potenciadores.
+ * Las rachas son ajustes manuales por piloto (entero positivo o negativo)
+ * que se aplican sobre las cartas de piloto recién cargadas:
+ *   - Suman `racha * 0,5M` al precio de mercado.
+ *   - Suman `racha` puntos a la `puntuacionBase` (afecta puntos de jornada).
  *
  * @module mercadoServer
  */
 
+const { construirCatalogoCompleto } = require('./data/catalogoBase')
+
+const BONIFICACION_PRECIO_POR_RACHA = 0.5
+
 let catalogoEnMemoria = null
+
+async function sembrarCatalogoEnFirestore(db) {
+  const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
+  const fechaSiembra = new Date().toISOString()
+  const batch = db.batch()
+  batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos, fechaSiembra })
+  batch.set(db.collection('catalogo').doc('coches'), { items: coches, fechaSiembra })
+  batch.set(db.collection('catalogo').doc('potenciadores'), { items: potenciadores, fechaSiembra })
+  await batch.commit()
+  console.log('[Catalogo] Auto-seed ejecutado correctamente.')
+  return { pilotos, coches, potenciadores }
+}
 
 async function cargarCatalogo(db) {
   if (catalogoEnMemoria) {
@@ -28,9 +45,8 @@ async function cargarCatalogo(db) {
   ])
 
   if (!docPilotos.exists || !docCoches.exists || !docPotenciadores.exists) {
-    throw new Error(
-      'Catalogo no encontrado en Firestore. Ejecuta el endpoint seedCatalogoHttp para sembrarlo.',
-    )
+    catalogoEnMemoria = await sembrarCatalogoEnFirestore(db)
+    return catalogoEnMemoria
   }
 
   catalogoEnMemoria = {
@@ -44,6 +60,42 @@ async function cargarCatalogo(db) {
 
 function invalidarCacheCatalogo() {
   catalogoEnMemoria = null
+}
+
+/**
+ * Lee el documento `catalogo/rachas` con la racha actual de cada piloto.
+ * @param {FirebaseFirestore.Firestore} db
+ * @returns {Promise<Object<string, number>>} Mapa { numeroPiloto: racha }.
+ */
+async function cargarRachas(db) {
+  const documento = await db.collection('catalogo').doc('rachas').get()
+  if (!documento.exists) return {}
+  return documento.data().rachas || {}
+}
+
+/**
+ * Devuelve un nuevo catálogo con las rachas aplicadas sobre las cartas de piloto.
+ * No muta el catálogo original (cache compartida).
+ * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
+ * @param {Object<string, number>} rachasPorNumero
+ * @returns {{ pilotos: Array, coches: Array, potenciadores: Array }}
+ */
+function aplicarRachasACatalogo(catalogo, rachasPorNumero = {}) {
+  const pilotosConRacha = catalogo.pilotos.map((piloto) => {
+    const racha = Number(rachasPorNumero[piloto.numero] || 0)
+    if (racha === 0) {
+      return { ...piloto, racha: 0 }
+    }
+    const precioAjustado = Number((piloto.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1))
+    const puntuacionAjustada = Number((piloto.puntuacionBase + racha).toFixed(1))
+    return {
+      ...piloto,
+      precio: Math.max(0.5, precioAjustado),
+      puntuacionBase: puntuacionAjustada,
+      racha,
+    }
+  })
+  return { ...catalogo, pilotos: pilotosConRacha }
 }
 
 const CARTAS_POR_DIA = {
@@ -73,6 +125,10 @@ function seleccionarCartasDiarias(catalogo) {
 module.exports = {
   cargarCatalogo,
   invalidarCacheCatalogo,
+  cargarRachas,
+  aplicarRachasACatalogo,
   seleccionarCartasDiarias,
+  sembrarCatalogoEnFirestore,
   CARTAS_POR_DIA,
+  BONIFICACION_PRECIO_POR_RACHA,
 }

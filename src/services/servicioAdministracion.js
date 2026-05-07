@@ -17,6 +17,8 @@ const llamadaPujas = httpsCallable(functions, 'dispararResolucionPujasManual')
 const llamadaJornada = httpsCallable(functions, 'dispararJornadaSemanalManual')
 const llamadaReset = httpsCallable(functions, 'resetearLigaManual')
 const llamadaSeed = httpsCallable(functions, 'sembrarCatalogoManual')
+const llamadaObtenerRachas = httpsCallable(functions, 'obtenerRachasPilotos')
+const llamadaGuardarRachas = httpsCallable(functions, 'guardarRachasPilotos')
 
 /**
  * Dispara la generación del mercado diario.
@@ -73,5 +75,25 @@ export async function resetearLiga(idLiga) {
  */
 export async function sembrarCatalogo() {
   const respuesta = await llamadaSeed()
+  return respuesta.data
+}
+
+/**
+ * Lee la racha actual asignada a cada piloto desde `catalogo/rachas`.
+ * @returns {Promise<{ ok: boolean, rachas: Object<string, number> }>}
+ */
+export async function obtenerRachasPilotos() {
+  const respuesta = await llamadaObtenerRachas()
+  return respuesta.data
+}
+
+/**
+ * Persiste el mapa completo de rachas. Cada punto suma 0,5M al precio
+ * del piloto en el siguiente mercado y 1 punto a su puntuación de jornada.
+ * @param {Object<string, number>} rachas - Mapa { numeroPiloto: enteroRacha }.
+ * @returns {Promise<{ ok: boolean, rachas: Object<string, number> }>}
+ */
+export async function guardarRachasPilotos(rachas) {
+  const respuesta = await llamadaGuardarRachas({ rachas })
   return respuesta.data
 }
