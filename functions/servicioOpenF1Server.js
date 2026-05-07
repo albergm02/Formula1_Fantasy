@@ -229,19 +229,26 @@ async function obtenerCondicionesCarrera(sessionKey) {
 /* ─── 6. Adelantamientos reales (Remontador) ────────────────────────────── */
 
 /**
- * Obtiene el número de adelantamientos realizados por cada piloto en una sesión.
- * Usa el endpoint /overtakes de OpenF1.
+ * Obtiene el número de adelantamientos realizados y recibidos por cada piloto
+ * en una sesión. Usa el endpoint /overtakes de OpenF1.
  * @param {number} sessionKey - Clave de la sesión de carrera.
- * @returns {Promise<Object>} Mapa { numeroPiloto → cantidadAdelantos }. Ej: { 1: 5, 44: 3 }
+ * @returns {Promise<Object>} Mapa { numeroPiloto → { realizados, recibidos } }.
  */
 async function obtenerAdelantamientosPorPiloto(sessionKey) {
   const adelantamientos = await consultarOpenF1(`/overtakes?session_key=${sessionKey}`)
   const conteo = {}
 
   for (const evento of adelantamientos) {
-    const numero = evento.overtaking_driver_number
-    if (numero != null) {
-      conteo[numero] = (conteo[numero] || 0) + 1
+    const realizador = evento.overtaking_driver_number
+    const receptor = evento.overtaken_driver_number
+
+    if (realizador != null) {
+      if (!conteo[realizador]) conteo[realizador] = { realizados: 0, recibidos: 0 }
+      conteo[realizador].realizados++
+    }
+    if (receptor != null) {
+      if (!conteo[receptor]) conteo[receptor] = { realizados: 0, recibidos: 0 }
+      conteo[receptor].recibidos++
     }
   }
 
@@ -343,7 +350,8 @@ async function recopilarDatosGranPremio(meetingKey) {
       posicionQualy: resultadosQualy[numeroPiloto] || 20,
       posicionCarrera: 99,
       posicionSalida: parrillaSalida[numeroPiloto] || 20,
-      numeroAdelantos: adelantamientos[numeroPiloto] || 0,
+      numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
+      numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
       numeroPitStops: stintsPiloto.numeroPitStops,
       porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
       dnf: fila.dnf === true,
@@ -364,7 +372,8 @@ async function recopilarDatosGranPremio(meetingKey) {
         posicionQualy: resultadosQualy[numeroPiloto] || 20,
         posicionCarrera: resultadosCarrera[numeroPiloto],
         posicionSalida: parrillaSalida[numeroPiloto] || resultadosCarrera[numeroPiloto],
-        numeroAdelantos: adelantamientos[numeroPiloto] || 0,
+        numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
+        numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
         numeroPitStops: stintsPiloto.numeroPitStops,
         porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
         dnf: false,
@@ -382,7 +391,8 @@ async function recopilarDatosGranPremio(meetingKey) {
       posicionQualy: resultadosQualy[numeroPiloto] || 20,
       posicionCarrera: 99,
       posicionSalida: parrillaSalida[numeroPiloto] || resultadosQualy[numeroPiloto] || 20,
-      numeroAdelantos: adelantamientos[numeroPiloto] || 0,
+      numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
+      numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
       numeroPitStops: 0,
       porcentajeStintMaximo: 0,
       dnf: true,

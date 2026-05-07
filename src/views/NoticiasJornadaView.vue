@@ -411,6 +411,13 @@ function formatearPorcentaje(valor) {
                                     </span>
                                 </div>
                                 <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Veces
+                                        adelantado</span>
+                                    <span class="text-base font-black text-white">
+                                        {{ piloto.actuacion.numeroVecesAdelantado ?? 0 }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Paradas en
                                         boxes</span>
                                     <span class="text-base font-black text-white">

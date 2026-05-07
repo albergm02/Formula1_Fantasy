@@ -13,7 +13,7 @@ const elementos = [
   { ruta: '/clasificacion', icono: 'pi-chart-bar', etiqueta: 'Ranking', tour: 'nav-ranking' },
   { ruta: '/garaje', icono: 'pi-warehouse', etiqueta: 'Garaje', tour: 'nav-garaje' },
   { ruta: '/mercado', icono: 'pi-shopping-cart', etiqueta: 'Mercado', tour: 'nav-mercado' },
-  { ruta: '/noticias', icono: 'pi-megaphone', etiqueta: 'Noticias', tour: 'nav-noticias' },
+  { ruta: '/jornada', icono: 'pi-chart-pie', etiqueta: 'Jornada', tour: 'nav-jornada' },
   { ruta: '/notificaciones', icono: 'pi-bell', etiqueta: 'Alertas', tour: 'nav-alertas' },
 ]
 </script>

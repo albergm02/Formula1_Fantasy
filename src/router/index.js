@@ -59,8 +59,8 @@ const rutas = [
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
-    path: '/noticias',
-    name: 'noticias',
+    path: '/jornada',
+    name: 'jornada',
     component: () => import('../views/NoticiasJornadaView.vue'),
     meta: { requiresAuth: true, requiresLiga: true },
   },

@@ -72,8 +72,8 @@ const pasosCanonicos = [
     texto: 'Puja por nuevos pilotos y desbloquea cláusulas de los rivales.',
   },
   {
-    objetivo: 'nav-noticias',
-    titulo: 'Noticias del Gran Premio',
+    objetivo: 'nav-jornada',
+    titulo: 'Jornada del Gran Premio',
     texto: 'Resultados oficiales y desglose de puntos de la última jornada disputada.',
   },
   {

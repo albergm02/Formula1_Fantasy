@@ -76,10 +76,18 @@ function calcularFactorTodoTerreno({
   return Math.round(factorClima * (1 + bonusCaos) * 100) / 100
 }
 
-function calcularFactorRemontador({ posicionCarrera, numeroAdelantos }) {
-  const factorBase = resolverFactorPorAdelantos(numeroAdelantos || 0)
-  const bonusPosicion = posicionCarrera <= 5 ? 0.05 : posicionCarrera <= 10 ? 0.025 : 0.0
-  return factorBase + bonusPosicion
+/**
+ * Factor basado en el diferencial de adelantamientos: realizados menos
+ * recibidos. Cada unidad de diferencial vale 0.1 puntos sobre la base 1.0
+ * (ej: +5 → 1.5, 0 → 1.0, -5 → 0.5). Se acota entre 0.3 y 1.7 para evitar
+ * extremos en carreras atípicas con muchos adelantamientos en cadena.
+ * @param {{ numeroAdelantos: number, numeroVecesAdelantado: number }} actuacion
+ * @returns {number}
+ */
+function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
+  const diferencial = (numeroAdelantos || 0) - (numeroVecesAdelantado || 0)
+  const factor = 1 + diferencial * 0.1
+  return Math.min(1.7, Math.max(0.3, factor))
 }
 
 function calcularFactorEstrategia(
@@ -121,15 +129,6 @@ function resolverFactorPosicionCarrera(posicion) {
   if (posicion <= 15) return 0.8
   if (posicion <= 20) return 0.6
   return 0.5
-}
-
-function resolverFactorPorAdelantos(numeroAdelantos) {
-  if (numeroAdelantos >= 14) return 1.45
-  if (numeroAdelantos >= 10) return 1.3
-  if (numeroAdelantos >= 7) return 1.15
-  if (numeroAdelantos >= 4) return 1.0
-  if (numeroAdelantos >= 1) return 0.8
-  return 0.55
 }
 
 function resolverBonusGestionStint(porcentajeStintMaximo) {
