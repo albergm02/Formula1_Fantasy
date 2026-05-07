@@ -16,7 +16,21 @@ import {
   getDoc,
   deleteDoc,
 } from 'firebase/firestore'
-import { db } from './servicioFirebase'
+import { httpsCallable } from 'firebase/functions'
+import { db, functions } from './servicioFirebase'
+
+const llamadaInicializarMercado = httpsCallable(functions, 'generarMercadoInicialLiga')
+
+/**
+ * Solicita al backend que genere el primer mercado de una liga recién creada.
+ * Idempotente: si el mercado de hoy ya existe para la liga, no lo recrea.
+ * @param {string} idLiga
+ * @returns {Promise<Object>} { ok, idMercado, totalCartas, fechaCierre } o el omitido.
+ */
+export const inicializarMercadoLiga = async (idLiga) => {
+  const respuesta = await llamadaInicializarMercado({ idLiga })
+  return respuesta.data
+}
 
 /* ─── Ligas ──────────────────────────────────────────────────────────────── */
 

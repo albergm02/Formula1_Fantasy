@@ -5,7 +5,6 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import {
-    dispararGeneracionMercado,
     dispararResolucionPujas,
     dispararProcesamientoJornada,
     resetearLiga,
@@ -16,7 +15,6 @@ import { pilotosBase } from '@/data/bases/pilotosBase'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Select from 'primevue/select'
-import Checkbox from 'primevue/checkbox'
 import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import Toast from 'primevue/toast'
@@ -28,7 +26,6 @@ const enrutador = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
 
-const cargandoMercado = ref(false)
 const cargandoPujas = ref(false)
 const cargandoJornada = ref(false)
 const cargandoReset = ref(false)
@@ -36,16 +33,12 @@ const cargandoRachas = ref(false)
 const guardandoRachas = ref(false)
 
 const ligas = ref([])
-const ligaSeleccionada = ref(null)
-const forzarRegeneracion = ref(false)
 const mercadoSeleccionado = ref(null)
 const mercadosDisponibles = ref([])
 const ligaAResetear = ref(null)
 const rachasPorPiloto = ref({})
 
 const ultimoResultado = ref(null)
-
-const fechaHoy = computed(() => new Date().toISOString().slice(0, 10))
 
 const pilotosOrdenados = computed(() =>
     [...pilotosBase].sort((a, b) => a.equipo.localeCompare(b.equipo) || a.nombre.localeCompare(b.nombre)),
@@ -109,34 +102,6 @@ async function manejarGuardarRachas() {
         })
     } finally {
         guardandoRachas.value = false
-    }
-}
-
-async function manejarGenerarMercado() {
-    cargandoMercado.value = true
-    ultimoResultado.value = null
-    try {
-        const datos = await dispararGeneracionMercado(
-            ligaSeleccionada.value || undefined,
-            { forzar: forzarRegeneracion.value },
-        )
-        ultimoResultado.value = datos
-        toast.add({
-            severity: 'success',
-            summary: 'Mercado generado',
-            detail: `${datos.resultados.length} liga(s) procesada(s).`,
-            life: 4000,
-        })
-        await cargarMercados()
-    } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'Error generando mercado',
-            detail: error.message,
-            life: 6000,
-        })
-    } finally {
-        cargandoMercado.value = false
     }
 }
 
@@ -280,110 +245,102 @@ function manejarResetearLiga() {
                 class="!text-zinc-400 hover:!text-red-500 cursor-pointer" />
         </header>
 
-        <main class="flex-1 p-4 max-w-4xl mx-auto w-full space-y-4">
-            <h1 class="text-2xl font-bold">Panel de testing</h1>
-            <p class="text-zinc-400 text-sm">
-                Disparo manual de procesos automatizados. Generar mercado siembra automáticamente
-                el catálogo si todavía no existe en Firestore.
-            </p>
-
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-shopping-cart text-[#E10600]" />
-                        <span>Generar mercado diario</span>
-                    </div>
-                </template>
-                <template #content>
-                    <p class="text-sm text-zinc-400 mb-3">
-                        Crea el mercado <code class="text-[#E10600]">{{ fechaHoy }}</code> y cierra/resuelve
-                        el del día anterior. Si el catálogo no existe, se siembra automáticamente antes.
-                        Idempotente salvo que marques "Forzar regeneración".
+        <main class="flex-1 p-4 max-w-6xl mx-auto w-full space-y-4">
+            <header class="flex items-end justify-between gap-3">
+                <div>
+                    <h1 class="text-xl font-black uppercase tracking-wide">Panel de administración</h1>
+                    <p class="text-zinc-500 text-xs mt-1">
+                        Gestión de pujas, jornadas, rachas y reset de ligas. El catálogo y los mercados
+                        diarios se inicializan automáticamente al crear cada liga.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-                        <div class="flex-1 w-full">
-                            <label class="text-xs text-zinc-500 block mb-1">
-                                Liga (opcional — si no eliges, se procesan todas)
-                            </label>
-                            <Select v-model="ligaSeleccionada" :options="ligas" optionLabel="nombre" optionValue="id"
-                                placeholder="Todas las ligas" showClear class="w-full" />
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
+                    <template #title>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="pi pi-gavel text-[#E10600]" />
+                            <span>Resolver pujas</span>
                         </div>
-                        <Button @click="manejarGenerarMercado" :loading="cargandoMercado" icon="pi pi-play"
-                            label="Generar mercado" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
-                    </div>
-                    <div class="flex items-center gap-2 mt-3">
-                        <Checkbox v-model="forzarRegeneracion" inputId="forzarRegen" binary />
-                        <label for="forzarRegen" class="text-xs text-zinc-400 cursor-pointer">
-                            Forzar regeneración (borra el mercado de hoy y sus pujas antes de crearlo)
-                        </label>
-                    </div>
-                </template>
-            </Card>
-
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-gavel text-[#E10600]" />
-                        <span>Resolver pujas de un mercado</span>
-                    </div>
-                </template>
-                <template #content>
-                    <p class="text-sm text-zinc-400 mb-3">
-                        Adjudica las cartas al mejor postor, descuenta presupuesto y cierra el mercado.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-                        <div class="flex-1 w-full">
-                            <label class="text-xs text-zinc-500 block mb-1">Mercado</label>
+                    </template>
+                    <template #content>
+                        <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
                             <Select v-model="mercadoSeleccionado" :options="mercadosDisponibles" optionLabel="label"
-                                optionValue="id" placeholder="Selecciona un mercado" filter class="w-full" />
+                                optionValue="id" placeholder="Selecciona un mercado" filter class="flex-1" />
+                            <Button @click="manejarResolverPujas" :loading="cargandoPujas" icon="pi pi-check-circle"
+                                label="Resolver" size="small"
+                                class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
                         </div>
-                        <Button @click="manejarResolverPujas" :loading="cargandoPujas" icon="pi pi-check-circle"
-                            label="Resolver pujas" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
-                    </div>
-                </template>
-            </Card>
+                    </template>
+                </Card>
+
+                <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
+                    <template #title>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="pi pi-flag-fill text-[#E10600]" />
+                            <span>Procesar jornada del último GP</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="flex flex-wrap gap-2">
+                            <Button @click="manejarProcesarJornada()" :loading="cargandoJornada" icon="pi pi-bolt"
+                                label="Procesar" size="small"
+                                class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                            <Button @click="manejarProcesarJornada({ forzar: true })" :loading="cargandoJornada"
+                                icon="pi pi-refresh" label="Forzar reproceso" size="small" severity="warning"
+                                class="!bg-amber-600 !border-amber-600 hover:!bg-amber-700" />
+                        </div>
+                    </template>
+                </Card>
+
+                <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border-2 border-red-900/60 lg:col-span-2">
+                    <template #title>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="pi pi-exclamation-triangle text-red-500" />
+                            <span class="text-red-400">Zona peligrosa · Resetear liga</span>
+                        </div>
+                    </template>
+                    <template #content>
+                        <p class="text-xs text-zinc-500 mb-2">
+                            Devuelve todos los participantes a 50M, 0 puntos y garaje vacío. Borra mercados,
+                            pujas y actividad. Irreversible.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
+                            <Select v-model="ligaAResetear" :options="ligas" optionLabel="nombre" optionValue="id"
+                                placeholder="Liga a resetear" filter class="flex-1" />
+                            <Button @click="manejarResetearLiga" :loading="cargandoReset" icon="pi pi-trash"
+                                label="Resetear" size="small" severity="danger"
+                                class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
+                        </div>
+                    </template>
+                </Card>
+            </div>
 
             <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
                 <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-flag-fill text-[#E10600]" />
-                        <span>Procesar jornada del último GP</span>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="pi pi-chart-line text-[#E10600]" />
+                            <span>Rachas de pilotos</span>
+                        </div>
+                        <Button @click="manejarGuardarRachas" :loading="guardandoRachas" icon="pi pi-save"
+                            label="Guardar" size="small" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
                     </div>
                 </template>
                 <template #content>
-                    <p class="text-sm text-zinc-400 mb-3">
-                        Recopila datos de OpenF1, calcula puntos para todas las participaciones y
-                        actualiza la clasificación.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <Button @click="manejarProcesarJornada()" :loading="cargandoJornada" icon="pi pi-bolt"
-                            label="Procesar jornada" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
-                        <Button @click="manejarProcesarJornada({ forzar: true })" :loading="cargandoJornada"
-                            icon="pi pi-refresh" label="Forzar reproceso" severity="warning"
-                            class="!bg-amber-600 !border-amber-600 hover:!bg-amber-700" />
-                    </div>
-                </template>
-            </Card>
-
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-chart-line text-[#E10600]" />
-                        <span>Rachas de pilotos</span>
-                    </div>
-                </template>
-                <template #content>
-                    <p class="text-sm text-zinc-400 mb-3">
+                    <p class="text-xs text-zinc-500 mb-3">
                         Cada punto de racha suma <strong class="text-[#E10600]">+0,5M</strong> al precio del piloto
-                        en el siguiente mercado generado y <strong class="text-[#E10600]">+1 punto</strong> a su
-                        puntuación de jornada. Acepta valores negativos. Aplica a todas las variantes del piloto.
+                        en el siguiente mercado y <strong class="text-[#E10600]">+1 punto</strong> a su puntuación
+                        de jornada. Aplica a todas sus variantes.
                     </p>
                     <div v-if="cargandoRachas" class="text-sm text-zinc-500">Cargando rachas…</div>
-                    <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-2">
+                    <div v-else
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto pr-2">
                         <div v-for="piloto in pilotosOrdenados" :key="piloto.numero"
                             class="flex items-center gap-2 p-2 bg-black/30 border border-zinc-800">
                             <img :src="piloto.imagen" :alt="piloto.nombre"
-                                class="w-10 h-10 object-cover border border-zinc-700" />
+                                class="w-9 h-9 object-cover border border-zinc-700" />
                             <div class="flex-1 min-w-0">
                                 <div class="text-xs font-bold text-white truncate">{{ piloto.nombre }}</div>
                                 <div class="text-[10px] text-zinc-500 uppercase">{{ piloto.equipo }}</div>
@@ -394,39 +351,11 @@ function manejarResetearLiga() {
                                 incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
                         </div>
                     </div>
-                    <Button @click="manejarGuardarRachas" :loading="guardandoRachas" icon="pi pi-save"
-                        label="Guardar rachas" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700 mt-3" />
-                </template>
-            </Card>
-
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border-2 border-red-900/60">
-                <template #title>
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-exclamation-triangle text-red-500" />
-                        <span class="text-red-400">Zona peligrosa · Resetear liga</span>
-                    </div>
-                </template>
-                <template #content>
-                    <p class="text-sm text-zinc-400 mb-3">
-                        Devuelve a TODOS los participantes de la liga a su estado inicial:
-                        <strong class="text-red-400">presupuesto 50M, 0 puntos, garaje vacío</strong>.
-                        Borra mercados, pujas y actividad. <strong>Irreversible.</strong>
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-                        <div class="flex-1 w-full">
-                            <label class="text-xs text-zinc-500 block mb-1">Liga a resetear</label>
-                            <Select v-model="ligaAResetear" :options="ligas" optionLabel="nombre" optionValue="id"
-                                placeholder="Selecciona una liga" filter class="w-full" />
-                        </div>
-                        <Button @click="manejarResetearLiga" :loading="cargandoReset" icon="pi pi-trash"
-                            label="Resetear liga" severity="danger"
-                            class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
-                    </div>
                 </template>
             </Card>
 
             <Message v-if="ultimoResultado" severity="info" :closable="false" class="!bg-[#1A1A1F] !border-zinc-700">
-                <pre class="text-xs overflow-auto max-h-72">{{ JSON.stringify(ultimoResultado, null, 2) }}</pre>
+                <pre class="text-xs overflow-auto max-h-60">{{ JSON.stringify(ultimoResultado, null, 2) }}</pre>
             </Message>
         </main>
     </div>

@@ -17,6 +17,7 @@ import {
   vincularLigaAlUsuario,
   desvincularLigaDelUsuario,
   cargarRankingLiga,
+  inicializarMercadoLiga,
 } from '@/services/servicioLigas'
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
 
@@ -139,6 +140,11 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       await vincularLigaAlUsuario(correoUsuario, idLiga)
       storeAutenticacion.usuarioActual.idsLigas.push(idLiga)
+
+      inicializarMercadoLiga(idLiga).catch((error) => {
+        console.warn(`No se pudo inicializar el mercado de la liga ${idLiga}:`, error.message)
+      })
+
       await cargarLigasUsuario()
       return { success: true, message: `Liga creada. Código: ${codigoInvitacion}` }
     } catch (error) {

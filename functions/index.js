@@ -30,11 +30,9 @@ const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacio
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
 const {
   cargarCatalogo,
-  invalidarCacheCatalogo,
   cargarRachas,
   aplicarRachasACatalogo,
   seleccionarCartasDiarias,
-  sembrarCatalogoEnFirestore,
 } = require('./mercadoServer')
 
 initializeApp()
@@ -589,25 +587,31 @@ async function exigirAdministrador(request) {
 }
 
 /**
- * Callable — dispara la generación del mercado diario.
- * Acepta `{ idLiga }` opcional. Sin idLiga, procesa todas las ligas.
+ * Callable — genera el primer mercado de una liga recién creada.
+ * Lo invoca el frontend tras `crearDocumentoLiga`. Solo lo puede llamar el
+ * administrador de esa liga. Es idempotente: si el mercado de hoy ya existe,
+ * no lo recrea.
  */
-exports.dispararMercadoDiarioManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { idLiga, forzar = false } = request.data || {}
-  const opciones = { forzar }
-  const resultados = []
-
-  if (idLiga) {
-    resultados.push(await ejecutarGeneracionMercadoParaLiga(idLiga, opciones))
-  } else {
-    const todasLigas = await db.collection('ligas').get()
-    for (const docLiga of todasLigas.docs) {
-      resultados.push(await ejecutarGeneracionMercadoParaLiga(docLiga.id, opciones))
-    }
+exports.generarMercadoInicialLiga = onCall({ region: 'europe-west1' }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  }
+  const email = request.auth.token.email
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
   }
 
-  return { ok: true, resultados }
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+  if (ligaSnap.data().admin !== email) {
+    throw new HttpsError('permission-denied', 'Solo el admin de la liga puede inicializarla.')
+  }
+
+  const resultado = await ejecutarGeneracionMercadoParaLiga(idLiga)
+  return { ok: true, ...resultado }
 })
 
 /**
@@ -708,23 +712,6 @@ exports.resetearLigaManual = onCall({ region: 'europe-west1' }, async (request) 
     participacionesReseteadas: participacionesSnap.size,
     mercadosBorrados: mercadosSnap.size,
     eventosActividadBorrados: actividadSnap.size,
-  }
-})
-
-/**
- * Callable — siembra el catálogo (pilotos, coches, potenciadores) en Firestore
- * desde /functions/data/catalogoBase.js. Sobrescribe los documentos existentes.
- * Necesario en cada entorno la primera vez (o cuando cambien los datos base).
- */
-exports.sembrarCatalogoManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { pilotos, coches, potenciadores } = await sembrarCatalogoEnFirestore(db)
-  invalidarCacheCatalogo()
-  return {
-    ok: true,
-    pilotos: pilotos.length,
-    coches: coches.length,
-    potenciadores: potenciadores.length,
   }
 })
 
