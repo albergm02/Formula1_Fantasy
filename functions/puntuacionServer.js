@@ -218,8 +218,7 @@ function calcularPuntuacionBase(atributos, pesos) {
 }
 
 function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
-  const escala = puntuacionBase / 100
-  return Math.max(0, Math.round(escala * 50 * factorJornada))
+  return Math.max(0, Math.round(puntuacionBase * factorJornada))
 }
 
 function aplicarMejorasAtributos(atributosBase, mejoras) {

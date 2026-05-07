@@ -318,6 +318,9 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const resultadosQualy = sesionQualy ? await obtenerResultadosSesion(sesionQualy.session_key) : {}
   const resultadosCarrera = await obtenerResultadosSesion(sesionCarrera.session_key)
+  const resultadosCompletosCarrera = await obtenerResultadosCompletosSesion(
+    sesionCarrera.session_key,
+  )
   const parrillaSalida = sesionQualy ? await obtenerParrillaSalida(sesionQualy.session_key) : {}
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
   const adelantamientos = await obtenerAdelantamientosPorPiloto(sesionCarrera.session_key)
@@ -325,6 +328,30 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const actuacionesPorPiloto = {}
 
+  // 1º DNFs/DNS/DSQ desde resultados completos (sin posición final).
+  for (const fila of resultadosCompletosCarrera) {
+    const numeroPiloto = fila.driver_number
+    if (numeroPiloto == null) continue
+    if (resultadosCarrera[numeroPiloto] != null) continue
+
+    const stintsPiloto = datosStints[numeroPiloto] || {
+      numeroPitStops: 0,
+      porcentajeStintMaximo: 0,
+    }
+    actuacionesPorPiloto[numeroPiloto] = {
+      posicionQualy: resultadosQualy[numeroPiloto] || 20,
+      posicionCarrera: 99,
+      posicionSalida: parrillaSalida[numeroPiloto] || 20,
+      numeroAdelantos: adelantamientos[numeroPiloto] || 0,
+      numeroPitStops: stintsPiloto.numeroPitStops,
+      porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
+      dnf: fila.dnf === true,
+      dns: fila.dns === true,
+      dsq: fila.dsq === true,
+    }
+  }
+
+  // 2º Pilotos con posición final válida.
   for (const numeroPiloto in resultadosCarrera) {
     if (Object.prototype.hasOwnProperty.call(resultadosCarrera, numeroPiloto)) {
       const stintsPiloto = datosStints[numeroPiloto] || {
@@ -339,6 +366,9 @@ async function recopilarDatosGranPremio(meetingKey) {
         numeroAdelantos: adelantamientos[numeroPiloto] || 0,
         numeroPitStops: stintsPiloto.numeroPitStops,
         porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
+        dnf: false,
+        dns: false,
+        dsq: false,
       }
     }
   }

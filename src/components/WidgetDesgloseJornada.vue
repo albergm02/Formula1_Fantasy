@@ -77,7 +77,7 @@ function explicarFactor(piloto) {
   }
 
   if (piloto.puntuacionBase) {
-    lineas.push(`Base: ${piloto.puntuacionBase} pts → escala: ${Math.round(piloto.puntuacionBase / 100 * 50 * factor)} pts`)
+    lineas.push(`Base: ${piloto.puntuacionBase} pts × ${factor} = ${Math.round(piloto.puntuacionBase * factor)} pts`)
   }
 
   return lineas

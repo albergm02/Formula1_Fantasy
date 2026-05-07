@@ -38,14 +38,14 @@ function acotarFactor(factor) {
 }
 
 /**
- * Convierte la puntuación base (0-100) y el factor de jornada en puntos finales.
+ * Convierte la puntuación base del piloto y el factor de jornada en puntos finales.
+ * Sin reescalado: el resultado es directamente puntuacionBase × factorJornada.
  * @param {number} puntuacionBase
  * @param {number} factorJornada
  * @returns {number}
  */
 export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
-  const escala = puntuacionBase / 100
-  return Math.max(0, Math.round(escala * 50 * factorJornada))
+  return Math.max(0, Math.round(puntuacionBase * factorJornada))
 }
 
 /* ─── Factores por variante ─────────────────────────────────────────────── */

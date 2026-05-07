@@ -4,8 +4,8 @@
  * @module sinergiaServer
  */
 
-const BONUS_EQUIPO_COMPLETO = 0.3
-const BONUS_COMBO_VARIANTE = 0.2
+const BONUS_EQUIPO_COMPLETO = 0.1
+const BONUS_COMBO_VARIANTE = 0.05
 
 /**
  * Calcula los bonus de sinergia aplicables al garaje del jugador.

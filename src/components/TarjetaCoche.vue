@@ -135,13 +135,12 @@ const confirmarEliminarPuja = () => {
             </p>
             <span
               class="ml-auto px-2 py-0.5 bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 text-[10px] font-black">
-              +{{ props.coche.habilidad.puntos }} PTS
+              +10%
             </span>
           </div>
           <p class="text-xs text-zinc-300 leading-relaxed">
-            Si alineas pilotos del mismo equipo que este chasis, recibirás
-            <strong class="text-emerald-300">+{{ props.coche.habilidad.puntos }} puntos extra</strong>
-            en cada Gran Premio.
+            Si alineas pilotos del mismo equipo que este chasis, los puntos totales de la jornada se
+            multiplican por <strong class="text-emerald-300">×1.10</strong>.
           </p>
         </div>
 

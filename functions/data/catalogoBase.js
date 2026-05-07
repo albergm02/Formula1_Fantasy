@@ -20,23 +20,23 @@
 // prettier-ignore
 const pilotosBase = [
   /* ══════════ McLAREN ══════════ */
-  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren', imagen: '/Pilotos/norris.webp',     atributos: { ritmo: 96, consistencia: 88, adaptabilidad: 87, agresividad: 72, gestion: 87 } },
+  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren', imagen: '/Pilotos/norris.webp',     atributos: { ritmo: 93, consistencia: 86, adaptabilidad: 85, agresividad: 70, gestion: 85 } },
   { numero: 81, nombre: 'Oscar Piastri',     equipo: 'McLaren', imagen: '/Pilotos/piastri.webp',    atributos: { ritmo: 86, consistencia: 87, adaptabilidad: 76, agresividad: 84, gestion: 80 } },
 
   /* ══════════ RED BULL ══════════ */
-  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull', imagen: '/Pilotos/verstappen.webp', atributos: { ritmo: 90, consistencia: 90, adaptabilidad: 88, agresividad: 98, gestion: 64 } },
+  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull', imagen: '/Pilotos/verstappen.webp', atributos: { ritmo: 88, consistencia: 88, adaptabilidad: 86, agresividad: 93, gestion: 64 } },
   { numero:  6, nombre: 'Isack Hadjar',      equipo: 'Red Bull', imagen: '/Pilotos/hadjar.webp',     atributos: { ritmo: 70, consistencia: 60, adaptabilidad: 64, agresividad: 52, gestion: 56 } },
 
   /* ══════════ FERRARI ══════════ */
-  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari', imagen: '/Pilotos/leclerc.webp',    atributos: { ritmo: 96, consistencia: 72, adaptabilidad: 78, agresividad: 88, gestion: 58 } },
-  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari', imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 70, consistencia: 88, adaptabilidad: 90, agresividad: 78, gestion: 93 } },
+  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari', imagen: '/Pilotos/leclerc.webp',    atributos: { ritmo: 93, consistencia: 72, adaptabilidad: 78, agresividad: 87, gestion: 58 } },
+  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari', imagen: '/Pilotos/hamilton.webp',   atributos: { ritmo: 70, consistencia: 86, adaptabilidad: 88, agresividad: 76, gestion: 90 } },
 
   /* ══════════ MERCEDES ══════════ */
-  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes', imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 92, consistencia: 90, adaptabilidad: 60, agresividad: 56, gestion: 90 } },
-  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes', imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 93, consistencia: 86, adaptabilidad: 90, agresividad: 88, gestion: 78 } },
+  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes', imagen: '/Pilotos/russell.webp',    atributos: { ritmo: 90, consistencia: 88, adaptabilidad: 60, agresividad: 56, gestion: 88 } },
+  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes', imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 90, consistencia: 84, adaptabilidad: 88, agresividad: 86, gestion: 76 } },
 
   /* ══════════ ASTON MARTIN ══════════ */
-  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 82, consistencia: 87, adaptabilidad: 66, agresividad: 89, gestion: 96 } },
+  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 80, consistencia: 86, adaptabilidad: 66, agresividad: 87, gestion: 93 } },
   { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', imagen: '/Pilotos/stroll.webp',     atributos: { ritmo: 50, consistencia: 42, adaptabilidad: 58, agresividad: 78, gestion: 46 } },
 
   /* ══════════ WILLIAMS ══════════ */
@@ -66,17 +66,17 @@ const pilotosBase = [
 
 // prettier-ignore
 const cochesBase = [
-  { id: 'alpine',       nombre: 'BWT Alpine F1',        precio: 16.0, puntos: 4, imagen: '/Coches/alpine.webp',      tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 4, descripcion: 'Bono si alineas pilotos Alpine.' } },
-  { id: 'aston_martin', nombre: 'Aston Martin Aramco',   precio: 10.0, puntos: 2, imagen: '/Coches/astonmartin.webp', tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 2, descripcion: 'Bono si alineas pilotos Aston Martin.' } },
-  { id: 'audi',         nombre: 'Audi Revolut F1',       precio: 13.0, puntos: 3, imagen: '/Coches/audi.webp',        tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 3, descripcion: 'Bono si alineas pilotos Audi.' } },
-  { id: 'cadillac',     nombre: 'Cadillac F1',            precio: 10.0, puntos: 2, imagen: '/Coches/cadillac.webp',   tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 2, descripcion: 'Bono si alineas pilotos Cadillac.' } },
-  { id: 'ferrari',      nombre: 'Ferrari',                precio: 26.0, puntos: 7, imagen: '/Coches/ferrari.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 7, descripcion: 'Bono si alineas pilotos Ferrari.' } },
-  { id: 'haas',         nombre: 'TGR Haas F1',            precio: 18.0, puntos: 5, imagen: '/Coches/haas.webp',       tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 5, descripcion: 'Bono si alineas pilotos Haas.' } },
-  { id: 'mclaren',      nombre: 'McLaren Mastercard',     precio: 22.0, puntos: 6, imagen: '/Coches/mclaren.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 6, descripcion: 'Bono si alineas pilotos McLaren.' } },
-  { id: 'mercedes',     nombre: 'Mercedes-AMG',            precio: 30.0, puntos: 8, imagen: '/Coches/mercedes.webp',   tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 8, descripcion: 'Bono si alineas pilotos Mercedes.' } },
-  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB',     precio: 16.0, puntos: 4, imagen: '/Coches/racingbulls.webp', tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 4, descripcion: 'Bono si alineas pilotos Racing Bulls.' } },
-  { id: 'red_bull',     nombre: 'Red Bull Racing',         precio: 17.0, puntos: 4, imagen: '/Coches/redbull.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 4, descripcion: 'Bono si alineas pilotos Red Bull.' } },
-  { id: 'williams',     nombre: 'Atlassian Williams',      precio: 12.0, puntos: 3, imagen: '/Coches/williams.webp',   tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 3, descripcion: 'Bono si alineas pilotos Williams.' } },
+  { id: 'alpine',       nombre: 'BWT Alpine F1',         precio: 16.0, puntos: 20, imagen: '/Coches/alpine.webp',      tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Alpine.' } },
+  { id: 'aston_martin', nombre: 'Aston Martin Aramco',   precio: 10.0, puntos: 10, imagen: '/Coches/astonmartin.webp', tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Aston Martin.' } },
+  { id: 'audi',         nombre: 'Audi Revolut F1',       precio: 13.0, puntos: 15, imagen: '/Coches/audi.webp',        tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Audi.' } },
+  { id: 'cadillac',     nombre: 'Cadillac F1',           precio: 10.0, puntos: 10, imagen: '/Coches/cadillac.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Cadillac.' } },
+  { id: 'ferrari',      nombre: 'Ferrari',               precio: 26.0, puntos: 35, imagen: '/Coches/ferrari.webp',     tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 35, descripcion: 'Bono si alineas pilotos Ferrari.' } },
+  { id: 'haas',         nombre: 'TGR Haas F1',           precio: 18.0, puntos: 25, imagen: '/Coches/haas.webp',        tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Bono si alineas pilotos Haas.' } },
+  { id: 'mclaren',      nombre: 'McLaren Mastercard',    precio: 22.0, puntos: 30, imagen: '/Coches/mclaren.webp',     tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 30, descripcion: 'Bono si alineas pilotos McLaren.' } },
+  { id: 'mercedes',     nombre: 'Mercedes-AMG',          precio: 30.0, puntos: 40, imagen: '/Coches/mercedes.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 40, descripcion: 'Bono si alineas pilotos Mercedes.' } },
+  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB',    precio: 16.0, puntos: 20, imagen: '/Coches/racingbulls.webp', tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Racing Bulls.' } },
+  { id: 'red_bull',     nombre: 'Red Bull Racing',       precio: 17.0, puntos: 20, imagen: '/Coches/redbull.webp',     tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Red Bull.' } },
+  { id: 'williams',     nombre: 'Atlassian Williams',    precio: 12.0, puntos: 15, imagen: '/Coches/williams.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Williams.' } },
 ]
 
 /* eslint-disable */

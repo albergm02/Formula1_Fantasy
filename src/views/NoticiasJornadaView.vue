@@ -186,6 +186,13 @@ function formatearPosicion(posicion) {
     return `P${posicion}`
 }
 
+function obtenerEstadoCarrera(actuacion) {
+    if (actuacion?.dsq) return 'DSQ'
+    if (actuacion?.dns) return 'DNS'
+    if (actuacion?.dnf) return 'DNF'
+    return null
+}
+
 function formatearPorcentaje(valor) {
     if (valor == null) return '—'
     return `${Math.round(valor * 100)}%`
@@ -315,8 +322,10 @@ function formatearPorcentaje(valor) {
                     <!-- Cabecera del piloto (clickable) -->
                     <button type="button" @click="alternarPiloto(piloto.numero)"
                         class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left hover:bg-[#1F1F25] transition-colors">
-                        <span class="w-10 text-center text-2xl font-black text-[#D4A843] tabular-nums">
-                            {{ formatearPosicion(piloto.actuacion.posicionCarrera) }}
+                        <span class="w-10 text-center text-2xl font-black tabular-nums"
+                            :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500 text-sm' : 'text-[#D4A843]'">
+                            {{ obtenerEstadoCarrera(piloto.actuacion) ||
+                                formatearPosicion(piloto.actuacion.posicionCarrera) }}
                         </span>
                         <div class="w-20 h-14 overflow-hidden bg-black border border-zinc-700 shrink-0">
                             <img :src="piloto.imagen" :alt="piloto.nombre" class="w-full h-full object-cover block" />
@@ -362,8 +371,10 @@ function formatearPorcentaje(valor) {
                                 <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
                                         carrera</span>
-                                    <span class="text-base font-black text-white">
-                                        {{ formatearPosicion(piloto.actuacion.posicionCarrera) }}
+                                    <span class="text-base font-black"
+                                        :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500' : 'text-white'">
+                                        {{ obtenerEstadoCarrera(piloto.actuacion) ||
+                                        formatearPosicion(piloto.actuacion.posicionCarrera) }}
                                     </span>
                                 </div>
                                 <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
