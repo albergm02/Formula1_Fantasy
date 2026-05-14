@@ -164,7 +164,7 @@ const manejarEliminarLiga = () => {
             <DataView :value="storeLigas.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
               <template #list="slotProps">
                 <div class="flex flex-col w-full gap-4">
-                  <div v-for="(item, index) in slotProps.items" :key="index"
+                  <div v-for="(item, index) in slotProps.items" :key="index" @click="abrirLiga(item.id)"
                     class="flex items-center justify-between p-4 bg-[#1A1A1F] border border-[#D4A843]/30">
                     <div class="flex flex-col gap-1 w-2/3">
                       <h3 class="pr-2 text-xl font-black uppercase truncate text-[#E10600]" :title="item.nombre">
@@ -183,7 +183,7 @@ const manejarEliminarLiga = () => {
                     <div class="flex gap-2 justify-end">
                       <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click="abrirOpcionesLiga(item)" />
-                      <Button icon="pi pi-flag-fill" class="!w-10 !h-10 !bg-[#E10600] !border-none !text-[#FFFFFF]"
+                      <Button icon="pi pi-play" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click="abrirLiga(item.id)" />
                     </div>
                   </div>

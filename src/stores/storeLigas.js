@@ -20,6 +20,7 @@ import {
   inicializarMercadoLiga,
 } from '@/services/servicioLigas'
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
+import { usarStoreNotificaciones } from './storeNotificaciones'
 
 const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) =>
@@ -144,6 +145,9 @@ export const usarStoreLigas = defineStore('ligas', () => {
       inicializarMercadoLiga(idLiga).catch((error) => {
         console.warn(`No se pudo inicializar el mercado de la liga ${idLiga}:`, error.message)
       })
+
+      const storeNotificaciones = usarStoreNotificaciones()
+      storeNotificaciones.registrarCreacionLiga(idLiga, nombreLiga).catch(() => {})
 
       await cargarLigasUsuario()
       return { success: true, message: `Liga creada. Código: ${codigoInvitacion}` }

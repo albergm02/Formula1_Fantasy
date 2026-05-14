@@ -116,6 +116,16 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
     })
   }
 
+  async function registrarCreacionLiga(idLiga, nombreLiga) {
+    const nombreUsuario = storeAutenticacion.usuarioActual.nombreVisible
+
+    await registrarActividad(idLiga, {
+      nombreUsuario,
+      tipo: TIPOS_ACTIVIDAD.CREACION,
+      descripcion: `ha creado la liga ${nombreLiga}`,
+    })
+  }
+
   /**
    * Registra que el usuario ha ejecutado una cláusula de rescisión.
    * @param {string} nombreElemento - Nombre de la carta fichada.
@@ -146,5 +156,6 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
     registrarIncorporacion,
     registrarAbandono,
     registrarClausula,
+    registrarCreacionLiga,
   }
 })

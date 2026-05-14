@@ -9,19 +9,19 @@ const navegar = (destino) => {
 }
 
 const elementos = [
-  { ruta: '/dashboard', icono: 'pi-home', etiqueta: 'Inicio', tour: 'nav-inicio' },
-  { ruta: '/clasificacion', icono: 'pi-chart-bar', etiqueta: 'Ranking', tour: 'nav-ranking' },
-  { ruta: '/garaje', icono: 'pi-warehouse', etiqueta: 'Garaje', tour: 'nav-garaje' },
-  { ruta: '/mercado', icono: 'pi-shopping-cart', etiqueta: 'Mercado', tour: 'nav-mercado' },
-  { ruta: '/jornada', icono: 'pi-chart-pie', etiqueta: 'Jornada', tour: 'nav-jornada' },
-  { ruta: '/notificaciones', icono: 'pi-bell', etiqueta: 'Alertas', tour: 'nav-alertas' },
+  { ruta: '/dashboard', icono: 'pi-home', etiqueta: 'Inicio' },
+  { ruta: '/clasificacion', icono: 'pi-chart-bar', etiqueta: 'Ranking' },
+  { ruta: '/garaje', icono: 'pi-warehouse', etiqueta: 'Garaje' },
+  { ruta: '/mercado', icono: 'pi-shopping-cart', etiqueta: 'Mercado' },
+  { ruta: '/jornada', icono: 'pi-chart-pie', etiqueta: 'Jornada' },
+  { ruta: '/notificaciones', icono: 'pi-bell', etiqueta: 'Alertas' },
 ]
 </script>
 
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1F] border-t border-[#E10600]">
     <div class="flex items-center justify-around px-1 py-1.5 sm:px-2 sm:py-2">
-      <button v-for="el in elementos" :key="el.ruta" :data-tour="el.tour" @click="navegar(el.ruta)"
+      <button v-for="el in elementos" :key="el.ruta" @click="navegar(el.ruta)"
         class="flex flex-col items-center gap-0.5 px-1.5 py-1 sm:px-3 cursor-pointer bg-transparent border-none min-w-0 flex-1"
         :class="ruta.path === el.ruta ? 'text-[#E10600]' : 'text-zinc-400'">
         <i class="pi text-base sm:text-lg" :class="el.icono"></i>

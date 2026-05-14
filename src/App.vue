@@ -1,71 +1,39 @@
 ﻿<script setup>
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import GestorPWA from '@/components/GestorPWA.vue'
-import TourOnboarding from '@/components/TourOnboarding.vue'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { usarStoreOnboarding } from '@/stores/storeOnboarding'
 import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
 
 const storeAutenticacion = usarStoreAutenticacion()
-const storeOnboarding = usarStoreOnboarding()
 const enrutador = useRouter()
 
-/* Iniciamos el observador para detectar cambios en el estado */
 let cancelarObservadorAutenticacion = () => { }
 
-/**
- * Observa los cambios de estado de autenticación de Firebase.
- * Cuando el usuario cierra sesión, limpia el estado del store y redirige al inicio.
- * El observador se registra en onMounted y se cancela en onUnmounted.
- */
+// Si Firebase detecta que el usuario cerró sesión, limpiamos el store y
+// expulsamos al login salvo que ya esté en una ruta pública.
 onMounted(() => {
   cancelarObservadorAutenticacion = escucharCambioEstadoAutenticacion((usuario) => {
-    // El usuario ha cerrado la sesion o la sesión ha expirado
     if (!usuario) {
       storeAutenticacion.limpiarSesion()
       const rutaActual = enrutador.currentRoute.value.path
       const estaEnRutaPublica = rutaActual === '/' || rutaActual === '/registro'
-      // ¿No está en una ruta pública? Es expulsado.
       if (!estaEnRutaPublica) enrutador.push('/')
     }
   })
 })
 
-// Al desmontar, apagamos el observador.
 onUnmounted(() => {
   cancelarObservadorAutenticacion()
 })
-
-/**
- * Lanza el recorrido guiado la primera vez que un usuario autenticado
- * accede a una ruta privada. La marca de "ya visto" se persiste en
- * localStorage dentro del propio store de onboarding.
- */
-watch(
-  () => [storeAutenticacion.datosCargados, storeAutenticacion.usuarioActual?.uid],
-  ([cargado, uid]) => {
-    if (!cargado || !uid) return
-    setTimeout(() => storeOnboarding.iniciarSiNoVisto(), 800)
-  },
-  { immediate: true },
-)
 </script>
 
-<!---------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!---------------------------------------------------------------------------------------------------------------------------->
-
 <template>
-  <!-- Fondo base de la aplicación -->
   <div class="fixed inset-0 h-full w-full bg-[#0C0C0E] -z-40"></div>
 
-  <!-- Componentes de PrimeVue -->
   <Toast position="top-center" />
   <ConfirmDialog :pt="{
     root: { class: '!bg-[#1A1A1F] !border-none' },
@@ -75,13 +43,9 @@ watch(
     icon: { class: '!text-[#E10600]' },
   }" />
 
-  <!-- Gestor de la PWA: instalación y avisos de nueva versión -->
   <GestorPWA />
 
-  <!-- Recorrido guiado interactivo (overlay global) -->
-  <TourOnboarding />
-
-  <!-- Muestra un loader mientras se cargan los datos de autenticación -->
+  <!-- Spinner mientras se resuelve el estado inicial de autenticación. -->
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
     <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
     <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Entrando al paddock...</p>

@@ -7,7 +7,7 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { usarStoreLigas } from '@/stores/storeLigas'
-const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
+const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
 import { ruedasBase } from '@/data/bases/ruedasBase'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
@@ -86,7 +86,7 @@ onMounted(async () => {
  * @param {Object} coche - El objeto coche que se desea vender.
  */
 const confirmarVentaCoche = (coche) => {
-  const valorReventa = calcularValorReventa(coche.precio)
+  const valorReventa = calcularValorReventa(coche.precio).toFixed(2)
 
   confirmar.require({
     icon: 'pi pi-exclamation-triangle',
@@ -110,7 +110,7 @@ const confirmarVentaCoche = (coche) => {
  * @param {Object} piloto - El objeto piloto que se desea despedir.
  */
 const confirmarVentaPiloto = (piloto) => {
-  const valorReventa = calcularValorReventa(piloto.precio)
+  const valorReventa = calcularValorReventa(piloto.precio).toFixed(2)
 
   confirmar.require({
     icon: 'pi pi-user-minus',

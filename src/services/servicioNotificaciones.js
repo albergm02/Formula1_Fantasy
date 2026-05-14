@@ -28,6 +28,7 @@ export const TIPOS_ACTIVIDAD = {
   INCORPORACION: 'incorporacion',
   ABANDONO: 'abandono',
   CLAUSULA: 'clausula',
+  CREACION: 'creacion',
 }
 
 /* ─── Exportaciones públicas ────────────────────────────────────────────── */

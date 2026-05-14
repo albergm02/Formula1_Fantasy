@@ -23,6 +23,8 @@ const etiquetaPorTipo = (tipo) => {
     venta: 'Venta',
     incorporacion: 'Incorporación',
     abandono: 'Abandono',
+    clausula: 'Cláusula',
+    creacion: 'Nueva liga',
   }
   return etiquetas[tipo] ?? tipo
 }

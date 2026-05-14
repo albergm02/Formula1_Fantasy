@@ -63,6 +63,42 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
 }
 
 /**
+ * Obtiene el último Gran Premio finalizado del año en curso.
+ * Útil como fallback cuando aún no se ha procesado una jornada en Firestore.
+ * @param {{ fetchImpl?: Function, anio?: number }} opciones
+ * @returns {Promise<Object|null>}
+ */
+export const obtenerUltimoGranPremioFinalizado = async ({
+  fetchImpl = fetch,
+  anio = 2026,
+} = {}) => {
+  const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
+  const reuniones = await respuesta.json()
+  const ahora = new Date()
+
+  const ultimaReunion = reuniones
+    .filter((reunion) => new Date(reunion.date_end) <= ahora)
+    .sort((primera, segunda) => new Date(segunda.date_end) - new Date(primera.date_end))[0]
+
+  if (!ultimaReunion) {
+    return null
+  }
+
+  const { fecha, hora } = formatearFechaGranPremio(ultimaReunion.date_start)
+
+  return {
+    circuito: ultimaReunion.circuit_short_name,
+    nombreGranPremio: ultimaReunion.meeting_name,
+    pais: ultimaReunion.country_name,
+    fecha,
+    hora,
+    imagen: ultimaReunion.circuit_image,
+    fechaInicio: ultimaReunion.date_start,
+    fechaFin: ultimaReunion.date_end,
+  }
+}
+
+/**
  * Calcula la cuenta regresiva hasta el inicio de un Gran Premio.
  * @param {string} fechaInicio - Fecha ISO del inicio de la carrera.
  * @param {Date} ahora - Fecha de referencia (inyectable para tests).

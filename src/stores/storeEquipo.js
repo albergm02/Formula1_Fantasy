@@ -11,7 +11,7 @@ const crearGarajeVacio = () => ({
   potenciadores: [],
   ruedas: { ...RUEDA_POR_DEFECTO },
 })
-const calcularValorReventa = (precio = 0) => Math.floor(Number(precio || 0) * 0.5)
+const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import {
   calcularPrecioClausula,
@@ -196,7 +196,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
 
       return {
         success: true,
-        message: `Has obtenido ${calcularValorReventa(elemento.precio)} de presupuesto. ¡Hasta pronto, ${elemento.nombre}!`,
+        message: `Has obtenido ${calcularValorReventa(elemento.precio).toFixed(2)}M de presupuesto. ¡Hasta pronto, ${elemento.nombre}!`,
       }
     } catch (error) {
       return { success: false, message: 'Error al vender el elemento. Inténtalo de nuevo.' }

@@ -1,8 +1,5 @@
 <script setup>
-/**
- * Componente que gestiona el ciclo de vida PWA: instalación nativa
- * (`beforeinstallprompt`) y aviso de nueva versión del Service Worker.
- */
+// Gestiona la instalación nativa de la PWA y el aviso de nueva versión del Service Worker.
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import Button from 'primevue/button'

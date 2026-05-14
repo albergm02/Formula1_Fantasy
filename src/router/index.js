@@ -92,29 +92,24 @@ enrutador.beforeEach(async (to) => {
   const storeAutenticacion = usarStoreAutenticacion()
   const storeLigas = usarStoreLigas()
 
-  // Si hay usuario pero aún no se han cargado sus datos, los inicializamos
   if (usuario && !storeAutenticacion.datosCargados) {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
   }
 
-  // Si la ruta es de administración, recargamos el perfil para asegurar que
-  // el flag esAdministrador refleje el estado más reciente en Firestore.
+  // En rutas de admin recargamos el perfil para asegurar el flag actualizado.
   if (usuario && to.meta.requiresAdmin) {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
   }
 
-  // Si no hay sesión activa, limpiamos el store para ocultar el spinner
   if (!usuario && !storeAutenticacion.datosCargados) {
     storeAutenticacion.limpiarSesion()
   }
 
-  // Si la ruta requiere autenticación pero no hay usuario, redirigimos al login
   if (to.meta.requiresAuth && !usuario) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // Si el usuario no ha verificado su correo, lo bloqueamos en la vista de verificación.
-  // Las cuentas de Google ya vienen verificadas, por lo que este guard no les afecta.
+  // El correo sin verificar bloquea el acceso a todo salvo a la propia vista de verificación.
   const rutaVerificacion = to.name === 'verificar-correo'
   if (usuario && !usuario.emailVerified && !rutaVerificacion) {
     return { name: 'verificar-correo' }
@@ -123,7 +118,6 @@ enrutador.beforeEach(async (to) => {
     return { name: 'ligas' }
   }
 
-  // Si la ruta requiere ser invitado pero hay usuario, redirigimos según su rol
   if (to.meta.requiresGuest && usuario) {
     if (!storeAutenticacion.perfilExiste) {
       return { name: 'registro-google' }
@@ -134,23 +128,20 @@ enrutador.beforeEach(async (to) => {
     return { name: 'ligas' }
   }
 
-  // Si el usuario tiene sesión pero no ha completado su perfil, redirigimos al registro de Google
   if (usuario && !storeAutenticacion.perfilExiste && !to.meta.requiresIncompleteProfile) {
     return { name: 'registro-google' }
   }
 
-  // Si la ruta requiere perfil incompleto pero el perfil ya existe, redirigimos a ligas
   if (to.meta.requiresIncompleteProfile && storeAutenticacion.perfilExiste) {
     return { name: 'ligas' }
   }
 
-  // Si la ruta requiere administrador pero el usuario no lo es, redirigimos al login
   if (to.meta.requiresAdmin && !storeAutenticacion.esAdministrador) {
     return { name: 'login' }
   }
 
-  // Si la ruta requiere liga pero el usuario no tiene ligas, redirigimos a ligas,
-  // si el usuario tiene ligas pero no se han cargado, las cargamos antes de permitir el acceso
+  // Las rutas que requieren liga necesitan que el usuario tenga al menos una;
+  // si las ligas no están cargadas todavía, las cargamos antes de continuar.
   if (to.meta.requiresLiga) {
     if (
       storeAutenticacion.usuarioActual.idsLigas.length > 0 &&

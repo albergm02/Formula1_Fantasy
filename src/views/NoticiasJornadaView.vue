@@ -13,6 +13,7 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import { suscribirseHistorialJornadas } from '@/services/servicioJornada'
+import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
 import { pilotosBase } from '@/data/bases/pilotosBase'
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
@@ -61,6 +62,7 @@ const cargando = ref(true)
 const pilotoExpandido = ref(null)
 const guiaAbierta = ref(false)
 const varianteGuiaExpandida = ref(null)
+const ultimoGranPremioPendiente = ref(null)
 let cancelarSuscripcion = () => { }
 
 const ruta = useRoute()
@@ -109,12 +111,22 @@ onMounted(async () => {
             await storeEscuderia.cargarEquipo(idLiga)
         }
     }
-    cancelarSuscripcion = suscribirseHistorialJornadas((jornadas) => {
+    cancelarSuscripcion = suscribirseHistorialJornadas(async (jornadas) => {
         historial.value = jornadas
         if (!idJornadaSeleccionada.value && jornadas.length > 0) {
             idJornadaSeleccionada.value = jornadas[0].id
         }
         cargando.value = false
+
+        // Si Firestore aún no tiene ninguna jornada, consultamos OpenF1
+        // directamente para informar del último GP corrido y evitar una pantalla vacía.
+        if (jornadas.length === 0 && !ultimoGranPremioPendiente.value) {
+            try {
+                ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
+            } catch (error) {
+                console.warn('No se pudo recuperar el último GP de OpenF1:', error.message)
+            }
+        }
     }) || (() => { })
 })
 
@@ -236,10 +248,39 @@ function formatearPorcentaje(valor) {
             </div>
 
             <!-- Sin jornada -->
-            <Message v-else-if="!hayJornada" severity="info" :closable="false">
-                Aún no hay ninguna jornada procesada. Vuelve tras el próximo Gran Premio para descubrir
-                cómo ha puntuado cada piloto.
-            </Message>
+            <div v-else-if="!hayJornada" class="flex flex-col gap-3">
+                <Message severity="info" :closable="false">
+                    Aún no hay ninguna jornada procesada. Los datos se publican automáticamente cada
+                    lunes tras el Gran Premio.
+                </Message>
+
+                <div v-if="ultimoGranPremioPendiente"
+                    class="bg-[#1A1A1F] border border-[#D4A843]/40 p-4 flex flex-col gap-2">
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-clock text-[#D4A843]"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">
+                            Último Gran Premio celebrado
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <img v-if="ultimoGranPremioPendiente.imagen" :src="ultimoGranPremioPendiente.imagen"
+                            alt="Circuito" class="w-24 h-16 object-contain" />
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-white">
+                                {{ ultimoGranPremioPendiente.nombreGranPremio }}
+                            </span>
+                            <span class="text-xs text-zinc-400">
+                                {{ ultimoGranPremioPendiente.circuito }} · {{ ultimoGranPremioPendiente.pais }}
+                            </span>
+                            <span class="text-xs text-zinc-500">{{ ultimoGranPremioPendiente.fecha }}</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-zinc-500 leading-relaxed">
+                        El cálculo de puntos para este GP está pendiente. Aparecerá aquí en cuanto se
+                        complete el procesamiento automático.
+                    </p>
+                </div>
+            </div>
 
             <!-- Selector de historial de jornadas -->
             <div v-if="!cargando && historial.length > 1" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">

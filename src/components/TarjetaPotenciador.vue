@@ -72,7 +72,7 @@ const confirmarEliminarPuja = () => {
 
         <!-- Imagen de fondo completa, desplazada a la derecha -->
         <img v-if="props.potenciador.imagen" :src="props.potenciador.imagen" :alt="props.potenciador.nombre"
-          class="absolute inset-0 w-full h-full object-cover" style="object-position: 65% center;" />
+          class="absolute inset-0 w-full h-full object-cover" style="object-position: 35% center;" />
 
         <!-- Badges superiores (precio + total pujas) -->
         <div v-if="modoMercado" class="absolute top-2 right-2 z-10 flex items-center gap-1.5">
