@@ -182,9 +182,9 @@ const manejarEliminarLiga = () => {
 
                     <div class="flex gap-2 justify-end">
                       <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
-                        @click="abrirOpcionesLiga(item)" />
+                        @click.stop="abrirOpcionesLiga(item)" />
                       <Button icon="pi pi-play" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
-                        @click="abrirLiga(item.id)" />
+                        @click.stop="abrirLiga(item.id)" />
                     </div>
                   </div>
                 </div>
