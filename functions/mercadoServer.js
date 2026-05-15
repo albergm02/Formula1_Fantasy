@@ -86,7 +86,9 @@ function aplicarRachasACatalogo(catalogo, rachasPorNumero = {}) {
     if (racha === 0) {
       return { ...piloto, racha: 0 }
     }
-    const precioAjustado = Number((piloto.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1))
+    const precioAjustado = Number(
+      (piloto.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1),
+    )
     const puntuacionAjustada = Number((piloto.puntuacionBase + racha).toFixed(1))
     return {
       ...piloto,
@@ -99,9 +101,9 @@ function aplicarRachasACatalogo(catalogo, rachasPorNumero = {}) {
 }
 
 const CARTAS_POR_DIA = {
-  pilotos: 8,
-  coches: 2,
-  potenciadores: 8,
+  pilotos: 3,
+  coches: 1,
+  potenciadores: 3,
 }
 
 function mezclarArray(array) {
@@ -112,14 +114,71 @@ function mezclarArray(array) {
   return array
 }
 
-function seleccionarCartasDiarias(catalogo) {
-  const pilotosDelDia = mezclarArray([...catalogo.pilotos]).slice(0, CARTAS_POR_DIA.pilotos)
-  const cochesDelDia = mezclarArray([...catalogo.coches]).slice(0, CARTAS_POR_DIA.coches)
-  const potenciadoresDelDia = mezclarArray([...catalogo.potenciadores]).slice(
+/**
+ * Selecciona aleatoriamente las cartas que aparecerán hoy en el mercado.
+ *
+ * Reglas de exclusión:
+ *  - Pilotos: si un piloto está fichado por cualquier participante (en cualquiera
+ *    de sus variantes), todas sus variantes se omiten del mercado. Cuando se
+ *    vende, el piloto vuelve a estar disponible.
+ *  - Coches y potenciadores: se filtran por `id` exacto.
+ *
+ * Además, en cada generación cada piloto aparece como mucho una vez: se
+ * agrupan sus variantes y se elige aleatoriamente una sola por piloto.
+ *
+ * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
+ * @param {Object} [exclusiones]
+ * @param {Set<number>|Array<number>} [exclusiones.numerosPilotos] - Pilotos bloqueados (por número).
+ * @param {Set<string>|Array<string>} [exclusiones.idsCartas] - Coches/potenciadores bloqueados (por id).
+ * @returns {Array} Cartas seleccionadas para el mercado del día.
+ */
+function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
+  const numerosBloqueados =
+    exclusiones.numerosPilotos instanceof Set
+      ? exclusiones.numerosPilotos
+      : new Set(exclusiones.numerosPilotos || [])
+  const idsBloqueados =
+    exclusiones.idsCartas instanceof Set
+      ? exclusiones.idsCartas
+      : new Set(exclusiones.idsCartas || [])
+
+  const pilotosDelDia = elegirPilotosUnicos(catalogo.pilotos, numerosBloqueados)
+  const cochesDelDia = mezclarArray(catalogo.coches.filter((c) => !idsBloqueados.has(c.id))).slice(
     0,
-    CARTAS_POR_DIA.potenciadores,
+    CARTAS_POR_DIA.coches,
   )
+  const potenciadoresDelDia = mezclarArray(
+    catalogo.potenciadores.filter((p) => !idsBloqueados.has(p.id)),
+  ).slice(0, CARTAS_POR_DIA.potenciadores)
+
   return [...pilotosDelDia, ...cochesDelDia, ...potenciadoresDelDia]
+}
+
+/**
+ * Agrupa las variantes de cada piloto, descarta los bloqueados y devuelve
+ * como máximo `CARTAS_POR_DIA.pilotos` cartas, eligiendo una sola variante
+ * aleatoria por piloto.
+ * @param {Array} cartasPiloto
+ * @param {Set<number>} numerosBloqueados
+ * @returns {Array}
+ */
+function elegirPilotosUnicos(cartasPiloto, numerosBloqueados) {
+  const variantesPorPiloto = new Map()
+  for (const carta of cartasPiloto) {
+    if (numerosBloqueados.has(carta.numero)) continue
+    if (!variantesPorPiloto.has(carta.numero)) {
+      variantesPorPiloto.set(carta.numero, [])
+    }
+    variantesPorPiloto.get(carta.numero).push(carta)
+  }
+
+  const numerosBarajados = mezclarArray([...variantesPorPiloto.keys()])
+  const numerosElegidos = numerosBarajados.slice(0, CARTAS_POR_DIA.pilotos)
+
+  return numerosElegidos.map((numero) => {
+    const variantes = variantesPorPiloto.get(numero)
+    return variantes[Math.floor(Math.random() * variantes.length)]
+  })
 }
 
 module.exports = {

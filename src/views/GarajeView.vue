@@ -216,10 +216,10 @@ const confirmarInversionClausula = async () => {
       <div class="flex items-center gap-3 px-6 mb-3">
         <i class="pi pi-car text-lg text-white"></i>
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
-        <span class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.coches.filter(c => c.equipado).length >= 1
-          ? 'text-emerald-400 border-emerald-500/50'
-          : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.coches.filter(c => c.equipado).length
-          }}/1</span>
+        <span
+          class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
+          {{storeEscuderia.garaje.coches.filter(c => c.equipado).length}} equipados
+        </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
@@ -350,10 +350,10 @@ const confirmarInversionClausula = async () => {
       <div class="flex items-center gap-3 px-6">
         <i class="pi pi-users text-lg text-white"></i>
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
-        <span class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.pilotos.filter(p => p.equipado).length >= 2
-          ? 'text-emerald-400 border-emerald-500/50'
-          : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.pilotos.filter(p => p.equipado).length
-          }}/2</span>
+        <span
+          class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
+          {{storeEscuderia.garaje.pilotos.filter(p => p.equipado).length}} titulares
+        </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 
@@ -409,10 +409,10 @@ const confirmarInversionClausula = async () => {
       <div class="flex items-center gap-3 px-6 mb-3">
         <i class="pi pi-bolt text-lg text-white"></i>
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
-        <span class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest" :class="storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length >= 3
-          ? 'text-amber-400 border-amber-500/50'
-          : 'text-zinc-500 border-zinc-700'">{{storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length
-          }}/3</span>
+        <span
+          class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-amber-400 border-amber-500/50">
+          {{storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length}} activos
+        </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </div>
 

@@ -466,6 +466,38 @@ async function resolverPujasMercado(idMercado) {
 }
 
 /**
+ * Recopila las exclusiones aplicables al próximo mercado de la liga:
+ *  - Números de pilotos fichados (cualquier variante bloquea al piloto entero).
+ *  - IDs de coches y potenciadores ocupados.
+ * @param {string} idLiga
+ * @returns {Promise<{ numerosPilotos: Set<number>, idsCartas: Set<string> }>}
+ */
+async function recopilarCartasFichadasEnLiga(idLiga) {
+  const participacionesSnap = await db
+    .collection('participaciones')
+    .where('id_liga', '==', idLiga)
+    .get()
+
+  const numerosPilotos = new Set()
+  const idsCartas = new Set()
+  for (const documento of participacionesSnap.docs) {
+    const garaje = documento.data().garaje || {}
+    for (const carta of garaje.pilotos || []) {
+      if (carta && typeof carta.numero !== 'undefined') {
+        numerosPilotos.add(carta.numero)
+      }
+    }
+    for (const carta of garaje.coches || []) {
+      if (carta && carta.id) idsCartas.add(carta.id)
+    }
+    for (const carta of garaje.potenciadores || []) {
+      if (carta && carta.id) idsCartas.add(carta.id)
+    }
+  }
+  return { numerosPilotos, idsCartas }
+}
+
+/**
  * Genera el mercado diario para UNA liga específica.
  * Crea un documento en 'mercados/{idLiga}_{YYYY-MM-DD}'.
  * Es idempotente: si el mercado de hoy ya existe para esa liga, no lo recrea.
@@ -513,7 +545,10 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
   const catalogoBase = await cargarCatalogo(db)
   const rachasPorPiloto = await cargarRachas(db)
   const catalogoConRachas = aplicarRachasACatalogo(catalogoBase, rachasPorPiloto)
-  const cartasDelDia = seleccionarCartasDiarias(catalogoConRachas)
+
+  /* ── Recopilar cartas ya fichadas en la liga para excluirlas ── */
+  const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
+  const cartasDelDia = seleccionarCartasDiarias(catalogoConRachas, exclusionesLiga)
 
   /* ── Crear documento del mercado de hoy para esta liga ── */
   const fechaApertura = ahora

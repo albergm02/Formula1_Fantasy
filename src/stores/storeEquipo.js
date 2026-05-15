@@ -142,11 +142,9 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     }
 
     if (tipoElemento === 'coche') {
-      const hayEquipado = garaje.value.coches.some((c) => c.equipado)
-      garaje.value.coches.push({ ...elementoComprado, equipado: !hayEquipado })
+      garaje.value.coches.push({ ...elementoComprado, equipado: true })
     } else if (tipoElemento === 'piloto') {
-      const pilotosEquipados = garaje.value.pilotos.filter((p) => p.equipado).length
-      garaje.value.pilotos.push({ ...elementoComprado, equipado: pilotosEquipados < 2 })
+      garaje.value.pilotos.push({ ...elementoComprado, equipado: true })
     } else if (tipoElemento === 'potenciador') {
       garaje.value.potenciadores.push(elementoComprado)
     }
@@ -220,14 +218,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       return {
         success: false,
         message: 'Debes tener al menos un piloto fichado para equipar un potenciador.',
-      }
-    }
-
-    const potenciadoresEquipados = garaje.value.potenciadores.filter((p) => p.equipado).length
-    if (!potenciador.equipado && potenciadoresEquipados >= 3) {
-      return {
-        success: false,
-        message: `Solo puedes equipar 3 potenciadores por carrera. Desinstala uno primero.`,
       }
     }
 
