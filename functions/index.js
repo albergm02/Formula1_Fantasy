@@ -30,7 +30,8 @@ const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacio
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
 const {
   cargarCatalogo,
-  cargarRachas,
+  cargarRachasPilotos,
+  cargarRachasCoches,
   aplicarRachasACatalogo,
   seleccionarCartasDiarias,
 } = require('./mercadoServer')
@@ -159,7 +160,11 @@ async function ejecutarProcesarJornada(opciones = {}) {
 
   const idJornada = `gp_${granPremio.meeting_key}`
 
-  const rachasPorPiloto = await cargarRachas(db)
+  const [rachasPorPiloto, rachasPorCoche] = await Promise.all([
+    cargarRachasPilotos(db),
+    cargarRachasCoches(db),
+  ])
+  const rachas = { pilotos: rachasPorPiloto, coches: rachasPorCoche }
   const todasParticipaciones = await db.collection('participaciones').get()
   const batch = db.batch()
   let participacionesProcesadas = 0
@@ -183,7 +188,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
       condiciones,
     )
 
-    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto, rachasPorPiloto)
+    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto, rachas)
 
     for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
       const detalle = detallesPorPiloto[pilotoDesglose.id]
@@ -248,7 +253,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
     participacionesProcesadas,
     condiciones,
     actuacionesPorPiloto,
-    rachasAplicadas: rachasPorPiloto,
+    rachasAplicadas: rachas,
     desglose: desgloseJornada,
   })
 
@@ -543,8 +548,14 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
 
   /* ── Cargar catálogo (auto-seed si falta) + rachas y aplicarlas antes de mezclar ── */
   const catalogoBase = await cargarCatalogo(db)
-  const rachasPorPiloto = await cargarRachas(db)
-  const catalogoConRachas = aplicarRachasACatalogo(catalogoBase, rachasPorPiloto)
+  const [rachasPorPiloto, rachasPorCoche] = await Promise.all([
+    cargarRachasPilotos(db),
+    cargarRachasCoches(db),
+  ])
+  const catalogoConRachas = aplicarRachasACatalogo(catalogoBase, {
+    pilotos: rachasPorPiloto,
+    coches: rachasPorCoche,
+  })
 
   /* ── Recopilar cartas ya fichadas en la liga para excluirlas ── */
   const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
@@ -761,7 +772,7 @@ exports.resetearLigaManual = onCall({ region: 'europe-west1' }, async (request) 
 
 exports.obtenerRachasPilotos = onCall({ region: 'europe-west1' }, async (request) => {
   await exigirAdministrador(request)
-  const rachas = await cargarRachas(db)
+  const rachas = await cargarRachasPilotos(db)
   return { ok: true, rachas }
 })
 
@@ -778,6 +789,31 @@ exports.guardarRachasPilotos = onCall({ region: 'europe-west1' }, async (request
     rachasNormalizadas[numero] = entero
   }
   await db.collection('catalogo').doc('rachas').set({
+    rachas: rachasNormalizadas,
+    fechaActualizacion: new Date().toISOString(),
+  })
+  return { ok: true, rachas: rachasNormalizadas }
+})
+
+exports.obtenerRachasCoches = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const rachas = await cargarRachasCoches(db)
+  return { ok: true, rachas }
+})
+
+exports.guardarRachasCoches = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { rachas } = request.data || {}
+  if (!rachas || typeof rachas !== 'object') {
+    throw new HttpsError('invalid-argument', 'Falta el mapa de rachas.')
+  }
+  const rachasNormalizadas = {}
+  for (const [idCoche, valor] of Object.entries(rachas)) {
+    const entero = Number.parseInt(valor, 10)
+    if (!Number.isFinite(entero) || entero === 0) continue
+    rachasNormalizadas[idCoche] = entero
+  }
+  await db.collection('catalogo').doc('rachas_coches').set({
     rachas: rachasNormalizadas,
     fechaActualizacion: new Date().toISOString(),
   })

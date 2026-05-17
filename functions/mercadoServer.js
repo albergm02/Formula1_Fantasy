@@ -67,22 +67,38 @@ function invalidarCacheCatalogo() {
  * @param {FirebaseFirestore.Firestore} db
  * @returns {Promise<Object<string, number>>} Mapa { numeroPiloto: racha }.
  */
-async function cargarRachas(db) {
+async function cargarRachasPilotos(db) {
   const documento = await db.collection('catalogo').doc('rachas').get()
   if (!documento.exists) return {}
   return documento.data().rachas || {}
 }
 
 /**
- * Devuelve un nuevo catálogo con las rachas aplicadas sobre las cartas de piloto.
+ * Lee el documento `catalogo/rachas_coches` con la racha actual de cada coche.
+ * @param {FirebaseFirestore.Firestore} db
+ * @returns {Promise<Object<string, number>>} Mapa { idCoche: racha }.
+ */
+async function cargarRachasCoches(db) {
+  const documento = await db.collection('catalogo').doc('rachas_coches').get()
+  if (!documento.exists) return {}
+  return documento.data().rachas || {}
+}
+
+/**
+ * Devuelve un nuevo catálogo con las rachas aplicadas sobre pilotos y coches.
  * No muta el catálogo original (cache compartida).
  * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
- * @param {Object<string, number>} rachasPorNumero
+ * @param {Object} [rachas]
+ * @param {Object<string, number>} [rachas.pilotos] - Mapa { numeroPiloto: racha }.
+ * @param {Object<string, number>} [rachas.coches] - Mapa { idCoche: racha }.
  * @returns {{ pilotos: Array, coches: Array, potenciadores: Array }}
  */
-function aplicarRachasACatalogo(catalogo, rachasPorNumero = {}) {
+function aplicarRachasACatalogo(catalogo, rachas = {}) {
+  const rachasPilotos = rachas.pilotos || {}
+  const rachasCoches = rachas.coches || {}
+
   const pilotosConRacha = catalogo.pilotos.map((piloto) => {
-    const racha = Number(rachasPorNumero[piloto.numero] || 0)
+    const racha = Number(rachasPilotos[piloto.numero] || 0)
     if (racha === 0) {
       return { ...piloto, racha: 0 }
     }
@@ -97,7 +113,25 @@ function aplicarRachasACatalogo(catalogo, rachasPorNumero = {}) {
       racha,
     }
   })
-  return { ...catalogo, pilotos: pilotosConRacha }
+
+  const cochesConRacha = catalogo.coches.map((coche) => {
+    const racha = Number(rachasCoches[coche.id] || 0)
+    if (racha === 0) {
+      return { ...coche, racha: 0 }
+    }
+    const precioAjustado = Number(
+      (coche.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1),
+    )
+    const puntosAjustados = Number((coche.puntos + racha).toFixed(1))
+    return {
+      ...coche,
+      precio: Math.max(0.5, precioAjustado),
+      puntos: puntosAjustados,
+      racha,
+    }
+  })
+
+  return { ...catalogo, pilotos: pilotosConRacha, coches: cochesConRacha }
 }
 
 const CARTAS_POR_DIA = {
@@ -184,7 +218,8 @@ function elegirPilotosUnicos(cartasPiloto, numerosBloqueados) {
 module.exports = {
   cargarCatalogo,
   invalidarCacheCatalogo,
-  cargarRachas,
+  cargarRachasPilotos,
+  cargarRachasCoches,
   aplicarRachasACatalogo,
   seleccionarCartasDiarias,
   sembrarCatalogoEnFirestore,

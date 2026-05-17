@@ -17,6 +17,8 @@ const llamadaJornada = httpsCallable(functions, 'dispararJornadaSemanalManual')
 const llamadaReset = httpsCallable(functions, 'resetearLigaManual')
 const llamadaObtenerRachas = httpsCallable(functions, 'obtenerRachasPilotos')
 const llamadaGuardarRachas = httpsCallable(functions, 'guardarRachasPilotos')
+const llamadaObtenerRachasCoches = httpsCallable(functions, 'obtenerRachasCoches')
+const llamadaGuardarRachasCoches = httpsCallable(functions, 'guardarRachasCoches')
 
 /**
  * Dispara la resolución de pujas y cierre de un mercado concreto.
@@ -68,5 +70,25 @@ export async function obtenerRachasPilotos() {
  */
 export async function guardarRachasPilotos(rachas) {
   const respuesta = await llamadaGuardarRachas({ rachas })
+  return respuesta.data
+}
+
+/**
+ * Lee la racha actual asignada a cada coche desde `catalogo/rachas_coches`.
+ * @returns {Promise<{ ok: boolean, rachas: Object<string, number> }>}
+ */
+export async function obtenerRachasCoches() {
+  const respuesta = await llamadaObtenerRachasCoches()
+  return respuesta.data
+}
+
+/**
+ * Persiste el mapa completo de rachas de coches. Cada punto suma 0,5M al precio
+ * del coche en el siguiente mercado y 1 punto a su puntuación de jornada.
+ * @param {Object<string, number>} rachas - Mapa { idCoche: enteroRacha }.
+ * @returns {Promise<{ ok: boolean, rachas: Object<string, number> }>}
+ */
+export async function guardarRachasCoches(rachas) {
+  const respuesta = await llamadaGuardarRachasCoches({ rachas })
   return respuesta.data
 }
