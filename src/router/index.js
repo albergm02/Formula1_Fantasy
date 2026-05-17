@@ -71,6 +71,12 @@ const rutas = [
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
+    path: '/perfil',
+    name: 'perfil',
+    component: () => import('../views/PerfilView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/verificar-correo',
     name: 'verificar-correo',
     component: () => import('../views/VerificacionCorreoView.vue'),

@@ -119,9 +119,7 @@ function aplicarRachasACatalogo(catalogo, rachas = {}) {
     if (racha === 0) {
       return { ...coche, racha: 0 }
     }
-    const precioAjustado = Number(
-      (coche.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1),
-    )
+    const precioAjustado = Number((coche.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1))
     const puntosAjustados = Number((coche.puntos + racha).toFixed(1))
     return {
       ...coche,

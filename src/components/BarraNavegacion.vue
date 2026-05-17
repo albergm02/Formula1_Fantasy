@@ -13,8 +13,8 @@ const elementos = [
   { ruta: '/clasificacion', icono: 'pi-chart-bar', etiqueta: 'Ranking' },
   { ruta: '/garaje', icono: 'pi-warehouse', etiqueta: 'Garaje' },
   { ruta: '/mercado', icono: 'pi-shopping-cart', etiqueta: 'Mercado' },
-  { ruta: '/jornada', icono: 'pi-chart-pie', etiqueta: 'Jornada' },
   { ruta: '/notificaciones', icono: 'pi-bell', etiqueta: 'Alertas' },
+  { ruta: '/jornada', icono: 'pi-question-circle', etiqueta: 'Guía' },
 ]
 </script>
 

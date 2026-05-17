@@ -21,6 +21,7 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
+const { getAuth } = require('firebase-admin/auth')
 
 const {
   recopilarDatosGranPremio,
@@ -818,4 +819,275 @@ exports.guardarRachasCoches = onCall({ region: 'europe-west1' }, async (request)
     fechaActualizacion: new Date().toISOString(),
   })
   return { ok: true, rachas: rachasNormalizadas }
+})
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GESTIÓN DE PERFIL — Cambio de nombre, cambio de correo y baja de cuenta.
+   ───────────────────────────────────────────────────────────────────────────
+   Las acciones sensibles (cambio de email y borrado) requieren que el cliente
+   haya reautenticado al usuario justo antes de invocar la callable.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const FORMATO_NOMBRE = /^[A-Za-z0-9_]{3,20}$/
+const DIAS_BLOQUEO_CAMBIO_NOMBRE = 30
+const MILISEGUNDOS_POR_DIA = 24 * 60 * 60 * 1000
+
+/**
+ * Devuelve el email del usuario autenticado o lanza si no hay sesión.
+ * @param {import('firebase-functions/v2/https').CallableRequest} request
+ * @returns {string}
+ */
+function exigirEmailAutenticado(request) {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  }
+  const email = request.auth.token.email
+  if (!email) {
+    throw new HttpsError('permission-denied', 'Token sin email.')
+  }
+  return email
+}
+
+/**
+ * Callable — cambia el nombre visible del usuario autenticado.
+ * Reglas: formato A-Z 0-9 _ (3-20 chars), unicidad global, máximo un cambio cada 30 días.
+ */
+exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const nombreNuevo = String(request.data?.nombreNuevo || '').trim()
+
+  if (!FORMATO_NOMBRE.test(nombreNuevo)) {
+    throw new HttpsError(
+      'invalid-argument',
+      'El nombre debe tener entre 3 y 20 caracteres alfanuméricos o guion bajo.',
+    )
+  }
+
+  const usuarioSnap = await db.collection('usuarios').doc(email).get()
+  if (!usuarioSnap.exists) {
+    throw new HttpsError('not-found', 'No existe tu perfil.')
+  }
+  const datos = usuarioSnap.data()
+
+  if (datos.nombre === nombreNuevo) {
+    throw new HttpsError('already-exists', 'Ya tienes ese nombre.')
+  }
+
+  const fechaUltimoCambio = datos.fechaUltimoCambioNombre
+    ? new Date(datos.fechaUltimoCambioNombre)
+    : null
+  if (fechaUltimoCambio) {
+    const diasTranscurridos = (Date.now() - fechaUltimoCambio.getTime()) / MILISEGUNDOS_POR_DIA
+    if (diasTranscurridos < DIAS_BLOQUEO_CAMBIO_NOMBRE) {
+      const diasRestantes = Math.ceil(DIAS_BLOQUEO_CAMBIO_NOMBRE - diasTranscurridos)
+      throw new HttpsError(
+        'failed-precondition',
+        `Solo puedes cambiar el nombre una vez cada 30 días. Faltan ${diasRestantes} días.`,
+      )
+    }
+  }
+
+  const colision = await db.collection('usuarios').where('nombre', '==', nombreNuevo).limit(1).get()
+  if (!colision.empty) {
+    throw new HttpsError('already-exists', 'Ese nombre ya está en uso.')
+  }
+
+  await db.collection('usuarios').doc(email).update({
+    nombre: nombreNuevo,
+    fechaUltimoCambioNombre: new Date().toISOString(),
+  })
+
+  return { ok: true, nombre: nombreNuevo }
+})
+
+/**
+ * Callable — migra todos los documentos de Firestore tras un cambio de correo en Auth.
+ * El cliente debe haber ejecutado primero `updateEmail()` y volver a obtener el token.
+ * El token recibido aquí ya lleva el nuevo correo: si no coincide, abortamos.
+ */
+exports.migrarCorreoUsuario = onCall({ region: 'europe-west1' }, async (request) => {
+  const emailToken = exigirEmailAutenticado(request)
+  const correoAnterior = String(request.data?.correoAnterior || '')
+    .trim()
+    .toLowerCase()
+  const correoNuevo = String(request.data?.correoNuevo || '')
+    .trim()
+    .toLowerCase()
+
+  if (!correoAnterior || !correoNuevo || correoAnterior === correoNuevo) {
+    throw new HttpsError('invalid-argument', 'Correos inválidos.')
+  }
+  if (emailToken.toLowerCase() !== correoNuevo) {
+    throw new HttpsError(
+      'failed-precondition',
+      'Debes actualizar el correo en Auth y refrescar el token antes de migrar.',
+    )
+  }
+
+  const docAnterior = await db.collection('usuarios').doc(correoAnterior).get()
+  if (!docAnterior.exists) {
+    throw new HttpsError('not-found', 'No existe el perfil anterior.')
+  }
+  const docNuevoExistente = await db.collection('usuarios').doc(correoNuevo).get()
+  if (docNuevoExistente.exists) {
+    throw new HttpsError('already-exists', 'Ya existe un perfil con ese correo.')
+  }
+
+  const batch = db.batch()
+  batch.set(db.collection('usuarios').doc(correoNuevo), {
+    ...docAnterior.data(),
+    correoAutenticacion: correoNuevo,
+  })
+  batch.delete(db.collection('usuarios').doc(correoAnterior))
+
+  const participacionesSnap = await db
+    .collection('participaciones')
+    .where('email_usuario', '==', correoAnterior)
+    .get()
+  for (const documento of participacionesSnap.docs) {
+    batch.update(documento.ref, { email_usuario: correoNuevo })
+  }
+
+  const ligasAdminSnap = await db.collection('ligas').where('admin', '==', correoAnterior).get()
+  for (const documento of ligasAdminSnap.docs) {
+    batch.update(documento.ref, { admin: correoNuevo })
+  }
+
+  await batch.commit()
+
+  return {
+    ok: true,
+    correoNuevo,
+    participacionesMigradas: participacionesSnap.size,
+    ligasMigradas: ligasAdminSnap.size,
+  }
+})
+
+/**
+ * Cede el rol de admin al siguiente participante por fecha_union ascendente.
+ * @param {Array<{id: string, email_usuario: string, fecha_union?: any}>} participacionesRestantes
+ * @returns {{id: string, email_usuario: string} | null}
+ */
+function elegirSiguienteAdministrador(participacionesRestantes) {
+  if (participacionesRestantes.length === 0) return null
+  const ordenadas = [...participacionesRestantes].sort((a, b) => {
+    const fechaA = a.fecha_union?.toMillis ? a.fecha_union.toMillis() : 0
+    const fechaB = b.fecha_union?.toMillis ? b.fecha_union.toMillis() : 0
+    return fechaA - fechaB
+  })
+  return ordenadas[0]
+}
+
+/**
+ * Borra una liga completa: mercados (con pujas), actividad y la propia liga.
+ * @param {string} idLiga
+ */
+async function borrarLigaCompleta(idLiga) {
+  const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
+  for (const docMercado of mercadosSnap.docs) {
+    const pujasSnap = await docMercado.ref.collection('pujas').get()
+    const batchPujas = db.batch()
+    for (const pujaDoc of pujasSnap.docs) batchPujas.delete(pujaDoc.ref)
+    await batchPujas.commit()
+    await docMercado.ref.delete()
+  }
+
+  const actividadSnap = await db.collection('actividad').where('idLiga', '==', idLiga).get()
+  const batchActividad = db.batch()
+  for (const documento of actividadSnap.docs) batchActividad.delete(documento.ref)
+  await batchActividad.commit()
+
+  await db.collection('ligas').doc(idLiga).delete()
+}
+
+/**
+ * Callable — elimina la cuenta del usuario autenticado en cascada:
+ *  · Si era único participante de una liga → borra la liga entera.
+ *  · Si era admin con más participantes → cede admin al siguiente.
+ *  · Borra su participación y resta 1 al contador de la liga.
+ *  · Borra todas sus pujas activas en mercados abiertos.
+ *  · Borra el documento `usuarios/{email}` y el usuario de Firebase Auth.
+ */
+exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const uid = request.auth.uid
+
+  const participacionesSnap = await db
+    .collection('participaciones')
+    .where('email_usuario', '==', email)
+    .get()
+
+  for (const documentoPropio of participacionesSnap.docs) {
+    const datosPropios = documentoPropio.data()
+    const idLiga = datosPropios.id_liga
+
+    const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+    if (!ligaSnap.exists) {
+      await documentoPropio.ref.delete()
+      continue
+    }
+    const datosLiga = ligaSnap.data()
+
+    const restantesSnap = await db
+      .collection('participaciones')
+      .where('id_liga', '==', idLiga)
+      .get()
+    const restantes = restantesSnap.docs
+      .filter((d) => d.id !== documentoPropio.id)
+      .map((d) => ({ id: d.id, ...d.data() }))
+
+    if (restantes.length === 0) {
+      await documentoPropio.ref.delete()
+      await borrarLigaCompleta(idLiga)
+      continue
+    }
+
+    if (datosPropios.rol === 'admin') {
+      const siguiente = elegirSiguienteAdministrador(restantes)
+      await db.collection('participaciones').doc(siguiente.id).update({ rol: 'admin' })
+      await db
+        .collection('ligas')
+        .doc(idLiga)
+        .update({
+          admin: siguiente.email_usuario,
+          participantes: (datosLiga.participantes || restantes.length + 1) - 1,
+        })
+    } else {
+      await db
+        .collection('ligas')
+        .doc(idLiga)
+        .update({
+          participantes: (datosLiga.participantes || restantes.length + 1) - 1,
+        })
+    }
+
+    await documentoPropio.ref.delete()
+  }
+
+  const mercadosAbiertosSnap = await db
+    .collection('mercados')
+    .where('estado', '==', 'abierto')
+    .get()
+  for (const docMercado of mercadosAbiertosSnap.docs) {
+    const pujasSnap = await docMercado.ref
+      .collection('pujas')
+      .where('emailUsuario', '==', email)
+      .get()
+    const batchPujas = db.batch()
+    for (const pujaDoc of pujasSnap.docs) batchPujas.delete(pujaDoc.ref)
+    if (!pujasSnap.empty) await batchPujas.commit()
+  }
+
+  await db.collection('usuarios').doc(email).delete()
+
+  try {
+    await getAuth().deleteUser(uid)
+  } catch (error) {
+    throw new HttpsError(
+      'internal',
+      `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`,
+    )
+  }
+
+  return { ok: true, email, participacionesBorradas: participacionesSnap.size }
 })

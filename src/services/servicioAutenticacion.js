@@ -13,6 +13,11 @@ import {
   sendEmailVerification,
   GoogleAuthProvider,
   signInWithPopup,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  updatePassword,
+  updateEmail,
 } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from './servicioFirebase'
@@ -96,4 +101,55 @@ export const crearPerfilUsuario = async (correoUsuario, nombreUsuario) => {
     nombre: nombreUsuario,
     ligasIds: [],
   })
+}
+
+/* ─── Acciones sensibles del perfil (reautenticación obligatoria) ─────── */
+
+/**
+ * Reautentica al usuario actual. Si se autentica con contraseña usa la
+ * credencial aportada; si se autenticó con Google, abre el popup de Google.
+ * @param {string} [contrasenaActual] - Obligatoria solo para usuarios password.
+ * @returns {Promise<void>}
+ */
+export const reautenticarUsuario = async (contrasenaActual) => {
+  const usuario = auth.currentUser
+  if (!usuario) throw new Error('No hay sesión activa.')
+
+  const proveedor = usuario.providerData[0]?.providerId
+  if (proveedor === 'google.com') {
+    await reauthenticateWithPopup(usuario, googleProvider)
+    return
+  }
+
+  if (!contrasenaActual) {
+    throw new Error('Debes introducir tu contraseña actual.')
+  }
+  const credencial = EmailAuthProvider.credential(usuario.email, contrasenaActual)
+  await reauthenticateWithCredential(usuario, credencial)
+}
+
+/**
+ * Cambia la contraseña del usuario actual. Requiere reautenticación previa.
+ * @param {string} contrasenaNueva
+ * @returns {Promise<void>}
+ */
+export const cambiarContrasenaUsuario = async (contrasenaNueva) => {
+  const usuario = auth.currentUser
+  if (!usuario) throw new Error('No hay sesión activa.')
+  await updatePassword(usuario, contrasenaNueva)
+}
+
+/**
+ * Cambia el correo del usuario actual en Firebase Auth y envía verificación
+ * al nuevo correo. La migración de documentos Firestore se hace después
+ * llamando a la callable `migrarCorreoUsuario`.
+ * @param {string} correoNuevo
+ * @returns {Promise<void>}
+ */
+export const cambiarCorreoUsuario = async (correoNuevo) => {
+  const usuario = auth.currentUser
+  if (!usuario) throw new Error('No hay sesión activa.')
+  await updateEmail(usuario, correoNuevo)
+  await usuario.reload()
+  await sendEmailVerification(usuario)
 }

@@ -9,6 +9,8 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getFunctions } from 'firebase/functions'
+import { getAnalytics, isSupported } from 'firebase/analytics'
+
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,3 +27,5 @@ const db = getFirestore(app)
 const functions = getFunctions(app, 'europe-west1')
 
 export { app, auth, db, functions }
+export let analytics = null
+isSupported().then((ok) => { if (ok) analytics = getAnalytics(app) })
