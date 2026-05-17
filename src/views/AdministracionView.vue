@@ -33,7 +33,7 @@ async function manejarCerrarSesion() {
                 <img src="/logo.png" class="h-8 w-8 object-contain" />
                 <span class="font-black italic text-[#E10600] text-lg">F1 FANTASY · ADMIN</span>
             </div>
-            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text
+            <Button @click="manejarCerrarSesion" label="Salir" text
                 class="!text-zinc-400 hover:!text-red-500 cursor-pointer" />
         </header>
 
@@ -48,18 +48,9 @@ async function manejarCerrarSesion() {
 
             <Tabs v-model:value="seccionActiva">
                 <TabList>
-                    <Tab value="testing">
-                        <i class="pi pi-bolt mr-2" />
-                        Testing
-                    </Tab>
-                    <Tab value="rachas">
-                        <i class="pi pi-chart-line mr-2" />
-                        Rachas
-                    </Tab>
-                    <Tab value="analisis">
-                        <i class="pi pi-chart-pie mr-2" />
-                        Análisis
-                    </Tab>
+                    <Tab value="testing">Testing</Tab>
+                    <Tab value="rachas">Rachas</Tab>
+                    <Tab value="analisis">Análisis</Tab>
                 </TabList>
                 <TabPanels class="!bg-transparent !px-0">
                     <TabPanel value="testing">

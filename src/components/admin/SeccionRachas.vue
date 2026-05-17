@@ -129,12 +129,9 @@ onMounted(async () => {
         <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
             <template #title>
                 <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 text-sm">
-                        <i class="pi pi-chart-line text-[#E10600]" />
-                        <span>Rachas de pilotos</span>
-                    </div>
-                    <Button @click="manejarGuardarRachas" :loading="guardandoRachas" icon="pi pi-save" label="Guardar"
-                        size="small" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                    <span class="text-sm">Rachas de pilotos</span>
+                    <Button @click="manejarGuardarRachas" :loading="guardandoRachas" label="Guardar" size="small"
+                        class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
                 </div>
             </template>
             <template #content>
@@ -166,12 +163,9 @@ onMounted(async () => {
         <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
             <template #title>
                 <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2 text-sm">
-                        <i class="pi pi-car text-[#E10600]" />
-                        <span>Rachas de coches</span>
-                    </div>
-                    <Button @click="manejarGuardarRachasCoches" :loading="guardandoRachasCoches" icon="pi pi-save"
-                        label="Guardar" size="small" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                    <span class="text-sm">Rachas de coches</span>
+                    <Button @click="manejarGuardarRachasCoches" :loading="guardandoRachasCoches" label="Guardar"
+                        size="small" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
                 </div>
             </template>
             <template #content>
