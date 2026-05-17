@@ -19,6 +19,7 @@ import {
   ejecutarClausula,
   persistirInversionClausula,
 } from '@/services/servicioClausulas'
+import { calcularIdMercado, cargarMisPujas } from '@/services/servicioMercado'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
 /**
@@ -340,6 +341,16 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       }
     }
 
+    const totalComprometidoEnPujas = await calcularTotalComprometidoEnPujas()
+    if (precioClausulaTotal + totalComprometidoEnPujas > presupuesto.value) {
+      return {
+        success: false,
+        message:
+          `Tienes ${totalComprometidoEnPujas.toFixed(1)}M comprometidos en pujas del mercado. ` +
+          `Cancela o reduce alguna puja antes de ejecutar este clausulazo (${precioClausulaTotal.toFixed(1)}M).`,
+      }
+    }
+
     try {
       await ejecutarClausula(
         idParticipanteRival,
@@ -365,6 +376,22 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
         message: `Error al ejecutar la cláusula: ${error.message}`,
       }
     }
+  }
+
+  /**
+   * Suma el dinero comprometido por el usuario actual en pujas del mercado
+   * activo de su liga. Devuelve 0 si no hay mercado abierto o si el usuario
+   * no tiene pujas registradas hoy.
+   * @returns {Promise<number>} Total comprometido en millones.
+   */
+  async function calcularTotalComprometidoEnPujas() {
+    const storeAuth = usarStoreAutenticacion()
+    const emailUsuario = storeAuth.usuarioActual?.correoAutenticacion
+    if (!emailUsuario || !idLigaActiva.value) return 0
+
+    const idMercadoHoy = calcularIdMercado(idLigaActiva.value)
+    const mapaPujas = await cargarMisPujas(idMercadoHoy, emailUsuario)
+    return Object.values(mapaPujas).reduce((suma, cantidad) => suma + cantidad, 0)
   }
 
   /**
