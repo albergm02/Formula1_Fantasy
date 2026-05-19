@@ -6,6 +6,7 @@ import {
     dispararResolucionPujas,
     dispararProcesamientoJornada,
     resetearLiga,
+    eliminarLigaComoAdministrador,
 } from '@/services/servicioAdministracion'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -20,11 +21,13 @@ const confirm = useConfirm()
 const cargandoPujas = ref(false)
 const cargandoJornada = ref(false)
 const cargandoReset = ref(false)
+const cargandoEliminacion = ref(false)
 
 const ligas = ref([])
 const mercadosDisponibles = ref([])
 const mercadoSeleccionado = ref(null)
 const ligaAResetear = ref(null)
+const ligaAEliminar = ref(null)
 const ultimoResultado = ref(null)
 
 async function cargarLigas() {
@@ -162,6 +165,54 @@ function manejarResetearLiga() {
         },
     })
 }
+
+function manejarEliminarLiga() {
+    if (!ligaAEliminar.value) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Selecciona una liga',
+            detail: 'Debes elegir la liga que quieres eliminar.',
+            life: 4000,
+        })
+        return
+    }
+    const nombreLiga =
+        ligas.value.find((l) => l.id === ligaAEliminar.value)?.nombre || ligaAEliminar.value
+
+    confirm.require({
+        message: `Vas a eliminar PERMANENTEMENTE la liga "${nombreLiga}": se borrarán sus participaciones, mercados, pujas y actividad, y se desvinculará de todos sus usuarios. Esta acción NO se puede deshacer.`,
+        header: 'Confirmar eliminación de liga',
+        acceptLabel: 'Sí, eliminar',
+        rejectLabel: 'Cancelar',
+        acceptClass: '!bg-red-700 !border-red-700',
+        accept: async () => {
+            cargandoEliminacion.value = true
+            ultimoResultado.value = null
+            try {
+                const datos = await eliminarLigaComoAdministrador(ligaAEliminar.value)
+                ultimoResultado.value = datos
+                toast.add({
+                    severity: 'success',
+                    summary: 'Liga eliminada',
+                    detail: `${datos.nombreLiga}: ${datos.participacionesBorradas} participaciones, ${datos.mercadosBorrados} mercados, ${datos.usuariosDesvinculados} usuarios desvinculados.`,
+                    life: 6000,
+                })
+                ligaAEliminar.value = null
+                if (ligaAResetear.value === datos.idLiga) ligaAResetear.value = null
+                await Promise.all([cargarLigas(), cargarMercados()])
+            } catch (error) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error eliminando liga',
+                    detail: error.message,
+                    life: 6000,
+                })
+            } finally {
+                cargandoEliminacion.value = false
+            }
+        },
+    })
+}
 </script>
 
 <template>
@@ -237,6 +288,28 @@ function manejarResetearLiga() {
                             placeholder="Liga a resetear" filter class="flex-1" />
                         <Button @click="manejarResetearLiga" :loading="cargandoReset" label="Resetear" size="small"
                             severity="danger" class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
+                    </div>
+                </template>
+            </Card>
+
+            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border-2 border-red-900/60 lg:col-span-2">
+                <template #title>
+                    <span class="text-sm text-red-400">Zona peligrosa · Eliminar liga</span>
+                </template>
+                <template #content>
+                    <p class="text-xs text-zinc-400 mb-3">
+                        Borra <strong>permanentemente</strong> la liga seleccionada: el documento de la
+                        liga, todas sus participaciones, mercados, pujas y actividad. Además la desvincula
+                        del perfil de cualquier usuario que la tuviera asociada. A diferencia del
+                        flujo normal, el administrador global puede eliminar <strong>cualquier liga</strong>,
+                        no solo las propias.
+                        <strong class="text-red-400">Acción irreversible.</strong>
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
+                        <Select v-model="ligaAEliminar" :options="ligas" optionLabel="nombre" optionValue="id"
+                            placeholder="Liga a eliminar" filter class="flex-1" />
+                        <Button @click="manejarEliminarLiga" :loading="cargandoEliminacion" label="Eliminar"
+                            size="small" severity="danger" class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
                     </div>
                 </template>
             </Card>

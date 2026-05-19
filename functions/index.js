@@ -762,6 +762,74 @@ exports.resetearLigaManual = onCall({ region: 'europe-west1' }, async (request) 
   }
 })
 
+/**
+ * Callable — ELIMINACIÓN COMPLETA de una liga (solo administrador global).
+ * A diferencia del flujo del usuario `eliminarLiga` (que exige ser admin de la
+ * liga), este callable permite al administrador global borrar cualquier liga.
+ * Borra: participaciones, mercados (y sus pujas), actividad, el documento de
+ * la liga, y desvincula la liga del array `ligasIds` de todos los usuarios
+ * que la tuvieran asociada.
+ * Acepta `{ idLiga }` (obligatorio).
+ */
+exports.eliminarLigaManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+
+  const batch = db.batch()
+
+  const participacionesSnap = await db
+    .collection('participaciones')
+    .where('id_liga', '==', idLiga)
+    .get()
+  for (const documento of participacionesSnap.docs) {
+    batch.delete(documento.ref)
+  }
+
+  const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
+  for (const documentoMercado of mercadosSnap.docs) {
+    const pujasSnap = await documentoMercado.ref.collection('pujas').get()
+    for (const documentoPuja of pujasSnap.docs) {
+      batch.delete(documentoPuja.ref)
+    }
+    batch.delete(documentoMercado.ref)
+  }
+
+  const actividadSnap = await db.collection('actividad').where('idLiga', '==', idLiga).get()
+  for (const documento of actividadSnap.docs) {
+    batch.delete(documento.ref)
+  }
+
+  const usuariosSnap = await db
+    .collection('usuarios')
+    .where('ligasIds', 'array-contains', idLiga)
+    .get()
+  for (const documentoUsuario of usuariosSnap.docs) {
+    batch.update(documentoUsuario.ref, { ligasIds: FieldValue.arrayRemove(idLiga) })
+  }
+
+  batch.delete(ligaSnap.ref)
+
+  await batch.commit()
+
+  return {
+    ok: true,
+    idLiga,
+    nombreLiga: ligaSnap.data().nombre || idLiga,
+    participacionesBorradas: participacionesSnap.size,
+    mercadosBorrados: mercadosSnap.size,
+    eventosActividadBorrados: actividadSnap.size,
+    usuariosDesvinculados: usuariosSnap.size,
+  }
+})
+
 /* ═══════════════════════════════════════════════════════════════════════════
    RACHAS DE PILOTOS — Ajuste manual del admin que altera precio y puntos.
    ───────────────────────────────────────────────────────────────────────────

@@ -15,6 +15,7 @@ import { functions } from '@/services/servicioFirebase'
 const llamadaPujas = httpsCallable(functions, 'dispararResolucionPujasManual')
 const llamadaJornada = httpsCallable(functions, 'dispararJornadaSemanalManual')
 const llamadaReset = httpsCallable(functions, 'resetearLigaManual')
+const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLigaManual')
 const llamadaObtenerRachas = httpsCallable(functions, 'obtenerRachasPilotos')
 const llamadaGuardarRachas = httpsCallable(functions, 'guardarRachasPilotos')
 const llamadaObtenerRachasCoches = httpsCallable(functions, 'obtenerRachasCoches')
@@ -50,6 +51,19 @@ export async function dispararProcesamientoJornada(opciones = {}) {
  */
 export async function resetearLiga(idLiga) {
   const respuesta = await llamadaReset({ idLiga })
+  return respuesta.data
+}
+
+/**
+ * ELIMINACIÓN COMPLETA de una liga por parte del administrador global.
+ * Borra la liga, sus participaciones, mercados, pujas y actividad, y la
+ * desvincula del array `ligasIds` de todos los usuarios.
+ * Operación destructiva e irreversible.
+ * @param {string} idLiga
+ * @returns {Promise<Object>} { ok, idLiga, nombreLiga, participacionesBorradas, mercadosBorrados, eventosActividadBorrados, usuariosDesvinculados }
+ */
+export async function eliminarLigaComoAdministrador(idLiga) {
+  const respuesta = await llamadaEliminarLiga({ idLiga })
   return respuesta.data
 }
 
