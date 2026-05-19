@@ -13,13 +13,9 @@ const storeAutenticacion = usarStoreAutenticacion()
 const escuderiaStore = usarStoreEscuderia()
 const storeMercado = usarStoreMercado()
 
-const handlerCerrarSesion = async () => {
-    try {
-        await cerrarSesion()
-        enrutador.push({ name: 'login' })
-    } catch (error) {
-        console.error('Error en cerrar sesión (Cabecera.vue):', error)
-    }
+const manejarCerrarSesion = async () => {
+    await cerrarSesion()
+    enrutador.push({ name: 'login' })
 }
 
 // Si el usuario está dentro de una liga, vuelve a su panel; si no, al listado.
@@ -46,7 +42,7 @@ const ocultarResumenEquipo = computed(() => {
                 <p v-if="!ocultarResumenEquipo" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ escuderiaStore.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ Number(escuderiaStore.presupuesto || 0).toFixed(2)
-                        }}M</span>
+                    }}M</span>
                     <span v-if="storeMercado.totalPujasComprometidas > 0" class="text-amber-400 font-bold">
                         (-{{ storeMercado.totalPujasComprometidas.toFixed(2) }}M)
                     </span>
@@ -59,7 +55,7 @@ const ocultarResumenEquipo = computed(() => {
                 class="!text-zinc-400 hover:!text-[#D4A843] cursor-pointer" />
             <Button @click="enrutador.push({ name: 'perfil' })" icon="pi pi-user" text
                 class="!text-zinc-400 hover:!text-white cursor-pointer" />
-            <Button @click="handlerCerrarSesion" icon="pi pi-sign-out" text
+            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text
                 class="!text-zinc-400 hover:!text-red-500 cursor-pointer" />
         </div>
     </header>

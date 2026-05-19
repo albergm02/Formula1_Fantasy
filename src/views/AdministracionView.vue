@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import SeccionTesting from '@/components/admin/SeccionTesting.vue'
 import SeccionRachas from '@/components/admin/SeccionRachas.vue'
-import SeccionAnalisis from '@/components/admin/SeccionAnalisis.vue'
 import Button from 'primevue/button'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
@@ -50,7 +49,6 @@ async function manejarCerrarSesion() {
                 <TabList>
                     <Tab value="testing">Testing</Tab>
                     <Tab value="rachas">Rachas</Tab>
-                    <Tab value="analisis">Análisis</Tab>
                 </TabList>
                 <TabPanels class="!bg-transparent !px-0">
                     <TabPanel value="testing">

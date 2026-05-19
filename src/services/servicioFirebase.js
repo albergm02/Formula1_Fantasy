@@ -39,7 +39,7 @@ const db = getFirestore(app)
 const functions = getFunctions(app, 'europe-west1')
 
 export { app, auth, db, functions }
-export let analytics = null
-isSupported().then((ok) => {
-  if (ok) analytics = getAnalytics(app)
+
+isSupported().then((soportado) => {
+  if (soportado) getAnalytics(app)
 })
