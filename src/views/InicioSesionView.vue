@@ -152,7 +152,7 @@ const alOcultarModalRecuperacion = () => {
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-3xl font-black tracking-widest text-[#E10600]">F1 FANTASY</h1>
+            <h1 class="text-3xl font-black tracking-widest text-[#D4A843]">F1 FANTASY</h1>
           </div>
         </div>
       </template>
@@ -203,7 +203,7 @@ const alOcultarModalRecuperacion = () => {
 
             <!-- Botón de contraseña olvidada -->
             <Button type="button" label="¿Olvidaste tu contraseña?" text
-              class="w-full mt-1 !bg-transparent !border-none font-bold !text-[#D4A843] transition-colors hover:!text-[#C09638]"
+              class="w-full mt-1 !bg-transparent !border-none font-bold !text-[#D4A843]"
               @click="modalRecuperacionVisible = true" />
 
             <!-- Enlace de registro -->
@@ -231,7 +231,7 @@ const alOcultarModalRecuperacion = () => {
           @keyup.enter="handleRecuperarContraseña" />
 
         <Button label="ENVIAR CORREO" :loading="cargandoRecuperacion"
-          class="w-full mt-2 py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#121218] hover:!bg-[#C09638]"
+          class="w-full mt-2 py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#121218]"
           @click="handleRecuperarContraseña" />
       </div>
     </Dialog>
