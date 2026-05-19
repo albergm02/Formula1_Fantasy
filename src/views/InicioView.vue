@@ -10,7 +10,6 @@ import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import WidgetGranPremio from '@/components/WidgetGranPremio.vue'
 import WidgetEstadisticasUsuario from '@/components/WidgetEstadisticasUsuario.vue'
 import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
-import ProgressSpinner from 'primevue/progressspinner'
 
 const storeEscuderia = usarStoreEscuderia()
 const storeLigas = usarStoreLigas()
@@ -30,29 +29,16 @@ onMounted(async () => {
 })
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
-
-    <!-- Spinner mientras carga la escudería -->
-    <div v-if="storeEscuderia.cargandoEquipo" class="flex flex-col items-center justify-center gap-4">
-      <ProgressSpinner strokeWidth="4" animationDuration=".5s" class="!w-12 !h-12" />
-      <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando telemetría...</p>
-    </div>
-
     <!-- Contenido principal: widgets de stats y próximo GP -->
-    <main v-else class="flex flex-col w-full max-w-md mx-auto mt-2 p-4 gap-6">
+    <main class="flex flex-col w-full max-w-md mx-auto mt-2 p-4 gap-6">
       <WidgetEstadisticasUsuario />
       <WidgetDesgloseJornada />
       <WidgetGranPremio />
     </main>
-
     <BarraNavegacion />
   </div>
 </template>
