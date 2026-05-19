@@ -77,8 +77,9 @@ export async function obtenerRachasPilotos() {
 }
 
 /**
- * Persiste el mapa completo de rachas. Cada punto suma 0,5M al precio
- * del piloto en el siguiente mercado y 1 punto a su puntuación de jornada.
+ * Persiste el mapa completo de rachas. Racha positiva suma 1M al precio
+ * del piloto en el siguiente mercado; racha negativa resta 0,5M.
+ * No afecta a la puntuación base del piloto.
  * @param {Object<string, number>} rachas - Mapa { numeroPiloto: enteroRacha }.
  * @returns {Promise<{ ok: boolean, rachas: Object<string, number> }>}
  */

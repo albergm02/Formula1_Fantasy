@@ -31,9 +31,8 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}, rachas = {}) {
 
   for (const piloto of pilotosEquipados) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
-    const puntuacionSinRacha = calcularPuntuacionBase(atributosModificados, piloto.pesos)
+    const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
     const racha = Number(rachasPilotos[piloto.numero] || 0)
-    const puntuacionBase = Math.round((puntuacionSinRacha + racha) * 10) / 10
     const factorEstePiloto =
       factoresPorPiloto[piloto.id] != null ? factoresPorPiloto[piloto.id] : 1.0
     const puntosJornada = calcularPuntosJornada(puntuacionBase, factorEstePiloto)

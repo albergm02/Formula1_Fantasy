@@ -8,8 +8,9 @@
  *
  * Las rachas son ajustes manuales por piloto (entero positivo o negativo)
  * que se aplican sobre las cartas de piloto recién cargadas:
- *   - Suman `racha * 0,5M` al precio de mercado.
- *   - Suman `racha` puntos a la `puntuacionBase` (afecta puntos de jornada).
+ *   - Racha positiva: suman `racha * 1M` al precio de mercado.
+ *   - Racha negativa: suman `racha * 0,5M` al precio de mercado.
+ *   - No modifican la `puntuacionBase` del piloto.
  *
  * @module mercadoServer
  */
@@ -102,14 +103,11 @@ function aplicarRachasACatalogo(catalogo, rachas = {}) {
     if (racha === 0) {
       return { ...piloto, racha: 0 }
     }
-    const precioAjustado = Number(
-      (piloto.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1),
-    )
-    const puntuacionAjustada = Number((piloto.puntuacionBase + racha).toFixed(1))
+    const bonificacionPrecio = racha > 0 ? 1.0 : BONIFICACION_PRECIO_POR_RACHA
+    const precioAjustado = Number((piloto.precio + racha * bonificacionPrecio).toFixed(1))
     return {
       ...piloto,
       precio: Math.max(0.5, precioAjustado),
-      puntuacionBase: puntuacionAjustada,
       racha,
     }
   })

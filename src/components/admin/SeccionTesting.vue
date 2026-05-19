@@ -36,16 +36,21 @@ async function cargarLigas() {
 }
 
 async function cargarMercados() {
+    const ligasExistentes = new Set(ligas.value.map((l) => l.id))
     const snap = await getDocs(collection(db, 'mercados'))
-    mercadosDisponibles.value = snap.docs.map((d) => ({
-        id: d.id,
-        estado: d.data().estado,
-        label: `${d.id} (${d.data().estado})`,
-    }))
+    mercadosDisponibles.value = snap.docs
+        .map((d) => ({
+            id: d.id,
+            idLiga: d.data().idLiga,
+            estado: d.data().estado,
+            label: `${d.id} (${d.data().estado})`,
+        }))
+        .filter((m) => m.estado === 'abierto' && ligasExistentes.has(m.idLiga))
 }
 
 onMounted(async () => {
-    await Promise.all([cargarLigas(), cargarMercados()])
+    await cargarLigas()
+    await cargarMercados()
 })
 
 async function manejarResolverPujas() {
