@@ -16,7 +16,7 @@ import { z } from 'zod'
 
 const esquemaValidacion = zodResolver(
   z.object({
-    username: z.string().trim().min(3, 'El nombre debe tener al menos 3 caracteres').max(10, 'El nombre no debe exceder los 10 caracteres'),
+    username: z.string().trim().min(3, 'El nombre debe tener al menos 3 caracteres.').max(10, 'El nombre no debe exceder los 10 caracteres'),
   })
 )
 
@@ -29,13 +29,8 @@ const valoresInicialesFormulario = ref({
   username: '',
 })
 
-/**
- * Maneja el envío del formulario de completar perfil para usuarios de Google.
- * El correo ya está en el store (cargado por verificarExistenciaPerfil al iniciar con Google).
- * Solo necesita el nombre de piloto elegido para crear el documento en Firestore.
- * @param {{ valid: boolean, values: { username: string } }} formulario
- */
-const manejarCompletarPerfilGoogle = async ({ valid, values }) => {
+/* Manejo de registro, aquí se completa el perfil del usuario de Google */
+const handleCompletarPerfil = async ({ valid, values }) => {
   if (!valid) return
   const nombreNormalizado = values.username.trim()
   cargando.value = true
@@ -58,10 +53,7 @@ const manejarCompletarPerfilGoogle = async ({ valid, values }) => {
   }
 }
 
-/**
- * Cancela el proceso de registro con Google, cierra la sesión activa y vuelve al login.
- * No actúa si hay una operación en curso para evitar estados inconsistentes.
- */
+/* Si el usuario decide cancelar el proceso de completar perfil, se cierra la sesión de Google y se redirige al inicio */
 const cancelarRegistroConGoogle = async () => {
   if (cargando.value) return
 
@@ -70,24 +62,19 @@ const cancelarRegistroConGoogle = async () => {
 }
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
     <!-- Tarjeta principal -->
-    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/40 backdrop-blur-md border border-zinc-800 shadow-2xl">
+    <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/20 backdrop-blur-md border border-zinc-800">
 
       <!-- Encabezado con logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-2xl font-black uppercase tracking-widest text-[#E10600]">Completa tu perfil</h1>
+            <h1 class="text-2xl font-black uppercase tracking-widest text-[#D4A843]">Completa tu perfil</h1>
           </div>
         </div>
       </template>
@@ -95,7 +82,7 @@ const cancelarRegistroConGoogle = async () => {
       <!-- Contenido del formulario -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
-          :resolver="esquemaValidacion" @submit="manejarCompletarPerfilGoogle">
+          :resolver="esquemaValidacion" @submit="handleCompletarPerfil">
 
           <p class="text-center text-sm text-[#F0ECEC]">
             Es tu primera vez entrando con Google. Elige tu nombre de piloto para continuar.
@@ -105,8 +92,8 @@ const cancelarRegistroConGoogle = async () => {
             <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">
               Nombre de Piloto
             </label>
-            <InputText id="username" type="text" name="username" placeholder="MagicAlonso33"
-              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC] focus:ring-1 focus:ring-[#E10600]" />
+            <InputText id="username" type="text" name="username" placeholder="Escribe aquí tu nombre de usuario..."
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -118,10 +105,10 @@ const cancelarRegistroConGoogle = async () => {
 
           <div class="flex flex-col gap-3 mt-4">
             <Button type="submit" label="Continuar" :loading="cargando"
-              class="w-full py-3 !bg-[#E10600] !border-none shadow-lg font-black uppercase !text-[#F0ECEC] transition-colors hover:!bg-[#C00500]" />
+              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
 
             <Button type="button" label="Cancelar" :disabled="cargando"
-              class="w-full py-3 !bg-transparent !border border-[#D4A843] shadow-lg font-black uppercase !text-[#D4A843] transition-colors hover:!bg-[#D4A843]/10"
+              class="w-full py-3 !bg-gray-500/30 !border-none shadow-lg font-black uppercase !text-white"
               @click="cancelarRegistroConGoogle" />
           </div>
         </Form>
