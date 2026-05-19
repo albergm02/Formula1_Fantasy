@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -103,7 +103,7 @@ onMounted(async () => {
           class="flex items-center justify-between p-4 border border-white transition-colors"
           :class="{
             '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion,
-            'cursor-pointer hover:border-[#D4A843]/60 hover:bg-[#D4A843]/5': jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion,
+            'cursor-pointer': jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion,
           }"
           @click="verEquipoRival(jugador)">
           <div class="flex items-center gap-4">

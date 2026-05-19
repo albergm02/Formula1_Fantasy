@@ -32,19 +32,19 @@ const VARIANTES = [
 const EJEMPLOS_VARIANTE = {
     qualy: {
         escenario: 'Piloto con base 72 que clasifica P2.',
-        calculo: 'Factor P2 = ×1.45 → 72 × 1.45 = 104,4 pts.',
+        calculo: 'Factor P2 (P1–P3) = ×1.50 → 72 × 1.50 = 108 pts.',
     },
     carrera: {
         escenario: 'Piloto con base 68 que termina P3.',
         calculo: 'Factor P3 = ×1.30 → 68 × 1.30 = 88,4 pts.',
     },
     todo_terreno: {
-        escenario: 'GP con lluvia, 1 Safety Car y 2 abandonos. Base del piloto 65.',
-        calculo: 'Factor = 1.40 + 0.10 + 0.06 = 1.50 → 65 × 1.50 = 97,5 pts.',
+        escenario: 'GP sin lluvia, 2 Safety Cars y 3 abandonos. Base del piloto 65.',
+        calculo: 'Factor = 0.50 × (1 + 0.10 + 0.30) = 0.50 × 1.40 = 0.70 → 65 × 0.70 = 45,5 pts.',
     },
     remontador: {
-        escenario: 'Piloto con base 60 que firma 11 adelantamientos y acaba P6.',
-        calculo: 'Factor = 1.30 + 0.025 (P6–P10) = 1.325 → 60 × 1.325 = 79,5 pts.',
+        escenario: 'Piloto con base 60 que realiza 8 adelantamientos y recibe 3 (diferencial +5).',
+        calculo: 'Factor = 1.0 + 5 × 0.1 = 1.50 → 60 × 1.50 = 90 pts.',
     },
     estratega: {
         escenario: 'Piloto con base 70, 1 parada, mejor stint del 50%, termina P5.',
@@ -224,7 +224,7 @@ function obtenerEstadoCarrera(actuacion) {
 }
 
 function formatearPorcentaje(valor) {
-    if (valor == null) return '—'
+    if (valor == null || valor === 0) return '—'
     return `${Math.round(valor * 100)}%`
 }
 </script>
@@ -288,7 +288,7 @@ function formatearPorcentaje(valor) {
                     class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 cursor-pointer transition-colors"
                     :class="item.id === jornada?.id
                         ? 'bg-[#E10600]/10 border-[#E10600] text-white'
-                        : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400 hover:border-zinc-600'">
+                        : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400'">
                     <span class="text-[9px] font-black uppercase tracking-widest">
                         {{ formatearFechaCorta(item.fechaProcesamiento) }}
                     </span>
@@ -299,7 +299,7 @@ function formatearPorcentaje(valor) {
             <!-- Guía de puntuación por clase -->
             <div v-if="!cargando" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
                 <button type="button" @click="alternarGuia"
-                    class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left hover:bg-[#1F1F25] transition-colors">
+                    class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
                     <i class="pi pi-book text-[#D4A843] text-base"></i>
                     <div class="flex-1 flex flex-col">
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
@@ -324,7 +324,7 @@ function formatearPorcentaje(valor) {
                     <div v-for="variante in VARIANTES" :key="variante.id"
                         class="bg-[#121218] border border-zinc-800 overflow-hidden">
                         <button type="button" @click="alternarVarianteGuia(variante.id)"
-                            class="w-full flex items-center gap-3 p-2.5 cursor-pointer bg-transparent border-none text-left hover:bg-[#1A1A20] transition-colors">
+                            class="w-full flex items-center gap-3 p-2.5 cursor-pointer bg-transparent border-none text-left transition-colors">
                             <i class="pi text-base" :class="variante.icono" :style="{ color: variante.color }"></i>
                             <span class="flex-1 text-xs font-bold text-white">{{ variante.etiqueta }}</span>
                             <i class="pi text-zinc-500 text-[10px]"
@@ -394,7 +394,7 @@ function formatearPorcentaje(valor) {
 
                     <!-- Cabecera del piloto (clickable) -->
                     <button type="button" @click="alternarPiloto(piloto.numero)"
-                        class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left hover:bg-[#1F1F25] transition-colors">
+                        class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
                         <span class="w-10 text-center text-2xl font-black tabular-nums"
                             :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500 text-sm' : 'text-[#D4A843]'">
                             {{ obtenerEstadoCarrera(piloto.actuacion) ||
@@ -466,8 +466,10 @@ function formatearPorcentaje(valor) {
                                     </span>
                                 </div>
                                 <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Mejor stint</span>
-                                    <span class="text-base font-black text-white">
+                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Stint más
+                                        largo</span>
+                                    <span class="text-base font-black text-white"
+                                        :title="'Porcentaje de vueltas que el piloto completó sin parar (su tramo más largo sobre el total de vueltas que hizo). 100% → ninguna parada; 50% → dos stints similares.'">
                                         {{ formatearPorcentaje(piloto.actuacion.porcentajeStintMaximo) }}
                                     </span>
                                 </div>

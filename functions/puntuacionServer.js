@@ -107,14 +107,12 @@ function calcularFactorTodoTerreno({
   numeroSafetyCarActivos,
   numeroVirtualSafetyCarActivos,
 }) {
-  const factorClima = llovio ? 1.4 : 0.9
+  const factorClima = llovio ? 1 : 0.5
 
   let bonusCaos = 0
-  bonusCaos += numeroSafetyCarActivos * 0.1
-  bonusCaos += numeroVirtualSafetyCarActivos * 0.05
-  bonusCaos += numeroDNFs * 0.03
-
-  if (bonusCaos > 0.3) bonusCaos = 0.3
+  bonusCaos += (numeroSafetyCarActivos || 0) * 0.05
+  bonusCaos += (numeroVirtualSafetyCarActivos || 0) * 0.05
+  bonusCaos += (numeroDNFs || 0) * 0.1
 
   return Math.round(factorClima * (1 + bonusCaos) * 100) / 100
 }
@@ -124,15 +122,14 @@ function calcularFactorTodoTerreno({
 /**
  * Factor basado en el diferencial de adelantamientos: realizados menos
  * recibidos. Cada unidad de diferencial vale 0.1 puntos sobre la base 1.0
- * (ej: +5 → 1.5, 0 → 1.0, -5 → 0.5). Se acota entre 0.3 y 1.7 para evitar
- * extremos en carreras atípicas con muchos adelantamientos en cadena.
+ * (ej: +5 → 1.5, 0 → 1.0, -5 → 0.5). El acotado final entre 0.5 y 1.5 lo
+ * aplica `acotarFactor` para mantener todas las variantes en el mismo rango.
  * @param {{ numeroAdelantos: number, numeroVecesAdelantado: number }} actuacion
  * @returns {number}
  */
 function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
   const diferencial = (numeroAdelantos || 0) - (numeroVecesAdelantado || 0)
-  const factor = 1 + diferencial * 0.1
-  return Math.min(1.7, Math.max(0.3, factor))
+  return 1 + diferencial * 0.1
 }
 
 /**
@@ -148,7 +145,7 @@ function calcularFactorEstrategia(
 ) {
   let factor = 0.7
   factor += resolverBonusGestionStint(porcentajeStintMaximo)
-  factor += resolverBonusEstrategiaParadas(numeroPitStops || 1)
+  factor += resolverBonusEstrategiaParadas(numeroPitStops)
   factor += resolverBonusPosicionEstratega(posicionCarrera)
 
   if (condiciones) {
@@ -186,7 +183,7 @@ function resolverBonusPosicionEstratega(posicionCarrera) {
 /* ─── 4. Tablas de resolución de posición ───────────────────────────────── */
 
 function resolverFactorPosicionQualy(posicion) {
-  if (posicion <= 3) return 1.45
+  if (posicion <= 3) return 1.5
   if (posicion <= 6) return 1.25
   if (posicion <= 10) return 1.1
   if (posicion <= 15) return 0.85

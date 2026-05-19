@@ -306,6 +306,31 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
   return resultado
 }
 
+/* ─── 7-bis. Paradas en boxes reales (endpoint /pit) ──────────────────── */
+
+/**
+ * Cuenta las paradas reales en boxes de cada piloto en una sesión usando el
+ * endpoint `/pit` de OpenF1 (un registro por cada paso por el pit lane con
+ * `pit_duration` válido). Más fiable que inferirlo desde /stints, donde un
+ * cambio de compuesto bajo bandera roja o un stint técnico no implica parada
+ * real.
+ * @param {number} sessionKey - Clave de la sesión de carrera.
+ * @returns {Promise<Object<string, number>>} Mapa { numeroPiloto → numeroPitStops }.
+ */
+async function obtenerParadasPorPiloto(sessionKey) {
+  const paradas = await consultarOpenF1(`/pit?session_key=${sessionKey}`)
+  const conteo = {}
+
+  for (const parada of paradas) {
+    const numero = parada.driver_number
+    if (numero == null) continue
+    if (parada.pit_duration == null) continue
+    conteo[numero] = (conteo[numero] || 0) + 1
+  }
+
+  return conteo
+}
+
 /* ─── 8. Orquestación: actuación completa de un GP ─────────────────────── */
 
 /**
@@ -333,6 +358,7 @@ async function recopilarDatosGranPremio(meetingKey) {
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
   const adelantamientos = await obtenerAdelantamientosPorPiloto(sesionCarrera.session_key)
   const datosStints = await obtenerDatosStintsPorPiloto(sesionCarrera.session_key)
+  const paradasPorPiloto = await obtenerParadasPorPiloto(sesionCarrera.session_key)
 
   const actuacionesPorPiloto = {}
 
@@ -342,17 +368,14 @@ async function recopilarDatosGranPremio(meetingKey) {
     if (numeroPiloto == null) continue
     if (resultadosCarrera[numeroPiloto] != null) continue
 
-    const stintsPiloto = datosStints[numeroPiloto] || {
-      numeroPitStops: 0,
-      porcentajeStintMaximo: 0,
-    }
+    const stintsPiloto = datosStints[numeroPiloto] || { porcentajeStintMaximo: 0 }
     actuacionesPorPiloto[numeroPiloto] = {
       posicionQualy: resultadosQualy[numeroPiloto] || 20,
       posicionCarrera: 99,
       posicionSalida: parrillaSalida[numeroPiloto] || 20,
       numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
       numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
-      numeroPitStops: stintsPiloto.numeroPitStops,
+      numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
       porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
       dnf: fila.dnf === true,
       dns: fila.dns === true,
@@ -363,10 +386,7 @@ async function recopilarDatosGranPremio(meetingKey) {
   // 2º Pilotos con posición final válida.
   for (const numeroPiloto in resultadosCarrera) {
     if (Object.prototype.hasOwnProperty.call(resultadosCarrera, numeroPiloto)) {
-      const stintsPiloto = datosStints[numeroPiloto] || {
-        numeroPitStops: 1,
-        porcentajeStintMaximo: 0.5,
-      }
+      const stintsPiloto = datosStints[numeroPiloto] || { porcentajeStintMaximo: 0 }
 
       actuacionesPorPiloto[numeroPiloto] = {
         posicionQualy: resultadosQualy[numeroPiloto] || 20,
@@ -374,7 +394,7 @@ async function recopilarDatosGranPremio(meetingKey) {
         posicionSalida: parrillaSalida[numeroPiloto] || resultadosCarrera[numeroPiloto],
         numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
         numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
-        numeroPitStops: stintsPiloto.numeroPitStops,
+        numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
         porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
         dnf: false,
         dns: false,
@@ -393,7 +413,7 @@ async function recopilarDatosGranPremio(meetingKey) {
       posicionSalida: parrillaSalida[numeroPiloto] || resultadosQualy[numeroPiloto] || 20,
       numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
       numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
-      numeroPitStops: 0,
+      numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
       porcentajeStintMaximo: 0,
       dnf: true,
       dns: false,
@@ -416,5 +436,6 @@ module.exports = {
   obtenerCondicionesCarrera,
   obtenerAdelantamientosPorPiloto,
   obtenerDatosStintsPorPiloto,
+  obtenerParadasPorPiloto,
   recopilarDatosGranPremio,
 }

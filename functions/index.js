@@ -35,6 +35,7 @@ const {
   cargarRachasCoches,
   aplicarRachasACatalogo,
   seleccionarCartasDiarias,
+  BONIFICACION_PRECIO_POR_RACHA,
 } = require('./mercadoServer')
 
 initializeApp()
@@ -857,11 +858,21 @@ exports.guardarRachasPilotos = onCall({ region: 'europe-west1' }, async (request
     if (!Number.isFinite(entero) || entero === 0) continue
     rachasNormalizadas[numero] = entero
   }
+
+  const rachasAnteriores = await cargarRachasPilotos(db)
   await db.collection('catalogo').doc('rachas').set({
     rachas: rachasNormalizadas,
     fechaActualizacion: new Date().toISOString(),
   })
-  return { ok: true, rachas: rachasNormalizadas }
+
+  const deltasPorNumero = calcularDeltasPrecio(rachasAnteriores, rachasNormalizadas)
+  const garajesActualizados = await propagarDeltasACategoriaDeGaraje(
+    deltasPorNumero,
+    'pilotos',
+    'numero',
+  )
+
+  return { ok: true, rachas: rachasNormalizadas, garajesActualizados }
 })
 
 exports.obtenerRachasCoches = onCall({ region: 'europe-west1' }, async (request) => {
@@ -882,12 +893,82 @@ exports.guardarRachasCoches = onCall({ region: 'europe-west1' }, async (request)
     if (!Number.isFinite(entero) || entero === 0) continue
     rachasNormalizadas[idCoche] = entero
   }
+
+  const rachasAnteriores = await cargarRachasCoches(db)
   await db.collection('catalogo').doc('rachas_coches').set({
     rachas: rachasNormalizadas,
     fechaActualizacion: new Date().toISOString(),
   })
-  return { ok: true, rachas: rachasNormalizadas }
+
+  const deltasPorId = calcularDeltasPrecio(rachasAnteriores, rachasNormalizadas)
+  const garajesActualizados = await propagarDeltasACategoriaDeGaraje(deltasPorId, 'coches', 'id')
+
+  return { ok: true, rachas: rachasNormalizadas, garajesActualizados }
 })
+
+/**
+ * Calcula el delta de precio (en M) que cada elemento debe sufrir al pasar de
+ * la racha antigua a la nueva. Recorre la unión de claves para detectar tanto
+ * rachas añadidas como retiradas. delta = (rachaNueva - rachaAnterior) * 0,5M.
+ * @param {Object<string, number>} rachasAnteriores
+ * @param {Object<string, number>} rachasNuevas
+ * @returns {Object<string, number>} Mapa { clave: deltaPrecioM }.
+ */
+function calcularDeltasPrecio(rachasAnteriores, rachasNuevas) {
+  const claves = new Set([...Object.keys(rachasAnteriores), ...Object.keys(rachasNuevas)])
+  const deltas = {}
+  for (const clave of claves) {
+    const anterior = Number(rachasAnteriores[clave] || 0)
+    const nueva = Number(rachasNuevas[clave] || 0)
+    if (anterior === nueva) continue
+    deltas[clave] = (nueva - anterior) * BONIFICACION_PRECIO_POR_RACHA
+  }
+  return deltas
+}
+
+/**
+ * Aplica los deltas de precio sobre los elementos de los garajes de TODAS las
+ * participaciones (clave `clavePorElemento`: 'numero' para pilotos, 'id' para
+ * coches). Mantiene el precio mínimo en 0.5M. Devuelve el número de garajes
+ * efectivamente modificados.
+ * @param {Object<string, number>} deltas
+ * @param {'pilotos'|'coches'} nombreColeccion
+ * @param {'numero'|'id'} clavePorElemento
+ * @returns {Promise<number>}
+ */
+async function propagarDeltasACategoriaDeGaraje(deltas, nombreColeccion, clavePorElemento) {
+  if (Object.keys(deltas).length === 0) return 0
+
+  const participacionesSnap = await db.collection('participaciones').get()
+  const batch = db.batch()
+  let garajesActualizados = 0
+
+  for (const documento of participacionesSnap.docs) {
+    const datos = documento.data()
+    const garaje = datos.garaje
+    if (!garaje || !Array.isArray(garaje[nombreColeccion])) continue
+
+    let huboCambio = false
+    const elementosActualizados = garaje[nombreColeccion].map((elemento) => {
+      const delta = deltas[elemento[clavePorElemento]]
+      if (!delta) return elemento
+      huboCambio = true
+      const precioNuevo = Math.max(
+        0.5,
+        Math.round((Number(elemento.precio || 0) + delta) * 10) / 10,
+      )
+      return { ...elemento, precio: precioNuevo }
+    })
+
+    if (huboCambio) {
+      batch.update(documento.ref, { [`garaje.${nombreColeccion}`]: elementosActualizados })
+      garajesActualizados++
+    }
+  }
+
+  if (garajesActualizados > 0) await batch.commit()
+  return garajesActualizados
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GESTIÓN DE PERFIL — Cambio de nombre, cambio de correo y baja de cuenta.

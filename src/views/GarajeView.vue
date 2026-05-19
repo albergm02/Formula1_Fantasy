@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -246,18 +246,18 @@ const confirmarInversionClausula = async () => {
                 'flex-1 shadow-lg',
                 coche.equipado
                   ? '!bg-emerald-900/20 !border-emerald-500/50'
-                  : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+                  : '!bg-[#121218] !border-zinc-800',
               ]" :pt="{
                 label: { class: ['text-[10px] font-black uppercase tracking-widest', coche.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
                 icon: { class: coche.equipado ? 'text-emerald-400' : 'text-zinc-500' },
               }" />
             <Button label="PROTEGER" icon="pi pi-shield" @click="abrirDialogoProteccion(coche)"
-              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-amber-900/50" :pt="{
+              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                 label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                 icon: { class: '!text-amber-400' },
               }" />
             <Button icon="pi pi-shopping-bag" @click="confirmarVentaCoche(coche)"
-              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
+              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                 icon: { class: '!text-red-500' },
               }" />
           </div>
@@ -294,7 +294,7 @@ const confirmarInversionClausula = async () => {
         <!-- Botón selector -->
         <Button :label="storeEscuderia.garaje.ruedas ? 'CAMBIAR NEUMÁTICOS' : 'EQUIPAR NEUMÁTICOS'"
           icon="pi pi-circle-fill" @click="mostrarSelectorNeumatico = true"
-          class="w-full !bg-[#121218] !border-zinc-800 shadow-lg hover:!border-zinc-600" :pt="{
+          class="w-full !bg-[#121218] !border-zinc-800 shadow-lg" :pt="{
             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
             icon: { class: 'text-zinc-500' },
           }" />
@@ -326,7 +326,7 @@ const confirmarInversionClausula = async () => {
           <!-- Imagen pura -->
           <div class="relative w-full h-16 overflow-hidden bg-black border transition-colors" :class="storeEscuderia.garaje.ruedas?.id === rueda.id
             ? 'border-emerald-500/70'
-            : 'border-zinc-700 hover:border-zinc-500'">
+            : 'border-zinc-700'">
             <img :src="rueda.imagen" :alt="rueda.nombre" class="absolute inset-0 w-full h-full object-cover"
               style="object-position: 65% center;" />
           </div>
@@ -380,18 +380,18 @@ const confirmarInversionClausula = async () => {
                 'flex-1 shadow-lg',
                 piloto.equipado
                   ? '!bg-emerald-900/20 !border-emerald-500/50'
-                  : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+                  : '!bg-[#121218] !border-zinc-800',
               ]" :pt="{
                 label: { class: ['text-[10px] font-black uppercase tracking-widest', piloto.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
                 icon: { class: piloto.equipado ? 'text-emerald-400' : 'text-zinc-500' },
               }" />
             <Button label="PROTEGER" icon="pi pi-shield" @click="abrirDialogoProteccion(piloto)"
-              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-amber-900/50" :pt="{
+              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                 label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                 icon: { class: '!text-amber-400' },
               }" />
             <Button icon="pi pi-user-minus" @click="confirmarVentaPiloto(piloto)"
-              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-red-900/50" :pt="{
+              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                 icon: { class: '!text-red-500' },
               }" />
           </div>
@@ -427,7 +427,7 @@ const confirmarInversionClausula = async () => {
                 'flex-1 shadow-lg',
                 potenciador.equipado
                   ? '!bg-emerald-900/20 !border-emerald-500/50'
-                  : '!bg-[#121218] !border-zinc-800 hover:!border-zinc-600',
+                  : '!bg-[#121218] !border-zinc-800',
               ]" :pt="{
                 label: { class: ['text-[10px] font-black uppercase tracking-widest', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
                 icon: { class: potenciador.equipado ? 'text-emerald-400' : 'text-zinc-500' },
@@ -471,7 +471,7 @@ const confirmarInversionClausula = async () => {
 
         <Button label="CONFIRMAR INVERSIÓN" icon="pi pi-shield" @click="confirmarInversionClausula"
           :disabled="cantidadInversion <= 0 || cantidadInversion > storeEscuderia.presupuesto"
-          class="w-full !bg-amber-900/20 !border-amber-500/50 hover:!bg-amber-900/40" :pt="{
+          class="w-full !bg-amber-900/20 !border-amber-500/50" :pt="{
             label: { class: 'text-[10px] font-black uppercase tracking-widest text-amber-400' },
             icon: { class: 'text-amber-400' },
           }" />

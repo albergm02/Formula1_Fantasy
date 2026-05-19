@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
+import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 
 const mostrarDetalles = ref(false)
 const mostrarPuja = ref(false)
@@ -27,6 +28,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['pujar', 'eliminarPuja'])
+
+const reglasVariante = computed(() => {
+  const clave = props.piloto.perfilPuntuacion || props.piloto.variante
+  return perfilesPuntuacion[clave]?.reglasUsuario || props.piloto.reglasUsuario || []
+})
 
 const barrasAtributos = computed(() => {
   const a = props.piloto.atributos
@@ -85,8 +91,7 @@ const confirmarEliminarPuja = () => {
           :class="props.piloto.racha > 0 ? 'border-emerald-500/50' : 'border-red-500/50'">
           <i class="pi text-[8px]"
             :class="[props.piloto.racha > 0 ? 'pi-arrow-up text-emerald-400' : 'pi-arrow-down text-red-400']"></i>
-          <span class="text-[10px] font-black"
-            :class="props.piloto.racha > 0 ? 'text-emerald-300' : 'text-red-300'">
+          <span class="text-[10px] font-black" :class="props.piloto.racha > 0 ? 'text-emerald-300' : 'text-red-300'">
             {{ props.piloto.racha > 0 ? '+' : '' }}{{ props.piloto.racha }}
           </span>
         </div>
@@ -178,13 +183,13 @@ const confirmarEliminarPuja = () => {
         </div>
 
         <!-- Reglas de la variante -->
-        <div v-if="props.piloto.reglasUsuario?.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
+        <div v-if="reglasVariante.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black uppercase leading-tight" :style="{ color: props.piloto.colorVariante }">
             <i class="pi mr-1" :class="props.piloto.iconoVariante"></i>
             {{ props.piloto.nombreVariante }}
           </p>
           <ul class="mt-2 space-y-1.5">
-            <li v-for="(regla, indice) in props.piloto.reglasUsuario" :key="`${props.piloto.id}-regla-${indice}`"
+            <li v-for="(regla, indice) in reglasVariante" :key="`${props.piloto.id}-regla-${indice}`"
               class="text-xs text-zinc-300 leading-relaxed">
               • {{ regla }}
             </li>

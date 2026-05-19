@@ -50,9 +50,9 @@ onUnmounted(() => {
         <i class="pi pi-download text-[#E10600]" />
         <span class="text-xs text-[#F0ECEC] font-bold uppercase tracking-wide">Instalar F1 Fantasy</span>
         <Button @click="lanzarInstalacion" icon="pi pi-check" size="small" rounded
-            class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700 !w-8 !h-8" aria-label="Instalar aplicación" />
+            class="!bg-[#E10600] !border-[#E10600] !w-8 !h-8" aria-label="Instalar aplicación" />
         <Button @click="descartarInstalacion" icon="pi pi-times" size="small" rounded text
-            class="!text-zinc-400 hover:!text-white !w-8 !h-8" aria-label="Cerrar" />
+            class="!text-zinc-400 !w-8 !h-8" aria-label="Cerrar" />
     </div>
 
     <div v-if="needRefresh"
@@ -60,6 +60,6 @@ onUnmounted(() => {
         <i class="pi pi-refresh text-[#D4A843]" />
         <span class="text-xs text-[#F0ECEC] font-bold uppercase tracking-wide">Nueva versión disponible</span>
         <Button @click="aplicarActualizacion" label="Actualizar" size="small"
-            class="!bg-[#D4A843] !border-[#D4A843] !text-black hover:!bg-yellow-600" />
+            class="!bg-[#D4A843] !border-[#D4A843] !text-black" />
     </div>
 </template>

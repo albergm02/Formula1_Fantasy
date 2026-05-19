@@ -131,7 +131,7 @@ onMounted(async () => {
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-sm">Rachas de pilotos</span>
                     <Button @click="manejarGuardarRachas" :loading="guardandoRachas" label="Guardar" size="small"
-                        class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                        class="!bg-[#E10600] !border-[#E10600]" />
                 </div>
             </template>
             <template #content>
@@ -165,7 +165,7 @@ onMounted(async () => {
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-sm">Rachas de coches</span>
                     <Button @click="manejarGuardarRachasCoches" :loading="guardandoRachasCoches" label="Guardar"
-                        size="small" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                        size="small" class="!bg-[#E10600] !border-[#E10600]" />
                 </div>
             </template>
             <template #content>

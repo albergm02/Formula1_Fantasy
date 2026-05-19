@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
@@ -52,11 +52,11 @@ const ocultarResumenEquipo = computed(() => {
 
         <div class="flex items-center gap-2">
             <Button @click="enrutador.push({ name: 'ligas' })" icon="pi pi-trophy" text
-                class="!text-zinc-400 hover:!text-[#D4A843] cursor-pointer" />
+                class="!text-zinc-400 cursor-pointer" />
             <Button @click="enrutador.push({ name: 'perfil' })" icon="pi pi-user" text
-                class="!text-zinc-400 hover:!text-white cursor-pointer" />
+                class="!text-zinc-400 cursor-pointer" />
             <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text
-                class="!text-zinc-400 hover:!text-red-500 cursor-pointer" />
+                class="!text-zinc-400 cursor-pointer" />
         </div>
     </header>
 </template>

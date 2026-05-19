@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
@@ -33,7 +33,7 @@ async function manejarCerrarSesion() {
                 <span class="font-black italic text-[#E10600] text-lg">F1 FANTASY · ADMIN</span>
             </div>
             <Button @click="manejarCerrarSesion" label="Salir" text
-                class="!text-zinc-400 hover:!text-red-500 cursor-pointer" />
+                class="!text-zinc-400 cursor-pointer" />
         </header>
 
         <main class="flex-1 p-4 max-w-6xl mx-auto w-full space-y-4">

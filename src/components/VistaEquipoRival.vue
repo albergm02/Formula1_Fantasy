@@ -117,7 +117,7 @@ const confirmarEjecucionClausula = (elemento) => {
                     </div>
                     <Button :label="`FICHAR ${calcularPrecioClausula(coche).toFixed(1)}M`" icon="pi pi-shield"
                         @click="confirmarEjecucionClausula(coche)" :disabled="esFichajeDeshabilitado(coche)"
-                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-amber-900/50"
+                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors"
                         :pt="{
                             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                             icon: { class: '!text-amber-400' },
@@ -145,7 +145,7 @@ const confirmarEjecucionClausula = (elemento) => {
                     </div>
                     <Button :label="`FICHAR ${calcularPrecioClausula(piloto).toFixed(1)}M`" icon="pi pi-shield"
                         @click="confirmarEjecucionClausula(piloto)" :disabled="esFichajeDeshabilitado(piloto)"
-                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors hover:!border-amber-900/50"
+                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors"
                         :pt="{
                             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                             icon: { class: '!text-amber-400' },

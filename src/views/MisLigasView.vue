@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -212,9 +212,9 @@ const manejarEliminarLiga = () => {
           class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#E10600]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"
-            class="!bg-transparent !border-none !text-[#F0ECEC] hover:!text-white" />
+            class="!bg-transparent !border-none !text-[#F0ECEC]" />
           <Button label="Crear" @click="manejarCrearLiga"
-            class="!px-10 !bg-[#E10600] !border-none font-bold hover:!bg-[#C00500]" />
+            class="!px-10 !bg-[#E10600] !border-none font-bold" />
         </div>
       </div>
     </Dialog>
@@ -229,9 +229,9 @@ const manejarEliminarLiga = () => {
           class="w-full !bg-[#121218] uppercase focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoUnirseVisible = false"
-            class="!bg-transparent !border-none !text-[#F0ECEC] hover:!text-white" />
+            class="!bg-transparent !border-none !text-[#F0ECEC]" />
           <Button label="Unirse" @click="manejarUnirseLiga"
-            class="!px-10 !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F] hover:!bg-[#C09638]" />
+            class="!px-10 !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]" />
         </div>
       </div>
     </Dialog>

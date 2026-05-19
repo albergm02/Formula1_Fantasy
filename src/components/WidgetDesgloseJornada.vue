@@ -70,7 +70,7 @@ function explicarFactor(piloto) {
     lineas.push(`P${a.posicionCarrera} en Carrera · ${ganadas >= 0 ? '+' : ''}${ganadas} pos → ×${factor}`)
   } else if (piloto.variante === 'todo_terreno') {
     const c = jornada.value?.condiciones || {}
-    const clima = c.llovio ? 'Lluvia ×1.4' : 'Seco ×0.9'
+    const clima = c.llovio ? 'Lluvia ×1.0' : 'Seco ×0.5'
     lineas.push(`${clima} + caos → ×${factor}`)
   } else if (piloto.variante === 'base') {
     lineas.push(`Promedio Q/C/TT → ×${factor}`)
@@ -158,8 +158,7 @@ function explicarFactor(piloto) {
             </div>
             <!-- Explicación del factor -->
             <div v-if="piloto.factorJornada" class="flex flex-col gap-0.5 pt-1 border-t border-zinc-800/50">
-              <span v-for="(linea, i) in explicarFactor(piloto)" :key="i"
-                class="text-[10px] text-zinc-400">
+              <span v-for="(linea, i) in explicarFactor(piloto)" :key="i" class="text-[10px] text-zinc-400">
                 {{ linea }}
               </span>
             </div>
@@ -218,7 +217,8 @@ function explicarFactor(piloto) {
         </div>
 
         <!-- Premio económico -->
-        <div v-if="jornada.premioJornada" class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
+        <div v-if="jornada.premioJornada"
+          class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
           <div class="flex flex-col">
             <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Premio al presupuesto</span>
             <span class="text-[10px] text-zinc-500">{{ jornada.puntosJornada }} pts ÷ 10</span>

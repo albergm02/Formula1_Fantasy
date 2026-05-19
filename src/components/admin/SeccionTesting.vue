@@ -242,7 +242,7 @@ function manejarEliminarLiga() {
                         <Select v-model="mercadoSeleccionado" :options="mercadosDisponibles" optionLabel="label"
                             optionValue="id" placeholder="Selecciona un mercado" filter class="flex-1" />
                         <Button @click="manejarResolverPujas" :loading="cargandoPujas" label="Resolver" size="small"
-                            class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                            class="!bg-[#E10600] !border-[#E10600]" />
                     </div>
                 </template>
             </Card>
@@ -264,10 +264,10 @@ function manejarEliminarLiga() {
                     </p>
                     <div class="flex flex-wrap gap-2">
                         <Button @click="manejarProcesarJornada()" :loading="cargandoJornada" label="Procesar"
-                            size="small" class="!bg-[#E10600] !border-[#E10600] hover:!bg-red-700" />
+                            size="small" class="!bg-[#E10600] !border-[#E10600]" />
                         <Button @click="manejarProcesarJornada({ forzar: true })" :loading="cargandoJornada"
                             label="Forzar reproceso" size="small" severity="warning"
-                            class="!bg-amber-600 !border-amber-600 hover:!bg-amber-700" />
+                            class="!bg-amber-600 !border-amber-600" />
                     </div>
                 </template>
             </Card>
@@ -287,7 +287,7 @@ function manejarEliminarLiga() {
                         <Select v-model="ligaAResetear" :options="ligas" optionLabel="nombre" optionValue="id"
                             placeholder="Liga a resetear" filter class="flex-1" />
                         <Button @click="manejarResetearLiga" :loading="cargandoReset" label="Resetear" size="small"
-                            severity="danger" class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
+                            severity="danger" class="!bg-red-700 !border-red-700" />
                     </div>
                 </template>
             </Card>
@@ -309,7 +309,7 @@ function manejarEliminarLiga() {
                         <Select v-model="ligaAEliminar" :options="ligas" optionLabel="nombre" optionValue="id"
                             placeholder="Liga a eliminar" filter class="flex-1" />
                         <Button @click="manejarEliminarLiga" :loading="cargandoEliminacion" label="Eliminar"
-                            size="small" severity="danger" class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
+                            size="small" severity="danger" class="!bg-red-700 !border-red-700" />
                     </div>
                 </template>
             </Card>

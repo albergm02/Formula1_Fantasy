@@ -321,14 +321,14 @@ function mensajeFirebase(error) {
                 <template #content>
                     <div class="flex flex-col gap-2">
                         <Button @click="abrirDialogoNombre" icon="pi pi-id-card" label="Cambiar nombre visible"
-                            class="!bg-zinc-900 !border-zinc-700 hover:!bg-zinc-800 justify-start"
+                            class="!bg-zinc-900 !border-zinc-700 justify-start"
                             :disabled="diasRestantesParaCambiarNombre > 0" />
                         <Button v-if="proveedorAutenticacion !== 'google.com'" @click="abrirDialogoContrasena"
                             icon="pi pi-lock" label="Cambiar contraseña"
-                            class="!bg-zinc-900 !border-zinc-700 hover:!bg-zinc-800 justify-start" />
+                            class="!bg-zinc-900 !border-zinc-700 justify-start" />
                         <Button v-if="proveedorAutenticacion !== 'google.com'" @click="abrirDialogoCorreo"
                             icon="pi pi-envelope" label="Cambiar correo"
-                            class="!bg-zinc-900 !border-zinc-700 hover:!bg-zinc-800 justify-start" />
+                            class="!bg-zinc-900 !border-zinc-700 justify-start" />
                         <Message v-if="proveedorAutenticacion === 'google.com'" severity="info" :closable="false">
                             Iniciaste sesión con Google: gestiona tu contraseña y correo desde tu cuenta de Google.
                         </Message>
@@ -349,7 +349,7 @@ function mensajeFirebase(error) {
                         de las que seas único administrador.
                     </p>
                     <Button @click="abrirDialogoBaja" icon="pi pi-trash" label="Eliminar mi cuenta"
-                        class="!bg-red-700 !border-red-700 hover:!bg-red-800" />
+                        class="!bg-red-700 !border-red-700" />
                 </template>
             </Card>
         </main>
