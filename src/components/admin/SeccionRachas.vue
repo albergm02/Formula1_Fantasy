@@ -136,9 +136,9 @@ onMounted(async () => {
             </template>
             <template #content>
                 <p class="text-xs text-zinc-500 mb-3">
-                    Cada punto de racha suma <strong class="text-[#E10600]">+0,5M</strong> al precio del piloto
-                    en el siguiente mercado y <strong class="text-[#E10600]">+1 punto</strong> a su puntuación
-                    de jornada. Aplica a todas sus variantes.
+                    Racha positiva → <strong class="text-[#E10600]">+1M</strong> por punto al precio del piloto.
+                    Racha negativa → <strong class="text-[#E10600]">−0,5M</strong> por punto. Solo afecta al
+                    precio del siguiente mercado; <strong>no modifica la puntuación de jornada</strong>.
                 </p>
                 <div v-if="cargandoRachas" class="text-sm text-zinc-500">Cargando rachas…</div>
                 <div v-else

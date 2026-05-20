@@ -1,21 +1,4 @@
-﻿/**
- * mercadoServer.js — Acceso al catálogo, rachas y selección diaria de cartas.
- *
- * El catálogo (pilotos, coches, potenciadores con sus precios calculados)
- * vive en Firestore como fuente única de verdad. Si Firestore no contiene
- * el catálogo en el primer acceso, este módulo lo siembra automáticamente
- * desde `data/catalogoBase.js` (auto-seed transparente al admin).
- *
- * Las rachas son ajustes manuales por piloto (entero positivo o negativo)
- * que se aplican sobre las cartas de piloto recién cargadas:
- *   - Racha positiva: suman `racha * 1M` al precio de mercado.
- *   - Racha negativa: suman `racha * 0,5M` al precio de mercado.
- *   - No modifican la `puntuacionBase` del piloto.
- *
- * @module mercadoServer
- */
-
-const { construirCatalogoCompleto } = require('./data/catalogoBase')
+﻿const { construirCatalogoCompleto } = require('./data/catalogoBase')
 
 const BONIFICACION_PRECIO_POR_RACHA = 0.5
 
