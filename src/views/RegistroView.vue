@@ -39,7 +39,12 @@ const valoresInicialesFormulario = ref({
   confirmPassword: '',
 })
 
-/* Manejo del registro: validación, comunicación con el servicio de autenticación y manejo de errores */
+/**
+ * Gestiona el envío del formulario de registro.
+ * Crea la cuenta en Firebase Auth, envía el correo de verificación,
+ * crea el perfil en Firestore y redirige a la pantalla de verificación.
+ * @param {{ valid: boolean, values: { username: string, email: string, password: string } }} formulario
+ */
 const handleRegistro = async ({ valid, values }) => {
   if (!valid) return
   const correoNormalizado = values.email.trim()

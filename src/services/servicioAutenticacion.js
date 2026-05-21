@@ -1,10 +1,4 @@
-﻿/**
- * Servicio de autenticación y gestión de perfiles de usuario.
- * Centraliza TODAS las llamadas a Firebase Auth y Firestore relacionadas con usuarios.
- * Los stores y vistas importan únicamente desde este módulo; nunca desde Firebase directamente.
- * @module servicioAutenticacion
- */
-import {
+﻿import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -19,27 +13,50 @@ import {
   updatePassword,
   updateEmail,
 } from 'firebase/auth'
+
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from './servicioFirebase'
 
 const googleProvider = new GoogleAuthProvider()
 
-/* ─── Firebase Auth ──────────────────────────────────────────────────────── */
-
-/** @param {string} email @param {string} password @returns {Promise<UserCredential>} */
+/**
+ * Registra un nuevo usuario con correo y contraseña en Firebase Auth.
+ * @param {string} email - Correo electrónico del nuevo usuario.
+ * @param {string} password - Contraseña elegida por el usuario.
+ * @returns {Promise<import('firebase/auth').UserCredential>}
+ */
 export const registrarse = (email, password) =>
   createUserWithEmailAndPassword(auth, email, password)
 
-/** @param {string} email @param {string} password @returns {Promise<UserCredential>} */
+/**
+ * Autentica a un usuario existente con correo y contraseña.
+ * @param {string} email - Correo electrónico del usuario.
+ * @param {string} password - Contraseña del usuario.
+ * @returns {Promise<import('firebase/auth').UserCredential>}
+ */
 export const iniciarSesion = (email, password) => signInWithEmailAndPassword(auth, email, password)
 
-/** @returns {Promise<UserCredential>} */
+/**
+ * Abre el popup de Google para autenticar al usuario.
+ * Se usa `signInWithPopup` en lugar de redirect para evitar conflictos
+ * con el ciclo de vida de Vue Router.
+ * @returns {Promise<import('firebase/auth').UserCredential>}
+ */
 export const iniciarSesionConGoogle = () => signInWithPopup(auth, googleProvider)
 
-/** @param {string} email @returns {Promise<void>} */
+/**
+ * Envía un correo de restablecimiento de contraseña a la dirección indicada.
+ * Por seguridad, la vista siempre muestra un mensaje de éxito genérico
+ * para no revelar si el correo está o no registrado (protección contra user enumeration).
+ * @param {string} email - Correo al que se envía el enlace de recuperación.
+ * @returns {Promise<void>}
+ */
 export const restablecerContraseña = (email) => sendPasswordResetEmail(auth, email)
 
-/** @returns {Promise<void>} */
+/**
+ * Cierra la sesión del usuario actual en Firebase Auth.
+ * @returns {Promise<void>}
+ */
 export const cerrarSesion = () => firebaseSignOut(auth)
 
 /**
@@ -74,8 +91,6 @@ export const obtenerUsuarioActual = () =>
     )
   })
 
-/* ─── Firestore – Perfiles de usuario ───────────────────────────────────── */
-
 /**
  * Carga el perfil del usuario desde Firestore.
  * Devuelve un objeto vacío si el documento no existe.
@@ -102,8 +117,6 @@ export const crearPerfilUsuario = async (correoUsuario, nombreUsuario) => {
     ligasIds: [],
   })
 }
-
-/* ─── Acciones sensibles del perfil (reautenticación obligatoria) ─────── */
 
 /**
  * Reautentica al usuario actual. Si se autentica con contraseña usa la

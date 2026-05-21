@@ -1,7 +1,7 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [], ruedas: null })
+
 import {
   cargarLigasPorIds,
   cargarLiga,
@@ -19,6 +19,7 @@ import {
   cargarRankingLiga,
   inicializarMercadoLiga,
 } from '@/services/servicioLigas'
+
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
@@ -26,51 +27,32 @@ const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) =>
   Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
 const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 8).toUpperCase()
+const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [], ruedas: null })
 
 /**
- * Devuelve el siguiente administrador por orden cronológico de incorporación a la liga.
- * Ordena las participaciones por `fecha_union` ascendente (los más antiguos primero).
- * Para participaciones heredadas sin este campo, se toma simplemente la primera.
- * @param {Array} participaciones - Participaciones candidatas (sin la del saliente).
- * @returns {Object} La participación más antigua.
+ * Elige al siguiente administrador de una liga basándose en quién lleva más tiempo en ella.
+ * El criterio es el `fecha_union` más antiguo (Timestamp de Firestore ascendente).
+ * @param {Array} participaciones - Participaciones restantes, excluido el admin saliente.
+ * @returns {Object} La participación del miembro con mayor antigüedad.
  */
-const elegirSiguienteAdministrador = (participaciones) => {
-  const ordenadas = [...participaciones].sort((primera, segunda) => {
-    const fechaPrimera = extraerTimestamp(primera.fecha_union)
-    const fechaSegunda = extraerTimestamp(segunda.fecha_union)
-    return fechaPrimera - fechaSegunda
-  })
-  return ordenadas[0]
-}
-
-/**
- * Extrae milisegundos desde un Timestamp de Firestore, un Date o una cadena ISO.
- * Devuelve Infinity para participaciones sin fecha, de modo que queden al final del orden.
- * @param {*} fecha
- * @returns {number}
- */
-const extraerTimestamp = (fecha) => {
-  if (!fecha) return Number.POSITIVE_INFINITY
-  if (typeof fecha.toMillis === 'function') return fecha.toMillis()
-  if (fecha instanceof Date) return fecha.getTime()
-  const parseada = new Date(fecha).getTime()
-  return Number.isFinite(parseada) ? parseada : Number.POSITIVE_INFINITY
-}
+const elegirSiguienteAdministrador = (participaciones) =>
+  [...participaciones].sort((a, b) => a.fecha_union.toMillis() - b.fecha_union.toMillis())[0]
 
 export const usarStoreLigas = defineStore('ligas', () => {
   const detallesLigas = ref([])
   const idLigaActiva = ref(null)
 
   /**
-   * Carga las ligas a las que pertenece el usuario y las guarda en el estado.
-   * Realiza limpieza lazy: si algún ID en el perfil apunta a una liga eliminada,
-   * lo desvincula automáticamente para mantener la coherencia.
+   * Carga las ligas a las que pertenece el usuario y actualiza el estado global.
+   * Realiza limpieza lazy: si algún ID apunta a una liga ya eliminada,
+   * lo desvincula automáticamente para mantener la coherencia entre Firestore y el estado local.
    * @returns {Promise<void>}
    */
   async function cargarLigasUsuario() {
     const storeAutenticacion = usarStoreAutenticacion()
     const idsAlmacenados = storeAutenticacion.usuarioActual.idsLigas
 
+    // Comprobar si hay ids
     if (!idsAlmacenados.length) {
       detallesLigas.value = []
       return
@@ -97,9 +79,9 @@ export const usarStoreLigas = defineStore('ligas', () => {
   }
 
   /**
-   * Crea una nueva liga y registra al usuario como administrador.
-   * Aplica dos límites: máximo 5 ligas por usuario y máximo 2 ligas creadas.
-   * @param {string} nombreLiga - Nombre de la liga (3–15 caracteres, validado en la vista).
+   * Crea una nueva liga y asigna al usuario actual como administrador.
+   * El mercado de la liga se inicializa en segundo plano sin bloquear la respuesta.
+   * @param {string} nombreLiga - Nombre visible de la liga.
    * @returns {Promise<{ success: boolean, message: string }>}
    */
   async function crearLiga(nombreLiga) {

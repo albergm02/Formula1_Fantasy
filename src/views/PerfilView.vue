@@ -7,12 +7,10 @@ import {
     cargarPerfilUsuario,
     reautenticarUsuario,
     cambiarContrasenaUsuario,
-    cambiarCorreoUsuario,
     cerrarSesion,
 } from '@/services/servicioAutenticacion'
 import {
     cambiarNombreUsuario,
-    migrarCorreoUsuario,
     eliminarMiCuenta,
 } from '@/services/servicioPerfil'
 import Cabecera from '@/components/Cabecera.vue'
@@ -144,58 +142,6 @@ async function confirmarCambioContrasena() {
     }
 }
 
-/* ─── Cambio de correo ─────────────────────────────────────────────── */
-
-const dialogoCorreoAbierto = ref(false)
-const contrasenaParaCorreo = ref('')
-const correoNuevo = ref('')
-const guardandoCorreo = ref(false)
-
-function abrirDialogoCorreo() {
-    contrasenaParaCorreo.value = ''
-    correoNuevo.value = ''
-    dialogoCorreoAbierto.value = true
-}
-
-async function confirmarCambioCorreo() {
-    const correoNormalizado = correoNuevo.value.trim().toLowerCase()
-    const correoAnterior = storeAutenticacion.usuarioActual.correoAutenticacion
-    if (!correoNormalizado || correoNormalizado === correoAnterior) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Correo inválido',
-            detail: 'Debe ser distinto del actual.',
-            life: 4000,
-        })
-        return
-    }
-    guardandoCorreo.value = true
-    try {
-        await reautenticarUsuario(contrasenaParaCorreo.value)
-        await cambiarCorreoUsuario(correoNormalizado)
-        await migrarCorreoUsuario(correoAnterior, correoNormalizado)
-        storeAutenticacion.usuarioActual.correoAutenticacion = correoNormalizado
-        dialogoCorreoAbierto.value = false
-        toast.add({
-            severity: 'success',
-            summary: 'Correo actualizado',
-            detail: 'Te hemos enviado un enlace de verificación al nuevo correo.',
-            life: 6000,
-        })
-        await cerrarSesion()
-        enrutador.push({ name: 'login' })
-    } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'No se pudo cambiar',
-            detail: mensajeFirebase(error),
-            life: 7000,
-        })
-    } finally {
-        guardandoCorreo.value = false
-    }
-}
-
 /* ─── Baja de cuenta ────────────────────────────────────────────────── */
 
 const dialogoBajaAbierto = ref(false)
@@ -225,6 +171,7 @@ async function ejecutarBaja() {
     try {
         await reautenticarUsuario(contrasenaParaBaja.value)
         await eliminarMiCuenta()
+        await cerrarSesion()
         toast.add({
             severity: 'success',
             summary: 'Cuenta eliminada',
@@ -321,35 +268,17 @@ function mensajeFirebase(error) {
                 <template #content>
                     <div class="flex flex-col gap-2">
                         <Button @click="abrirDialogoNombre" icon="pi pi-id-card" label="Cambiar nombre visible"
-                            class="!bg-zinc-900 !border-zinc-700 justify-start"
+                            class="!bg-zinc-900 !border-zinc-700 !text-white justify-start"
                             :disabled="diasRestantesParaCambiarNombre > 0" />
                         <Button v-if="proveedorAutenticacion !== 'google.com'" @click="abrirDialogoContrasena"
                             icon="pi pi-lock" label="Cambiar contraseña"
-                            class="!bg-zinc-900 !border-zinc-700 justify-start" />
-                        <Button v-if="proveedorAutenticacion !== 'google.com'" @click="abrirDialogoCorreo"
-                            icon="pi pi-envelope" label="Cambiar correo"
-                            class="!bg-zinc-900 !border-zinc-700 justify-start" />
+                            class="!bg-zinc-900 !border-zinc-700 !text-white justify-start" />
                         <Message v-if="proveedorAutenticacion === 'google.com'" severity="info" :closable="false">
-                            Iniciaste sesión con Google: gestiona tu contraseña y correo desde tu cuenta de Google.
+                            Iniciaste sesión con Google: gestiona tu contraseña desde tu cuenta de Google.
                         </Message>
+                        <Button @click="abrirDialogoBaja" icon="pi pi-trash" label="Eliminar mi cuenta"
+                            class="!bg-red-700 !border-red-700 !text-white justify-start mt-2" />
                     </div>
-                </template>
-            </Card>
-
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-red-900/60">
-                <template #title>
-                    <div class="flex items-center gap-2 text-sm">
-                        <i class="pi pi-exclamation-triangle text-red-500" />
-                        <span>Zona de peligro</span>
-                    </div>
-                </template>
-                <template #content>
-                    <p class="text-xs text-zinc-400 mb-3">
-                        Al eliminar tu cuenta se borrarán todas tus participaciones, tus pujas activas y las ligas
-                        de las que seas único administrador.
-                    </p>
-                    <Button @click="abrirDialogoBaja" icon="pi pi-trash" label="Eliminar mi cuenta"
-                        class="!bg-red-700 !border-red-700" />
                 </template>
             </Card>
         </main>
@@ -386,26 +315,6 @@ function mensajeFirebase(error) {
                 <div class="flex justify-end gap-2 mt-2">
                     <Button label="Cancelar" text @click="dialogoContrasenaAbierto = false" />
                     <Button label="Cambiar" :loading="guardandoContrasena" @click="confirmarCambioContrasena"
-                        class="!bg-[#E10600] !border-[#E10600]" />
-                </div>
-            </div>
-        </Dialog>
-
-        <!-- Diálogo cambio de correo -->
-        <Dialog v-model:visible="dialogoCorreoAbierto" modal header="Cambiar correo"
-            :style="{ width: '90vw', maxWidth: '460px' }"
-            :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
-            <div class="flex flex-col gap-3">
-                <Message severity="warn" :closable="false">
-                    Tras cambiar el correo se cerrará tu sesión y deberás verificar el nuevo enlace que te enviemos.
-                </Message>
-                <label class="text-xs text-zinc-400 uppercase">Contraseña actual</label>
-                <Password v-model="contrasenaParaCorreo" :feedback="false" toggleMask inputClass="w-full" />
-                <label class="text-xs text-zinc-400 uppercase">Nuevo correo</label>
-                <InputText v-model="correoNuevo" type="email" placeholder="tu.nuevo@correo.com" />
-                <div class="flex justify-end gap-2 mt-2">
-                    <Button label="Cancelar" text @click="dialogoCorreoAbierto = false" />
-                    <Button label="Cambiar" :loading="guardandoCorreo" @click="confirmarCambioCorreo"
                         class="!bg-[#E10600] !border-[#E10600]" />
                 </div>
             </div>

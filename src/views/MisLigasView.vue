@@ -6,7 +6,9 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+
 import Cabecera from '@/components/Cabecera.vue'
+
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
@@ -15,23 +17,21 @@ import DataView from 'primevue/dataview'
 
 const storeLigas = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
-const enrutador = useRouter()
+const router = useRouter()
 const notificacion = useToast()
 const confirmar = useConfirm()
 
 const nombreNuevaLiga = ref('')
 const codigoUnion = ref('')
+const ligaSeleccionada = ref(null)
+
 const cargando = ref(false)
+const cargandoAccion = ref(false)
+
 const dialogoCrearVisible = ref(false)
 const dialogoUnirseVisible = ref(false)
 const dialogoOpcionesVisible = ref(false)
-const ligaSeleccionada = ref(null)
-const cargandoAccion = ref(false)
 
-const abrirOpcionesLiga = (liga) => {
-  ligaSeleccionada.value = liga
-  dialogoOpcionesVisible.value = true
-}
 
 onMounted(async () => {
   cargando.value = true
@@ -39,19 +39,28 @@ onMounted(async () => {
   cargando.value = false
 })
 
-const manejarCrearLiga = async () => {
+/* Abrir diálogo de opciones para la liga seleccionada */
+const abrirOpcionesLiga = (liga) => {
+  ligaSeleccionada.value = liga
+  dialogoOpcionesVisible.value = true
+}
+
+/* Manejar la creación de una nueva liga */
+const handleCrearLiga = async () => {
+  // Corto el nombre para eliminar espacios al inicio y al final por si acaso
   const nombreLigaNormalizado = nombreNuevaLiga.value.trim()
 
+  // Validaciones básicas de longitud del nombre
   if (nombreLigaNormalizado.length < 3) {
-    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 carácteres' })
+    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 carácteres.' })
     return
   }
-
   if (nombreLigaNormalizado.length > 12) {
-    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre no puede exceder los 12 carácteres' })
+    notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre no puede exceder los 12 carácteres.' })
     return
   }
 
+  // Llamo al store para crear la liga y manejo la respuesta
   const resultado = await storeLigas.crearLiga(nombreLigaNormalizado)
   if (resultado.success) {
     notificacion.add({ severity: 'success', summary: '¡Liga creada!', detail: resultado.message })
@@ -62,7 +71,7 @@ const manejarCrearLiga = async () => {
   }
 }
 
-const manejarUnirseLiga = async () => {
+const handleUnirseLiga = async () => {
   const codigoUnionNormalizado = codigoUnion.value.trim().toUpperCase()
 
   if (!codigoUnionNormalizado) {
@@ -81,10 +90,20 @@ const manejarUnirseLiga = async () => {
 
 const abrirLiga = (idLiga) => {
   storeLigas.idLigaActiva = idLiga
-  enrutador.push({ name: 'inicio', query: { liga: idLiga } })
+  router.push({ name: 'inicio', query: { liga: idLiga } })
 }
 
-const manejarAbandonarLiga = () => {
+async function copiarCodigoLiga(codigo) {
+  await navigator.clipboard.writeText(codigo)
+  notificacion.add({
+    severity: 'success',
+    summary: 'Código copiado',
+    detail: `"${codigo}" ya está en tu portapapeles.`,
+    life: 3000,
+  })
+}
+
+const handleAbandonarLiga = () => {
   confirmar.require({
     icon: 'pi pi-exclamation-triangle',
     message: `¿Estás seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
@@ -107,7 +126,7 @@ const manejarAbandonarLiga = () => {
   })
 }
 
-const manejarEliminarLiga = () => {
+const handleEliminarLiga = () => {
   confirmar.require({
     icon: 'pi pi-trash',
     message: 'Todos los participantes serán expulsados y los datos serán borrados permanentemente.',
@@ -131,11 +150,6 @@ const manejarEliminarLiga = () => {
 }
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <div class="min-h-screen pb-10 font-sans">
@@ -181,9 +195,14 @@ const manejarEliminarLiga = () => {
                     </div>
 
                     <div class="flex gap-2 justify-end">
-                      <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                      <Button icon="pi pi-copy" v-tooltip.top="'Copiar código'"
+                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                        @click.stop="copiarCodigoLiga(item.codigo_invitacion)" />
+                      <Button icon="pi pi-cog" v-tooltip.top="'Ajustes'"
+                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click.stop="abrirOpcionesLiga(item)" />
-                      <Button icon="pi pi-play" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                      <Button icon="pi pi-play" v-tooltip.top="'Entrar'"
+                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click.stop="abrirLiga(item.id)" />
                     </div>
                   </div>
@@ -213,8 +232,7 @@ const manejarEliminarLiga = () => {
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"
             class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button label="Crear" @click="manejarCrearLiga"
-            class="!px-10 !bg-[#E10600] !border-none font-bold" />
+          <Button label="Crear" @click="handleCrearLiga" class="!px-10 !bg-[#E10600] !border-none font-bold" />
         </div>
       </div>
     </Dialog>
@@ -230,7 +248,7 @@ const manejarEliminarLiga = () => {
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoUnirseVisible = false"
             class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button label="Unirse" @click="manejarUnirseLiga"
+          <Button label="Unirse" @click="handleUnirseLiga"
             class="!px-10 !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]" />
         </div>
       </div>
@@ -245,13 +263,12 @@ const manejarEliminarLiga = () => {
           ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
         </p>
 
-        <Button label="ABANDONAR LIGA" icon="pi pi-sign-out"
-          class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black" @click="manejarAbandonarLiga"
-          :loading="cargandoAccion" />
+        <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
+          @click="handleAbandonarLiga" :loading="cargandoAccion" />
 
         <Button v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion"
-          label="ELIMINAR LIGA" icon="pi pi-trash" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
-          @click="manejarEliminarLiga" :loading="cargandoAccion" />
+          label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
+          @click="handleEliminarLiga" :loading="cargandoAccion" />
       </div>
     </Dialog>
   </div>

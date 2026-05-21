@@ -7,6 +7,7 @@ import {
   iniciarSesionConGoogle,
   restablecerContraseña
 } from '@/services/servicioAutenticacion'
+
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 import Card from 'primevue/card'
@@ -23,7 +24,7 @@ import { z } from 'zod'
 
 const esquemaValidacion = zodResolver(
   z.object({
-    email: z.string().min(1, 'El correo es obligatorio,').email('Formato de correo inválido.'),
+    email: z.string().min(1, 'El correo es obligatorio.').email('Formato de correo inválido.'),
     password: z.string().min(1, 'La contraseña es obligatoria.')
   })
 )
@@ -40,7 +41,11 @@ const modalRecuperacionVisible = ref(false)
 const correoRecuperacion = ref('')
 const cargandoRecuperacion = ref(false)
 
-/* Manejo de inicio de sesión con email/contraseña */
+/**
+ * Gestiona el envío del formulario de inicio de sesión con email y contraseña.
+ * Redirige al área de administración o a ligas según el rol del usuario.
+ * @param {{ valid: boolean, values: { email: string, password: string } }} formulario
+ */
 const handleInicioSesion = async ({ valid, values }) => {
   if (!valid) return
   cargando.value = true
@@ -67,7 +72,11 @@ const handleInicioSesion = async ({ valid, values }) => {
   }
 }
 
-/* Manejo de inicio de sesión con Google (no usar en desarrollo) */
+/**
+ * Gestiona el inicio de sesión mediante el popup de Google.
+ * Si el usuario nunca se había registrado, lo redirige al flujo de registro-google
+ * para que complete su nombre visible antes de continuar.
+ */
 const handleInicioSesionGoogle = async () => {
   errorAuth.value = ''
   cargando.value = true
@@ -101,8 +110,11 @@ const handleInicioSesionGoogle = async () => {
   }
 }
 
-/* Manejo de restablecimiento de contraseña, cabe destacar que siempre voy a mostrar
-un mensaje de éxito independientemente de si el correo está o no registrado por seguridad. */
+/**
+ * Gestiona el restablecimiento de contraseña desde el modal.
+ * Siempre muestra un mensaje de éxito genérico para no revelar si el correo
+ * está registrado o no (protección contra user enumeration).
+ */
 const handleRecuperarContraseña = async () => {
   const correoAEnviar = correoRecuperacion.value.trim()
 
@@ -131,7 +143,7 @@ const handleRecuperarContraseña = async () => {
   }
 }
 
-// Limpiamos el estado del modal para evitar datos residuales al cerrarlo.
+/** Limpia el estado del modal de recuperación al cerrarse para evitar datos residuales. */
 const alOcultarModalRecuperacion = () => {
   correoRecuperacion.value = ''
   cargandoRecuperacion.value = false
