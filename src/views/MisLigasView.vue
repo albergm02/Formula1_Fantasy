@@ -71,6 +71,7 @@ const handleCrearLiga = async () => {
   }
 }
 
+/* Manejar la acción de unirse a una liga mediante código de invitación */
 const handleUnirseLiga = async () => {
   const codigoUnionNormalizado = codigoUnion.value.trim().toUpperCase()
 
@@ -88,26 +89,28 @@ const handleUnirseLiga = async () => {
   }
 }
 
+/* Abrir la liga seleccionada y redirigir a la pantalla principal con la liga activa */
 const abrirLiga = (idLiga) => {
   storeLigas.idLigaActiva = idLiga
   router.push({ name: 'inicio', query: { liga: idLiga } })
 }
 
+/* Copiar el código de invitación de la liga al portapapeles y mostrar una notificación */
 async function copiarCodigoLiga(codigo) {
   await navigator.clipboard.writeText(codigo)
   notificacion.add({
     severity: 'success',
     summary: 'Código copiado',
-    detail: `"${codigo}" ya está en tu portapapeles.`,
+    detail: `"${codigo}" copiado al portapapeles.`,
     life: 3000,
   })
 }
 
+/* Manejar la acción de abandonar la liga seleccionada con confirmación previa */
 const handleAbandonarLiga = () => {
   confirmar.require({
-    icon: 'pi pi-exclamation-triangle',
-    message: `¿Estás seguro de que quieres abandonar el campeonato "${ligaSeleccionada.value.nombre}"?`,
-    header: 'CONFIRMACIÓN DE SALIDA',
+    message: `¿Estás seguro de que quieres abandonar la liga "${ligaSeleccionada.value.nombre}"?`,
+    header: 'CONFIRMACIÓN DE ABANDONO',
     acceptLabel: 'Abandonar',
     rejectClass: '!bg-transparent !border-none !text-white',
     acceptClass: '!bg-[#D4A843] !border-none !text-[#1A1A1F]',
@@ -117,19 +120,20 @@ const handleAbandonarLiga = () => {
       cargandoAccion.value = false
 
       if (resultado.success) {
-        notificacion.add({ severity: 'success', summary: 'Coche fuera de pista', detail: resultado.message })
+        notificacion.add({ severity: 'success', summary: 'Abandonaste la liga.', detail: resultado.message })
         dialogoOpcionesVisible.value = false
       } else {
-        notificacion.add({ severity: 'error', summary: 'Error al abandonar', detail: resultado.message })
+        notificacion.add({ severity: 'error', summary: 'Error al abandonar.', detail: resultado.message })
       }
     },
   })
 }
 
+/* Manejar la acción de eliminar la liga seleccionada con confirmación previa. 
+Solo el admin puede eliminar la liga. */
 const handleEliminarLiga = () => {
   confirmar.require({
-    icon: 'pi pi-trash',
-    message: 'Todos los participantes serán expulsados y los datos serán borrados permanentemente.',
+    message: `¿Estás seguro de que quieres eliminar la liga "${ligaSeleccionada.value.nombre}"? Todos los participantes serán expulsados y los datos serán borrados permanentemente.`,
     header: 'ELIMINAR LIGA',
     acceptLabel: 'Eliminar para todos',
     rejectClass: '!bg-transparent !border-none !text-white',
@@ -140,10 +144,10 @@ const handleEliminarLiga = () => {
       cargandoAccion.value = false
 
       if (resultado.success) {
-        notificacion.add({ severity: 'success', summary: 'Campeonato finalizado', detail: resultado.message })
+        notificacion.add({ severity: 'success', summary: 'Liga eliminada.', detail: resultado.message })
         dialogoOpcionesVisible.value = false
       } else {
-        notificacion.add({ severity: 'error', summary: 'Error al eliminar', detail: resultado.message })
+        notificacion.add({ severity: 'error', summary: 'Error al eliminar.', detail: resultado.message })
       }
     },
   })
@@ -175,16 +179,17 @@ const handleEliminarLiga = () => {
               Ligas disponibles: {{ storeLigas.detallesLigas.length }}/5
             </div>
 
+            <!-- DataView de ligas -->
             <DataView :value="storeLigas.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
               <template #list="slotProps">
                 <div class="flex flex-col w-full gap-4">
                   <div v-for="(item, index) in slotProps.items" :key="index" @click="abrirLiga(item.id)"
-                    class="flex items-center justify-between p-4 bg-[#1A1A1F] border border-[#D4A843]/30">
+                    class="flex items-center justify-between p-4 bg-[#1A1A1F] rounded-lg">
                     <div class="flex flex-col gap-1 w-2/3">
                       <h3 class="pr-2 text-xl font-black uppercase truncate text-[#E10600]" :title="item.nombre">
                         {{ item.nombre }}
                       </h3>
-                      <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-[#F0ECEC] opacity-80">
+                      <div class="flex flex-wrap gap-2 text-xs font-medium">
                         <span class="flex items-center gap-1">
                           <i class="pi pi-users text-[#D4A843]"></i> {{ item.participantes }}
                         </span>
@@ -195,14 +200,11 @@ const handleEliminarLiga = () => {
                     </div>
 
                     <div class="flex gap-2 justify-end">
-                      <Button icon="pi pi-copy" v-tooltip.top="'Copiar código'"
-                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                      <Button icon="pi pi-copy" class=" !bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click.stop="copiarCodigoLiga(item.codigo_invitacion)" />
-                      <Button icon="pi pi-cog" v-tooltip.top="'Ajustes'"
-                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                      <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click.stop="abrirOpcionesLiga(item)" />
-                      <Button icon="pi pi-play" v-tooltip.top="'Entrar'"
-                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                      <Button icon="pi pi-play" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
                         @click.stop="abrirLiga(item.id)" />
                     </div>
                   </div>
@@ -221,26 +223,20 @@ const handleEliminarLiga = () => {
       </div>
     </div>
 
-    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO"
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: '#E10600', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO">
       <div class="flex flex-col gap-4">
-        <span class="text-[#F0ECEC]"> Puedes crear un máximo de 2 ligas</span>
-        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre"
-          class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#E10600]" autofocus />
+        <span class="text-[#F0ECEC]">Introduzca el nombre de la nueva liga.</span>
+        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre..."
+          class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"
             class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button label="Crear" @click="handleCrearLiga" class="!px-10 !bg-[#E10600] !border-none font-bold" />
+          <Button label="Crear" @click="handleCrearLiga" class="!px-10 !bg-[#D4A843] !border-none font-bold" />
         </div>
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA"
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: '#D4A843', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA">
       <div class="flex flex-col gap-4">
         <span class="text-sm text-[#F0ECEC]">Introduce el código de invitación de 6 dígitos.</span>
         <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3"
@@ -254,10 +250,7 @@ const handleEliminarLiga = () => {
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA"
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA">
       <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
         <p class="mb-2 text-center text-sm text-[#F0ECEC]">
           ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
@@ -265,7 +258,7 @@ const handleEliminarLiga = () => {
 
         <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
           @click="handleAbandonarLiga" :loading="cargandoAccion" />
-
+        <!-- Aqui compruebo que la liga seleccionada pertenece al administrador o no -->
         <Button v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion"
           label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
           @click="handleEliminarLiga" :loading="cargandoAccion" />
