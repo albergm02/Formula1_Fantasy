@@ -64,14 +64,13 @@ function calcularFactorTodoTerreno({
   numeroSafetyCarActivos,
   numeroVirtualSafetyCarActivos,
 }) {
-  const factorClima = llovio ? 1 : 0.5
+  const factorBase = llovio ? 1 : 0.5
+  const bonusCaos =
+    (numeroSafetyCarActivos || 0) * 0.05 +
+    (numeroVirtualSafetyCarActivos || 0) * 0.05 +
+    (numeroDNFs || 0) * 0.1
 
-  let bonusCaos = 0
-  bonusCaos += (numeroSafetyCarActivos || 0) * 0.05
-  bonusCaos += (numeroVirtualSafetyCarActivos || 0) * 0.05
-  bonusCaos += (numeroDNFs || 0) * 0.1
-
-  return Math.round(factorClima * (1 + bonusCaos) * 100) / 100
+  return Math.round((factorBase + bonusCaos) * 100) / 100
 }
 
 /**

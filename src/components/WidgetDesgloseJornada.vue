@@ -6,7 +6,6 @@ import { ref } from 'vue'
 
 const storeEscuderia = usarStoreEscuderia()
 const mostrarDetalle = ref(false)
-
 const jornada = computed(() => storeEscuderia.ultimaJornada)
 
 const tieneSinergia = computed(() => {
@@ -32,6 +31,8 @@ const puntosBaseSinSinergia = computed(() => {
   return puntosPilotosTotal.value + puntosCoche.value
 })
 
+/// Genera un texto descriptivo de las condiciones climáticas para la clase todoterreno
+//  de la jornada para mostrar en el diálogo.
 const condicionesTexto = computed(() => {
   if (!jornada.value?.condiciones) return []
   const c = jornada.value.condiciones
@@ -47,37 +48,52 @@ const condicionesTexto = computed(() => {
 const NOMBRES_VARIANTE = {
   qualy: 'Qualy',
   carrera: 'Carrera',
-  todo_terreno: 'Todo Terreno',
+  todo_terreno: 'Todoterreno',
   base: 'Base',
+  remontador: 'Remontador',
+  estratega: 'Estratega',
 }
 
 /**
  * Genera las líneas de explicación del factor de jornada de un piloto.
- * @param {Object} piloto - Objeto del desglose con variante, actuacion, factorJornada.
+ * El factor multiplica la puntuación base de atributos según su variante y la actuación real en la jornada.
+ * @param {Object} piloto - Objeto del desglose con variante, actuacion, factorJornada y puntuacionBase.
  * @returns {Array<string>}
  */
 function explicarFactor(piloto) {
   if (!piloto.variante || !piloto.factorJornada) return []
 
   const lineas = []
-  const a = piloto.actuacion || {}
+  const actuacion = piloto.actuacion || {}
   const factor = piloto.factorJornada
 
   if (piloto.variante === 'qualy') {
-    lineas.push(`P${a.posicionQualy} en Qualy → ×${factor}`)
+    lineas.push(`Clasificó P${actuacion.posicionQualy} → factor ×${factor}`)
   } else if (piloto.variante === 'carrera') {
-    const ganadas = (a.posicionSalida || 20) - (a.posicionCarrera || 20)
-    lineas.push(`P${a.posicionCarrera} en Carrera · ${ganadas >= 0 ? '+' : ''}${ganadas} pos → ×${factor}`)
+    const posicionesGanadas = (actuacion.posicionSalida || 20) - (actuacion.posicionCarrera || 20)
+    const signo = posicionesGanadas >= 0 ? '+' : ''
+    lineas.push(`Terminó P${actuacion.posicionCarrera} (${signo}${posicionesGanadas} desde salida) → factor ×${factor}`)
   } else if (piloto.variante === 'todo_terreno') {
-    const c = jornada.value?.condiciones || {}
-    const clima = c.llovio ? 'Lluvia ×1.0' : 'Seco ×0.5'
-    lineas.push(`${clima} + caos → ×${factor}`)
+    const condiciones = jornada.value?.condiciones || {}
+    const clima = condiciones.llovio ? 'Con lluvia' : 'En seco'
+    lineas.push(`${clima} + incidentes de carrera → factor ×${factor}`)
   } else if (piloto.variante === 'base') {
-    lineas.push(`Promedio Q/C/TT → ×${factor}`)
+    lineas.push(`Media de Qualy, Carrera y Todoterreno → factor ×${factor}`)
+  } else if (piloto.variante === 'remontador') {
+    const adelantamientos = actuacion.numeroAdelantos || 0
+    const adelantado = actuacion.numeroVecesAdelantado || 0
+    const diferencial = adelantamientos - adelantado
+    const signo = diferencial >= 0 ? '+' : ''
+    lineas.push(`${adelantamientos} adelantamientos − ${adelantado} recibidos (${signo}${diferencial}) → factor ×${factor}`)
+  } else if (piloto.variante === 'estratega') {
+    const paradas = actuacion.numeroPitStops ?? '—'
+    const stint = Math.round((actuacion.porcentajeStintMaximo || 0) * 100)
+    lineas.push(`P${actuacion.posicionCarrera} · ${paradas} paradas · stint más largo ${stint}% → factor ×${factor}`)
   }
 
   if (piloto.puntuacionBase) {
-    lineas.push(`Base: ${piloto.puntuacionBase} pts × ${factor} = ${Math.round(piloto.puntuacionBase * factor)} pts`)
+    const puntosFinales = Math.round(piloto.puntuacionBase * factor)
+    lineas.push(`Base ${piloto.puntuacionBase} pts × ${factor} = ${puntosFinales} pts`)
   }
 
   return lineas

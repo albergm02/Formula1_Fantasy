@@ -1,25 +1,23 @@
 <script setup>
-/**
- * Vista de explicación pública de la jornada seleccionada (por defecto la última).
- * Permite navegar el historial de jornadas procesadas y, por cada piloto,
- * inspeccionar los datos crudos de OpenF1 y la simulación por variante.
- */
-
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+
 import Card from 'primevue/card'
 import Message from 'primevue/message'
 import ProgressSpinner from 'primevue/progressspinner'
+
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
+
 import { suscribirseHistorialJornadas } from '@/services/servicioJornada'
 import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
+
 import { pilotosBase } from '@/data/bases/pilotosBase'
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
-import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
-import { usarStoreLigas } from '@/stores/storeLigas'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
 
+import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
+
+// Variantes de puntuación para mostrar en la guía rápida
 const VARIANTES = [
     { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
     { id: 'carrera', etiqueta: 'Carrera', icono: 'pi-flag-fill', color: '#f97316' },
@@ -29,6 +27,7 @@ const VARIANTES = [
     { id: 'base', etiqueta: 'Base', icono: 'pi-user', color: '#a1a1aa' },
 ]
 
+// Ejemplos para cada variante dentro de la guía para explicar como funciona el sistema de puntuación.
 const EJEMPLOS_VARIANTE = {
     qualy: {
         escenario: 'Piloto con base 72 que clasifica P2.',
@@ -40,7 +39,7 @@ const EJEMPLOS_VARIANTE = {
     },
     todo_terreno: {
         escenario: 'GP sin lluvia, 2 Safety Cars y 3 abandonos. Base del piloto 65.',
-        calculo: 'Factor = 0.50 × (1 + 0.10 + 0.30) = 0.50 × 1.40 = 0.70 → 65 × 0.70 = 45,5 pts.',
+        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 → 65 × 0.90 = 58,5 pts.',
     },
     remontador: {
         escenario: 'Piloto con base 60 que realiza 8 adelantamientos y recibe 3 (diferencial +5).',
@@ -51,8 +50,8 @@ const EJEMPLOS_VARIANTE = {
         calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 → 70 × 1.20 = 84 pts.',
     },
     base: {
-        escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/TT son 1.20, 1.10 y 1.00.',
-        calculo: 'Factor = (1.20 + 1.10 + 1.00) / 3 = 1.10 → 66 × 1.10 = 72,6 pts.',
+        escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/Todo Terreno son 1.20, 1.10 y 1.00.',
+        calculo: 'Factor = (1.20 + 1.10 + 1.00) / 3 = 1.10 → 66 × 1.10 = 72,6 pts (73).',
     },
 }
 
@@ -63,11 +62,8 @@ const pilotoExpandido = ref(null)
 const guiaAbierta = ref(false)
 const varianteGuiaExpandida = ref(null)
 const ultimoGranPremioPendiente = ref(null)
-let cancelarSuscripcion = () => { }
 
-const ruta = useRoute()
-const storeLigas = usarStoreLigas()
-const storeEscuderia = usarStoreEscuderia()
+let cancelarSuscripcion = () => { }
 
 const jornada = computed(() => {
     if (!historial.value.length) return null
@@ -104,13 +100,6 @@ function obtenerEjemploVariante(id) {
 }
 
 onMounted(async () => {
-    const idLiga = ruta.query.liga || storeLigas.idLigaActiva
-    if (idLiga) {
-        storeLigas.idLigaActiva = idLiga
-        if (!storeEscuderia.idLigaActiva) {
-            await storeEscuderia.cargarEquipo(idLiga)
-        }
-    }
     cancelarSuscripcion = suscribirseHistorialJornadas(async (jornadas) => {
         historial.value = jornadas
         if (!idJornadaSeleccionada.value && jornadas.length > 0) {
@@ -127,7 +116,7 @@ onMounted(async () => {
                 console.warn('No se pudo recuperar el último GP de OpenF1:', error.message)
             }
         }
-    }) || (() => { })
+    })
 })
 
 onUnmounted(() => {
@@ -234,14 +223,6 @@ function formatearPorcentaje(valor) {
         <Cabecera />
 
         <main class="flex flex-col w-full max-w-3xl mx-auto mt-2 p-4 gap-4">
-
-            <!-- Cabecera de sección -->
-            <div class="flex items-center gap-2 pb-2 border-b border-[#FFFFFF]/10">
-                <i class="pi pi-megaphone text-[#E10600] text-base"></i>
-                <h2 class="text-sm font-black uppercase tracking-widest text-white">
-                    Resultados de la jornada
-                </h2>
-            </div>
             <!-- Cargando -->
             <div v-if="cargando" class="flex justify-center py-16">
                 <ProgressSpinner stroke-width="3" />

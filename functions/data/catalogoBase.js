@@ -142,12 +142,12 @@ const perfilesPuntuacion = {
   todo_terreno: {
     pesos: { ritmo: 0.1, consistencia: 0.15, adaptabilidad: 0.45, agresividad: 0.2, gestion: 0.1 },
     reglasUsuario: [
-      'Factor según condiciones de carrera:',
-      'Lluvia → ×1.00 | Sin lluvia → ×0.50',
+      'Factor base según el clima:',
+      'Lluvia → 1.00 | Sin lluvia → 0.50',
       'Cada Safety Car → +0.05',
       'Cada Virtual SC → +0.05',
       'Cada abandono (DNF) → +0.10',
-      'Factor acotado al rango 0.50 – 1.50.',
+      'Factor = base + bonus, acotado al rango 0.50 – 1.50.',
     ],
   },
   base: {
