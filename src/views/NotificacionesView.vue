@@ -38,6 +38,7 @@ const formatearFecha = (fecha) => {
   const ahora = new Date()
   const diferencia = Math.floor((ahora - fecha) / 1000)
 
+  // cambio de formato a "hace X min/h" o fecha corta si es más de un día
   if (diferencia < 60) return 'hace un momento'
   if (diferencia < 3600) return `hace ${Math.floor(diferencia / 60)} min`
   if (diferencia < 86400) return `hace ${Math.floor(diferencia / 3600)} h`
@@ -58,11 +59,6 @@ onMounted(async () => {
 })
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE----------------------------------------------------------->
-
-<!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <div class="min-h-screen pb-24 font-sans">
@@ -73,15 +69,10 @@ onMounted(async () => {
       <!-- Cabecera de sección -->
       <div class="flex justify-between items-center pb-2 border-b border-[#FFFFFF]/10">
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Actividad del campeonato</h2>
-        <span v-if="storeNotificaciones.actividad.length" class="text-xs text-zinc-500">
-          {{ storeNotificaciones.actividad.length }} movimientos
-        </span>
       </div>
 
-      <!-- Spinner de carga -->
       <div v-if="storeNotificaciones.cargando" class="flex flex-col items-center justify-center py-16 gap-3">
-        <i class="pi pi-spinner text-3xl text-[#D4A843] animate-spin"></i>
-        <p class="text-xs font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando actividad...</p>
+        <p class="text-xs font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando...</p>
       </div>
 
       <!-- Feed de actividad -->
@@ -96,15 +87,6 @@ onMounted(async () => {
           </span>
         </div>
       </div>
-
-      <!-- Estado vacío -->
-      <div v-else class="flex flex-col items-center justify-center py-16 gap-3">
-        <i class="pi pi-flag text-3xl text-zinc-700"></i>
-        <p class="text-center text-xs uppercase tracking-widest text-zinc-500">
-          Aún no hay movimientos en este campeonato
-        </p>
-      </div>
-
     </main>
 
     <BarraNavegacion />
