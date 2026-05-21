@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, onUnmounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
 
 import Card from 'primevue/card'
 import Message from 'primevue/message'
@@ -91,15 +90,9 @@ function alternarVarianteGuia(id) {
     varianteGuiaExpandida.value = varianteGuiaExpandida.value === id ? null : id
 }
 
-function obtenerReglasVariante(id) {
-    return perfilesPuntuacion[id]?.reglasUsuario || []
-}
-
-function obtenerEjemploVariante(id) {
-    return EJEMPLOS_VARIANTE[id] || null
-}
 
 onMounted(async () => {
+    // Nos suscribimos al historial de jornadas para mostrar la más reciente y permitir navegar por las anteriores si estas existen.
     cancelarSuscripcion = suscribirseHistorialJornadas(async (jornadas) => {
         historial.value = jornadas
         if (!idJornadaSeleccionada.value && jornadas.length > 0) {
@@ -148,28 +141,26 @@ const filasPilotos = computed(() => {
     return filas.sort((a, b) => a.actuacion.posicionCarrera - b.actuacion.posicionCarrera)
 })
 
+// Condiciones que muestran las condiciones climáticas y de carrera del gran premio.
 const condicionesTexto = computed(() => {
     if (!hayJornada.value) return []
     const c = jornada.value.condiciones || {}
     const etiquetas = []
-    if (c.llovio) etiquetas.push({ texto: 'Lluvia', icono: 'pi-cloud', color: 'text-blue-400' })
-    else etiquetas.push({ texto: 'Seco', icono: 'pi-sun', color: 'text-amber-300' })
+    if (c.llovio) etiquetas.push({ texto: 'Lluvia', color: 'text-blue-400' })
+    else etiquetas.push({ texto: 'Seco', color: 'text-amber-300' })
     if (c.numeroSafetyCarActivos > 0)
         etiquetas.push({
             texto: `${c.numeroSafetyCarActivos} Safety Car`,
-            icono: 'pi-exclamation-triangle',
             color: 'text-amber-400',
         })
     if (c.numeroVirtualSafetyCarActivos > 0)
         etiquetas.push({
             texto: `${c.numeroVirtualSafetyCarActivos} VSC`,
-            icono: 'pi-exclamation-circle',
             color: 'text-yellow-400',
         })
     if (c.numeroDNFs > 0)
         etiquetas.push({
             texto: `${c.numeroDNFs} DNFs`,
-            icono: 'pi-times-circle',
             color: 'text-red-400',
         })
     return etiquetas
@@ -179,6 +170,7 @@ function alternarPiloto(numero) {
     pilotoExpandido.value = pilotoExpandido.value === numero ? null : numero
 }
 
+// Cálculo de puntuación base dependiendo del perfil visitado en la guía rápida.
 function calcularPuntuacionBaseVariante(atributos, perfil) {
     const pesos = perfilesPuntuacion[perfil].pesos
     const valor =
@@ -190,6 +182,7 @@ function calcularPuntuacionBaseVariante(atributos, perfil) {
     return Math.round(valor * 10) / 10
 }
 
+// Cálculo de la puntuación final de cada variante aplicando el factor de jornada.
 function obtenerSimulacionVariantes(piloto) {
     const condiciones = jornada.value.condiciones || {}
     return VARIANTES.map((variante) => {
@@ -200,10 +193,6 @@ function obtenerSimulacionVariantes(piloto) {
     })
 }
 
-function formatearPosicion(posicion) {
-    if (!posicion || posicion >= 99) return '—'
-    return `P${posicion}`
-}
 
 function obtenerEstadoCarrera(actuacion) {
     if (actuacion?.dsq) return 'DSQ'
@@ -256,10 +245,6 @@ function formatearPorcentaje(valor) {
                             <span class="text-xs text-zinc-500">{{ ultimoGranPremioPendiente.fecha }}</span>
                         </div>
                     </div>
-                    <p class="text-[11px] text-zinc-500 leading-relaxed">
-                        El cálculo de puntos para este GP está pendiente. Aparecerá aquí en cuanto se
-                        complete el procesamiento automático.
-                    </p>
                 </div>
             </div>
 
@@ -287,7 +272,7 @@ function formatearPorcentaje(valor) {
                             Guía rápida
                         </span>
                         <span class="text-sm font-bold text-white">
-                            Cómo puntúa cada clase de carta
+                            ¿Cómo puntúan mis pilotos?
                         </span>
                     </div>
                     <i class="pi text-zinc-500 text-xs" :class="guiaAbierta ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
@@ -297,9 +282,9 @@ function formatearPorcentaje(valor) {
                     <p class="text-[11px] text-zinc-400 leading-relaxed">
                         Cada carta tiene una <span class="text-white font-bold">puntuación base</span>
                         (suma ponderada de los atributos del piloto) y un
-                        <span class="text-white font-bold">factor de jornada</span> que depende de cómo le
+                        <span class="text-white font-bold">factor de peso de jornada,</span> que depende de cómo le
                         fue al piloto en este Gran Premio. Los puntos finales son
-                        <span class="text-white font-bold">base × factor</span>.
+                        <span class="text-white font-bold">puntuación base × factor de peso de jornada</span>.
                     </p>
 
                     <div v-for="variante in VARIANTES" :key="variante.id"
@@ -315,22 +300,22 @@ function formatearPorcentaje(valor) {
                         <div v-if="varianteGuiaExpandida === variante.id"
                             class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
                             <ul class="flex flex-col gap-0.5 list-none p-0 m-0">
-                                <li v-for="(regla, idx) in obtenerReglasVariante(variante.id)" :key="idx"
-                                    class="text-[11px] text-zinc-300 leading-snug">
+                                <li v-for="(regla, idx) in perfilesPuntuacion[variante.id]?.reglasUsuario || []"
+                                    :key="idx" class="text-[11px] text-zinc-300 leading-snug">
                                     {{ regla }}
                                 </li>
                             </ul>
-                            <div v-if="obtenerEjemploVariante(variante.id)"
+                            <div v-if="EJEMPLOS_VARIANTE[variante.id]"
                                 class="flex flex-col gap-1 p-2 bg-[#1A1A1F] border-l-2"
                                 :style="{ borderColor: variante.color }">
                                 <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">
                                     Ejemplo
                                 </span>
                                 <span class="text-[11px] text-zinc-300 leading-snug">
-                                    {{ obtenerEjemploVariante(variante.id).escenario }}
+                                    {{ EJEMPLOS_VARIANTE[variante.id].escenario }}
                                 </span>
                                 <span class="text-[11px] font-bold leading-snug" :style="{ color: variante.color }">
-                                    {{ obtenerEjemploVariante(variante.id).calculo }}
+                                    {{ EJEMPLOS_VARIANTE[variante.id].calculo }}
                                 </span>
                             </div>
                         </div>
@@ -343,7 +328,6 @@ function formatearPorcentaje(valor) {
                 :pt="{ root: { class: 'bg-[#1A1A1F] border border-zinc-800' }, body: { class: 'p-4' } }">
                 <template #content>
                     <div class="flex items-center gap-3">
-                        <i class="pi pi-flag-fill text-[#E10600] text-xl"></i>
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                                 Último Gran Premio
@@ -357,11 +341,10 @@ function formatearPorcentaje(valor) {
                         <span v-for="(cond, idx) in condicionesTexto" :key="idx"
                             class="flex items-center gap-1.5 px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold"
                             :class="cond.color">
-                            <i class="pi text-[10px]" :class="cond.icono"></i>
                             {{ cond.texto }}
                         </span>
                     </div>
-                    <p class="text-[11px] text-zinc-500 mt-3 leading-relaxed">
+                    <p class="text-xs text-zinc-200 mt-3">
                         Pulsa cualquier piloto para ver los datos reales recopilados de OpenF1 y cuántos
                         puntos habría sumado bajo cada variante de carta.
                     </p>
@@ -376,24 +359,16 @@ function formatearPorcentaje(valor) {
                     <!-- Cabecera del piloto (clickable) -->
                     <button type="button" @click="alternarPiloto(piloto.numero)"
                         class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
-                        <span class="w-10 text-center text-2xl font-black tabular-nums"
+                        <span class="w-10 text-center text-2xl font-black"
                             :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500 text-sm' : 'text-[#D4A843]'">
                             {{ obtenerEstadoCarrera(piloto.actuacion) ||
-                                formatearPosicion(piloto.actuacion.posicionCarrera) }}
+                                piloto.actuacion.posicionCarrera }}
                         </span>
-                        <div class="w-20 h-14 overflow-hidden bg-black border border-zinc-700 shrink-0">
-                            <img :src="piloto.imagen" :alt="piloto.nombre" class="w-full h-full object-cover block" />
+                        <div class="w-20 h-14 bg-black">
+                            <img :src="piloto.imagen" :alt="piloto.nombre" class="w-full h-full object-cover" />
                         </div>
-                        <div class="flex-1 flex flex-col gap-0.5">
-                            <span class="text-sm font-bold text-white">{{ piloto.nombre }}</span>
-                            <span class="text-[10px] uppercase tracking-wider text-zinc-500">
-                                {{ piloto.equipo }} · #{{ piloto.numero }}
-                            </span>
-                        </div>
-                        <div class="flex flex-col items-end text-[10px] text-zinc-400">
-                            <span>SALIDA {{ formatearPosicion(piloto.actuacion.posicionSalida) }}</span>
-                            <span>CARRERA {{ obtenerEstadoCarrera(piloto.actuacion) ||
-                                formatearPosicion(piloto.actuacion.posicionCarrera) }}</span>
+                        <div class="flex-1 flex flex-col">
+                            <span class="text-sm font-bold text-white uppercase">{{ piloto.nombre }}</span>
                         </div>
                         <i class="pi text-zinc-500 text-xs"
                             :class="pilotoExpandido === piloto.numero ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
@@ -408,45 +383,46 @@ function formatearPorcentaje(valor) {
                             <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                                 Datos recogidos por OpenF1
                             </span>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                            <!-- Resultados recogidos de openf1 -->
+                            <div class="grid grid-cols-2 gap-1">
+                                <div class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
                                         salida</span>
                                     <span class="text-base font-black text-white">
-                                        {{ formatearPosicion(piloto.actuacion.posicionSalida) }}
+                                        {{ piloto.actuacion.posicionSalida }}
                                     </span>
                                 </div>
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                                <div class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
                                         carrera</span>
                                     <span class="text-base font-black"
                                         :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500' : 'text-white'">
                                         {{ obtenerEstadoCarrera(piloto.actuacion) ||
-                                            formatearPosicion(piloto.actuacion.posicionCarrera) }}
+                                            piloto.actuacion.posicionCarrera }}
                                     </span>
                                 </div>
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                                <div class="flex flex-col p-2 bg-[#121218]">
                                     <span
                                         class="text-[9px] uppercase tracking-wider text-zinc-500">Adelantamientos</span>
                                     <span class="text-base font-black text-white">
                                         {{ piloto.actuacion.numeroAdelantos ?? 0 }}
                                     </span>
                                 </div>
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                                <div class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Veces
                                         adelantado</span>
                                     <span class="text-base font-black text-white">
                                         {{ piloto.actuacion.numeroVecesAdelantado ?? 0 }}
                                     </span>
                                 </div>
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                                <div class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Paradas en
                                         boxes</span>
                                     <span class="text-base font-black text-white">
                                         {{ piloto.actuacion.numeroPitStops ?? 0 }}
                                     </span>
                                 </div>
-                                <div class="flex flex-col p-2 bg-[#121218] border border-zinc-800">
+                                <div class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Stint más
                                         largo</span>
                                     <span class="text-base font-black text-white"
@@ -457,14 +433,14 @@ function formatearPorcentaje(valor) {
                             </div>
                         </section>
 
-                        <!-- Simulación por variante -->
+                        <!-- Simulación por variante del piloto -->
                         <section class="flex flex-col gap-2">
                             <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                                 Puntos por variante de carta
                             </span>
                             <div class="flex flex-col gap-1.5">
                                 <div v-for="sim in obtenerSimulacionVariantes(piloto)" :key="sim.id"
-                                    class="flex items-center gap-3 p-2.5 bg-[#121218] border border-zinc-800">
+                                    class="flex items-center gap-3 p-2.5 bg-[#121218]">
                                     <i class="pi text-base" :class="sim.icono" :style="{ color: sim.color }"></i>
                                     <div class="flex-1 flex flex-col">
                                         <span class="text-xs font-bold text-white">{{ sim.etiqueta }}</span>
