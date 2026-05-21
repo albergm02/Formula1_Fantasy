@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
+
 import SeccionTesting from '@/components/admin/SeccionTesting.vue'
 import SeccionRachas from '@/components/admin/SeccionRachas.vue'
+
 import Button from 'primevue/button'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
@@ -13,12 +15,12 @@ import TabPanel from 'primevue/tabpanel'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 
-const enrutador = useRouter()
+const router = useRouter()
 const seccionActiva = ref('testing')
 
 async function manejarCerrarSesion() {
     await cerrarSesion()
-    enrutador.push({ name: 'login' })
+    router.push({ name: 'login' })
 }
 </script>
 
@@ -30,19 +32,14 @@ async function manejarCerrarSesion() {
         <header class="w-full p-3 flex justify-between sticky top-0 z-40 bg-[#1A1A1F] border-b border-[#E10600]">
             <div class="flex items-center gap-2">
                 <img src="/logo.png" class="h-8 w-8 object-contain" />
-                <span class="font-black italic text-[#E10600] text-lg">F1 FANTASY · ADMIN</span>
+                <span class="font-black italic text-[#E10600] text-lg">F1 FANTASY - ADMIN</span>
             </div>
-            <Button @click="manejarCerrarSesion" label="Salir" text
-                class="!text-zinc-400 cursor-pointer" />
+            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400 cursor-pointer" />
         </header>
 
         <main class="flex-1 p-4 max-w-6xl mx-auto w-full space-y-4">
             <header>
                 <h1 class="text-xl font-black uppercase tracking-wide">Panel de administración</h1>
-                <p class="text-zinc-500 text-xs mt-1">
-                    Gestión separada por responsabilidad: validación funcional con datos reales,
-                    ajuste de rachas del catálogo y análisis del sistema.
-                </p>
             </header>
 
             <Tabs v-model:value="seccionActiva">

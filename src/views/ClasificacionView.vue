@@ -2,13 +2,17 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
+
 import { cargarGarajeDeParticipante } from '@/services/servicioLigas'
+
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 import VistaEquipoRival from '@/components/VistaEquipoRival.vue'
+
 import Dialog from 'primevue/dialog'
 import ProgressSpinner from 'primevue/progressspinner'
 
@@ -76,11 +80,6 @@ onMounted(async () => {
 })
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!-------------------------------------------------------------------------------------------------------------------------->
 
 <template>
   <div class="min-h-screen pb-24 font-sans">
@@ -100,12 +99,10 @@ onMounted(async () => {
 
       <div v-else class="flex flex-col gap-3">
         <div v-for="(jugador, indice) in ranking" :key="jugador.id"
-          class="flex items-center justify-between p-4 border border-white transition-colors"
-          :class="{
+          class="flex items-center justify-between p-4 border border-white transition-colors" :class="{
             '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion,
             'cursor-pointer': jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion,
-          }"
-          @click="verEquipoRival(jugador)">
+          }" @click="verEquipoRival(jugador)">
           <div class="flex items-center gap-4">
             <div class="relative -top-4 text-2xl font-black italic" :class="{
               'text-yellow-400': indice === 0,
@@ -115,10 +112,10 @@ onMounted(async () => {
             }">{{ indice + 1 }}º</div>
             <div class="flex flex-col">
               <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
-              <span
-                v-if="jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion"
+              <span v-if="jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion"
                 class="mt-1 text-xs text-[#F0ECEC]">
-                Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2) }}M</span>
+                Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2)
+                }}M</span>
               </span>
               <span v-else class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
                 Toca para ver su equipo
@@ -131,21 +128,14 @@ onMounted(async () => {
               <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
               <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
             </div>
-            <i
-              v-if="jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion"
-              class="pi pi-eye text-zinc-500 text-sm"
-            ></i>
+            <i v-if="jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion"
+              class="pi pi-eye text-zinc-500 text-sm"></i>
           </div>
         </div>
       </div>
 
-      <Dialog
-        v-model:visible="dialogoRivalVisible"
-        modal
-        :draggable="false"
-        class="w-full max-w-md mx-auto"
-        :pt="{ root: { class: '!bg-[#0C0C0E] !border-zinc-700' }, header: { class: '!bg-[#0C0C0E] !p-3' }, content: { class: '!bg-[#0C0C0E] !p-0' } }"
-      >
+      <Dialog v-model:visible="dialogoRivalVisible" modal :draggable="false" class="w-full max-w-md mx-auto"
+        :pt="{ root: { class: '!bg-[#0C0C0E]' }, header: { class: '!bg-[#0C0C0E] !p-3' }, content: { class: '!bg-[#0C0C0E] !p-0' } }">
         <template #header>
           <span class="text-sm font-bold uppercase tracking-widest text-zinc-400">Equipo rival</span>
         </template>
