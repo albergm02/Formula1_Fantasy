@@ -30,27 +30,27 @@ const VARIANTES = [
 const EJEMPLOS_VARIANTE = {
     qualy: {
         escenario: 'Piloto con base 72 que clasifica P2.',
-        calculo: 'Factor P2 (P1–P3) = ×1.50 → 72 × 1.50 = 108 pts.',
+        calculo: 'Factor P2 (P1–P3) = ×1.50 -> 72 × 1.50 = 108 pts.',
     },
     carrera: {
         escenario: 'Piloto con base 68 que termina P3.',
-        calculo: 'Factor P3 = ×1.30 → 68 × 1.30 = 88,4 pts.',
+        calculo: 'Factor P3 = ×1.30 -> 68 × 1.30 = 88,4 pts.',
     },
     todo_terreno: {
         escenario: 'GP sin lluvia, 2 Safety Cars y 3 abandonos. Base del piloto 65.',
-        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 → 65 × 0.90 = 58,5 pts.',
+        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 -> 65 × 0.90 = 58,5 pts.',
     },
     remontador: {
         escenario: 'Piloto con base 60 que realiza 8 adelantamientos y recibe 3 (diferencial +5).',
-        calculo: 'Factor = 1.0 + 5 × 0.1 = 1.50 → 60 × 1.50 = 90 pts.',
+        calculo: 'Factor = 1.0 + 5 × 0.1 = 1.50 -> 60 × 1.50 = 90 pts.',
     },
     estratega: {
         escenario: 'Piloto con base 70, 1 parada, mejor stint del 50%, termina P5.',
-        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 → 70 × 1.20 = 84 pts.',
+        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 -> 70 × 1.20 = 84 pts.',
     },
     base: {
         escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/Todo Terreno son 1.20, 1.10 y 1.00.',
-        calculo: 'Factor = (1.20 + 1.10 + 1.00) / 3 = 1.10 → 66 × 1.10 = 72,6 pts (73).',
+        calculo: 'Factor = (1.20 + 1.10 + 1.00) / 3 = 1.10 -> 66 × 1.10 = 72,6 pts (73).',
     },
 }
 
@@ -301,20 +301,19 @@ function formatearPorcentaje(valor) {
                             class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
                             <ul class="flex flex-col gap-0.5 list-none p-0 m-0">
                                 <li v-for="(regla, idx) in perfilesPuntuacion[variante.id]?.reglasUsuario || []"
-                                    :key="idx" class="text-[11px] text-zinc-300 leading-snug">
+                                    :key="idx" class="text-[11px] text-zinc-300">
                                     {{ regla }}
                                 </li>
                             </ul>
-                            <div v-if="EJEMPLOS_VARIANTE[variante.id]"
-                                class="flex flex-col gap-1 p-2 bg-[#1A1A1F] border-l-2"
+                            <div v-if="EJEMPLOS_VARIANTE[variante.id]" class="flex flex-col gap-1 p-2 bg-[#1A1A1F]"
                                 :style="{ borderColor: variante.color }">
                                 <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">
                                     Ejemplo
                                 </span>
-                                <span class="text-[11px] text-zinc-300 leading-snug">
+                                <span class="text-[11px] text-zinc-300">
                                     {{ EJEMPLOS_VARIANTE[variante.id].escenario }}
                                 </span>
-                                <span class="text-[11px] font-bold leading-snug" :style="{ color: variante.color }">
+                                <span class="text-[11px] font-bold" :style="{ color: variante.color }">
                                     {{ EJEMPLOS_VARIANTE[variante.id].calculo }}
                                 </span>
                             </div>

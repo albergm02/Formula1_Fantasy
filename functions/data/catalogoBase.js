@@ -1,18 +1,3 @@
-/**
- * catalogoBase.js — Semilla del catálogo de cartas para Cloud Functions.
- *
- * Este módulo contiene los datos crudos (pilotos, coches, potenciadores,
- * perfiles de puntuación y variantes) más la lógica pura para construir el
- * catálogo final con precios calculados por puntuación normalizada.
- *
- * Su única finalidad es alimentar el endpoint `seedCatalogoHttp`, que sube
- * el catálogo resultante a Firestore. En tiempo de ejecución, las Cloud
- * Functions leen el catálogo desde Firestore (no desde aquí), por lo que
- * Firestore es la fuente de verdad. Este archivo es la semilla inicial.
- *
- * @module data/catalogoBase
- */
-
 /* ═══════════════════════════════════════════════════════════════════════════
    DATOS BASE — Espejo exacto de /src/data/bases/*
    ═══════════════════════════════════════════════════════════════════════════ */

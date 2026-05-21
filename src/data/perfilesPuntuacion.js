@@ -1,12 +1,3 @@
-/**
- * Perfiles de puntuacion con sistema de atributos ponderados.
- * Cada variante aplica diferentes pesos a los 5 atributos del piloto:
- *   ritmo (0-100), consistencia (0-100), adaptabilidad (0-100),
- *   agresividad (0-100), gestion (0-100)
- *
- * Formula: puntuacionBase = Σ (peso × atributo) para todos los atributos activos.
- * Los pesos de cada perfil suman 1.0. Rango resultante: 0-100 → se escala a puntos de fantasy.
- */
 // prettier-ignore
 export const perfilesPuntuacion = {
   qualy: {
@@ -18,7 +9,6 @@ export const perfilesPuntuacion = {
       'P7 – P10 → ×1.10',
       'P11 – P15 → ×0.85',
       'P16+ → ×0.65',
-      'Factor acotado al rango 0.50 – 1.50.',
     ],
   },
   carrera: {
@@ -33,7 +23,6 @@ export const perfilesPuntuacion = {
       'P11 – P15 → ×0.80',
       'P16 – P20 → ×0.60',
       'P20+ → ×0.50',
-      'Factor acotado al rango 0.50 – 1.50.',
     ],
   },
   todo_terreno: {
@@ -44,7 +33,6 @@ export const perfilesPuntuacion = {
       'Cada Safety Car → +0.05',
       'Cada Virtual SC → +0.05',
       'Cada abandono (DNF) → +0.10',
-      'Factor = base + bonus, acotado al rango 0.50 – 1.50.',
     ],
   },
   base: {
@@ -53,7 +41,6 @@ export const perfilesPuntuacion = {
       'Media de los factores Qualy, Carrera y Todo Terreno:',
       'Factor = (factorQualy + factorCarrera + factorTodoTerreno) / 3',
       'Perfil equilibrado sin especialización.',
-      'Factor acotado al rango 0.50 – 1.50.',
     ],
   },
   remontador: {
@@ -63,7 +50,6 @@ export const perfilesPuntuacion = {
       'diferencial = adelantamientos realizados − recibidos',
       'Factor = 1.0 + diferencial × 0.1',
       'Ej: +5 → ×1.50 | 0 → ×1.00 | −5 → ×0.50',
-      'Factor acotado al rango 0.50 – 1.50.',
     ],
   },
   estratega: {
@@ -75,7 +61,6 @@ export const perfilesPuntuacion = {
       '1 parada → +0.15 | 2 paradas → +0.05 | 3+ → +0.00',
       'Posición: P1–P3 +0.15 | P4–P10 +0.05 | P16+ −0.10',
       'Cada SC → +0.05 | Cada VSC → +0.025 (máx +0.15)',
-      'Factor acotado al rango 0.50 – 1.50.',
     ],
   },
 }

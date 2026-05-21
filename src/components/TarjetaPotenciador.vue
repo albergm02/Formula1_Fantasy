@@ -99,14 +99,6 @@ const confirmarEliminarPuja = () => {
             </div>
           </div>
 
-          <!-- Etiquetas de mejora -->
-          <div class="flex flex-wrap gap-1 my-1">
-            <span v-for="m in etiquetasMejora" :key="m.atributo"
-              class="px-1.5 py-0.5 text-[8px] font-black uppercase bg-black/80 border border-zinc-700" :class="m.color">
-              {{ m.signo }}{{ m.valor }} {{ m.atributo.slice(0, 3) }}
-            </span>
-          </div>
-
           <!-- Botones: Detalles + Pujar -->
           <div v-if="modoMercado" class="flex gap-2">
             <button @click="mostrarDetalles = true"
