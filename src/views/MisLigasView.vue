@@ -225,8 +225,8 @@ const handleEliminarLiga = () => {
 
     <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO">
       <div class="flex flex-col gap-4">
-        <span class="text-[#F0ECEC]">Introduzca el nombre de la nueva liga.</span>
-        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre..."
+        <span class="text-[#F0ECEC]">Introduzca el nombre de la nueva liga. (Máximo 12 caracteres)</span>
+        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre..." maxlength="12"
           class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"

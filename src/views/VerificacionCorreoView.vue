@@ -7,7 +7,7 @@ import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 
-const enrutador = useRouter()
+const router = useRouter()
 const notificacion = useToast()
 const storeAutenticacion = usarStoreAutenticacion()
 
@@ -60,7 +60,7 @@ const comprobarVerificacion = async () => {
         await usuario.reload()
         if (usuario.emailVerified) {
             await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
-            enrutador.push('/ligas')
+            router.push('/ligas')
         } else {
             notificacion.add({
                 severity: 'warn',
@@ -79,15 +79,10 @@ const comprobarVerificacion = async () => {
  */
 const salir = async () => {
     await cerrarSesion()
-    enrutador.push('/')
+    router.push('/')
 }
 </script>
 
-<!---------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!---------------------------------------------------------------------------------------------------------------------------->
 
 <template>
     <div class="flex items-center justify-center min-h-screen p-4">
