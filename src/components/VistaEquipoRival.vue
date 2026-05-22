@@ -4,6 +4,7 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarBloqueoJornada } from '@/composables/usarBloqueoJornada'
 
 import Button from 'primevue/button'
 import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
@@ -23,12 +24,15 @@ const storeEscuderia = usarStoreEscuderia()
 const notificacion = useToast()
 const confirmar = useConfirm()
 
+const { jornadaIniciada, mensajeBloqueoJornada } = usarBloqueoJornada()
+
 /**
  * Determina si el botón de fichar por cláusula está deshabilitado.
  * @param {Object} elemento - Carta del garaje rival.
  * @returns {boolean}
  */
 const esFichajeDeshabilitado = (elemento) => {
+    if (jornadaIniciada.value) return true
     if (estaEnPeriodoDeGracia(elemento)) return true
 
     const precioClausula = calcularPrecioClausula(elemento)
@@ -42,6 +46,10 @@ const esFichajeDeshabilitado = (elemento) => {
  * @param {Object} elemento - Carta del garaje rival a fichar.
  */
 const confirmarEjecucionClausula = (elemento) => {
+    if (jornadaIniciada.value) {
+        notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada })
+        return
+    }
     const precioClausula = calcularPrecioClausula(elemento)
 
     confirmar.require({
@@ -68,6 +76,10 @@ const confirmarEjecucionClausula = (elemento) => {
 
 <template>
     <div class="flex flex-col gap-6 p-4">
+        <div v-if="jornadaIniciada"
+            class="px-3 py-2 bg-emerald-900/20 border border-emerald-500/50 text-[10px] font-black uppercase tracking-widest text-emerald-400 text-center">
+            {{ mensajeBloqueoJornada }}
+        </div>
         <div class="flex items-center justify-between border-b border-zinc-700 pb-3">
             <div class="flex flex-col">
                 <span class="text-lg font-black uppercase text-white">{{ participacion.nombreUsuario }}</span>

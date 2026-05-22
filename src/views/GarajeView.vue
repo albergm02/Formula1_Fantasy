@@ -9,6 +9,7 @@ import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
+import { usarBloqueoJornada } from '@/composables/usarBloqueoJornada'
 
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -24,6 +25,12 @@ const storeLigas = usarStoreLigas()
 const notificacion = useToast()
 const confirmar = useConfirm()
 const ruta = useRoute()
+
+const { jornadaIniciada, mensajeBloqueoJornada } = usarBloqueoJornada()
+
+const notificarBloqueoJornada = () => {
+  notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada })
+}
 
 const dialogoProteccion = ref(false)
 const elementoProtegiendo = ref(null)
@@ -106,6 +113,10 @@ const confirmarVentaPiloto = (piloto) => {
  * @param {string} idInstancia - El identificador único de la instancia del potenciador.
  */
 const alternarInstalacionPotenciador = async (idInstancia) => {
+  if (jornadaIniciada.value) {
+    notificarBloqueoJornada()
+    return
+  }
   const resultado = await storeEscuderia.alternarPotenciador(idInstancia)
   if (!resultado.success) {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
@@ -117,6 +128,10 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
  * @param {number} instanciaId - instancia_id del coche.
  */
 const alternarEquipoCoche = async (instanciaId) => {
+  if (jornadaIniciada.value) {
+    notificarBloqueoJornada()
+    return
+  }
   const resultado = await storeEscuderia.alternarCoche(instanciaId)
   if (!resultado.success) {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
@@ -128,6 +143,10 @@ const alternarEquipoCoche = async (instanciaId) => {
  * @param {number} instanciaId - instancia_id del piloto.
  */
 const alternarEquipoPiloto = async (instanciaId) => {
+  if (jornadaIniciada.value) {
+    notificarBloqueoJornada()
+    return
+  }
   const resultado = await storeEscuderia.alternarPiloto(instanciaId)
   if (!resultado.success) {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
@@ -167,6 +186,11 @@ const confirmarInversionClausula = async () => {
 
   <main class="flex flex-col w-full max-w-sm mx-auto mt-4 mb-24 px-3 gap-6">
 
+    <div v-if="jornadaIniciada"
+      class="px-3 py-2 bg-emerald-900/20 border border-emerald-500/50 text-[10px] font-black uppercase tracking-widest text-emerald-400 text-center">
+      {{ mensajeBloqueoJornada }}
+    </div>
+
     <section>
       <header class="flex items-center gap-2 mb-2">
         <div class="flex-1 h-px bg-zinc-700"></div>
@@ -197,7 +221,7 @@ const confirmarInversionClausula = async () => {
 
             <div class="grid grid-cols-3 gap-1.5">
               <Button :label="coche.equipado ? 'En uso' : 'Usar chasis'"
-                @click="alternarEquipoCoche(coche.instancia_id)" size="small"
+                @click="alternarEquipoCoche(coche.instancia_id)" size="small" :disabled="jornadaIniciada"
                 :class="coche.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                 :pt="{
                   label: { class: ['text-[10px] font-black uppercase tracking-wide', coche.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
@@ -254,7 +278,7 @@ const confirmarInversionClausula = async () => {
 
             <div class="grid grid-cols-3 gap-1.5">
               <Button :label="piloto.equipado ? 'Titular' : 'Hacer titular'"
-                @click="alternarEquipoPiloto(piloto.instancia_id)" size="small"
+                @click="alternarEquipoPiloto(piloto.instancia_id)" size="small" :disabled="jornadaIniciada"
                 :class="piloto.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                 :pt="{
                   label: { class: ['text-[10px] font-black uppercase tracking-wide', piloto.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
@@ -295,6 +319,7 @@ const confirmarInversionClausula = async () => {
           <div class="flex flex-col gap-2 px-2 py-2 items-center border-t border-zinc-800/70">
             <Button :label="potenciador.equipado ? 'Instalado' : 'Instalar'"
               @click="alternarInstalacionPotenciador(potenciador.instancia_id)" size="small" class="w-full"
+              :disabled="jornadaIniciada"
               :class="potenciador.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
               :pt="{
                 label: { class: ['text-[10px] font-black uppercase tracking-wide', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-300'] },

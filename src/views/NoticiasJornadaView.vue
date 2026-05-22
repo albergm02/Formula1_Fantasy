@@ -8,10 +8,9 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
-import { suscribirseHistorialJornadas } from '@/services/servicioJornada'
+import { suscribirseHistorialJornadas, cargarCatalogoPilotos } from '@/services/servicioJornada'
 import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
 
-import { pilotosBase } from '@/data/bases/pilotosBase'
 import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 
 import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
@@ -55,6 +54,7 @@ const EJEMPLOS_VARIANTE = {
 }
 
 const historial = ref([])
+const catalogoPilotos = ref([])
 const idJornadaSeleccionada = ref(null)
 const cargando = ref(true)
 const pilotoExpandido = ref(null)
@@ -92,6 +92,12 @@ function alternarVarianteGuia(id) {
 
 
 onMounted(async () => {
+    try {
+        catalogoPilotos.value = await cargarCatalogoPilotos()
+    } catch (error) {
+        console.warn('No se pudo cargar el catálogo de pilotos:', error.message)
+    }
+
     // Nos suscribimos al historial de jornadas para mostrar la más reciente y permitir navegar por las anteriores si estas existen.
     cancelarSuscripcion = suscribirseHistorialJornadas(async (jornadas) => {
         historial.value = jornadas
@@ -124,7 +130,7 @@ const filasPilotos = computed(() => {
     const actuaciones = jornada.value.actuacionesPorPiloto
     const filas = []
 
-    for (const pilotoBase of pilotosBase) {
+    for (const pilotoBase of catalogoPilotos.value) {
         const actuacion = actuaciones[pilotoBase.numero]
         if (!actuacion) continue
 

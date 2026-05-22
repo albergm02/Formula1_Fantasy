@@ -38,6 +38,12 @@ const formatearFechaGranPremio = (fechaIso) => {
  */
 export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
+
+  if (!respuesta.ok) {
+    const cuerpoError = await respuesta.json().catch(() => ({}))
+    throw new Error(cuerpoError?.detail || `Error HTTP ${respuesta.status}`)
+  }
+
   const reuniones = await respuesta.json()
   const ahora = new Date()
 
@@ -73,6 +79,12 @@ export const obtenerUltimoGranPremioFinalizado = async ({
   anio = 2026,
 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
+
+  if (!respuesta.ok) {
+    const cuerpoError = await respuesta.json().catch(() => ({}))
+    throw new Error(cuerpoError?.detail || `Error HTTP ${respuesta.status}`)
+  }
+
   const reuniones = await respuesta.json()
   const ahora = new Date()
 
