@@ -14,7 +14,6 @@ import Cabecera from '@/components/Cabecera.vue'
 import VistaEquipoRival from '@/components/VistaEquipoRival.vue'
 
 import Dialog from 'primevue/dialog'
-import ProgressSpinner from 'primevue/progressspinner'
 
 const storeLigas = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
@@ -92,8 +91,7 @@ onMounted(async () => {
       </div>
 
       <div v-if="cargando" class="flex flex-col items-center justify-center py-10 gap-3">
-        <i class="pi pi-spinner text-4xl text-[#D4A843] animate-spin"></i>
-        <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando clasificación...
+        <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando...
         </p>
       </div>
 
@@ -118,7 +116,7 @@ onMounted(async () => {
                 }}M</span>
               </span>
               <span v-else class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
-                Toca para ver su equipo
+                Toca para ver su equipo y hacer clausulas.
               </span>
             </div>
           </div>
@@ -135,14 +133,13 @@ onMounted(async () => {
       </div>
 
       <Dialog v-model:visible="dialogoRivalVisible" modal :draggable="false" class="w-full max-w-md mx-auto"
-        :pt="{ root: { class: '!bg-[#0C0C0E]' }, header: { class: '!bg-[#0C0C0E] !p-3' }, content: { class: '!bg-[#0C0C0E] !p-0' } }">
+        :pt="{ root: { class: '!bg-[#0C0C0E] !border-none' }, header: { class: '!bg-[#0C0C0E] !p-3' }, content: { class: '!bg-[#0C0C0E] !p-0' } }">
         <template #header>
           <span class="text-sm font-bold uppercase tracking-widest text-zinc-400">Equipo rival</span>
         </template>
 
         <div v-if="cargandoRival" class="flex flex-col items-center justify-center py-10 gap-3">
-          <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" />
-          <p class="text-sm text-zinc-500">Cargando equipo...</p>
+          <p class="text-sm text-zinc-500">Cargando...</p>
         </div>
 
         <VistaEquipoRival v-else-if="participacionRival" :participacion="participacionRival" />

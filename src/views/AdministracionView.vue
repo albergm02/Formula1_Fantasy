@@ -1,22 +1,14 @@
 <script setup>
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 
 import SeccionTesting from '@/components/admin/SeccionTesting.vue'
-import SeccionRachas from '@/components/admin/SeccionRachas.vue'
 
 import Button from 'primevue/button'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 
 const router = useRouter()
-const seccionActiva = ref('testing')
 
 async function manejarCerrarSesion() {
     await cerrarSesion()
@@ -42,20 +34,7 @@ async function manejarCerrarSesion() {
                 <h1 class="text-xl font-black uppercase tracking-wide">Panel de administración</h1>
             </header>
 
-            <Tabs v-model:value="seccionActiva">
-                <TabList>
-                    <Tab value="testing">Testing</Tab>
-                    <Tab value="rachas">Rachas</Tab>
-                </TabList>
-                <TabPanels class="!bg-transparent !px-0">
-                    <TabPanel value="testing">
-                        <SeccionTesting />
-                    </TabPanel>
-                    <TabPanel value="rachas">
-                        <SeccionRachas />
-                    </TabPanel>
-                </TabPanels>
-            </Tabs>
+            <SeccionTesting />
         </main>
     </div>
 </template>

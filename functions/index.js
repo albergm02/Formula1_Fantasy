@@ -19,6 +19,7 @@
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
+const { onDocumentUpdated } = require('firebase-functions/v2/firestore')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
 const { getAuth } = require('firebase-admin/auth')
@@ -31,11 +32,10 @@ const { calcularPuntuacionGaraje, calcularFactorJornada } = require('./puntuacio
 const { calcularSinergias, aplicarSinergia } = require('./sinergiaServer')
 const {
   cargarCatalogo,
-  cargarRachasPilotos,
-  cargarRachasCoches,
-  aplicarRachasACatalogo,
+  cargarPreciosPilotos,
+  aplicarPreciosDinamicosACatalogo,
+  construirClavePiloto,
   seleccionarCartasDiarias,
-  BONIFICACION_PRECIO_POR_RACHA,
 } = require('./mercadoServer')
 
 initializeApp()
@@ -104,10 +104,15 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
  * @param {boolean} [opciones.forzar=false] - Si true, reprocesa el último GP
  *        aunque ya exista en `jornadas`, revirtiendo los puntos y premio
  *        previos antes de aplicar los nuevos. Útil para testing.
+ * @param {string} [opciones.idLiga] - Si se indica, sólo se reprocesa esa
+ *        liga (sus participaciones) y no se sobrescribe el documento global
+ *        de `jornadas/{idJornada}`. Pensado para testing puntual desde el
+ *        panel de administración sin afectar a otras ligas.
  * @returns {Promise<Object>} Resumen del resultado.
  */
 async function ejecutarProcesarJornada(opciones = {}) {
-  const { forzar = false } = opciones
+  const { forzar = false, idLiga = null } = opciones
+  const reprocesoPorLiga = Boolean(idLiga)
 
   // Buscamos el GP más reciente con datos disponibles en OpenF1.
   // Algunos GPs pueden estar marcados como finalizados pero no tener datos
@@ -162,12 +167,10 @@ async function ejecutarProcesarJornada(opciones = {}) {
 
   const idJornada = `gp_${granPremio.meeting_key}`
 
-  const [rachasPorPiloto, rachasPorCoche] = await Promise.all([
-    cargarRachasPilotos(db),
-    cargarRachasCoches(db),
-  ])
-  const rachas = { pilotos: rachasPorPiloto, coches: rachasPorCoche }
-  const todasParticipaciones = await db.collection('participaciones').get()
+  const consultaParticipaciones = reprocesoPorLiga
+    ? db.collection('participaciones').where('id_liga', '==', idLiga)
+    : db.collection('participaciones')
+  const todasParticipaciones = await consultaParticipaciones.get()
   const batch = db.batch()
   let participacionesProcesadas = 0
   const desgloseJornada = []
@@ -190,7 +193,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
       condiciones,
     )
 
-    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto, rachas)
+    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
 
     for (const pilotoDesglose of resultadoGaraje.desglose.pilotos) {
       const detalle = detallesPorPiloto[pilotoDesglose.id]
@@ -247,17 +250,18 @@ async function ejecutarProcesarJornada(opciones = {}) {
     participacionesProcesadas++
   }
 
-  batch.set(db.collection('jornadas').doc(idJornada), {
-    meetingKey: granPremio.meeting_key,
-    nombreGranPremio: granPremio.meeting_name,
-    fechaProcesamiento: new Date().toISOString(),
-    temporada: TEMPORADA_ACTUAL,
-    participacionesProcesadas,
-    condiciones,
-    actuacionesPorPiloto,
-    rachasAplicadas: rachas,
-    desglose: desgloseJornada,
-  })
+  if (!reprocesoPorLiga) {
+    batch.set(db.collection('jornadas').doc(idJornada), {
+      meetingKey: granPremio.meeting_key,
+      nombreGranPremio: granPremio.meeting_name,
+      fechaProcesamiento: new Date().toISOString(),
+      temporada: TEMPORADA_ACTUAL,
+      participacionesProcesadas,
+      condiciones,
+      actuacionesPorPiloto,
+      desglose: desgloseJornada,
+    })
+  }
 
   await batch.commit()
 
@@ -425,6 +429,7 @@ async function resolverPujasMercado(idMercado) {
         ? {
             ...cartaCompleta,
             tipo: tipoCarta,
+            precio: cantidad,
             instancia_id: Date.now() + Math.random(),
             ...propiedadesClausula,
           }
@@ -470,14 +475,18 @@ async function resolverPujasMercado(idMercado) {
   }
 
   await batch.commit()
+
+  await actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta)
 }
 
 /**
  * Recopila las exclusiones aplicables al próximo mercado de la liga:
- *  - Números de pilotos fichados (cualquier variante bloquea al piloto entero).
+ *  - Claves «<numero>|<variante>» de pilotos ya fichados: solo se bloquea
+ *    esa combinación concreta. El mismo piloto sigue pudiendo aparecer en
+ *    otras variantes.
  *  - IDs de coches y potenciadores ocupados.
  * @param {string} idLiga
- * @returns {Promise<{ numerosPilotos: Set<number>, idsCartas: Set<string> }>}
+ * @returns {Promise<{ clavesPilotoBloqueadas: Set<string>, idsCartas: Set<string> }>}
  */
 async function recopilarCartasFichadasEnLiga(idLiga) {
   const participacionesSnap = await db
@@ -485,13 +494,13 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
     .where('id_liga', '==', idLiga)
     .get()
 
-  const numerosPilotos = new Set()
+  const clavesPilotoBloqueadas = new Set()
   const idsCartas = new Set()
   for (const documento of participacionesSnap.docs) {
     const garaje = documento.data().garaje || {}
     for (const carta of garaje.pilotos || []) {
-      if (carta && typeof carta.numero !== 'undefined') {
-        numerosPilotos.add(carta.numero)
+      if (carta && carta.numero != null && carta.variante) {
+        clavesPilotoBloqueadas.add(`${carta.numero}|${carta.variante}`)
       }
     }
     for (const carta of garaje.coches || []) {
@@ -501,7 +510,7 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
       if (carta && carta.id) idsCartas.add(carta.id)
     }
   }
-  return { numerosPilotos, idsCartas }
+  return { clavesPilotoBloqueadas, idsCartas }
 }
 
 /**
@@ -548,20 +557,14 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
     await db.collection('mercados').doc(idMercadoAyer).update({ estado: 'cerrado' })
   }
 
-  /* ── Cargar catálogo (auto-seed si falta) + rachas y aplicarlas antes de mezclar ── */
+  /* ── Cargar catálogo (auto-seed si falta) y aplicar precios dinámicos por puja ── */
   const catalogoBase = await cargarCatalogo(db)
-  const [rachasPorPiloto, rachasPorCoche] = await Promise.all([
-    cargarRachasPilotos(db),
-    cargarRachasCoches(db),
-  ])
-  const catalogoConRachas = aplicarRachasACatalogo(catalogoBase, {
-    pilotos: rachasPorPiloto,
-    coches: rachasPorCoche,
-  })
+  const preciosDinamicos = await cargarPreciosPilotos(db)
+  const catalogoConPrecios = aplicarPreciosDinamicosACatalogo(catalogoBase, preciosDinamicos)
 
   /* ── Recopilar cartas ya fichadas en la liga para excluirlas ── */
   const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
-  const cartasDelDia = seleccionarCartasDiarias(catalogoConRachas, exclusionesLiga)
+  const cartasDelDia = seleccionarCartasDiarias(catalogoConPrecios, exclusionesLiga)
 
   /* ── Crear documento del mercado de hoy para esta liga ── */
   const fechaApertura = ahora
@@ -689,8 +692,8 @@ exports.dispararResolucionPujasManual = onCall({ region: 'europe-west1' }, async
  */
 exports.dispararJornadaSemanalManual = onCall({ region: 'europe-west1' }, async (request) => {
   await exigirAdministrador(request)
-  const { forzar = false } = request.data || {}
-  const resultado = await ejecutarProcesarJornada({ forzar })
+  const { forzar = false, idLiga = null } = request.data || {}
+  const resultado = await ejecutarProcesarJornada({ forzar, idLiga })
   return resultado
 })
 
@@ -832,136 +835,133 @@ exports.eliminarLigaManual = onCall({ region: 'europe-west1' }, async (request) 
 })
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RACHAS DE PILOTOS — Ajuste manual del admin que altera precio y puntos.
+   PRECIOS DINÁMICOS DE PILOTOS — derivados de las pujas reales del mercado.
    ───────────────────────────────────────────────────────────────────────────
-   Se persisten en `catalogo/rachas` como un único documento con la forma
-   { rachas: { '1': 3, '44': -2, ... } }. Cada punto de racha suma 0,5M al
-   precio del piloto en el siguiente mercado generado y 1 punto a su
-   `puntuacionBase` (afecta los puntos de la próxima jornada procesada).
+   Cada vez que se cierra el mercado de una liga, se registra una muestra del
+   precio realmente pagado por cada carta de piloto (numero + variante). Las
+   cartas que salen al mercado pero no reciben puja añaden una muestra
+   penalizada (precio actual * FACTOR_DESINTERES) para reflejar la pérdida de
+   valor por falta de interés. El precio dinámico de cada carta es el
+   promedio de sus últimas HISTORIAL_MAX_MUESTRAS muestras y se aplica de
+   forma global (todas las ligas comparten precios). Tras cada actualización
+   se propaga el cambio a los garajes de todos los participantes y a los
+   mercados que aún siguen abiertos.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-exports.obtenerRachasPilotos = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const rachas = await cargarRachasPilotos(db)
-  return { ok: true, rachas }
-})
-
-exports.guardarRachasPilotos = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { rachas } = request.data || {}
-  if (!rachas || typeof rachas !== 'object') {
-    throw new HttpsError('invalid-argument', 'Falta el mapa de rachas.')
-  }
-  const rachasNormalizadas = {}
-  for (const [numero, valor] of Object.entries(rachas)) {
-    const entero = Number.parseInt(valor, 10)
-    if (!Number.isFinite(entero) || entero === 0) continue
-    rachasNormalizadas[numero] = entero
-  }
-
-  const rachasAnteriores = await cargarRachasPilotos(db)
-  await db.collection('catalogo').doc('rachas').set({
-    rachas: rachasNormalizadas,
-    fechaActualizacion: new Date().toISOString(),
-  })
-
-  const deltasPorNumero = calcularDeltasPrecio(rachasAnteriores, rachasNormalizadas)
-  const garajesActualizados = await propagarDeltasACategoriaDeGaraje(
-    deltasPorNumero,
-    'pilotos',
-    'numero',
-  )
-
-  return { ok: true, rachas: rachasNormalizadas, garajesActualizados }
-})
-
-exports.obtenerRachasCoches = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const rachas = await cargarRachasCoches(db)
-  return { ok: true, rachas }
-})
-
-exports.guardarRachasCoches = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { rachas } = request.data || {}
-  if (!rachas || typeof rachas !== 'object') {
-    throw new HttpsError('invalid-argument', 'Falta el mapa de rachas.')
-  }
-  const rachasNormalizadas = {}
-  for (const [idCoche, valor] of Object.entries(rachas)) {
-    const entero = Number.parseInt(valor, 10)
-    if (!Number.isFinite(entero) || entero === 0) continue
-    rachasNormalizadas[idCoche] = entero
-  }
-
-  const rachasAnteriores = await cargarRachasCoches(db)
-  await db.collection('catalogo').doc('rachas_coches').set({
-    rachas: rachasNormalizadas,
-    fechaActualizacion: new Date().toISOString(),
-  })
-
-  const deltasPorId = calcularDeltasPrecio(rachasAnteriores, rachasNormalizadas)
-  const garajesActualizados = await propagarDeltasACategoriaDeGaraje(deltasPorId, 'coches', 'id')
-
-  return { ok: true, rachas: rachasNormalizadas, garajesActualizados }
-})
+const HISTORIAL_MAX_MUESTRAS = 5
+const FACTOR_DESINTERES = 0.95
+const PRECIO_MINIMO = 0.5
 
 /**
- * Calcula el delta de precio (en M) que cada elemento debe sufrir al pasar de
- * la racha antigua a la nueva. Recorre la unión de claves para detectar tanto
- * rachas añadidas como retiradas. delta = (rachaNueva - rachaAnterior) * 0,5M.
- * @param {Object<string, number>} rachasAnteriores
- * @param {Object<string, number>} rachasNuevas
+ * Para cada carta de piloto del mercado recién resuelto, calcula una muestra
+ * de precio (puja ganadora si la hubo, o `precio * FACTOR_DESINTERES` si la
+ * carta quedó desierta) y delega su agregación al histórico y la propagación
+ * de los nuevos precios a garajes y mercados abiertos.
+ * @param {Array} cartasMercado - Cartas que estuvieron a la venta en el mercado.
+ * @param {Object} pujasPorCarta - Mapa { idCarta: pujaGanadora } resuelto previamente.
+ * @returns {Promise<void>}
+ */
+async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
+  const muestrasPorClave = {}
+  for (const carta of cartasMercado) {
+    if (carta.tipoCarta !== 'piloto' || carta.numero == null || !carta.variante) continue
+    const clave = `${carta.numero}|${carta.variante}`
+    const pujaGanadora = pujasPorCarta[carta.id]
+    const precioMuestra = pujaGanadora
+      ? Number(pujaGanadora.cantidad)
+      : Number(carta.precio) * FACTOR_DESINTERES
+    muestrasPorClave[clave] = Math.round(precioMuestra * 10) / 10
+  }
+
+  if (Object.keys(muestrasPorClave).length === 0) return
+
+  await fusionarMuestrasYRecalcularPrecios(muestrasPorClave)
+}
+
+/**
+ * Añade las muestras al histórico (recortando a las últimas
+ * HISTORIAL_MAX_MUESTRAS por clave), recalcula el precio dinámico de cada
+ * carta como promedio del histórico y persiste tanto el histórico como el
+ * documento de precios. Luego propaga los deltas a garajes y mercados.
+ * @param {Object<string, number>} muestrasPorClave - { "<numero>|<variante>": precioMuestra }.
+ * @returns {Promise<void>}
+ */
+async function fusionarMuestrasYRecalcularPrecios(muestrasPorClave) {
+  const refHistorial = db.collection('catalogo').doc('historial_pujas')
+  const refPrecios = db.collection('catalogo').doc('precios_pilotos')
+
+  const [snapHistorial, snapPrecios] = await Promise.all([refHistorial.get(), refPrecios.get()])
+  const historial = snapHistorial.exists ? snapHistorial.data().muestras || {} : {}
+  const preciosAnteriores = snapPrecios.exists ? snapPrecios.data().precios || {} : {}
+
+  const preciosNuevos = { ...preciosAnteriores }
+
+  for (const [clave, muestra] of Object.entries(muestrasPorClave)) {
+    const previas = historial[clave] || []
+    const combinadas = [...previas, muestra].slice(-HISTORIAL_MAX_MUESTRAS)
+    historial[clave] = combinadas
+    const media = combinadas.reduce((acc, valor) => acc + valor, 0) / combinadas.length
+    preciosNuevos[clave] = Math.max(PRECIO_MINIMO, Math.round(media * 10) / 10)
+  }
+
+  const fechaActualizacion = new Date().toISOString()
+  await Promise.all([
+    refHistorial.set({ muestras: historial, fechaActualizacion }),
+    refPrecios.set({ precios: preciosNuevos, fechaActualizacion }),
+  ])
+}
+
+/**
+ * Calcula los deltas de precio (precioNuevo - precioAnterior) por clave de
+ * piloto. Las claves sin precio previo se consideran sin delta (el primer
+ * precio asignado no propaga nada hacia atrás).
+ * @param {Object<string, number>} preciosAnteriores
+ * @param {Object<string, number>} preciosNuevos
  * @returns {Object<string, number>} Mapa { clave: deltaPrecioM }.
  */
-function calcularDeltasPrecio(rachasAnteriores, rachasNuevas) {
-  const claves = new Set([...Object.keys(rachasAnteriores), ...Object.keys(rachasNuevas)])
+function calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos) {
   const deltas = {}
-  for (const clave of claves) {
-    const anterior = Number(rachasAnteriores[clave] || 0)
-    const nueva = Number(rachasNuevas[clave] || 0)
-    if (anterior === nueva) continue
-    deltas[clave] = (nueva - anterior) * BONIFICACION_PRECIO_POR_RACHA
+  for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
+    const precioAnterior = preciosAnteriores[clave]
+    if (precioAnterior == null) continue
+    const delta = Math.round((precioNuevo - precioAnterior) * 10) / 10
+    if (delta !== 0) deltas[clave] = delta
   }
   return deltas
 }
 
 /**
- * Aplica los deltas de precio sobre los elementos de los garajes de TODAS las
- * participaciones (clave `clavePorElemento`: 'numero' para pilotos, 'id' para
- * coches). Mantiene el precio mínimo en 0.5M. Devuelve el número de garajes
- * efectivamente modificados.
- * @param {Object<string, number>} deltas
- * @param {'pilotos'|'coches'} nombreColeccion
- * @param {'numero'|'id'} clavePorElemento
+ * Aplica los deltas de precio sobre las cartas de pilotos presentes en los
+ * garajes de TODAS las participaciones. Una carta del garaje se identifica
+ * por la combinación `<numero>|<variante>`. Mantiene PRECIO_MINIMO como
+ * suelo. Devuelve el número de garajes efectivamente modificados.
+ * @param {Object<string, number>} deltasPorClave
  * @returns {Promise<number>}
  */
-async function propagarDeltasACategoriaDeGaraje(deltas, nombreColeccion, clavePorElemento) {
-  if (Object.keys(deltas).length === 0) return 0
-
+async function propagarDeltasAGarajesDePilotos(deltasPorClave) {
   const participacionesSnap = await db.collection('participaciones').get()
   const batch = db.batch()
   let garajesActualizados = 0
 
   for (const documento of participacionesSnap.docs) {
-    const datos = documento.data()
-    const garaje = datos.garaje
-    if (!garaje || !Array.isArray(garaje[nombreColeccion])) continue
+    const garaje = documento.data().garaje
+    if (!garaje || !Array.isArray(garaje.pilotos)) continue
 
     let huboCambio = false
-    const elementosActualizados = garaje[nombreColeccion].map((elemento) => {
-      const delta = deltas[elemento[clavePorElemento]]
-      if (!delta) return elemento
+    const pilotosActualizados = garaje.pilotos.map((piloto) => {
+      if (piloto == null || piloto.numero == null || !piloto.variante) return piloto
+      const delta = deltasPorClave[`${piloto.numero}|${piloto.variante}`]
+      if (!delta) return piloto
       huboCambio = true
       const precioNuevo = Math.max(
-        0.5,
-        Math.round((Number(elemento.precio || 0) + delta) * 10) / 10,
+        PRECIO_MINIMO,
+        Math.round((Number(piloto.precio || 0) + delta) * 10) / 10,
       )
-      return { ...elemento, precio: precioNuevo }
+      return { ...piloto, precio: precioNuevo }
     })
 
     if (huboCambio) {
-      batch.update(documento.ref, { [`garaje.${nombreColeccion}`]: elementosActualizados })
+      batch.update(documento.ref, { 'garaje.pilotos': pilotosActualizados })
       garajesActualizados++
     }
   }
@@ -969,6 +969,74 @@ async function propagarDeltasACategoriaDeGaraje(deltas, nombreColeccion, clavePo
   if (garajesActualizados > 0) await batch.commit()
   return garajesActualizados
 }
+
+/**
+ * Aplica los deltas de precio sobre las cartas de pilotos en mercados con
+ * `estado: 'abierto'`. Identifica por `<numero>|<variante>`.
+ * @param {Object<string, number>} deltasPorClave
+ * @returns {Promise<number>}
+ */
+async function propagarDeltasAMercadosAbiertos(deltasPorClave) {
+  const mercadosSnap = await db.collection('mercados').where('estado', '==', 'abierto').get()
+  if (mercadosSnap.empty) return 0
+
+  const batch = db.batch()
+  let mercadosActualizados = 0
+
+  for (const documento of mercadosSnap.docs) {
+    const cartas = documento.data().cartas || []
+    let huboCambio = false
+
+    const cartasActualizadas = cartas.map((carta) => {
+      if (carta.tipoCarta !== 'piloto' || carta.numero == null || !carta.variante) return carta
+      const delta = deltasPorClave[`${carta.numero}|${carta.variante}`]
+      if (!delta) return carta
+      huboCambio = true
+      const precioNuevo = Math.max(
+        PRECIO_MINIMO,
+        Math.round((Number(carta.precio || 0) + delta) * 10) / 10,
+      )
+      return { ...carta, precio: precioNuevo }
+    })
+
+    if (huboCambio) {
+      batch.update(documento.ref, { cartas: cartasActualizadas })
+      mercadosActualizados++
+    }
+  }
+
+  if (mercadosActualizados > 0) await batch.commit()
+  return mercadosActualizados
+}
+
+/**
+ * Trigger Firestore — se dispara cuando se modifica `catalogo/precios_pilotos`.
+ * Calcula los deltas entre el mapa de precios anterior y el nuevo y los
+ * propaga a los precios de los pilotos en TODOS los garajes y en las cartas
+ * de los mercados con `estado: 'abierto'`. Es la fuente única de propagación,
+ * tanto para cambios automáticos (resolución de pujas) como para ediciones
+ * manuales desde la consola de Firestore.
+ */
+exports.alActualizarPreciosPilotos = onDocumentUpdated(
+  { document: 'catalogo/precios_pilotos', region: 'europe-west1' },
+  async (event) => {
+    const preciosAnteriores = event.data?.before?.data()?.precios || {}
+    const preciosNuevos = event.data?.after?.data()?.precios || {}
+
+    const deltasPorClave = calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos)
+    if (Object.keys(deltasPorClave).length === 0) return
+
+    const [garajes, mercados] = await Promise.all([
+      propagarDeltasAGarajesDePilotos(deltasPorClave),
+      propagarDeltasAMercadosAbiertos(deltasPorClave),
+    ])
+
+    console.log(
+      `[PreciosPilotos] Propagados ${Object.keys(deltasPorClave).length} deltas → ` +
+        `garajes: ${garajes}, mercados abiertos: ${mercados}.`,
+    )
+  },
+)
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GESTIÓN DE PERFIL — Cambio de nombre, cambio de correo y baja de cuenta.

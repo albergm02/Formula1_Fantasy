@@ -6,9 +6,7 @@
 
 /* ─── 1. Pipeline principal del garaje ──────────────────────────────────── */
 
-function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}, rachas = {}) {
-  const rachasPilotos = rachas.pilotos || {}
-  const rachasCoches = rachas.coches || {}
+function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   let mejorasRuedas = { ritmo: 0, consistencia: 0, adaptabilidad: 0, agresividad: 0, gestion: 0 }
   if (garaje.ruedas && garaje.ruedas.mejoras) {
     mejorasRuedas = garaje.ruedas.mejoras
@@ -32,7 +30,6 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}, rachas = {}) {
   for (const piloto of pilotosEquipados) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
     const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
-    const racha = Number(rachasPilotos[piloto.numero] || 0)
     const factorEstePiloto =
       factoresPorPiloto[piloto.id] != null ? factoresPorPiloto[piloto.id] : 1.0
     const puntosJornada = calcularPuntosJornada(puntuacionBase, factorEstePiloto)
@@ -42,7 +39,6 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}, rachas = {}) {
       nombre: piloto.nombre,
       atributosModificados,
       puntuacionBase,
-      racha,
       factorJornada: factorEstePiloto,
       puntosJornada,
     })
@@ -55,9 +51,8 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}, rachas = {}) {
   const cocheEquipado = garaje.coches ? garaje.coches.find((c) => c.equipado) : garaje.coche || null
 
   if (cocheEquipado) {
-    const rachaCoche = Number(rachasCoches[cocheEquipado.id] || 0)
-    puntosCoche = Math.round((cocheEquipado.puntos + rachaCoche) * 10) / 10
-    desgloseCoche = { nombre: cocheEquipado.nombre, puntos: puntosCoche, racha: rachaCoche }
+    puntosCoche = Math.round(cocheEquipado.puntos * 10) / 10
+    desgloseCoche = { nombre: cocheEquipado.nombre, puntos: puntosCoche }
   }
 
   return {

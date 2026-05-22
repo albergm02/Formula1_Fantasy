@@ -1,7 +1,5 @@
 ﻿const { construirCatalogoCompleto } = require('./data/catalogoBase')
 
-const BONIFICACION_PRECIO_POR_RACHA = 0.5
-
 let catalogoEnMemoria = null
 
 async function sembrarCatalogoEnFirestore(db) {
@@ -47,74 +45,49 @@ function invalidarCacheCatalogo() {
 }
 
 /**
- * Lee el documento `catalogo/rachas` con la racha actual de cada piloto.
+ * Lee el documento `catalogo/precios_pilotos` con el precio dinámico actual
+ * de cada piloto, calculado a partir del historial de pujas ganadoras.
  * @param {FirebaseFirestore.Firestore} db
- * @returns {Promise<Object<string, number>>} Mapa { numeroPiloto: racha }.
+ * @returns {Promise<Object<string, number>>} Mapa { "<numero>|<variante>": precio }.
  */
-async function cargarRachasPilotos(db) {
-  const documento = await db.collection('catalogo').doc('rachas').get()
+async function cargarPreciosPilotos(db) {
+  const documento = await db.collection('catalogo').doc('precios_pilotos').get()
   if (!documento.exists) return {}
-  return documento.data().rachas || {}
+  return documento.data().precios || {}
 }
 
 /**
- * Lee el documento `catalogo/rachas_coches` con la racha actual de cada coche.
- * @param {FirebaseFirestore.Firestore} db
- * @returns {Promise<Object<string, number>>} Mapa { idCoche: racha }.
- */
-async function cargarRachasCoches(db) {
-  const documento = await db.collection('catalogo').doc('rachas_coches').get()
-  if (!documento.exists) return {}
-  return documento.data().rachas || {}
-}
-
-/**
- * Devuelve un nuevo catálogo con las rachas aplicadas sobre pilotos y coches.
- * No muta el catálogo original (cache compartida).
+ * Devuelve un nuevo catálogo con los precios dinámicos aplicados a cada carta
+ * de piloto (clave `<numero>|<variante>`). Si una carta no tiene precio
+ * dinámico registrado, conserva su precio base. No muta el catálogo original.
  * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
- * @param {Object} [rachas]
- * @param {Object<string, number>} [rachas.pilotos] - Mapa { numeroPiloto: racha }.
- * @param {Object<string, number>} [rachas.coches] - Mapa { idCoche: racha }.
+ * @param {Object<string, number>} preciosPilotos
  * @returns {{ pilotos: Array, coches: Array, potenciadores: Array }}
  */
-function aplicarRachasACatalogo(catalogo, rachas = {}) {
-  const rachasPilotos = rachas.pilotos || {}
-  const rachasCoches = rachas.coches || {}
-
-  const pilotosConRacha = catalogo.pilotos.map((piloto) => {
-    const racha = Number(rachasPilotos[piloto.numero] || 0)
-    if (racha === 0) {
-      return { ...piloto, racha: 0 }
-    }
-    const bonificacionPrecio = racha > 0 ? 1.0 : BONIFICACION_PRECIO_POR_RACHA
-    const precioAjustado = Number((piloto.precio + racha * bonificacionPrecio).toFixed(1))
-    return {
-      ...piloto,
-      precio: Math.max(0.5, precioAjustado),
-      racha,
-    }
+function aplicarPreciosDinamicosACatalogo(catalogo, preciosPilotos = {}) {
+  const pilotosConPrecio = catalogo.pilotos.map((piloto) => {
+    const clave = construirClavePiloto(piloto)
+    const precioDinamico = preciosPilotos[clave]
+    if (precioDinamico == null) return piloto
+    return { ...piloto, precio: Math.max(0.5, Number(precioDinamico)) }
   })
 
-  const cochesConRacha = catalogo.coches.map((coche) => {
-    const racha = Number(rachasCoches[coche.id] || 0)
-    if (racha === 0) {
-      return { ...coche, racha: 0 }
-    }
-    const precioAjustado = Number((coche.precio + racha * BONIFICACION_PRECIO_POR_RACHA).toFixed(1))
-    const puntosAjustados = Number((coche.puntos + racha).toFixed(1))
-    return {
-      ...coche,
-      precio: Math.max(0.5, precioAjustado),
-      puntos: puntosAjustados,
-      racha,
-    }
-  })
+  return { ...catalogo, pilotos: pilotosConPrecio }
+}
 
-  return { ...catalogo, pilotos: pilotosConRacha, coches: cochesConRacha }
+/**
+ * Construye la clave única de una carta de piloto, formada por su número
+ * y su variante. Se utiliza como identificador para precios dinámicos y
+ * para detectar duplicados (numero + variante) en garajes y mercados.
+ * @param {{ numero: number|string, variante: string }} piloto
+ * @returns {string}
+ */
+function construirClavePiloto(piloto) {
+  return `${piloto.numero}|${piloto.variante}`
 }
 
 const CARTAS_POR_DIA = {
-  pilotos: 3,
+  pilotos: 7,
   coches: 1,
   potenciadores: 3,
 }
@@ -131,31 +104,28 @@ function mezclarArray(array) {
  * Selecciona aleatoriamente las cartas que aparecerán hoy en el mercado.
  *
  * Reglas de exclusión:
- *  - Pilotos: si un piloto está fichado por cualquier participante (en cualquiera
- *    de sus variantes), todas sus variantes se omiten del mercado. Cuando se
- *    vende, el piloto vuelve a estar disponible.
+ *  - Pilotos: una carta concreta (numero + variante) se omite del mercado
+ *    SOLO si está fichada por algún participante con esa misma variante. La
+ *    misma persona puede aparecer en distintas variantes simultáneamente.
  *  - Coches y potenciadores: se filtran por `id` exacto.
- *
- * Además, en cada generación cada piloto aparece como mucho una vez: se
- * agrupan sus variantes y se elige aleatoriamente una sola por piloto.
  *
  * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
  * @param {Object} [exclusiones]
- * @param {Set<number>|Array<number>} [exclusiones.numerosPilotos] - Pilotos bloqueados (por número).
+ * @param {Set<string>|Array<string>} [exclusiones.clavesPilotoBloqueadas] - Combinaciones "<numero>|<variante>" ocupadas.
  * @param {Set<string>|Array<string>} [exclusiones.idsCartas] - Coches/potenciadores bloqueados (por id).
  * @returns {Array} Cartas seleccionadas para el mercado del día.
  */
 function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
-  const numerosBloqueados =
-    exclusiones.numerosPilotos instanceof Set
-      ? exclusiones.numerosPilotos
-      : new Set(exclusiones.numerosPilotos || [])
+  const clavesBloqueadas =
+    exclusiones.clavesPilotoBloqueadas instanceof Set
+      ? exclusiones.clavesPilotoBloqueadas
+      : new Set(exclusiones.clavesPilotoBloqueadas || [])
   const idsBloqueados =
     exclusiones.idsCartas instanceof Set
       ? exclusiones.idsCartas
       : new Set(exclusiones.idsCartas || [])
 
-  const pilotosDelDia = elegirPilotosUnicos(catalogo.pilotos, numerosBloqueados)
+  const pilotosDelDia = elegirPilotosDelDia(catalogo.pilotos, clavesBloqueadas)
   const cochesDelDia = mezclarArray(catalogo.coches.filter((c) => !idsBloqueados.has(c.id))).slice(
     0,
     CARTAS_POR_DIA.coches,
@@ -168,40 +138,28 @@ function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
 }
 
 /**
- * Agrupa las variantes de cada piloto, descarta los bloqueados y devuelve
- * como máximo `CARTAS_POR_DIA.pilotos` cartas, eligiendo una sola variante
- * aleatoria por piloto.
+ * Elige las cartas de piloto del día. La unicidad se mide por la combinación
+ * `<numero>|<variante>`: el mismo piloto puede aparecer varias veces siempre
+ * que cada aparición tenga una variante distinta y no esté bloqueada por
+ * estar ya fichada en algún garaje.
  * @param {Array} cartasPiloto
- * @param {Set<number>} numerosBloqueados
+ * @param {Set<string>} clavesBloqueadas
  * @returns {Array}
  */
-function elegirPilotosUnicos(cartasPiloto, numerosBloqueados) {
-  const variantesPorPiloto = new Map()
-  for (const carta of cartasPiloto) {
-    if (numerosBloqueados.has(carta.numero)) continue
-    if (!variantesPorPiloto.has(carta.numero)) {
-      variantesPorPiloto.set(carta.numero, [])
-    }
-    variantesPorPiloto.get(carta.numero).push(carta)
-  }
-
-  const numerosBarajados = mezclarArray([...variantesPorPiloto.keys()])
-  const numerosElegidos = numerosBarajados.slice(0, CARTAS_POR_DIA.pilotos)
-
-  return numerosElegidos.map((numero) => {
-    const variantes = variantesPorPiloto.get(numero)
-    return variantes[Math.floor(Math.random() * variantes.length)]
-  })
+function elegirPilotosDelDia(cartasPiloto, clavesBloqueadas) {
+  const disponibles = cartasPiloto.filter(
+    (carta) => !clavesBloqueadas.has(construirClavePiloto(carta)),
+  )
+  return mezclarArray([...disponibles]).slice(0, CARTAS_POR_DIA.pilotos)
 }
 
 module.exports = {
   cargarCatalogo,
   invalidarCacheCatalogo,
-  cargarRachasPilotos,
-  cargarRachasCoches,
-  aplicarRachasACatalogo,
+  cargarPreciosPilotos,
+  aplicarPreciosDinamicosACatalogo,
+  construirClavePiloto,
   seleccionarCartasDiarias,
   sembrarCatalogoEnFirestore,
   CARTAS_POR_DIA,
-  BONIFICACION_PRECIO_POR_RACHA,
 }

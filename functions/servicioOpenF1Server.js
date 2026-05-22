@@ -331,6 +331,31 @@ async function obtenerParadasPorPiloto(sessionKey) {
   return conteo
 }
 
+/* ─── 7-ter. Clasificación del campeonato (drivers/teams) ─────────────── */
+
+/**
+ * Obtiene la clasificación del campeonato de pilotos justo antes y después de
+ * una sesión de carrera concreta. Solo está disponible para sesiones tipo
+ * "Race". Cada entrada incluye `position_start` (posición en el campeonato
+ * antes de la carrera) y `position_current` (posición tras la carrera), junto
+ * con los puntos correspondientes.
+ * @param {number} sessionKeyCarrera - session_key de la sesión de carrera.
+ * @returns {Promise<Array<{driver_number:number, points_start:number, points_current:number, position_start:number, position_current:number}>>}
+ */
+async function obtenerCampeonatoPilotos(sessionKeyCarrera) {
+  return consultarOpenF1(`/championship_drivers?session_key=${sessionKeyCarrera}`)
+}
+
+/**
+ * Obtiene la clasificación del campeonato de constructores en torno a una
+ * sesión de carrera. Misma semántica que `obtenerCampeonatoPilotos`.
+ * @param {number} sessionKeyCarrera - session_key de la sesión de carrera.
+ * @returns {Promise<Array<{team_name:string, points_start:number, points_current:number, position_start:number, position_current:number}>>}
+ */
+async function obtenerCampeonatoEquipos(sessionKeyCarrera) {
+  return consultarOpenF1(`/championship_teams?session_key=${sessionKeyCarrera}`)
+}
+
 /* ─── 8. Orquestación: actuación completa de un GP ─────────────────────── */
 
 /**
@@ -421,7 +446,11 @@ async function recopilarDatosGranPremio(meetingKey) {
     }
   }
 
-  return { actuacionesPorPiloto, condiciones }
+  return {
+    actuacionesPorPiloto,
+    condiciones,
+    sessionKeyCarrera: sesionCarrera.session_key,
+  }
 }
 
 module.exports = {
@@ -437,5 +466,7 @@ module.exports = {
   obtenerAdelantamientosPorPiloto,
   obtenerDatosStintsPorPiloto,
   obtenerParadasPorPiloto,
+  obtenerCampeonatoPilotos,
+  obtenerCampeonatoEquipos,
   recopilarDatosGranPremio,
 }

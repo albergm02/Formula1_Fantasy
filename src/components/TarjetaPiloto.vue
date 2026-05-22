@@ -85,17 +85,6 @@ const confirmarEliminarPuja = () => {
           </div>
         </div>
 
-        <!-- Badge de racha (top-left) -->
-        <div v-if="props.piloto.racha"
-          class="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border"
-          :class="props.piloto.racha > 0 ? 'border-emerald-500/50' : 'border-red-500/50'">
-          <i class="pi text-[8px]"
-            :class="[props.piloto.racha > 0 ? 'pi-arrow-up text-emerald-400' : 'pi-arrow-down text-red-400']"></i>
-          <span class="text-[10px] font-black" :class="props.piloto.racha > 0 ? 'text-emerald-300' : 'text-red-300'">
-            {{ props.piloto.racha > 0 ? '+' : '' }}{{ props.piloto.racha }}
-          </span>
-        </div>
-
         <!-- Overlay de info (lado derecho, siempre visible) -->
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 

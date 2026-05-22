@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
 import {
@@ -24,11 +24,19 @@ const cargandoReset = ref(false)
 const cargandoEliminacion = ref(false)
 
 const ligas = ref([])
-const mercadosDisponibles = ref([])
-const mercadoSeleccionado = ref(null)
+const mercadosAbiertos = ref([])
+const ligaParaPujas = ref(null)
+const ligaParaJornada = ref(null)
 const ligaAResetear = ref(null)
 const ligaAEliminar = ref(null)
 const ultimoResultado = ref(null)
+
+const ligasConMercadoAbierto = computed(() => {
+    const mapaMercados = new Map(mercadosAbiertos.value.map((m) => [m.idLiga, m.id]))
+    return ligas.value
+        .filter((liga) => mapaMercados.has(liga.id))
+        .map((liga) => ({ ...liga, idMercado: mapaMercados.get(liga.id) }))
+})
 
 async function cargarLigas() {
     const snap = await getDocs(collection(db, 'ligas'))
@@ -36,16 +44,10 @@ async function cargarLigas() {
 }
 
 async function cargarMercados() {
-    const ligasExistentes = new Set(ligas.value.map((l) => l.id))
     const snap = await getDocs(collection(db, 'mercados'))
-    mercadosDisponibles.value = snap.docs
-        .map((d) => ({
-            id: d.id,
-            idLiga: d.data().idLiga,
-            estado: d.data().estado,
-            label: `${d.id} (${d.data().estado})`,
-        }))
-        .filter((m) => m.estado === 'abierto' && ligasExistentes.has(m.idLiga))
+    mercadosAbiertos.value = snap.docs
+        .map((d) => ({ id: d.id, idLiga: d.data().idLiga, estado: d.data().estado }))
+        .filter((m) => m.estado === 'abierto')
 }
 
 onMounted(async () => {
@@ -54,11 +56,12 @@ onMounted(async () => {
 })
 
 async function manejarResolverPujas() {
-    if (!mercadoSeleccionado.value) {
+    const liga = ligasConMercadoAbierto.value.find((l) => l.id === ligaParaPujas.value)
+    if (!liga) {
         toast.add({
             severity: 'warn',
-            summary: 'Selecciona un mercado',
-            detail: 'Debes elegir el mercado cuyas pujas quieres resolver.',
+            summary: 'Selecciona una liga',
+            detail: 'Debes elegir la liga cuyas pujas quieres resolver.',
             life: 4000,
         })
         return
@@ -66,12 +69,12 @@ async function manejarResolverPujas() {
     cargandoPujas.value = true
     ultimoResultado.value = null
     try {
-        const datos = await dispararResolucionPujas(mercadoSeleccionado.value)
+        const datos = await dispararResolucionPujas(liga.idMercado)
         ultimoResultado.value = datos
         toast.add({
             severity: 'success',
             summary: 'Pujas resueltas',
-            detail: `Mercado ${datos.idMercado} cerrado.`,
+            detail: `Mercado de "${liga.nombre}" cerrado.`,
             life: 4000,
         })
         await cargarMercados()
@@ -87,36 +90,45 @@ async function manejarResolverPujas() {
     }
 }
 
-async function manejarProcesarJornada(opciones = {}) {
+async function manejarReprocesarJornada() {
+    const liga = ligas.value.find((l) => l.id === ligaParaJornada.value)
+    if (!liga) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Selecciona una liga',
+            detail: 'Debes elegir la liga cuya jornada quieres reprocesar.',
+            life: 4000,
+        })
+        return
+    }
     cargandoJornada.value = true
     ultimoResultado.value = null
     try {
-        const datos = await dispararProcesamientoJornada(opciones)
+        const datos = await dispararProcesamientoJornada({ forzar: true, idLiga: liga.id })
         ultimoResultado.value = datos
         if (datos.ok) {
             toast.add({
                 severity: 'success',
-                summary: opciones.forzar ? 'Jornada reprocesada' : 'Jornada procesada',
-                detail: `${datos.nombreGranPremio} · ${datos.participacionesProcesadas} participaciones.`,
+                summary: 'Jornada reprocesada',
+                detail: `${datos.nombreGranPremio} · ${datos.participacionesProcesadas} participaciones de "${liga.nombre}".`,
                 life: 5000,
             })
         } else {
             const motivos = {
-                jornada_ya_procesada: 'La jornada ya se procesó previamente.',
                 sin_gp_finalizado: 'No hay Gran Premio finalizado en la temporada actual.',
                 sin_datos_openf1: `Ningún GP finalizado tiene datos en OpenF1 todavía. Omitidos: ${(datos.omitidos || []).map((o) => o.nombre || o.meeting_key).join(', ') || 'ninguno'}.`,
             }
             toast.add({
                 severity: 'info',
                 summary: 'Sin cambios',
-                detail: motivos[datos.motivo] || `Motivo desconocido: ${datos.motivo}`,
+                detail: motivos[datos.motivo] || `Motivo: ${datos.motivo}`,
                 life: 8000,
             })
         }
     } catch (error) {
         toast.add({
             severity: 'error',
-            summary: 'Error procesando jornada',
+            summary: 'Error reprocesando jornada',
             detail: error.message,
             life: 6000,
         })
@@ -222,15 +234,6 @@ function manejarEliminarLiga() {
 
 <template>
     <div class="space-y-4">
-        <Message severity="info" :closable="false" class="!bg-[#1A1A1F] !border-zinc-700">
-            <p class="text-xs">
-                Esta sección permite disparar manualmente las tareas programadas del backend para
-                validar el comportamiento end-to-end con datos reales. Cada acción ejecuta exactamente
-                la misma lógica que el <strong>cron</strong> automático; el resultado se imprime al final
-                en formato JSON para contrastarlo con Firestore.
-            </p>
-        </Message>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
                 <template #title>
@@ -238,83 +241,76 @@ function manejarEliminarLiga() {
                 </template>
                 <template #content>
                     <p class="text-xs text-zinc-400 mb-3">
-                        Cierra el mercado seleccionado: para cada carta, adjudica la puja más alta al
-                        participante con mayor presupuesto disponible, descuenta el importe y entrega
-                        el activo a su garaje. Las pujas perdedoras se devuelven al presupuesto.
-                        Equivale al cierre nocturno automático.
+                        Equivale al cierre nocturno automático: cierra el mercado de la liga, resuelve
+                        las pujas según el resultado real del GP, actualiza los garajes de los participantes
+                        y notifica a los usuarios afectados.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
-                        <Select v-model="mercadoSeleccionado" :options="mercadosDisponibles" optionLabel="label"
-                            optionValue="id" placeholder="Selecciona un mercado" filter class="flex-1" />
-                        <Button @click="manejarResolverPujas" :loading="cargandoPujas" label="Resolver" size="small"
-                            class="!bg-[#E10600] !border-[#E10600]" />
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <Select v-model="ligaParaPujas" :options="ligasConMercadoAbierto" optionLabel="nombre"
+                            optionValue="id" placeholder="Selecciona una liga con mercado abierto" filter
+                            class="flex-1" />
+                        <Button @click="manejarResolverPujas" :loading="cargandoPujas" label="Resolver pujas"
+                            size="small" class="!bg-white !border-white !text-black" />
                     </div>
                 </template>
             </Card>
 
             <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
                 <template #title>
-                    <span class="text-sm">Procesar jornada del último GP</span>
+                    <span class="text-sm">Reprocesar jornada</span>
                 </template>
                 <template #content>
                     <p class="text-xs text-zinc-400 mb-3">
-                        <strong>Procesar:</strong> calcula la puntuación del último Gran Premio finalizado
-                        usando datos de OpenF1, suma los puntos a cada participante y actualiza los precios
-                        del catálogo. Si la jornada ya se procesó previamente, no hace nada.
+                        Recalcula la puntuación del último Gran Premio finalizado para todas las
+                        participaciones de la liga seleccionada, sobrescribiendo puntos y precios.
+                        No afecta a otras ligas ni al documento global de la jornada. Útil para
+                        verificar cambios en la fórmula de puntuación sobre una liga activa concreta.
                     </p>
-                    <p class="text-xs text-zinc-400 mb-3">
-                        <strong>Forzar reproceso:</strong> repite el cálculo del último GP aunque ya
-                        estuviera procesado, sobrescribiendo puntuaciones y precios. Útil para corregir
-                        un cálculo erróneo o probar cambios en la fórmula de puntuación.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <Button @click="manejarProcesarJornada()" :loading="cargandoJornada" label="Procesar"
-                            size="small" class="!bg-[#E10600] !border-[#E10600]" />
-                        <Button @click="manejarProcesarJornada({ forzar: true })" :loading="cargandoJornada"
-                            label="Forzar reproceso" size="small" severity="warning"
-                            class="!bg-amber-600 !border-amber-600" />
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <Select v-model="ligaParaJornada" :options="ligas" optionLabel="nombre" optionValue="id"
+                            placeholder="Selecciona una liga" filter class="flex-1" />
+                        <Button @click="manejarReprocesarJornada" :loading="cargandoJornada" label="Reprocesar jornada"
+                            size="small" class="!bg-white !border-white !text-black" />
                     </div>
                 </template>
             </Card>
 
             <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border-2 border-red-900/60 lg:col-span-2">
-                <template #title>
-                    <span class="text-sm text-red-400">Zona peligrosa · Resetear liga</span>
-                </template>
                 <template #content>
-                    <p class="text-xs text-zinc-400 mb-3">
-                        Devuelve cada participante de la liga al estado inicial: 50M de presupuesto,
-                        0 puntos y garaje vacío. Borra todos los mercados, pujas y eventos de actividad
-                        asociados. Pensado para repetir pruebas desde cero sin tener que recrear la liga.
-                        <strong class="text-red-400">Acción irreversible.</strong>
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
-                        <Select v-model="ligaAResetear" :options="ligas" optionLabel="nombre" optionValue="id"
-                            placeholder="Liga a resetear" filter class="flex-1" />
-                        <Button @click="manejarResetearLiga" :loading="cargandoReset" label="Resetear" size="small"
-                            severity="danger" class="!bg-red-700 !border-red-700" />
-                    </div>
-                </template>
-            </Card>
+                    <div class="space-y-5">
+                        <div>
+                            <h3 class="text-sm font-semibold text-red-400 mb-2">Resetear liga</h3>
+                            <p class="text-xs text-zinc-400 mb-3">
+                                Devuelve cada participante de la liga al estado inicial: 50M de presupuesto,
+                                0 puntos y garaje vacío. Borra todos los mercados, pujas y eventos de actividad
+                                asociados. Pensado para repetir pruebas desde cero sin tener que recrear la liga.
+                                <strong class="text-red-400">Acción irreversible.</strong>
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
+                                <Select v-model="ligaAResetear" :options="ligas" optionLabel="nombre" optionValue="id"
+                                    placeholder="Liga a resetear" filter class="flex-1" />
+                                <Button @click="manejarResetearLiga" :loading="cargandoReset" label="Resetear"
+                                    size="small" severity="danger" class="!bg-red-700 !border-red-700" />
+                            </div>
+                        </div>
 
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border-2 border-red-900/60 lg:col-span-2">
-                <template #title>
-                    <span class="text-sm text-red-400">Zona peligrosa · Eliminar liga</span>
-                </template>
-                <template #content>
-                    <p class="text-xs text-zinc-400 mb-3">
-                        Borra <strong>permanentemente</strong> la liga seleccionada: el documento de la
-                        liga, todas sus participaciones, mercados, pujas y actividad. Además la desvincula
-                        del perfil de cualquier usuario que la tuviera asociada. A diferencia del
-                        flujo normal, el administrador global puede eliminar <strong>cualquier liga</strong>,
-                        no solo las propias.
-                        <strong class="text-red-400">Acción irreversible.</strong>
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
-                        <Select v-model="ligaAEliminar" :options="ligas" optionLabel="nombre" optionValue="id"
-                            placeholder="Liga a eliminar" filter class="flex-1" />
-                        <Button @click="manejarEliminarLiga" :loading="cargandoEliminacion" label="Eliminar"
-                            size="small" severity="danger" class="!bg-red-700 !border-red-700" />
+                        <div class="border-t border-red-900/40 pt-4">
+                            <h3 class="text-sm font-semibold text-red-400 mb-2">Eliminar liga</h3>
+                            <p class="text-xs text-zinc-400 mb-3">
+                                Borra <strong>permanentemente</strong> la liga seleccionada: el documento de la
+                                liga, todas sus participaciones, mercados, pujas y actividad. Además la desvincula
+                                del perfil de cualquier usuario que la tuviera asociada. A diferencia del
+                                flujo normal, el administrador global puede eliminar <strong>cualquier liga</strong>,
+                                no solo las propias.
+                                <strong class="text-red-400">Acción irreversible.</strong>
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
+                                <Select v-model="ligaAEliminar" :options="ligas" optionLabel="nombre" optionValue="id"
+                                    placeholder="Liga a eliminar" filter class="flex-1" />
+                                <Button @click="manejarEliminarLiga" :loading="cargandoEliminacion" label="Eliminar"
+                                    size="small" severity="danger" class="!bg-red-700 !border-red-700" />
+                            </div>
+                        </div>
                     </div>
                 </template>
             </Card>

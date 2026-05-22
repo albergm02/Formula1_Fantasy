@@ -117,8 +117,7 @@ const confirmarEjecucionClausula = (elemento) => {
                     </div>
                     <Button :label="`FICHAR ${calcularPrecioClausula(coche).toFixed(1)}M`" icon="pi pi-shield"
                         @click="confirmarEjecucionClausula(coche)" :disabled="esFichajeDeshabilitado(coche)"
-                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors"
-                        :pt="{
+                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                             icon: { class: '!text-amber-400' },
                         }" />
@@ -145,8 +144,7 @@ const confirmarEjecucionClausula = (elemento) => {
                     </div>
                     <Button :label="`FICHAR ${calcularPrecioClausula(piloto).toFixed(1)}M`" icon="pi pi-shield"
                         @click="confirmarEjecucionClausula(piloto)" :disabled="esFichajeDeshabilitado(piloto)"
-                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors"
-                        :pt="{
+                        class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                             icon: { class: '!text-amber-400' },
                         }" />
@@ -175,7 +173,6 @@ const confirmarEjecucionClausula = (elemento) => {
 
         <div v-if="(!participacion.garaje.coches || !participacion.garaje.coches.length) && !participacion.garaje.pilotos.length && !participacion.garaje.potenciadores.length && !participacion.garaje.ruedas"
             class="flex flex-col items-center py-10 gap-2">
-            <i class="pi pi-box text-3xl text-zinc-600"></i>
             <p class="text-sm text-zinc-500">Este jugador aún no tiene cartas en su garaje.</p>
         </div>
     </div>
