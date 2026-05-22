@@ -19,7 +19,6 @@
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
-const { onDocumentUpdated } = require('firebase-functions/v2/firestore')
 const { initializeApp } = require('firebase-admin/app')
 const { getFirestore, FieldValue } = require('firebase-admin/firestore')
 const { getAuth } = require('firebase-admin/auth')
@@ -34,7 +33,6 @@ const {
   cargarCatalogo,
   cargarPreciosPilotos,
   aplicarPreciosDinamicosACatalogo,
-  construirClavePiloto,
   seleccionarCartasDiarias,
 } = require('./mercadoServer')
 
@@ -429,7 +427,7 @@ async function resolverPujasMercado(idMercado) {
         ? {
             ...cartaCompleta,
             tipo: tipoCarta,
-            precio: cantidad,
+            precioCompra: cantidad,
             instancia_id: Date.now() + Math.random(),
             ...propiedadesClausula,
           }
@@ -439,6 +437,7 @@ async function resolverPujasMercado(idMercado) {
             tipoCarta,
             tipo: tipoCarta,
             precio: pujaGanadora.precioCarta,
+            precioCompra: cantidad,
             instancia_id: Date.now() + Math.random(),
             ...propiedadesClausula,
           }
@@ -666,8 +665,9 @@ exports.generarMercadoInicialLiga = onCall({ region: 'europe-west1' }, async (re
 })
 
 /**
- * Callable — fuerza la resolución de pujas y cierre de un mercado concreto.
- * Útil para probar todo el flujo de pujas sin esperar al cierre automático.
+ * Callable — fuerza la resolución de pujas, cierra el mercado actual y genera
+ * inmediatamente uno nuevo para la misma liga. Útil para probar todo el flujo
+ * de pujas + apertura encadenada sin esperar al cierre automático.
  * Acepta `{ idMercado }` (obligatorio).
  */
 exports.dispararResolucionPujasManual = onCall({ region: 'europe-west1' }, async (request) => {
@@ -681,10 +681,22 @@ exports.dispararResolucionPujasManual = onCall({ region: 'europe-west1' }, async
     throw new HttpsError('not-found', `Mercado ${idMercado} no encontrado.`)
   }
 
+  const { idLiga } = mercadoSnap.data()
+  if (!idLiga) {
+    throw new HttpsError('failed-precondition', `Mercado ${idMercado} no tiene idLiga asociado.`)
+  }
+
   await resolverPujasMercado(idMercado)
   await db.collection('mercados').doc(idMercado).update({ estado: 'cerrado' })
 
-  return { ok: true, idMercado, estado: 'cerrado' }
+  const nuevoMercado = await ejecutarGeneracionMercadoParaLiga(idLiga, { forzar: true })
+
+  return {
+    ok: true,
+    idMercado,
+    estado: 'cerrado',
+    nuevoMercado,
+  }
 })
 
 /**
@@ -909,6 +921,26 @@ async function fusionarMuestrasYRecalcularPrecios(muestrasPorClave) {
     refHistorial.set({ muestras: historial, fechaActualizacion }),
     refPrecios.set({ precios: preciosNuevos, fechaActualizacion }),
   ])
+
+  const deltasPorClave = calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos)
+  const preciosPrimeraVezPorClave = {}
+  for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
+    if (preciosAnteriores[clave] == null) {
+      preciosPrimeraVezPorClave[clave] = precioNuevo
+    }
+  }
+
+  const propagaciones = []
+  if (Object.keys(deltasPorClave).length > 0) {
+    propagaciones.push(
+      propagarDeltasAGarajesDePilotos(deltasPorClave),
+      propagarDeltasAMercadosAbiertos(deltasPorClave),
+    )
+  }
+  if (Object.keys(preciosPrimeraVezPorClave).length > 0) {
+    propagaciones.push(propagarPreciosAbsolutosAGarajes(preciosPrimeraVezPorClave))
+  }
+  if (propagaciones.length > 0) await Promise.all(propagaciones)
 }
 
 /**
@@ -931,7 +963,42 @@ function calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos) {
 }
 
 /**
- * Aplica los deltas de precio sobre las cartas de pilotos presentes en los
+ * Para pilotos cuyo precio aparece en `catalogo/precios_pilotos` por primera
+ * vez (sin histórico previo), establece el precio de forma absoluta en todos
+ * los garajes que ya tengan esa carta. Evita que el precio base del catálogo
+ * se quede desincronizado cuando no hay delta anterior con el que calcular.
+ * @param {Object<string, number>} preciosPorClave - { "<numero>|<variante>": precioNuevo }.
+ * @returns {Promise<number>} Número de garajes actualizados.
+ */
+async function propagarPreciosAbsolutosAGarajes(preciosPorClave) {
+  const participacionesSnap = await db.collection('participaciones').get()
+  const batch = db.batch()
+  let garajesActualizados = 0
+
+  for (const documento of participacionesSnap.docs) {
+    const garaje = documento.data().garaje
+    if (!garaje || !Array.isArray(garaje.pilotos)) continue
+
+    let huboCambio = false
+    const pilotosActualizados = garaje.pilotos.map((piloto) => {
+      if (piloto == null || piloto.numero == null || !piloto.variante) return piloto
+      const nuevoPrecio = preciosPorClave[`${piloto.numero}|${piloto.variante}`]
+      if (nuevoPrecio == null) return piloto
+      huboCambio = true
+      return { ...piloto, precio: nuevoPrecio }
+    })
+
+    if (huboCambio) {
+      batch.update(documento.ref, { 'garaje.pilotos': pilotosActualizados })
+      garajesActualizados++
+    }
+  }
+
+  if (garajesActualizados > 0) await batch.commit()
+  return garajesActualizados
+}
+
+/**
  * garajes de TODAS las participaciones. Una carta del garaje se identifica
  * por la combinación `<numero>|<variante>`. Mantiene PRECIO_MINIMO como
  * suelo. Devuelve el número de garajes efectivamente modificados.
@@ -1008,35 +1075,6 @@ async function propagarDeltasAMercadosAbiertos(deltasPorClave) {
   if (mercadosActualizados > 0) await batch.commit()
   return mercadosActualizados
 }
-
-/**
- * Trigger Firestore — se dispara cuando se modifica `catalogo/precios_pilotos`.
- * Calcula los deltas entre el mapa de precios anterior y el nuevo y los
- * propaga a los precios de los pilotos en TODOS los garajes y en las cartas
- * de los mercados con `estado: 'abierto'`. Es la fuente única de propagación,
- * tanto para cambios automáticos (resolución de pujas) como para ediciones
- * manuales desde la consola de Firestore.
- */
-exports.alActualizarPreciosPilotos = onDocumentUpdated(
-  { document: 'catalogo/precios_pilotos', region: 'europe-west1' },
-  async (event) => {
-    const preciosAnteriores = event.data?.before?.data()?.precios || {}
-    const preciosNuevos = event.data?.after?.data()?.precios || {}
-
-    const deltasPorClave = calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos)
-    if (Object.keys(deltasPorClave).length === 0) return
-
-    const [garajes, mercados] = await Promise.all([
-      propagarDeltasAGarajesDePilotos(deltasPorClave),
-      propagarDeltasAMercadosAbiertos(deltasPorClave),
-    ])
-
-    console.log(
-      `[PreciosPilotos] Propagados ${Object.keys(deltasPorClave).length} deltas → ` +
-        `garajes: ${garajes}, mercados abiertos: ${mercados}.`,
-    )
-  },
-)
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GESTIÓN DE PERFIL — Cambio de nombre, cambio de correo y baja de cuenta.

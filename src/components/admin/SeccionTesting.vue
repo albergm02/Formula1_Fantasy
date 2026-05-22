@@ -71,11 +71,14 @@ async function manejarResolverPujas() {
     try {
         const datos = await dispararResolucionPujas(liga.idMercado)
         ultimoResultado.value = datos
+        const idNuevoMercado = datos.nuevoMercado?.idMercado
         toast.add({
             severity: 'success',
             summary: 'Pujas resueltas',
-            detail: `Mercado de "${liga.nombre}" cerrado.`,
-            life: 4000,
+            detail: idNuevoMercado
+                ? `Mercado de "${liga.nombre}" cerrado y nuevo mercado generado (${idNuevoMercado}).`
+                : `Mercado de "${liga.nombre}" cerrado.`,
+            life: 5000,
         })
         await cargarMercados()
     } catch (error) {

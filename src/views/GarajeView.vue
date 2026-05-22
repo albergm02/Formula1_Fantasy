@@ -208,7 +208,7 @@ const confirmarInversionClausula = async () => {
 
     <section class="grid">
       <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="pi pi-car text-lg text-white"></i>
+        <i class="text-lg text-white"></i>
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
         <span
           class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
@@ -223,7 +223,7 @@ const confirmarInversionClausula = async () => {
           <TarjetaCoche :coche="coche" :modoMercado="false" />
           <div class="flex items-center justify-between px-6 py-1.5">
             <div class="flex items-center gap-2">
-              <i class="pi pi-shield text-[10px] text-amber-400"></i>
+              <i class="text-[10px] text-amber-400"></i>
               <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
                 Cláusula: {{ calcularPrecioClausula(coche).toFixed(1) }}M
               </span>
@@ -234,9 +234,8 @@ const confirmarInversionClausula = async () => {
             </span>
           </div>
           <div class="flex gap-2 px-6 pb-2 -mt-1">
-            <Button :label="coche.equipado ? 'EQUIPADO' : 'EQUIPAR'"
-              :icon="coche.equipado ? 'pi pi-check-circle' : 'pi pi-circle'"
-              @click="alternarEquipoCoche(coche.instancia_id)" :class="[
+            <Button :label="coche.equipado ? 'EQUIPADO' : 'EQUIPAR'" @click="alternarEquipoCoche(coche.instancia_id)"
+              :class="[
                 'flex-1 shadow-lg',
                 coche.equipado
                   ? '!bg-emerald-900/20 !border-emerald-500/50'
@@ -245,12 +244,12 @@ const confirmarInversionClausula = async () => {
                 label: { class: ['text-[10px] font-black uppercase tracking-widest', coche.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
                 icon: { class: coche.equipado ? 'text-emerald-400' : 'text-zinc-500' },
               }" />
-            <Button label="PROTEGER" icon="pi pi-shield" @click="abrirDialogoProteccion(coche)"
+            <Button label="PROTEGER" @click="abrirDialogoProteccion(coche)"
               class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                 label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
                 icon: { class: '!text-amber-400' },
               }" />
-            <Button icon="pi pi-shopping-bag" @click="confirmarVentaCoche(coche)"
+            <Button @click="confirmarVentaCoche(coche)"
               class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                 icon: { class: '!text-red-500' },
               }" />

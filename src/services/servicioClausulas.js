@@ -15,13 +15,17 @@ const HORAS_PERIODO_GRACIA = 48
 
 /**
  * Calcula el precio de cláusula de un elemento del garaje.
- * Fórmula: precio de compra + (inversión del dueño × 2).
- * @param {Object} elemento - Carta del garaje con campos precio y clausulaInvertida.
+ * Se basa en el precio realmente pagado por el dueño al fichar la carta
+ * (`precioCompra`), no en su valor de mercado actual: así la cláusula refleja
+ * la inversión histórica + las mejoras que el dueño haya aplicado.
+ * Fórmula: precioCompra + (inversión del dueño × 2).
+ * @param {Object} elemento - Carta del garaje con campos precioCompra y clausulaInvertida.
  * @returns {number} Precio total de la cláusula.
  */
 export const calcularPrecioClausula = (elemento) => {
+  const precioBase = elemento.precioCompra ?? elemento.precio
   const inversionDueño = elemento.clausulaInvertida || 0
-  return elemento.precio + inversionDueño * 2
+  return precioBase + inversionDueño * 2
 }
 
 /**
@@ -101,6 +105,7 @@ export const ejecutarClausula = async (
 
   const cartaParaDestino = {
     ...cartaTransferida.carta,
+    precioCompra: precioClausula,
     clausulaInvertida: 0,
     fechaAdquisicion: new Date().toISOString(),
   }
