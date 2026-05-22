@@ -5,8 +5,8 @@ import { db } from '@/services/servicioFirebase'
 import {
     dispararResolucionPujas,
     dispararProcesamientoJornada,
-    resetearLiga,
     eliminarLigaComoAdministrador,
+    eliminarUsuarioComoAdministrador,
 } from '@/services/servicioAdministracion'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -20,15 +20,16 @@ const confirm = useConfirm()
 
 const cargandoPujas = ref(false)
 const cargandoJornada = ref(false)
-const cargandoReset = ref(false)
 const cargandoEliminacion = ref(false)
+const cargandoEliminacionUsuario = ref(false)
 
 const ligas = ref([])
 const mercadosAbiertos = ref([])
+const usuarios = ref([])
 const ligaParaPujas = ref(null)
 const ligaParaJornada = ref(null)
-const ligaAResetear = ref(null)
 const ligaAEliminar = ref(null)
+const usuarioAEliminar = ref(null)
 const ultimoResultado = ref(null)
 
 const ligasConMercadoAbierto = computed(() => {
@@ -50,9 +51,22 @@ async function cargarMercados() {
         .filter((m) => m.estado === 'abierto')
 }
 
+async function cargarUsuarios() {
+    const snap = await getDocs(collection(db, 'usuarios'))
+    usuarios.value = snap.docs
+        .map((d) => ({
+            email: d.id,
+            nombre: d.data().nombre || d.id,
+            esAdministrador: d.data().esAdministrador === true,
+        }))
+        .filter((u) => !u.esAdministrador)
+        .map((u) => ({ ...u, etiqueta: `${u.nombre} (${u.email})` }))
+}
+
 onMounted(async () => {
     await cargarLigas()
     await cargarMercados()
+    await cargarUsuarios()
 })
 
 async function manejarResolverPujas() {
@@ -140,47 +154,48 @@ async function manejarReprocesarJornada() {
     }
 }
 
-function manejarResetearLiga() {
-    if (!ligaAResetear.value) {
+function manejarEliminarUsuario() {
+    if (!usuarioAEliminar.value) {
         toast.add({
             severity: 'warn',
-            summary: 'Selecciona una liga',
-            detail: 'Debes elegir la liga que quieres resetear.',
+            summary: 'Selecciona un usuario',
+            detail: 'Debes elegir el usuario que quieres eliminar.',
             life: 4000,
         })
         return
     }
-    const nombreLiga =
-        ligas.value.find((l) => l.id === ligaAResetear.value)?.nombre || ligaAResetear.value
+    const usuario = usuarios.value.find((u) => u.email === usuarioAEliminar.value)
+    const etiquetaUsuario = usuario?.etiqueta || usuarioAEliminar.value
 
     confirm.require({
-        message: `Vas a borrar TODOS los mercados, pujas y actividad de "${nombreLiga}", y devolver a 50M / 0 puntos / garaje vacío a todos sus participantes. Esta acción NO se puede deshacer.`,
-        header: 'Confirmar reset de liga',
-        acceptLabel: 'Sí, resetear',
+        message: `Vas a eliminar PERMANENTEMENTE al usuario ${etiquetaUsuario}: se borrarán su perfil, sus participaciones, pujas activas y su cuenta de autenticación. Si era el único participante de alguna liga, esa liga también se borrará. Esta acción NO se puede deshacer.`,
+        header: 'Confirmar eliminación de usuario',
+        acceptLabel: 'Sí, eliminar',
         rejectLabel: 'Cancelar',
-        acceptClass: '!bg-[#E10600] !border-[#E10600]',
+        acceptClass: '!bg-red-700 !border-red-700',
         accept: async () => {
-            cargandoReset.value = true
+            cargandoEliminacionUsuario.value = true
             ultimoResultado.value = null
             try {
-                const datos = await resetearLiga(ligaAResetear.value)
+                const datos = await eliminarUsuarioComoAdministrador(usuarioAEliminar.value)
                 ultimoResultado.value = datos
                 toast.add({
                     severity: 'success',
-                    summary: 'Liga reseteada',
-                    detail: `${datos.participacionesReseteadas} participaciones, ${datos.mercadosBorrados} mercados, ${datos.eventosActividadBorrados} eventos.`,
-                    life: 5000,
+                    summary: 'Usuario eliminado',
+                    detail: `${datos.email}: ${datos.participacionesBorradas} participaciones, ${datos.ligasBorradas} ligas borradas.`,
+                    life: 6000,
                 })
-                await cargarMercados()
+                usuarioAEliminar.value = null
+                await Promise.all([cargarLigas(), cargarMercados(), cargarUsuarios()])
             } catch (error) {
                 toast.add({
                     severity: 'error',
-                    summary: 'Error reseteando liga',
+                    summary: 'Error eliminando usuario',
                     detail: error.message,
                     life: 6000,
                 })
             } finally {
-                cargandoReset.value = false
+                cargandoEliminacionUsuario.value = false
             }
         },
     })
@@ -218,7 +233,6 @@ function manejarEliminarLiga() {
                     life: 6000,
                 })
                 ligaAEliminar.value = null
-                if (ligaAResetear.value === datos.idLiga) ligaAResetear.value = null
                 await Promise.all([cargarLigas(), cargarMercados()])
             } catch (error) {
                 toast.add({
@@ -282,18 +296,21 @@ function manejarEliminarLiga() {
                 <template #content>
                     <div class="space-y-5">
                         <div>
-                            <h3 class="text-sm font-semibold text-red-400 mb-2">Resetear liga</h3>
+                            <h3 class="text-sm font-semibold text-red-400 mb-2">Eliminar usuario</h3>
                             <p class="text-xs text-zinc-400 mb-3">
-                                Devuelve cada participante de la liga al estado inicial: 50M de presupuesto,
-                                0 puntos y garaje vacío. Borra todos los mercados, pujas y eventos de actividad
-                                asociados. Pensado para repetir pruebas desde cero sin tener que recrear la liga.
+                                Borra <strong>permanentemente</strong> al usuario seleccionado: su perfil,
+                                participaciones, pujas activas en mercados abiertos y su cuenta de Firebase
+                                Authentication. Si el usuario era el único participante de alguna liga, esa
+                                liga también se elimina; si era administrador con más participantes, el rol
+                                se cede automáticamente al siguiente.
                                 <strong class="text-red-400">Acción irreversible.</strong>
                             </p>
                             <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
-                                <Select v-model="ligaAResetear" :options="ligas" optionLabel="nombre" optionValue="id"
-                                    placeholder="Liga a resetear" filter class="flex-1" />
-                                <Button @click="manejarResetearLiga" :loading="cargandoReset" label="Resetear"
-                                    size="small" severity="danger" class="!bg-red-700 !border-red-700" />
+                                <Select v-model="usuarioAEliminar" :options="usuarios" optionLabel="etiqueta"
+                                    optionValue="email" placeholder="Usuario a eliminar" filter class="flex-1" />
+                                <Button @click="manejarEliminarUsuario" :loading="cargandoEliminacionUsuario"
+                                    label="Eliminar" size="small" severity="danger"
+                                    class="!bg-red-700 !border-red-700" />
                             </div>
                         </div>
 
@@ -318,9 +335,5 @@ function manejarEliminarLiga() {
                 </template>
             </Card>
         </div>
-
-        <Message v-if="ultimoResultado" severity="info" :closable="false" class="!bg-[#1A1A1F] !border-zinc-700">
-            <pre class="text-xs overflow-auto max-h-60">{{ JSON.stringify(ultimoResultado, null, 2) }}</pre>
-        </Message>
     </div>
 </template>

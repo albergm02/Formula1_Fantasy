@@ -7,19 +7,14 @@
 /* ─── 1. Pipeline principal del garaje ──────────────────────────────────── */
 
 function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
-  let mejorasRuedas = { ritmo: 0, consistencia: 0, adaptabilidad: 0, agresividad: 0, gestion: 0 }
-  if (garaje.ruedas && garaje.ruedas.mejoras) {
-    mejorasRuedas = garaje.ruedas.mejoras
-  }
-
   const mejorasPotenciadores = acumularMejorasPotenciadores(garaje.potenciadores || [])
 
   const mejorasTotal = {
-    ritmo: mejorasRuedas.ritmo + mejorasPotenciadores.ritmo,
-    consistencia: mejorasRuedas.consistencia + mejorasPotenciadores.consistencia,
-    adaptabilidad: mejorasRuedas.adaptabilidad + mejorasPotenciadores.adaptabilidad,
-    agresividad: (mejorasRuedas.agresividad || 0) + mejorasPotenciadores.agresividad,
-    gestion: (mejorasRuedas.gestion || 0) + mejorasPotenciadores.gestion,
+    ritmo: mejorasPotenciadores.ritmo,
+    consistencia: mejorasPotenciadores.consistencia,
+    adaptabilidad: mejorasPotenciadores.adaptabilidad,
+    agresividad: mejorasPotenciadores.agresividad,
+    gestion: mejorasPotenciadores.gestion,
   }
 
   const desglosePilotos = []

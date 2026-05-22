@@ -7,8 +7,6 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { usarStoreEscuderia } from '@/stores/storeEquipo'
 import { usarStoreLigas } from '@/stores/storeLigas'
-const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
-import { ruedasBase } from '@/data/bases/ruedasBase'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
 
@@ -27,48 +25,23 @@ const notificacion = useToast()
 const confirmar = useConfirm()
 const ruta = useRoute()
 
-const mostrarSelectorNeumatico = ref(false)
 const dialogoProteccion = ref(false)
 const elementoProtegiendo = ref(null)
 const cantidadInversion = ref(1)
 
 /**
- * Construye la lista de etiquetas de mejora de un compuesto para mostrar en la carta.
- * @param {Object} rueda - El objeto del compuesto de neumáticos.
- * @returns {Array<{ atributo: string, valor: number, signo: string, color: string }>}
+ * Valor que el usuario recupera al vender una carta (90 % del precio dinámico).
+ * @param {number} precio
+ * @returns {number}
  */
-const calcularEtiquetasRueda = (rueda) => {
-  if (!rueda || !rueda.mejoras) return []
+const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
 
-  const etiquetas = []
-
-  if (rueda.mejoras.ritmo !== 0) {
-    etiquetas.push({
-      atributo: 'ritmo',
-      valor: rueda.mejoras.ritmo,
-      signo: rueda.mejoras.ritmo > 0 ? '+' : '',
-      color: rueda.mejoras.ritmo > 0 ? 'text-emerald-400' : 'text-red-400',
-    })
-  }
-  if (rueda.mejoras.consistencia !== 0) {
-    etiquetas.push({
-      atributo: 'consistencia',
-      valor: rueda.mejoras.consistencia,
-      signo: rueda.mejoras.consistencia > 0 ? '+' : '',
-      color: rueda.mejoras.consistencia > 0 ? 'text-emerald-400' : 'text-red-400',
-    })
-  }
-  if (rueda.mejoras.adaptabilidad !== 0) {
-    etiquetas.push({
-      atributo: 'adaptabilidad',
-      valor: rueda.mejoras.adaptabilidad,
-      signo: rueda.mejoras.adaptabilidad > 0 ? '+' : '',
-      color: rueda.mejoras.adaptabilidad > 0 ? 'text-emerald-400' : 'text-red-400',
-    })
-  }
-
-  return etiquetas
-}
+/**
+ * Formatea el precio actual de mercado de una carta del garaje.
+ * @param {Object} carta - Carta del garaje (piloto o coche).
+ * @returns {string} Precio formateado con dos decimales (ej. "12.45").
+ */
+const formatearPrecioActual = (carta) => Number(carta?.precio ?? 0).toFixed(2)
 
 onMounted(async () => {
   const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
@@ -82,7 +55,6 @@ onMounted(async () => {
 
 /**
  * Solicita confirmación antes de vender el coche del garaje.
- * En caso afirmativo, delega la operación al store y notifica el resultado.
  * @param {Object} coche - El objeto coche que se desea vender.
  */
 const confirmarVentaCoche = (coche) => {
@@ -141,25 +113,13 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
 }
 
 /**
- * Equipa el compuesto seleccionado desde el selector y cierra el diálogo.
- * @param {string} idRueda - El id del compuesto a equipar.
- */
-const seleccionarNeumatico = async (idRueda) => {
-  const resultado = await storeEscuderia.equiparNeumatico(idRueda)
-  if (resultado.success) {
-    mostrarSelectorNeumatico.value = false
-  } else {
-    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
-  }
-}
-/**
  * Alterna el estado equipado de un coche en el garaje.
  * @param {number} instanciaId - instancia_id del coche.
  */
 const alternarEquipoCoche = async (instanciaId) => {
   const resultado = await storeEscuderia.alternarCoche(instanciaId)
   if (!resultado.success) {
-    notificacion.add({ severity: 'warn', summary: 'Acci\u00f3n denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
   }
 }
 
@@ -170,9 +130,10 @@ const alternarEquipoCoche = async (instanciaId) => {
 const alternarEquipoPiloto = async (instanciaId) => {
   const resultado = await storeEscuderia.alternarPiloto(instanciaId)
   if (!resultado.success) {
-    notificacion.add({ severity: 'warn', summary: 'Acci\u00f3n denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
   }
 }
+
 /**
  * Abre el diálogo de inversión en cláusula para el elemento seleccionado.
  * @param {Object} elemento - Carta del garaje a proteger.
@@ -204,234 +165,147 @@ const confirmarInversionClausula = async () => {
 <template>
   <Cabecera />
 
-  <main class="flex flex-col w-full max-w-md mx-auto mt-4 mb-24 p-4 gap-6">
+  <main class="flex flex-col w-full max-w-sm mx-auto mt-4 mb-24 px-3 gap-6">
 
-    <section class="grid">
-      <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="text-lg text-white"></i>
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
-        <span
-          class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
-          {{storeEscuderia.garaje.coches.filter(c => c.equipado).length}} equipados
-        </span>
+    <section>
+      <header class="flex items-center gap-2 mb-2">
         <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
+        <h2 class="text-xs font-black uppercase tracking-widest text-white">Chásis</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+      </header>
 
-      <template v-if="storeEscuderia.garaje.coches.length > 0">
-        <div v-for="coche in storeEscuderia.garaje.coches" :key="coche.instancia_id"
-          class="flex flex-col w-full h-full">
+      <div v-if="storeEscuderia.garaje.coches.length > 0" class="grid grid-cols-1 gap-3">
+        <article v-for="coche in storeEscuderia.garaje.coches" :key="coche.instancia_id"
+          class="flex flex-col bg-[#121218]">
           <TarjetaCoche :coche="coche" :modoMercado="false" />
-          <div class="flex items-center justify-between px-6 py-1.5">
-            <div class="flex items-center gap-2">
-              <i class="text-[10px] text-amber-400"></i>
-              <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
-                Cláusula: {{ calcularPrecioClausula(coche).toFixed(1) }}M
+
+          <div class="flex flex-col gap-2 px-2 py-2 items-center">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+              <span class="text-zinc-400">
+                Valor actual:
+                <span class="font-black text-[#D4A843]">{{ formatearPrecioActual(coche) }}M</span>
+              </span>
+              <span class="text-zinc-400">
+                Cláusula:
+                <span class="font-black text-amber-400">{{ calcularPrecioClausula(coche).toFixed(1) }}M</span>
+              </span>
+              <span v-if="estaEnPeriodoDeGracia(coche)"
+                class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
+                Protegido {{ horasRestantesDeGracia(coche) }}h
               </span>
             </div>
-            <span v-if="estaEnPeriodoDeGracia(coche)"
-              class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[9px] font-bold uppercase text-emerald-400">
-              Protegida · {{ horasRestantesDeGracia(coche) }}h
-            </span>
-          </div>
-          <div class="flex gap-2 px-6 pb-2 -mt-1">
-            <Button :label="coche.equipado ? 'EQUIPADO' : 'EQUIPAR'" @click="alternarEquipoCoche(coche.instancia_id)"
-              :class="[
-                'flex-1 shadow-lg',
-                coche.equipado
-                  ? '!bg-emerald-900/20 !border-emerald-500/50'
-                  : '!bg-[#121218] !border-zinc-800',
-              ]" :pt="{
-                label: { class: ['text-[10px] font-black uppercase tracking-widest', coche.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
-                icon: { class: coche.equipado ? 'text-emerald-400' : 'text-zinc-500' },
-              }" />
-            <Button label="PROTEGER" @click="abrirDialogoProteccion(coche)"
-              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
-                label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-                icon: { class: '!text-amber-400' },
-              }" />
-            <Button @click="confirmarVentaCoche(coche)"
-              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
-                icon: { class: '!text-red-500' },
-              }" />
-          </div>
-        </div>
-      </template>
 
-      <div v-else class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
-        <i class="pi pi-car mb-3 text-3xl text-zinc-600"></i>
-        <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Garaje Vacío</span>
+            <div class="grid grid-cols-3 gap-1.5">
+              <Button :label="coche.equipado ? 'En uso' : 'Usar chasis'"
+                @click="alternarEquipoCoche(coche.instancia_id)" size="small"
+                :class="coche.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
+                :pt="{
+                  label: { class: ['text-[10px] font-black uppercase tracking-wide', coche.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
+                }" />
+              <Button label="Proteger" @click="abrirDialogoProteccion(coche)" size="small"
+                class="!bg-[#1A1A1F] !border-amber-500/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-amber-400' } }" />
+              <Button :label="`Vender ${calcularValorReventa(coche.precio).toFixed(2)}M`"
+                @click="confirmarVentaCoche(coche)" size="small" class="!bg-[#1A1A1F] !border-red-500/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-red-400' } }" />
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
+        <span class="text-[10px] font-black uppercase text-zinc-500">Garaje Vacío</span>
       </div>
     </section>
 
-    <section class="grid">
-      <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="pi pi-circle-fill text-lg text-white"></i>
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Neumáticos</h2>
-        <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
-
-      <div class="flex flex-col gap-3 px-6">
-        <!-- Imagen pura del compuesto equipado, sin texto superpuesto -->
-        <div v-if="storeEscuderia.garaje.ruedas"
-          class="relative w-full h-16 overflow-hidden bg-black border border-emerald-500/50">
-          <img :src="storeEscuderia.garaje.ruedas.imagen" :alt="storeEscuderia.garaje.ruedas.nombre"
-            class="absolute inset-0 w-full h-full object-cover" style="object-position: 65% center;" />
-        </div>
-
-        <!-- Sin neumáticos -->
-        <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
-          <i class="pi pi-circle mb-3 text-3xl text-zinc-600"></i>
-          <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Neumáticos</span>
-        </div>
-
-        <!-- Botón selector -->
-        <Button :label="storeEscuderia.garaje.ruedas ? 'CAMBIAR NEUMÁTICOS' : 'EQUIPAR NEUMÁTICOS'"
-          icon="pi pi-circle-fill" @click="mostrarSelectorNeumatico = true"
-          class="w-full !bg-[#121218] !border-zinc-800 shadow-lg" :pt="{
-            label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-            icon: { class: 'text-zinc-500' },
-          }" />
-
-        <!-- Nombre y mejoras del compuesto equipado, desacoplado de la imagen -->
-        <div v-if="storeEscuderia.garaje.ruedas" class="flex items-center gap-2 px-1">
-          <i class="pi pi-circle-fill text-[8px]" :style="{ color: storeEscuderia.garaje.ruedas.color }"></i>
-          <span class="text-xs font-black uppercase tracking-wide text-white">
-            {{ storeEscuderia.garaje.ruedas.nombre }}
-          </span>
-          <div class="flex flex-wrap ml-1 gap-1">
-            <span v-for="m in calcularEtiquetasRueda(storeEscuderia.garaje.ruedas)" :key="m.atributo"
-              class="px-1.5 py-0.5 bg-black/80 border border-zinc-700 text-[8px] font-black uppercase" :class="m.color">
-              {{ m.signo }}{{ m.valor }} {{ m.atributo.slice(0, 3) }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Diálogo de selección de compuesto -->
-    <Dialog v-model:visible="mostrarSelectorNeumatico" header="Seleccionar Compuesto" modal
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
-      <div class="flex flex-col gap-4">
-        <div v-for="rueda in ruedasBase" :key="rueda.id" class="flex flex-col gap-1 cursor-pointer"
-          @click="seleccionarNeumatico(rueda.id)">
-          <!-- Imagen pura -->
-          <div class="relative w-full h-16 overflow-hidden bg-black border transition-colors" :class="storeEscuderia.garaje.ruedas?.id === rueda.id
-            ? 'border-emerald-500/70'
-            : 'border-zinc-700'">
-            <img :src="rueda.imagen" :alt="rueda.nombre" class="absolute inset-0 w-full h-full object-cover"
-              style="object-position: 65% center;" />
-          </div>
-          <!-- Nombre y mejoras desacoplados -->
-          <div class="flex items-center gap-2 px-1">
-            <i class="pi pi-circle-fill text-[8px]" :style="{ color: rueda.color }"></i>
-            <span class="text-xs font-black uppercase tracking-wide text-white">{{ rueda.nombre }}</span>
-            <div class="flex flex-wrap ml-1 gap-1">
-              <span v-for="m in calcularEtiquetasRueda(rueda)" :key="m.atributo"
-                class="px-1.5 py-0.5 bg-black/80 border border-zinc-700 text-[8px] font-black uppercase"
-                :class="m.color">
-                {{ m.signo }}{{ m.valor }} {{ m.atributo.slice(0, 3) }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Dialog>
-
-    <section class="grid grid-cols-1 gap-6">
-      <div class="flex items-center gap-3 px-6">
-        <i class="pi pi-users text-lg text-white"></i>
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
+    <!-- ─────────────── PILOTOS ─────────────── -->
+    <section>
+      <header class="flex items-center gap-2 mb-2 px-1">
+        <i class="pi pi-users text-sm text-white"></i>
+        <h2 class="text-xs font-black uppercase tracking-widest text-white">Pilotos</h2>
         <span
-          class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
-          {{storeEscuderia.garaje.pilotos.filter(p => p.equipado).length}} titulares
+          class="px-1.5 py-0.5 border text-[9px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
+          {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
         </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
+      </header>
 
-      <template v-if="storeEscuderia.garaje.pilotos.length > 0">
-        <div v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
-          class="flex flex-col w-full h-full">
+      <div v-if="storeEscuderia.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
+        <article v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
+          class="flex flex-col bg-[#121218] border border-zinc-800">
           <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
-          <div class="flex items-center justify-between px-6 py-1.5">
-            <div class="flex items-center gap-2">
-              <i class="pi pi-shield text-[10px] text-amber-400"></i>
-              <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
-                Cláusula: {{ calcularPrecioClausula(piloto).toFixed(1) }}M
+
+          <!-- Información clara del piloto -->
+          <div class="flex flex-col gap-2 px-3 py-2 border-t border-zinc-800/70">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+              <span class="text-zinc-400">
+                Valor actual:
+                <span class="font-black text-[#D4A843]">{{ formatearPrecioActual(piloto) }}M</span>
+              </span>
+              <span class="text-zinc-400">
+                Cláusula de rescisión:
+                <span class="font-black text-amber-400">{{ calcularPrecioClausula(piloto).toFixed(1) }}M</span>
+              </span>
+              <span v-if="estaEnPeriodoDeGracia(piloto)"
+                class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
+                Protegido {{ horasRestantesDeGracia(piloto) }}h
               </span>
             </div>
-            <span v-if="estaEnPeriodoDeGracia(piloto)"
-              class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[9px] font-bold uppercase text-emerald-400">
-              Protegida · {{ horasRestantesDeGracia(piloto) }}h
-            </span>
-          </div>
-          <div class="flex gap-2 px-6 pb-2 -mt-1">
-            <Button :label="piloto.equipado ? 'TITULAR' : 'SUPLENTE'"
-              :icon="piloto.equipado ? 'pi pi-check-circle' : 'pi pi-circle'"
-              @click="alternarEquipoPiloto(piloto.instancia_id)" :class="[
-                'flex-1 shadow-lg',
-                piloto.equipado
-                  ? '!bg-emerald-900/20 !border-emerald-500/50'
-                  : '!bg-[#121218] !border-zinc-800',
-              ]" :pt="{
-                label: { class: ['text-[10px] font-black uppercase tracking-widest', piloto.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
-                icon: { class: piloto.equipado ? 'text-emerald-400' : 'text-zinc-500' },
-              }" />
-            <Button label="PROTEGER" icon="pi pi-shield" @click="abrirDialogoProteccion(piloto)"
-              class="flex-1 !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
-                label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-                icon: { class: '!text-amber-400' },
-              }" />
-            <Button icon="pi pi-user-minus" @click="confirmarVentaPiloto(piloto)"
-              class="!bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
-                icon: { class: '!text-red-500' },
-              }" />
-          </div>
-        </div>
-      </template>
 
-      <div v-else
-        class="flex flex-col items-center justify-center col-span-full mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
-        <i class="pi pi-users mb-3 text-3xl text-zinc-600"></i>
-        <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Asientos Vacíos</span>
+            <div class="grid grid-cols-3 gap-1.5">
+              <Button :label="piloto.equipado ? 'Titular' : 'Hacer titular'"
+                @click="alternarEquipoPiloto(piloto.instancia_id)" size="small"
+                :class="piloto.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
+                :pt="{
+                  label: { class: ['text-[10px] font-black uppercase tracking-wide', piloto.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
+                }" />
+              <Button label="Proteger" @click="abrirDialogoProteccion(piloto)" size="small"
+                class="!bg-[#1A1A1F] !border-amber-500/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-amber-400' } }" />
+              <Button :label="`Despedir ${calcularValorReventa(piloto.precio).toFixed(2)}M`"
+                @click="confirmarVentaPiloto(piloto)" size="small" class="!bg-[#1A1A1F] !border-red-500/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-red-400' } }" />
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
+        <i class="pi pi-users mb-2 text-2xl text-zinc-600"></i>
+        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Asientos Vacíos</span>
       </div>
     </section>
 
-    <section class="grid">
-      <div class="flex items-center gap-3 px-6 mb-3">
-        <i class="pi pi-bolt text-lg text-white"></i>
-        <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
+    <!-- ─────────────── POTENCIADORES ─────────────── -->
+    <section>
+      <header class="flex items-center gap-2 mb-2 px-1">
+        <i class="pi pi-bolt text-sm text-white"></i>
+        <h2 class="text-xs font-black uppercase tracking-widest text-white">Potenciadores</h2>
         <span
-          class="px-2 py-0.5 border text-[10px] font-black uppercase tracking-widest text-amber-400 border-amber-500/50">
-          {{storeEscuderia.garaje.potenciadores.filter(p => p.equipado).length}} activos
+          class="px-1.5 py-0.5 border text-[9px] font-black uppercase tracking-widest text-amber-400 border-amber-500/50">
+          {{storeEscuderia.garaje.potenciadores.filter((p) => p.equipado).length}} activos
         </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
-      </div>
+      </header>
 
-      <div v-if="storeEscuderia.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-6 px-6">
-        <div v-for="potenciador in storeEscuderia.garaje.potenciadores" :key="potenciador.instancia_id"
-          class="flex flex-col w-full h-full">
+      <div v-if="storeEscuderia.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-3">
+        <article v-for="potenciador in storeEscuderia.garaje.potenciadores" :key="potenciador.instancia_id"
+          class="flex flex-col bg-[#121218] border border-zinc-800">
           <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
-          <div class="flex gap-2 mt-1.5">
-            <Button :label="potenciador.equipado ? 'INSTALADO' : 'INSTALAR'"
-              :icon="potenciador.equipado ? 'pi pi-check-circle' : 'pi pi-cog'"
-              @click="alternarInstalacionPotenciador(potenciador.instancia_id)" :class="[
-                'flex-1 shadow-lg',
-                potenciador.equipado
-                  ? '!bg-emerald-900/20 !border-emerald-500/50'
-                  : '!bg-[#121218] !border-zinc-800',
-              ]" :pt="{
-                label: { class: ['text-[10px] font-black uppercase tracking-widest', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-400'] },
-                icon: { class: potenciador.equipado ? 'text-emerald-400' : 'text-zinc-500' },
+          <div class="flex flex-col gap-2 px-2 py-2 items-center border-t border-zinc-800/70">
+            <Button :label="potenciador.equipado ? 'Instalado' : 'Instalar'"
+              @click="alternarInstalacionPotenciador(potenciador.instancia_id)" size="small" class="w-full"
+              :class="potenciador.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
+              :pt="{
+                label: { class: ['text-[10px] font-black uppercase tracking-wide', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
               }" />
           </div>
-        </div>
+        </article>
       </div>
 
-      <div v-else class="flex flex-col items-center justify-center mx-6 p-12 bg-[#1A1A1F]/50 border border-zinc-800/50">
-        <i class="pi pi-box mb-3 text-3xl text-zinc-600"></i>
-        <span class="text-xs font-black uppercase tracking-widest text-zinc-500">Sin Mejoras Compradas</span>
+      <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
+        <i class="pi pi-box mb-2 text-2xl text-zinc-600"></i>
+        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sin Mejoras Compradas</span>
       </div>
     </section>
 

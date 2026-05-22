@@ -1,15 +1,11 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
-import { ruedasBase } from '@/data/bases/ruedasBase'
-
-const RUEDA_POR_DEFECTO = ruedasBase.find((r) => r.id === 'medio') || ruedasBase[0]
 
 const crearGarajeVacio = () => ({
   coches: [],
   pilotos: [],
   potenciadores: [],
-  ruedas: { ...RUEDA_POR_DEFECTO },
 })
 const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
@@ -42,7 +38,6 @@ const migrarGaraje = (garajeOriginal) => {
   }))
 
   garaje.potenciadores = garaje.potenciadores || []
-  garaje.ruedas = garaje.ruedas || { ...RUEDA_POR_DEFECTO }
 
   return garaje
 }
@@ -228,38 +223,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
       success: true,
       message: `Has ${potenciador.equipado ? 'equipado' : 'desequipado'} el potenciador: ${potenciador.nombre}.`,
     }
-  }
-
-  /**
-   * Equipa un compuesto de neumáticos en el garaje.
-   * Requiere tener al menos un piloto y un coche fichados.
-   * @param {string} idRueda - El id del compuesto a equipar (ej. 'blando', 'medio').
-   * @returns {Promise<{ success: boolean, message: string }>}
-   */
-  async function equiparNeumatico(idRueda) {
-    const rueda = ruedasBase.find((r) => r.id === idRueda)
-    if (!rueda) {
-      return { success: false, message: `Compuesto con id ${idRueda} no encontrado.` }
-    }
-
-    garaje.value.ruedas = { ...rueda }
-    await guardarEstadoEquipo()
-    return { success: true, message: `Compuesto ${rueda.nombre} equipado.` }
-  }
-
-  /**
-   * Retira los neumáticos equipados restaurando el compuesto por defecto.
-   * @returns {Promise<{ success: boolean, message: string }>}
-   */
-  async function desequiparNeumatico() {
-    if (!garaje.value.ruedas) {
-      return { success: false, message: 'No hay neumáticos equipados para retirar.' }
-    }
-
-    const nombreRueda = garaje.value.ruedas.nombre
-    garaje.value.ruedas = { ...RUEDA_POR_DEFECTO }
-    await guardarEstadoEquipo()
-    return { success: true, message: `Compuesto ${nombreRueda} retirado.` }
   }
 
   /**
@@ -473,8 +436,6 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
     comprarElemento,
     venderElemento,
     alternarPotenciador,
-    equiparNeumatico,
-    desequiparNeumatico,
     limpiarEstadoLigaActiva,
     invertirEnClausula,
     ejecutarClausulaRival,

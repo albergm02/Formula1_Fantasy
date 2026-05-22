@@ -391,7 +391,6 @@ async function resolverPujasMercado(idMercado) {
       coches: [],
       pilotos: [],
       potenciadores: [],
-      ruedas: null,
     }
 
     /* Migrar formato antiguo (coche singular) al nuevo (coches array) */
@@ -707,75 +706,6 @@ exports.dispararJornadaSemanalManual = onCall({ region: 'europe-west1' }, async 
   const { forzar = false, idLiga = null } = request.data || {}
   const resultado = await ejecutarProcesarJornada({ forzar, idLiga })
   return resultado
-})
-
-/**
- * Callable — RESET COMPLETO de una liga (solo testing).
- * Devuelve a todas las participaciones a su estado inicial:
- *   - presupuesto = 50
- *   - puntos = 0
- *   - garaje vacío
- *   - elimina ultimaJornada
- * También borra todos los mercados y pujas de esa liga, y la actividad asociada.
- * Acepta `{ idLiga }` (obligatorio).
- */
-exports.resetearLigaManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
-
-  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
-
-  const garajeVacio = { coches: [], pilotos: [], potenciadores: [], ruedas: null }
-  const batch = db.batch()
-
-  /* 1. Reset de participaciones de la liga */
-  const participacionesSnap = await db
-    .collection('participaciones')
-    .where('id_liga', '==', idLiga)
-    .get()
-
-  for (const doc of participacionesSnap.docs) {
-    batch.update(doc.ref, {
-      presupuesto: 50.0,
-      puntos: 0,
-      garaje: garajeVacio,
-      ultimaJornada: FieldValue.delete(),
-    })
-  }
-
-  /* 2. Borrar mercados de la liga (y sus subcolecciones de pujas) */
-  const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
-
-  for (const docMercado of mercadosSnap.docs) {
-    const pujasSnap = await docMercado.ref.collection('pujas').get()
-    for (const pujaDoc of pujasSnap.docs) {
-      batch.delete(pujaDoc.ref)
-    }
-    batch.delete(docMercado.ref)
-  }
-
-  /* 3. Borrar actividad de la liga */
-  const actividadSnap = await db.collection('actividad').where('idLiga', '==', idLiga).get()
-
-  for (const doc of actividadSnap.docs) {
-    batch.delete(doc.ref)
-  }
-
-  await batch.commit()
-
-  return {
-    ok: true,
-    idLiga,
-    participacionesReseteadas: participacionesSnap.size,
-    mercadosBorrados: mercadosSnap.size,
-    eventosActividadBorrados: actividadSnap.size,
-  }
 })
 
 /**
@@ -1256,21 +1186,22 @@ async function borrarLigaCompleta(idLiga) {
 }
 
 /**
- * Callable — elimina la cuenta del usuario autenticado en cascada:
+ * Borra en cascada todos los datos del usuario `email`:
  *  · Si era único participante de una liga → borra la liga entera.
  *  · Si era admin con más participantes → cede admin al siguiente.
  *  · Borra su participación y resta 1 al contador de la liga.
  *  · Borra todas sus pujas activas en mercados abiertos.
  *  · Borra el documento `usuarios/{email}` y el usuario de Firebase Auth.
+ * @param {string} email
+ * @returns {Promise<{participacionesBorradas: number, ligasBorradas: number}>}
  */
-exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) => {
-  const email = exigirEmailAutenticado(request)
-  const uid = request.auth.uid
-
+async function eliminarCuentaUsuarioEnCascada(email) {
   const participacionesSnap = await db
     .collection('participaciones')
     .where('email_usuario', '==', email)
     .get()
+
+  let ligasBorradas = 0
 
   for (const documentoPropio of participacionesSnap.docs) {
     const datosPropios = documentoPropio.data()
@@ -1294,6 +1225,7 @@ exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) =>
     if (restantes.length === 0) {
       await documentoPropio.ref.delete()
       await borrarLigaCompleta(idLiga)
+      ligasBorradas += 1
       continue
     }
 
@@ -1335,14 +1267,65 @@ exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) =>
 
   await db.collection('usuarios').doc(email).delete()
 
+  let uidEliminar = null
   try {
-    await getAuth().deleteUser(uid)
+    const usuarioAuth = await getAuth().getUserByEmail(email)
+    uidEliminar = usuarioAuth.uid
   } catch (error) {
+    if (error.code !== 'auth/user-not-found') {
+      throw new HttpsError(
+        'internal',
+        `Error consultando el usuario de Auth para ${email}: ${error.message}`,
+      )
+    }
+  }
+
+  if (uidEliminar) {
+    try {
+      await getAuth().deleteUser(uidEliminar)
+    } catch (error) {
+      throw new HttpsError(
+        'internal',
+        `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`,
+      )
+    }
+  }
+
+  return { participacionesBorradas: participacionesSnap.size, ligasBorradas }
+}
+
+/**
+ * Callable — elimina la cuenta del usuario autenticado en cascada.
+ */
+exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const resultado = await eliminarCuentaUsuarioEnCascada(email)
+  return { ok: true, email, ...resultado }
+})
+
+/**
+ * Callable — el administrador global elimina la cuenta de cualquier usuario
+ * en cascada (participaciones, pujas, perfil y usuario de Auth).
+ * Acepta `{ email }` (obligatorio).
+ */
+exports.eliminarUsuarioManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const { email } = request.data || {}
+  if (!email) {
+    throw new HttpsError('invalid-argument', 'Falta email.')
+  }
+
+  const usuarioSnap = await db.collection('usuarios').doc(email).get()
+  if (!usuarioSnap.exists) {
+    throw new HttpsError('not-found', `Usuario ${email} no encontrado.`)
+  }
+  if (usuarioSnap.data().esAdministrador === true) {
     throw new HttpsError(
-      'internal',
-      `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`,
+      'failed-precondition',
+      'No se puede eliminar a otro administrador desde el panel.',
     )
   }
 
-  return { ok: true, email, participacionesBorradas: participacionesSnap.size }
+  const resultado = await eliminarCuentaUsuarioEnCascada(email)
+  return { ok: true, email, ...resultado }
 })

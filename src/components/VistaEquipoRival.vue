@@ -162,16 +162,7 @@ const confirmarEjecucionClausula = (elemento) => {
             </div>
         </section>
 
-        <section v-if="participacion.garaje.ruedas">
-            <h3 class="mb-2 text-xs font-bold uppercase tracking-widest text-zinc-500">Neumáticos</h3>
-            <div class="flex items-center gap-3 p-3 border border-zinc-700 rounded-lg">
-                <img v-if="participacion.garaje.ruedas.imagen" :src="participacion.garaje.ruedas.imagen"
-                    :alt="participacion.garaje.ruedas.nombre" class="w-12 h-12 object-contain" />
-                <span class="text-sm font-bold text-white uppercase">{{ participacion.garaje.ruedas.nombre }}</span>
-            </div>
-        </section>
-
-        <div v-if="(!participacion.garaje.coches || !participacion.garaje.coches.length) && !participacion.garaje.pilotos.length && !participacion.garaje.potenciadores.length && !participacion.garaje.ruedas"
+        <div v-if="(!participacion.garaje.coches || !participacion.garaje.coches.length) && !participacion.garaje.pilotos.length && !participacion.garaje.potenciadores.length"
             class="flex flex-col items-center py-10 gap-2">
             <p class="text-sm text-zinc-500">Este jugador aún no tiene cartas en su garaje.</p>
         </div>

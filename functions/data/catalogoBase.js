@@ -89,7 +89,7 @@ const potenciadoresBase = [
   { id: 'ingeniero',             nombre: 'Ing. Rendimiento',  categoria: 'equipo_humano',   precio: 3.0, imagen: '/Potenciadores/ingeniero.webp',             icono: 'pi-wrench',             color: '#64748b', tipoCarta: 'potenciador', mejoras: { ritmo:  5, consistencia:  3, adaptabilidad:  0, agresividad:  0, gestion:  2 }, descripcion: 'Setup optimizado para cada circuito.'               },
   { id: 'ingeniero_coms',        nombre: 'Comunicaciones',    categoria: 'equipo_humano',   precio: 2.0, imagen: '/Potenciadores/ingeniero_coms.webp',        icono: 'pi-headphones',         color: '#0ea5e9', tipoCarta: 'potenciador', mejoras: { ritmo:  0, consistencia:  0, adaptabilidad:  4, agresividad:  3, gestion:  0 }, descripcion: 'Reaccion rapida a safety cars y banderas.'          },
   { id: 'modo_override',         nombre: 'Override Energia',  categoria: 'especial',        precio: 5.0, imagen: '/Potenciadores/modo_override.webp',         icono: 'pi-power-off',          color: '#ef4444', tipoCarta: 'potenciador', mejoras: { ritmo: 12, consistencia: -6, adaptabilidad:  0, agresividad:  6, gestion:  0 }, descripcion: 'Deploy completo de bateria en una vuelta.'          },
-  { id: 'modo_defensa',          nombre: 'Modo Defensa',      categoria: 'especial',        precio: 4.5, imagen: '/Potenciadores/modo_defensa.webp',          icono: 'pi-lock',               color: '#22d3ee', tipoCarta: 'potenciador', mejoras: { ritmo: -4, consistencia: 12, adaptabilidad:  0, agresividad:  0, gestion:  8 }, descripcion: 'Conservacion extrema de neumaticos y PU.'           },
+  { id: 'modo_defensa',          nombre: 'Modo Defensa',      categoria: 'especial',        precio: 4.5, imagen: '/Potenciadores/modo_defensa.webp',          icono: 'pi-lock',               color: '#22d3ee', tipoCarta: 'potenciador', mejoras: { ritmo: -4, consistencia: 12, adaptabilidad:  0, agresividad:  0, gestion:  8 }, descripcion: 'Conservacion extrema de componentes del coche y PU.'           },
   { id: 'meteorologia',          nombre: 'Meteorologia',      categoria: 'especial',        precio: 4.0, imagen: '/Potenciadores/meterologia.webp',           icono: 'pi-cloud',              color: '#a78bfa', tipoCarta: 'potenciador', mejoras: { ritmo:  0, consistencia:  0, adaptabilidad: 15, agresividad:  0, gestion:  0 }, descripcion: 'Prediccion meteorologica perfecta.'                 },
   { id: 'simulador_nocturno',    nombre: 'Simulador',         categoria: 'especial',        precio: 2.5, imagen: '/Potenciadores/simulador_nocturno.webp',    icono: 'pi-moon',               color: '#1e293b', tipoCarta: 'potenciador', mejoras: { ritmo:  3, consistencia:  3, adaptabilidad:  3, agresividad:  2, gestion:  2 }, descripcion: 'Preparacion extra del piloto en simulador.'         },
 ]
@@ -179,7 +179,7 @@ const variantesPiloto = [
 ]
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   LÓGICA PURA — Construcción del catálogo con precios por puntuación
+   Construcción del catálogo con precios por puntuación
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const RANGO_PRECIO_PILOTOS = { min: 10, max: 26 }

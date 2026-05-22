@@ -6,6 +6,7 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
+import Tooltip from 'primevue/tooltip'
 import Aura from '@primevue/themes/aura'
 
 import 'primeicons/primeicons.css'
@@ -22,6 +23,7 @@ app.use(gestorPinia)
 app.use(router)
 app.use(ToastService)
 app.use(ConfirmationService)
+app.directive('tooltip', Tooltip)
 
 // La app se monta <-> cambia el estado de autenticación.
 // Evito mostrar pantallas de carga o de error innecesarias.

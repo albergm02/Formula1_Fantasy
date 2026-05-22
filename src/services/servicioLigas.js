@@ -220,7 +220,6 @@ export const cargarGarajeDeParticipante = async (idParticipacion) => {
     coches: [],
     pilotos: [],
     potenciadores: [],
-    ruedas: null,
   }
 
   const garajeMigrado = { ...garajeOriginal }
@@ -233,7 +232,6 @@ export const cargarGarajeDeParticipante = async (idParticipacion) => {
     equipado: p.equipado !== undefined ? p.equipado : true,
   }))
   garajeMigrado.potenciadores = garajeMigrado.potenciadores || []
-  garajeMigrado.ruedas = garajeMigrado.ruedas || null
 
   return {
     id: documento.id,

@@ -41,9 +41,9 @@ onUnmounted(() => {
       <img :src="siguienteGranPremio.imagen" alt="Circuito" class="w-40 h-20 object-contain" />
       <div class="flex flex-col items-center gap-1 text-center">
         <span class="text-base font-bold text-white">{{ siguienteGranPremio.nombreGranPremio }}</span>
-        <span class="text-sm text-zinc-400">{{ siguienteGranPremio.circuito }} · {{ siguienteGranPremio.pais }}</span>
-        <span class="text-sm text-zinc-500">{{ siguienteGranPremio.fecha }} · {{ siguienteGranPremio.hora }}</span>
-        <span class="mt-2 text-sm font-semibold text-green-400">Faltan: {{ cuentaRegresiva }}</span>
+        <span class="text-sm text-zinc-400">{{ siguienteGranPremio.circuito }} - {{ siguienteGranPremio.pais }}</span>
+        <span class="text-sm text-zinc-500">{{ siguienteGranPremio.fecha }} - {{ siguienteGranPremio.hora }}</span>
+        <span class="mt-2 text-sm font-semibold text-white mb-4">Faltan: {{ cuentaRegresiva }}</span>
       </div>
     </div>
     <div v-else class="flex flex-col items-center justify-center py-10 gap-3">

@@ -27,7 +27,7 @@ const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) =>
   Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
 const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 8).toUpperCase()
-const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [], ruedas: null })
+const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [] })
 
 /**
  * Elige al siguiente administrador de una liga basándose en quién lleva más tiempo en ella.

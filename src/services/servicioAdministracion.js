@@ -14,8 +14,8 @@ import { functions } from '@/services/servicioFirebase'
 
 const llamadaPujas = httpsCallable(functions, 'dispararResolucionPujasManual')
 const llamadaJornada = httpsCallable(functions, 'dispararJornadaSemanalManual')
-const llamadaReset = httpsCallable(functions, 'resetearLigaManual')
 const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLigaManual')
+const llamadaEliminarUsuario = httpsCallable(functions, 'eliminarUsuarioManual')
 
 /**
  * Dispara la resolución de pujas y cierre de un mercado concreto.
@@ -43,17 +43,6 @@ export async function dispararProcesamientoJornada(opciones = {}) {
 }
 
 /**
- * RESET COMPLETO de una liga: presupuestos, puntos, garajes, mercados y actividad.
- * Solo testing — operación destructiva e irreversible.
- * @param {string} idLiga
- * @returns {Promise<Object>} { ok, idLiga, participacionesReseteadas, mercadosBorrados, eventosActividadBorrados }
- */
-export async function resetearLiga(idLiga) {
-  const respuesta = await llamadaReset({ idLiga })
-  return respuesta.data
-}
-
-/**
  * ELIMINACIÓN COMPLETA de una liga por parte del administrador global.
  * Borra la liga, sus participaciones, mercados, pujas y actividad, y la
  * desvincula del array `ligasIds` de todos los usuarios.
@@ -63,5 +52,19 @@ export async function resetearLiga(idLiga) {
  */
 export async function eliminarLigaComoAdministrador(idLiga) {
   const respuesta = await llamadaEliminarLiga({ idLiga })
+  return respuesta.data
+}
+
+/**
+ * ELIMINACIÓN COMPLETA de un usuario por parte del administrador global.
+ * Borra su perfil, participaciones, pujas activas y el usuario de Firebase Auth,
+ * desvinculándolo de todas sus ligas (con cesión de admin o borrado de liga
+ * si quedaba como único participante).
+ * Operación destructiva e irreversible.
+ * @param {string} email
+ * @returns {Promise<Object>} { ok, email, participacionesBorradas, ligasBorradas }
+ */
+export async function eliminarUsuarioComoAdministrador(email) {
+  const respuesta = await llamadaEliminarUsuario({ email })
   return respuesta.data
 }
