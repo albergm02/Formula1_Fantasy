@@ -263,7 +263,7 @@ function formatearPorcentaje(valor) {
                         ? 'bg-[#E10600]/10 border-[#E10600] text-white'
                         : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400'">
                     <span class="text-[9px] font-black uppercase tracking-widest">
-                        {{ formatearFechaCorta(item.fechaProcesamiento) }}
+                        {{ formatearFechaCorta(item.fechaCarrera || item.fechaProcesamiento) }}
                     </span>
                     <span class="text-xs font-bold">{{ item.nombreGranPremio }}</span>
                 </button>

@@ -262,6 +262,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
     batch.set(db.collection('jornadas').doc(idJornada), {
       meetingKey: granPremio.meeting_key,
       nombreGranPremio: granPremio.meeting_name,
+      fechaCarrera: granPremio.date_end,
       fechaProcesamiento: new Date().toISOString(),
       temporada: TEMPORADA_ACTUAL,
       participacionesProcesadas,
@@ -278,6 +279,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
       {
         meetingKey: granPremio.meeting_key,
         nombreGranPremio: granPremio.meeting_name,
+        fechaCarrera: granPremio.date_end,
         fechaProcesamiento: new Date().toISOString(),
         temporada: TEMPORADA_ACTUAL,
         condiciones,
