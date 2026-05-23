@@ -66,29 +66,29 @@ const confirmarEliminarPuja = () => {
 </script>
 
 <template>
-  <div class="w-full h-[140px]">
+  <div class="w-full h-[160px]">
     <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
 
         <!-- Imagen de fondo completa, desplazada a la derecha -->
         <img v-if="props.potenciador.imagen" :src="props.potenciador.imagen" :alt="props.potenciador.nombre"
-          class="absolute inset-0 w-full h-full object-cover" style="object-position: 35% center;" />
+          class="absolute inset-0 w-full h-full object-cover" style="object-position: 20% center;" />
 
         <!-- Badges superiores (precio + total pujas) -->
-        <div v-if="modoMercado" class="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+        <div v-if="modoMercado" class="absolute top-20 right-3 z-10 flex items-center gap-1.5">
           <div v-if="totalPujas > 0"
             class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
             <i class="pi pi-users text-[8px] text-zinc-300"></i>
             <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
           </div>
-          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-[#D4A843]/40">
-            <span class="text-[10px] font-black text-[#D4A843]">{{ Number(props.potenciador.precio).toFixed(2) }}</span>
-            <span class="text-[7px] text-zinc-400 uppercase font-bold">M</span>
+          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
+            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.potenciador.precio).toFixed(2) }}
+              M</span>
           </div>
         </div>
 
         <!-- Overlay de info (lado derecho) -->
-        <div class="absolute inset-y-0 right-0 w-[70%] flex flex-col justify-between p-3">
+        <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
           <!-- Header: nombre -->
           <div class="flex items-start justify-between gap-2 mt-4">
             <div class="flex flex-col min-w-0">
@@ -128,9 +128,7 @@ const confirmarEliminarPuja = () => {
 
     <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.potenciador.nombre" modal
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+      :style="{ width: '90vw', maxWidth: '400px' }">
       <div class="space-y-3">
 
         <!-- Descripcion -->
@@ -156,13 +154,11 @@ const confirmarEliminarPuja = () => {
 
     <!-- Dialog de puja -->
     <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '360px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+      :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">
         <div class="text-center">
           <p class="text-white font-bold text-sm">{{ props.potenciador.nombre }}</p>
-          <p class="text-zinc-400 text-xs mt-1">Precio base: <span class="text-[#D4A843] font-bold">{{
+          <p class="text-zinc-400 text-xs mt-1">Precio base: <span class="text-emerald-400 font-bold">{{
             Number(props.potenciador.precio).toFixed(2) }}M</span></p>
         </div>
         <div class="flex flex-col items-center gap-2">
@@ -171,12 +167,12 @@ const confirmarEliminarPuja = () => {
             :maxFractionDigits="2" inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32" />
         </div>
         <button @click="confirmarPuja"
-          class="w-full py-3 bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 border-none rounded-sm cursor-pointer text-white font-black uppercase text-xs tracking-widest">
+          class="w-full py-3 bg-[#D4A843]/70 border border-[#D4A843] text-white font-black uppercase">
           CONFIRMAR PUJA
         </button>
         <button v-if="miPuja != null" @click="confirmarEliminarPuja"
-          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 rounded-sm cursor-pointer text-red-400 text-sm font-black uppercase tracking-widest">
-          <i class="pi pi-trash mr-2"></i> ELIMINAR PUJA
+          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 text-white uppercase font-black">ELIMINAR
+          PUJA
         </button>
       </div>
     </Dialog>

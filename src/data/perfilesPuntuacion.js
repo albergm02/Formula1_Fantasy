@@ -1,7 +1,7 @@
 // prettier-ignore
 export const perfilesPuntuacion = {
   qualy: {
-    pesos: { ritmo: 0.45, consistencia: 0.2, adaptabilidad: 0.05, agresividad: 0.25, gestion: 0.05 },
+    pesos: { ritmo: 0.5, consistencia: 0, adaptabilidad: 0, agresividad: 0.5, gestion: 0 },
     reglasUsuario: [
       'Factor según posición en clasificación:',
       'P1 – P3 → ×1.50',
@@ -12,7 +12,7 @@ export const perfilesPuntuacion = {
     ],
   },
   carrera: {
-    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0.05, agresividad: 0.1, gestion: 0.25 },
+    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.4 },
     reglasUsuario: [
       'Factor según posición final en carrera:',
       'P1 → ×1.50',
@@ -26,7 +26,7 @@ export const perfilesPuntuacion = {
     ],
   },
   todo_terreno: {
-    pesos: { ritmo: 0.1, consistencia: 0.15, adaptabilidad: 0.45, agresividad: 0.2, gestion: 0.1 },
+    pesos: { ritmo: 0.1, consistencia: 0.1, adaptabilidad: 0.6, agresividad: 0.1, gestion: 0.1 },
     reglasUsuario: [
       'Factor base según el clima:',
       'Lluvia → 1.00 | Sin lluvia → 0.50',
@@ -44,7 +44,7 @@ export const perfilesPuntuacion = {
     ],
   },
   remontador: {
-    pesos: { ritmo: 0.25, consistencia: 0, adaptabilidad: 0.1, agresividad: 0.55, gestion: 0.1 },
+    pesos: { ritmo: 0.2, consistencia: 0, adaptabilidad: 0.4, agresividad: 0.4, gestion: 0 },
     reglasUsuario: [
       'Factor según diferencial de adelantamientos (OpenF1 /overtakes):',
       'diferencial = adelantamientos realizados − recibidos',
@@ -53,7 +53,7 @@ export const perfilesPuntuacion = {
     ],
   },
   estratega: {
-    pesos: { ritmo: 0.05, consistencia: 0.3, adaptabilidad: 0.15, agresividad: 0, gestion: 0.5 },
+    pesos: { ritmo: 0.1, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.5 },
     reglasUsuario: [
       'Factor compuesto por gestión, paradas y posición:',
       'Base: 0.70',

@@ -64,7 +64,7 @@ const confirmarEliminarPuja = () => {
 </script>
 
 <template>
-  <div class="w-full h-[180px]">
+  <div class="w-full h-[160px]">
     <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
 
@@ -73,15 +73,14 @@ const confirmarEliminarPuja = () => {
           class="w-full h-full object-cover block" />
 
         <!-- Badges superiores (precio + total pujas) -->
-        <div v-if="modoMercado" class="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+        <div v-if="modoMercado" class="absolute top-20 right-3 z-10 flex items-center gap-1.5">
           <div v-if="totalPujas > 0"
             class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
             <i class="pi pi-users text-[8px] text-zinc-300"></i>
             <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
           </div>
-          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-[#D4A843]/40">
-            <span class="text-[10px] font-black text-[#D4A843]">{{ Number(props.piloto.precio).toFixed(2) }}</span>
-            <span class="text-[7px] text-zinc-400 uppercase font-bold">M</span>
+          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
+            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.piloto.precio).toFixed(2) }} M</span>
           </div>
         </div>
 
@@ -91,7 +90,7 @@ const confirmarEliminarPuja = () => {
           <!-- Header: nombre + equipo -->
           <div>
             <div class="flex flex-col min-w-0">
-              <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
+              <span class="text-sm font-black text-white uppercase">
                 {{ props.piloto.nombre }}
               </span>
               <span class="text-xs text-zinc-300 uppercase font-bold">
@@ -100,13 +99,11 @@ const confirmarEliminarPuja = () => {
             </div>
           </div>
 
-          <div class="flex-1"></div>
-
           <!-- Badge variante -->
-          <div class="flex mb-1">
-            <span class="px-2 py-1 flex items-center gap-1 text-[8px] font-black uppercase bg-black/50 border"
+          <div class="flex mt-7">
+            <span class="px-2 py-1 flex items-center gap-1 text-[8px] font-black uppercase bg-black/50"
               :style="{ color: props.piloto.colorVariante, borderColor: props.piloto.colorVariante }">
-              <i class="pi text-[8px]" :class="props.piloto.iconoVariante"></i>
+              <i class="pi" :class="props.piloto.iconoVariante"></i>
               {{ props.piloto.variante }}
             </span>
           </div>
@@ -140,9 +137,7 @@ const confirmarEliminarPuja = () => {
 
     <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.piloto.nombre" modal
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+      :style="{ width: '90vw', maxWidth: '400px' }">
       <div class="space-y-3">
 
         <!-- Puntuacion ponderada -->
@@ -155,7 +150,7 @@ const confirmarEliminarPuja = () => {
 
         <!-- Barras de atributos -->
         <div class="px-3 py-2.5 bg-zinc-800 border border-zinc-700 space-y-2">
-          <p class="text-sm font-black text-sky-400 uppercase leading-tight mb-2">Atributos</p>
+          <p class="text-sm font-black text-sky-400 uppercase leading-tight mb-2">Atributos del piloto</p>
           <div v-for="barra in barrasAtributos" :key="barra.nombre" class="space-y-0.5">
             <div class="flex justify-between items-center">
               <span class="text-[10px] font-bold text-zinc-300 uppercase">{{ barra.nombre }}</span>
@@ -164,8 +159,8 @@ const confirmarEliminarPuja = () => {
                   barra.peso }}</span></span>
             </div>
             <div class="w-full h-1.5 bg-zinc-700 overflow-hidden">
-              <div class="h-full transition-all duration-500"
-                :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: barra.peso > 0 ? 0.4 + barra.peso : 0.15 }">
+              <div class="h-full"
+                :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: barra.peso > 0 ? 0.4 : 0.1 }">
               </div>
             </div>
           </div>
@@ -180,7 +175,7 @@ const confirmarEliminarPuja = () => {
           <ul class="mt-2 space-y-1.5">
             <li v-for="(regla, indice) in reglasVariante" :key="`${props.piloto.id}-regla-${indice}`"
               class="text-xs text-zinc-300 leading-relaxed">
-              • {{ regla }}
+              -{{ regla }}
             </li>
           </ul>
         </div>
@@ -190,13 +185,11 @@ const confirmarEliminarPuja = () => {
 
     <!-- Dialog de puja -->
     <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
-      :style="{ width: '90vw', maxWidth: '360px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+      :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">
         <div class="text-center">
           <p class="text-white font-bold text-sm">{{ props.piloto.nombre }}</p>
-          <p class="text-zinc-400 text-xs mt-1">Precio base: <span class="text-[#D4A843] font-bold">{{
+          <p class="text-zinc-400 text-xs mt-1">Precio base: <span class="text-emerald-400 font-bold">{{
             Number(props.piloto.precio).toFixed(2) }}M</span></p>
         </div>
         <div class="flex flex-col items-center gap-2">
@@ -205,12 +198,12 @@ const confirmarEliminarPuja = () => {
             :maxFractionDigits="2" inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32" />
         </div>
         <button @click="confirmarPuja"
-          class="w-full py-3 bg-amber-600 disabled:bg-zinc-700 disabled:text-zinc-500 border-none rounded-sm cursor-pointer text-white font-black uppercase text-xs tracking-widest">
+          class="w-full py-3 bg-[#D4A843]/70 border border-[#D4A843] text-white font-black uppercase">
           CONFIRMAR PUJA
         </button>
         <button v-if="miPuja != null" @click="confirmarEliminarPuja"
-          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 rounded-sm cursor-pointer text-red-400 text-sm font-black uppercase tracking-widest">
-          <i class="pi pi-trash mr-2"></i> ELIMINAR PUJA
+          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 cursor-pointer text-white uppercase font-black">ELIMINAR
+          PUJA
         </button>
       </div>
     </Dialog>

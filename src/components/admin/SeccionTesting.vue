@@ -7,6 +7,7 @@ import {
     dispararProcesamientoJornada,
     eliminarLigaComoAdministrador,
     eliminarUsuarioComoAdministrador,
+    resembrarCatalogo,
 } from '@/services/servicioAdministracion'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -22,6 +23,7 @@ const cargandoPujas = ref(false)
 const cargandoJornada = ref(false)
 const cargandoEliminacion = ref(false)
 const cargandoEliminacionUsuario = ref(false)
+const cargandoResiembra = ref(false)
 
 const ligas = ref([])
 const mercadosAbiertos = ref([])
@@ -152,6 +154,38 @@ async function manejarReprocesarJornada() {
     } finally {
         cargandoJornada.value = false
     }
+}
+
+function manejarResembrarCatalogo() {
+    confirm.require({
+        message: 'Se sobrescribirán los documentos catalogo/{pilotos,coches,potenciadores} con los datos actuales del código (atributos, pesos, precios base). Los precios dinámicos por puja se conservan. ¿Continuar?',
+        header: 'Resembrar catálogo',
+        acceptLabel: 'Sí, resembrar',
+        rejectLabel: 'Cancelar',
+        accept: async () => {
+            cargandoResiembra.value = true
+            ultimoResultado.value = null
+            try {
+                const datos = await resembrarCatalogo()
+                ultimoResultado.value = datos
+                toast.add({
+                    severity: 'success',
+                    summary: 'Catálogo actualizado',
+                    detail: `${datos.pilotosSembrados} pilotos · ${datos.cochesSembrados} coches · ${datos.potenciadoresSembrados} potenciadores.`,
+                    life: 5000,
+                })
+            } catch (error) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error resembrando catálogo',
+                    detail: error.message,
+                    life: 6000,
+                })
+            } finally {
+                cargandoResiembra.value = false
+            }
+        },
+    })
 }
 
 function manejarEliminarUsuario() {
@@ -288,6 +322,25 @@ function manejarEliminarLiga() {
                             placeholder="Selecciona una liga" filter class="flex-1" />
                         <Button @click="manejarReprocesarJornada" :loading="cargandoJornada" label="Reprocesar jornada"
                             size="small" class="!bg-white !border-white !text-black" />
+                    </div>
+                </template>
+            </Card>
+
+            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800 lg:col-span-2">
+                <template #title>
+                    <span class="text-sm">Resembrar catálogo</span>
+                </template>
+                <template #content>
+                    <p class="text-xs text-zinc-400 mb-3">
+                        Sobrescribe los documentos <code>catalogo/pilotos</code>, <code>catalogo/coches</code>
+                        y <code>catalogo/potenciadores</code> en Firestore con los datos actuales del
+                        código fuente (<code>catalogoBase.js</code>). Útil tras cambiar atributos, pesos
+                        de perfiles de puntuación o precios base. Los precios dinámicos generados por
+                        las pujas se conservan en el documento <code>catalogo/precios_pilotos</code>.
+                    </p>
+                    <div class="flex justify-end">
+                        <Button @click="manejarResembrarCatalogo" :loading="cargandoResiembra"
+                            label="Resembrar catálogo" size="small" class="!bg-white !border-white !text-black" />
                     </div>
                 </template>
             </Card>

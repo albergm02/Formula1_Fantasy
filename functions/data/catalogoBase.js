@@ -21,7 +21,7 @@ const pilotosBase = [
   { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes', imagen: '/Pilotos/antonelli.webp',  atributos: { ritmo: 90, consistencia: 84, adaptabilidad: 88, agresividad: 86, gestion: 76 } },
 
   /* ══════════ ASTON MARTIN ══════════ */
-  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 80, consistencia: 86, adaptabilidad: 66, agresividad: 87, gestion: 93 } },
+  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', imagen: '/Pilotos/alonso.webp',     atributos: { ritmo: 71, consistencia: 86, adaptabilidad: 85, agresividad: 87, gestion: 93 } },
   { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', imagen: '/Pilotos/stroll.webp',     atributos: { ritmo: 50, consistencia: 42, adaptabilidad: 58, agresividad: 78, gestion: 46 } },
 
   /* ══════════ WILLIAMS ══════════ */
@@ -98,7 +98,7 @@ const potenciadoresBase = [
 // prettier-ignore
 const perfilesPuntuacion = {
   qualy: {
-    pesos: { ritmo: 0.45, consistencia: 0.2, adaptabilidad: 0.05, agresividad: 0.25, gestion: 0.05 },
+    pesos: { ritmo: 0.5, consistencia: 0, adaptabilidad: 0, agresividad: 0.5, gestion: 0 },
     reglasUsuario: [
       'Factor según posición en clasificación:',
       'P1 – P3 → ×1.50',
@@ -110,7 +110,7 @@ const perfilesPuntuacion = {
     ],
   },
   carrera: {
-    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0.05, agresividad: 0.1, gestion: 0.25 },
+    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.4 },
     reglasUsuario: [
       'Factor según posición final en carrera:',
       'P1 → ×1.50',
@@ -125,7 +125,7 @@ const perfilesPuntuacion = {
     ],
   },
   todo_terreno: {
-    pesos: { ritmo: 0.1, consistencia: 0.15, adaptabilidad: 0.45, agresividad: 0.2, gestion: 0.1 },
+    pesos: { ritmo: 0.1, consistencia: 0.1, adaptabilidad: 0.6, agresividad: 0.1, gestion: 0.1 },
     reglasUsuario: [
       'Factor base según el clima:',
       'Lluvia → 1.00 | Sin lluvia → 0.50',
@@ -145,7 +145,7 @@ const perfilesPuntuacion = {
     ],
   },
   remontador: {
-    pesos: { ritmo: 0.25, consistencia: 0, adaptabilidad: 0.1, agresividad: 0.55, gestion: 0.1 },
+    pesos: { ritmo: 0.2, consistencia: 0, adaptabilidad: 0.4, agresividad: 0.4, gestion: 0 },
     reglasUsuario: [
       'Factor según diferencial de adelantamientos (OpenF1 /overtakes):',
       'diferencial = adelantamientos realizados − recibidos',
@@ -155,7 +155,7 @@ const perfilesPuntuacion = {
     ],
   },
   estratega: {
-    pesos: { ritmo: 0.05, consistencia: 0.3, adaptabilidad: 0.15, agresividad: 0, gestion: 0.5 },
+    pesos: { ritmo: 0.1, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.5 },
     reglasUsuario: [
       'Factor compuesto por gestión, paradas y posición:',
       'Base: 0.70',

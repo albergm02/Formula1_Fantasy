@@ -1,14 +1,3 @@
-/**
- * Determina si la jornada actual de F1 ya ha comenzado para bloquear
- * acciones del usuario (equipar cartas, ejecutar cláusulas).
- *
- * Política conservadora: arranca BLOQUEADA y sólo se desbloquea cuando
- * OpenF1 confirma que el próximo Gran Premio aún no ha comenzado.
- * Cualquier fallo de red, CORS o restricción ("Live F1 session in progress")
- * mantiene el bloqueo activo.
- *
- * @returns {{ jornadaIniciada: import('vue').Ref<boolean>, mensajeBloqueoJornada: string }}
- */
 import { ref, onMounted, onUnmounted } from 'vue'
 import { obtenerSiguienteGranPremio } from '@/services/servicioOpenF1'
 

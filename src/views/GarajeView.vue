@@ -186,8 +186,9 @@ const confirmarInversionClausula = async () => {
 
   <main class="flex flex-col w-full max-w-sm mx-auto mt-4 mb-24 px-3 gap-6">
 
+    <!-- Mensaje de bloqueo de jornada en caso de que ya haya comenzado -->
     <div v-if="jornadaIniciada"
-      class="px-3 py-2 bg-emerald-900/20 border border-emerald-500/50 text-[10px] font-black uppercase tracking-widest text-emerald-400 text-center">
+      class="px-3 py-2 bg-yellow-900/20 text-[10px] font-black uppercase tracking-widest text-yellow-400 text-center">
       {{ mensajeBloqueoJornada }}
     </div>
 
@@ -244,16 +245,15 @@ const confirmarInversionClausula = async () => {
 
     <!-- ─────────────── PILOTOS ─────────────── -->
     <section>
-      <header class="flex items-center gap-2 mb-2 px-1">
-        <i class="pi pi-users text-sm text-white"></i>
+      <header class="flex items-center gap-2 mb-2">
+        <div class="flex-1 h-px bg-zinc-700"></div>
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Pilotos</h2>
-        <span
-          class="px-1.5 py-0.5 border text-[9px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
-          {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
-        </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </header>
-
+      <span
+        class="align-center border text-[9px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
+        {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
+      </span>
       <div v-if="storeEscuderia.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
         <article v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col bg-[#121218] border border-zinc-800">
@@ -345,7 +345,7 @@ const confirmarInversionClausula = async () => {
             {{ elementoProtegiendo.nombre }}
           </span>
           <span class="text-[10px] text-zinc-400">
-            Cláusula actual: {{ calcularPrecioClausula(elementoProtegiendo).toFixed(1) }}M
+            Cláusula actual: {{ calcularPrecioClausula(elementoProtegiendo).toFixed(2) }}M
           </span>
         </div>
 
@@ -357,7 +357,7 @@ const confirmarInversionClausula = async () => {
             :minFractionDigits="1" :maxFractionDigits="1" inputClass="!bg-black !text-white !border-zinc-700 w-full"
             class="w-full" />
           <span class="text-[10px] text-zinc-500">
-            Nueva cláusula: {{ (calcularPrecioClausula(elementoProtegiendo) + cantidadInversion * 2).toFixed(1) }}M
+            Nueva cláusula: {{ (calcularPrecioClausula(elementoProtegiendo) + cantidadInversion * 2).toFixed(2) }}M
           </span>
         </div>
 

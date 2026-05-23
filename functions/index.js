@@ -34,6 +34,8 @@ const {
   cargarPreciosPilotos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,
+  sembrarCatalogoEnFirestore,
+  invalidarCacheCatalogo,
 } = require('./mercadoServer')
 
 initializeApp()
@@ -706,6 +708,25 @@ exports.dispararJornadaSemanalManual = onCall({ region: 'europe-west1' }, async 
   const { forzar = false, idLiga = null } = request.data || {}
   const resultado = await ejecutarProcesarJornada({ forzar, idLiga })
   return resultado
+})
+
+/**
+ * Callable — re-siembra el catálogo (pilotos, coches, potenciadores) en
+ * Firestore con los datos actuales de `catalogoBase.js`. Sobrescribe los
+ * documentos `catalogo/pilotos`, `catalogo/coches` y `catalogo/potenciadores`,
+ * e invalida la cache en memoria de las Cloud Functions. Útil tras cambiar
+ * atributos, pesos o precios base en el código fuente.
+ */
+exports.resembrarCatalogoManual = onCall({ region: 'europe-west1' }, async (request) => {
+  await exigirAdministrador(request)
+  const resultado = await sembrarCatalogoEnFirestore(db)
+  invalidarCacheCatalogo()
+  return {
+    ok: true,
+    pilotosSembrados: resultado.pilotos.length,
+    cochesSembrados: resultado.coches.length,
+    potenciadoresSembrados: resultado.potenciadores.length,
+  }
 })
 
 /**

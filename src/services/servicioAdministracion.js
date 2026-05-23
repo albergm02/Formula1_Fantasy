@@ -16,6 +16,7 @@ const llamadaPujas = httpsCallable(functions, 'dispararResolucionPujasManual')
 const llamadaJornada = httpsCallable(functions, 'dispararJornadaSemanalManual')
 const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLigaManual')
 const llamadaEliminarUsuario = httpsCallable(functions, 'eliminarUsuarioManual')
+const llamadaResembrarCatalogo = httpsCallable(functions, 'resembrarCatalogoManual')
 
 /**
  * Dispara la resolución de pujas y cierre de un mercado concreto.
@@ -66,5 +67,17 @@ export async function eliminarLigaComoAdministrador(idLiga) {
  */
 export async function eliminarUsuarioComoAdministrador(email) {
   const respuesta = await llamadaEliminarUsuario({ email })
+  return respuesta.data
+}
+
+/**
+ * Re-siembra el catálogo completo (pilotos, coches, potenciadores) en
+ * Firestore con los datos actuales de `catalogoBase.js` del backend.
+ * Sobrescribe los documentos `catalogo/{pilotos|coches|potenciadores}`
+ * e invalida la cache en memoria de las Cloud Functions.
+ * @returns {Promise<Object>} { ok, pilotosSembrados, cochesSembrados, potenciadoresSembrados }
+ */
+export async function resembrarCatalogo() {
+  const respuesta = await llamadaResembrarCatalogo()
   return respuesta.data
 }
