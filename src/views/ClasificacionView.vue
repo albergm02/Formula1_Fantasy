@@ -84,7 +84,7 @@ onMounted(async () => {
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
 
-    <main class="flex flex-col w-full max-w-md mx-auto mt-4 p-4 gap-4">
+    <main class="flex flex-col w-full max-w-lg mx-auto mt-4 p-4 gap-4">
 
       <div class="flex justify-center pb-2 border-b border-[#FFFFFF]/50">
         <h2 class="text-2xl font-black uppercase text-white">Clasificación general</h2>

@@ -91,18 +91,18 @@ const salir = async () => {
             <img src="/logo.png" alt="Logo F1" class="w-20 h-20 object-contain" />
 
             <div class="flex flex-col gap-2">
-                <h1 class="text-2xl font-black uppercase tracking-widest text-[#E10600]">Verifica tu correo</h1>
-                <p class="text-[#F0ECEC] text-sm leading-relaxed">
+                <h1 class="text-2xl font-black uppercase text-[#E10600]">Verifica tu correo</h1>
+                <p class="text-[#F0ECEC] text-sm">
                     Te hemos enviado un enlace de verificación. Ábrelo desde tu correo para acceder a la aplicación.
                 </p>
                 <p class="text-[#a1a1aa] text-xs">Revisa también la carpeta de spam.</p>
             </div>
 
             <div class="flex flex-col gap-3 w-full">
-                <Button label="Ya lo verifiqué" icon="pi pi-check-circle" class="w-full" :loading="cargandoComprobacion"
+                <Button label="Ya lo verifiqué" class="w-full" :loading="cargandoComprobacion"
                     @click="comprobarVerificacion" />
-                <Button label="Reenviar correo" icon="pi pi-envelope" severity="secondary" class="w-full"
-                    :loading="cargandoReenvio" @click="reenviarCorreo" />
+                <Button label="Reenviar correo" severity="secondary" class="w-full" :loading="cargandoReenvio"
+                    @click="reenviarCorreo" />
                 <Button label="Volver al inicio" icon="pi pi-sign-out" severity="secondary" variant="text"
                     class="w-full" @click="salir" />
             </div>

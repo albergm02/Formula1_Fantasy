@@ -12,6 +12,7 @@ import {
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Select from 'primevue/select'
+import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -30,6 +31,7 @@ const mercadosAbiertos = ref([])
 const usuarios = ref([])
 const ligaParaPujas = ref(null)
 const ligaParaJornada = ref(null)
+const meetingKeyJornada = ref('')
 const ligaAEliminar = ref(null)
 const usuarioAEliminar = ref(null)
 const ultimoResultado = ref(null)
@@ -123,7 +125,8 @@ async function manejarReprocesarJornada() {
     cargandoJornada.value = true
     ultimoResultado.value = null
     try {
-        const datos = await dispararProcesamientoJornada({ forzar: true, idLiga: liga.id })
+        const meetingKey = meetingKeyJornada.value ? Number(meetingKeyJornada.value) : null
+        const datos = await dispararProcesamientoJornada({ forzar: true, idLiga: liga.id, meetingKey })
         ultimoResultado.value = datos
         if (datos.ok) {
             toast.add({
@@ -317,11 +320,17 @@ function manejarEliminarLiga() {
                         No afecta a otras ligas ni al documento global de la jornada. Útil para
                         verificar cambios en la fórmula de puntuación sobre una liga activa concreta.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <Select v-model="ligaParaJornada" :options="ligas" optionLabel="nombre" optionValue="id"
-                            placeholder="Selecciona una liga" filter class="flex-1" />
-                        <Button @click="manejarReprocesarJornada" :loading="cargandoJornada" label="Reprocesar jornada"
-                            size="small" class="!bg-white !border-white !text-black" />
+                    <div class="flex flex-col gap-2">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <Select v-model="ligaParaJornada" :options="ligas" optionLabel="nombre" optionValue="id"
+                                placeholder="Selecciona una liga" filter class="flex-1" />
+                            <Button @click="manejarReprocesarJornada" :loading="cargandoJornada"
+                                label="Reprocesar jornada" size="small" class="!bg-white !border-white !text-black" />
+                        </div>
+                        <InputText v-model="meetingKeyJornada" placeholder="Meeting key (opcional, ej: 1254 para Japón)"
+                            class="w-full text-xs" size="small" />
+                        <p class="text-[10px] text-zinc-500">Deja vacío para usar el último GP finalizado. Especifica el
+                            meeting_key para forzar un GP concreto (útil cuando ya ha empezado el siguiente).</p>
                     </div>
                 </template>
             </Card>

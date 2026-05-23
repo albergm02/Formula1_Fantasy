@@ -72,15 +72,21 @@ const confirmarEliminarPuja = () => {
         <img v-if="props.piloto.imagen" :src="props.piloto.imagen" :alt="props.piloto.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Badges superiores (precio + total pujas) -->
-        <div v-if="modoMercado" class="absolute top-20 right-3 z-10 flex items-center gap-1.5">
-          <div v-if="totalPujas > 0"
+        <!-- Columna superior derecha: variante + precio + pujas -->
+        <div class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
+          <span class="px-2 py-1 flex items-center gap-1 text-[8px] font-black uppercase bg-black/70 border"
+            :style="{ color: props.piloto.colorVariante, borderColor: props.piloto.colorVariante }">
+            <i class="pi" :class="props.piloto.iconoVariante"></i>
+            {{ props.piloto.variante }}
+          </span>
+          <div v-if="modoMercado" class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
+            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.piloto.precio).toFixed(2) }}
+              M</span>
+          </div>
+          <div v-if="modoMercado && totalPujas > 0"
             class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
             <i class="pi pi-users text-[8px] text-zinc-300"></i>
             <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
-          </div>
-          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
-            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.piloto.precio).toFixed(2) }} M</span>
           </div>
         </div>
 
@@ -97,15 +103,6 @@ const confirmarEliminarPuja = () => {
                 {{ props.piloto.equipo }}
               </span>
             </div>
-          </div>
-
-          <!-- Badge variante -->
-          <div class="flex mt-7">
-            <span class="px-2 py-1 flex items-center gap-1 text-[8px] font-black uppercase bg-black/50"
-              :style="{ color: props.piloto.colorVariante, borderColor: props.piloto.colorVariante }">
-              <i class="pi" :class="props.piloto.iconoVariante"></i>
-              {{ props.piloto.variante }}
-            </span>
           </div>
 
           <!-- Botones: Info + Pujar -->
@@ -202,7 +199,7 @@ const confirmarEliminarPuja = () => {
           CONFIRMAR PUJA
         </button>
         <button v-if="miPuja != null" @click="confirmarEliminarPuja"
-          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 cursor-pointer text-white uppercase font-black">ELIMINAR
+          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 text-white uppercase font-black">ELIMINAR
           PUJA
         </button>
       </div>

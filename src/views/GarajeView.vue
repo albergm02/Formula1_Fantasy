@@ -173,10 +173,10 @@ const confirmarInversionClausula = async () => {
   )
 
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Protección aumentada', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: 'Cláusula aumentada.', detail: resultado.message })
     dialogoProteccion.value = false
   } else {
-    notificacion.add({ severity: 'warn', summary: 'Inversión denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Cláusula no aumentada.', detail: resultado.message })
   }
 }
 </script>
@@ -184,7 +184,7 @@ const confirmarInversionClausula = async () => {
 <template>
   <Cabecera />
 
-  <main class="flex flex-col w-full max-w-sm mx-auto mt-4 mb-24 px-3 gap-6">
+  <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-24 px-3 gap-6">
 
     <!-- Mensaje de bloqueo de jornada en caso de que ya haya comenzado -->
     <div v-if="jornadaIniciada"
@@ -197,7 +197,11 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Chásis</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
+        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black">
+          {{storeEscuderia.garaje.coches.filter((c) => c.equipado).length}} titulares
+        </span>
       </header>
+
 
       <div v-if="storeEscuderia.garaje.coches.length > 0" class="grid grid-cols-1 gap-3">
         <article v-for="coche in storeEscuderia.garaje.coches" :key="coche.instancia_id"
@@ -249,17 +253,16 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
+        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black">
+          {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
+        </span>
       </header>
-      <span
-        class="align-center border text-[9px] font-black uppercase tracking-widest text-emerald-400 border-emerald-500/50">
-        {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
-      </span>
       <div v-if="storeEscuderia.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
         <article v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col bg-[#121218] border border-zinc-800">
           <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
 
-          <!-- Información clara del piloto -->
+          <!-- Información del piloto -->
           <div class="flex flex-col gap-2 px-3 py-2 border-t border-zinc-800/70">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
               <span class="text-zinc-400">
@@ -295,21 +298,19 @@ const confirmarInversionClausula = async () => {
       </div>
 
       <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
-        <i class="pi pi-users mb-2 text-2xl text-zinc-600"></i>
-        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Asientos Vacíos</span>
+        <span class="text-[10px] font-black uppercase text-zinc-500">Asientos vacíos</span>
       </div>
     </section>
 
     <!-- ─────────────── POTENCIADORES ─────────────── -->
     <section>
       <header class="flex items-center gap-2 mb-2 px-1">
-        <i class="pi pi-bolt text-sm text-white"></i>
-        <h2 class="text-xs font-black uppercase tracking-widest text-white">Potenciadores</h2>
-        <span
-          class="px-1.5 py-0.5 border text-[9px] font-black uppercase tracking-widest text-amber-400 border-amber-500/50">
-          {{storeEscuderia.garaje.potenciadores.filter((p) => p.equipado).length}} activos
-        </span>
         <div class="flex-1 h-px bg-zinc-700"></div>
+        <h2 class="text-xs font-black uppercase tracking-widest text-white">Potenciadores</h2>
+        <div class="flex-1 h-px bg-zinc-700"></div>
+        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black">
+          {{storeEscuderia.garaje.potenciadores.filter((p) => p.equipado).length}} instalados
+        </span>
       </header>
 
       <div v-if="storeEscuderia.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-3">
@@ -329,8 +330,7 @@ const confirmarInversionClausula = async () => {
       </div>
 
       <div v-else class="flex flex-col items-center justify-center p-8 bg-[#1A1A1F]/50 border border-zinc-800/50">
-        <i class="pi pi-box mb-2 text-2xl text-zinc-600"></i>
-        <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sin Mejoras Compradas</span>
+        <span class="text-[10px] font-black uppercase text-zinc-500">Sin mejoras</span>
       </div>
     </section>
 

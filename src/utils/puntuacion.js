@@ -19,7 +19,7 @@ export function calcularFactorJornada(actuacion, condiciones, variante) {
   if (variante === 'todo_terreno') return acotarFactor(calcularFactorTodoTerreno(condiciones))
   if (variante === 'remontador') return acotarFactor(calcularFactorRemontador(actuacion))
   if (variante === 'estratega') {
-    return acotarFactor(calcularFactorEstrategia(actuacion, condiciones))
+    return acotarFactor(calcularFactorEstrategia(actuacion))
   }
 
   const factorQ = calcularFactorQualy(actuacion)
@@ -86,23 +86,18 @@ function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
   return 1 + diferencial * 0.1
 }
 
-function calcularFactorEstrategia(
-  { posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 },
-  condiciones,
-) {
+function calcularFactorEstrategia({
+  posicionCarrera,
+  numeroPitStops,
+  porcentajeStintMaximo = 0.5,
+  dnf = false,
+}) {
   let factor = 0.7
-  factor += resolverBonusGestionStint(porcentajeStintMaximo)
+  if (!dnf) {
+    factor += resolverBonusGestionStint(porcentajeStintMaximo)
+  }
   factor += resolverBonusEstrategiaParadas(numeroPitStops)
   factor += resolverBonusPosicionEstratega(posicionCarrera)
-
-  if (condiciones) {
-    let bonusCaos = 0
-    bonusCaos += (condiciones.numeroSafetyCarActivos || 0) * 0.05
-    bonusCaos += (condiciones.numeroVirtualSafetyCarActivos || 0) * 0.025
-    if (bonusCaos > 0.15) bonusCaos = 0.15
-    factor += bonusCaos
-  }
-
   return factor
 }
 
@@ -128,7 +123,7 @@ function resolverFactorPosicionCarrera(posicion) {
 }
 
 function resolverBonusGestionStint(porcentajeStintMaximo) {
-  if (porcentajeStintMaximo >= 0.6) return 0.45
+  if (porcentajeStintMaximo >= 0.6) return 0.5
   if (porcentajeStintMaximo >= 0.45) return 0.3
   if (porcentajeStintMaximo >= 0.35) return 0.2
   if (porcentajeStintMaximo >= 0.25) return 0.1

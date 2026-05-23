@@ -52,15 +52,15 @@ const confirmarEliminarPuja = () => {
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Badges superiores (precio + total pujas) -->
-        <div v-if="modoMercado" class="absolute top-20 right-3 z-10 flex items-center gap-1.5">
+        <!-- Columna superior derecha: precio + pujas -->
+        <div v-if="modoMercado" class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
+          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
+            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.coche.precio).toFixed(2) }} M</span>
+          </div>
           <div v-if="totalPujas > 0"
             class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
             <i class="pi pi-users text-[8px] text-zinc-300"></i>
             <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
-          </div>
-          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
-            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.coche.precio).toFixed(2) }} M</span>
           </div>
         </div>
 

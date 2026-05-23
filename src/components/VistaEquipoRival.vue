@@ -75,9 +75,9 @@ const confirmarEjecucionClausula = (elemento) => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-6 p-4">
+    <div class="flex flex-col gap-6 p-4 max-w-lg mx-auto ">
         <div v-if="jornadaIniciada"
-            class="px-3 py-2 bg-emerald-900/20 border border-emerald-500/50 text-[10px] font-black uppercase tracking-widest text-emerald-400 text-center">
+            class="px-3 py-2 bg-yellow-900/20 text-[10px] font-black uppercase tracking-widest text-yellow-400 text-center">
             {{ mensajeBloqueoJornada }}
         </div>
         <div class="flex items-center justify-between border-b border-zinc-700 pb-3">
@@ -124,7 +124,7 @@ const confirmarEjecucionClausula = (elemento) => {
                         </div>
                         <span v-if="estaEnPeriodoDeGracia(coche)"
                             class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[9px] font-bold uppercase text-emerald-400">
-                            Protegida · {{ horasRestantesDeGracia(coche) }}h
+                            Protegida - {{ horasRestantesDeGracia(coche) }}h
                         </span>
                     </div>
                     <Button :label="`FICHAR ${calcularPrecioClausula(coche).toFixed(1)}M`" icon="pi pi-shield"
@@ -151,7 +151,7 @@ const confirmarEjecucionClausula = (elemento) => {
                         </div>
                         <span v-if="estaEnPeriodoDeGracia(piloto)"
                             class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/50 text-[9px] font-bold uppercase text-emerald-400">
-                            Protegida · {{ horasRestantesDeGracia(piloto) }}h
+                            Protegida - {{ horasRestantesDeGracia(piloto) }}h
                         </span>
                     </div>
                     <Button :label="`FICHAR ${calcularPrecioClausula(piloto).toFixed(1)}M`" icon="pi pi-shield"

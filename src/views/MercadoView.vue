@@ -85,7 +85,6 @@ const manejarEliminarPuja = async (carta) => {
 
     <!-- Sin mercado abierto -->
     <div v-else-if="!storeMercado.hayMercadoAbierto" class="flex flex-col items-center gap-3 py-20 text-zinc-400">
-      <i class="pi pi-shop text-4xl"></i>
       <p class="text-sm">No hay mercado abierto en este momento.</p>
     </div>
 
@@ -93,20 +92,15 @@ const manejarEliminarPuja = async (carta) => {
     <template v-else>
 
       <!-- Cuenta atrás hasta el cierre -->
-      <section class="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3">
+      <section class="flex items-center justify-between bg-zinc-900 border border-zinc-700 px-4 py-3">
         <div class="flex items-center gap-2">
-          <i class="pi pi-clock text-amber-400"></i>
-          <span class="text-xs font-semibold uppercase tracking-widest text-zinc-300">Cierre del mercado</span>
+          <span class="text-xs uppercase tracking-widest text-zinc-300">Cierre del mercado</span>
         </div>
-        <span class="text-sm font-mono font-bold text-amber-400">{{ storeMercado.textoCuentaAtras }}</span>
+        <span class="text-sm text-amber-400">{{ storeMercado.textoCuentaAtras }}</span>
       </section>
 
 
       <section class="flex flex-col gap-4">
-        <div class="flex items-center gap-3">
-          <h2 class="text-sm font-black uppercase tracking-widest text-white">Coches</h2>
-          <div class="flex-1 h-px bg-zinc-700"></div>
-        </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
             :miPuja="storeMercado.misPujas[coche.id] || null"
@@ -115,12 +109,10 @@ const manejarEliminarPuja = async (carta) => {
         </div>
       </section>
 
+      <div class="flex-1 h-px bg-zinc-700 border-t border-zinc-700"></div>
+
 
       <section class="flex flex-col gap-4">
-        <div class="flex items-center gap-3">
-          <h2 class="text-sm font-black uppercase tracking-widest text-white">Pilotos</h2>
-          <div class="flex-1 h-px bg-zinc-700"></div>
-        </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto"
             :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
@@ -129,12 +121,9 @@ const manejarEliminarPuja = async (carta) => {
         </div>
       </section>
 
+      <div class="flex-1 h-px bg-zinc-700 border-t border-zinc-700"></div>
 
       <section class="flex flex-col gap-4">
-        <div class="flex items-center gap-3">
-          <h2 class="text-sm font-black uppercase tracking-widest text-white">Potenciadores</h2>
-          <div class="flex-1 h-px bg-zinc-700"></div>
-        </div>
         <div class="grid grid-cols-1 gap-4">
           <TarjetaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
             :potenciador="potenciador" :modoMercado="true" :miPuja="storeMercado.misPujas[potenciador.id] || null"

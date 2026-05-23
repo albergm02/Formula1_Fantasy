@@ -159,10 +159,10 @@ const perfilesPuntuacion = {
     reglasUsuario: [
       'Factor compuesto por gestión, paradas y posición:',
       'Base: 0.70',
-      'Stint ≥ 60% → +0.45 | ≥ 45% → +0.30 | ≥ 35% → +0.20 | ≥ 25% → +0.10',
+      'Stint ≥ 60% → +0.50 | ≥ 45% → +0.30 | ≥ 35% → +0.20 | ≥ 25% → +0.10',
+      'DNF → no puntua el stint',
       '1 parada → +0.15 | 2 paradas → +0.05 | 3+ → +0.00',
       'Posición: P1–P3 +0.15 | P4–P10 +0.05 | P16+ −0.10',
-      'Cada SC → +0.05 | Cada VSC → +0.025 (máx +0.15)',
       'Factor acotado al rango 0.50 – 1.50.',
     ],
   },

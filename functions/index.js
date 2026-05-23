@@ -111,17 +111,25 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
  * @returns {Promise<Object>} Resumen del resultado.
  */
 async function ejecutarProcesarJornada(opciones = {}) {
-  const { forzar = false, idLiga = null } = opciones
+  const { forzar = false, idLiga = null, meetingKey: meetingKeyForzado = null } = opciones
   const reprocesoPorLiga = Boolean(idLiga)
 
   // Buscamos el GP más reciente con datos disponibles en OpenF1.
   // Algunos GPs pueden estar marcados como finalizados pero no tener datos
   // (cancelados por fuerza mayor, sin /position publicado, etc.). Iteramos
   // hacia atrás hasta encontrar uno válido o agotar la lista.
-  const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
+  let candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
   if (candidatos.length === 0) {
     console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
     return { ok: false, motivo: 'sin_gp_finalizado' }
+  }
+
+  // Si se especifica un meeting_key concreto, filtramos para procesar solo ese GP.
+  if (meetingKeyForzado) {
+    candidatos = candidatos.filter((c) => c.meeting_key === meetingKeyForzado)
+    if (candidatos.length === 0) {
+      return { ok: false, motivo: 'meeting_key_no_encontrado', meetingKey: meetingKeyForzado }
+    }
   }
 
   let granPremio = null
@@ -261,6 +269,22 @@ async function ejecutarProcesarJornada(opciones = {}) {
       actuacionesPorPiloto,
       desglose: desgloseJornada,
     })
+  } else if (forzar) {
+    // Reproceso por liga forzado: refrescamos los campos no dependientes de
+    // liga (actuaciones y condiciones) para que NoticiasJornadaView muestre
+    // los datos recién calculados con las fórmulas actualizadas.
+    batch.set(
+      db.collection('jornadas').doc(idJornada),
+      {
+        meetingKey: granPremio.meeting_key,
+        nombreGranPremio: granPremio.meeting_name,
+        fechaProcesamiento: new Date().toISOString(),
+        temporada: TEMPORADA_ACTUAL,
+        condiciones,
+        actuacionesPorPiloto,
+      },
+      { merge: true },
+    )
   }
 
   await batch.commit()
@@ -444,16 +468,14 @@ async function resolverPujasMercado(idMercado) {
           }
 
       if (tipoCarta === 'coche') {
-        const hayEquipado = garaje.coches.some((c) => c.equipado)
-        garaje.coches.push({ ...cartaGanada, equipado: !hayEquipado })
+        garaje.coches.push({ ...cartaGanada, equipado: false })
       } else if (tipoCarta === 'piloto') {
-        const pilotosEquipados = (garaje.pilotos || []).filter((p) => p.equipado).length
-        garaje.pilotos = [
-          ...(garaje.pilotos || []),
-          { ...cartaGanada, equipado: pilotosEquipados < 2 },
-        ]
+        garaje.pilotos = [...(garaje.pilotos || []), { ...cartaGanada, equipado: false }]
       } else if (tipoCarta === 'potenciador') {
-        garaje.potenciadores = [...(garaje.potenciadores || []), cartaGanada]
+        garaje.potenciadores = [
+          ...(garaje.potenciadores || []),
+          { ...cartaGanada, equipado: false },
+        ]
       }
 
       presupuestoRestante -= cantidad
@@ -705,8 +727,8 @@ exports.dispararResolucionPujasManual = onCall({ region: 'europe-west1' }, async
  */
 exports.dispararJornadaSemanalManual = onCall({ region: 'europe-west1' }, async (request) => {
   await exigirAdministrador(request)
-  const { forzar = false, idLiga = null } = request.data || {}
-  const resultado = await ejecutarProcesarJornada({ forzar, idLiga })
+  const { forzar = false, idLiga = null, meetingKey = null } = request.data || {}
+  const resultado = await ejecutarProcesarJornada({ forzar, idLiga, meetingKey })
   return resultado
 })
 

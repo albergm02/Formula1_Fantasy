@@ -34,7 +34,7 @@ onMounted(async () => {
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
     <!-- Contenido principal: widgets de stats y próximo GP -->
-    <main class="flex flex-col w-full max-w-md mx-auto mt-2 p-4 gap-6">
+    <main class="flex flex-col w-full max-w-lg mx-auto mt-2 p-4 gap-6">
       <WidgetEstadisticasUsuario />
       <WidgetGranPremio />
       <WidgetDesgloseJornada />

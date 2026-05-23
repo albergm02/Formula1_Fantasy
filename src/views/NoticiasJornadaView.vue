@@ -95,7 +95,7 @@ onMounted(async () => {
     try {
         catalogoPilotos.value = await cargarCatalogoPilotos()
     } catch (error) {
-        console.warn('No se pudo cargar el catálogo de pilotos:', error.message)
+        console.warn('No se ha podido cargar el catálogo de pilotos:', error.message)
     }
 
     // Nos suscribimos al historial de jornadas para mostrar la más reciente y permitir navegar por las anteriores si estas existen.
@@ -112,7 +112,7 @@ onMounted(async () => {
             try {
                 ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
             } catch (error) {
-                console.warn('No se pudo recuperar el último GP de OpenF1:', error.message)
+                console.warn('No se ha podido recuperar el último GP de OpenF1:', error.message)
             }
         }
     })
@@ -200,6 +200,7 @@ function obtenerSimulacionVariantes(piloto) {
 }
 
 
+// Muestro estados si son necesarios en caso de DSQ, DNS o DNF.
 function obtenerEstadoCarrera(actuacion) {
     if (actuacion?.dsq) return 'DSQ'
     if (actuacion?.dns) return 'DNS'
@@ -207,6 +208,7 @@ function obtenerEstadoCarrera(actuacion) {
     return null
 }
 
+// Porcentaje para el stint más largo, usado en la variante estratega.
 function formatearPorcentaje(valor) {
     if (valor == null || valor === 0) return '—'
     return `${Math.round(valor * 100)}%`
@@ -220,14 +222,13 @@ function formatearPorcentaje(valor) {
         <main class="flex flex-col w-full max-w-3xl mx-auto mt-2 p-4 gap-4">
             <!-- Cargando -->
             <div v-if="cargando" class="flex justify-center py-16">
-                <ProgressSpinner stroke-width="3" />
+                <span class="ml-4 text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</span>
             </div>
 
             <!-- Sin jornada -->
             <div v-else-if="!hayJornada" class="flex flex-col gap-3">
                 <Message severity="info" :closable="false">
-                    Aún no hay ninguna jornada procesada. Los datos se publican automáticamente cada
-                    lunes tras el Gran Premio.
+                    No hay ninguna jornada procesada.
                 </Message>
 
                 <div v-if="ultimoGranPremioPendiente"
@@ -235,7 +236,7 @@ function formatearPorcentaje(valor) {
                     <div class="flex items-center gap-2">
                         <i class="pi pi-clock text-[#D4A843]"></i>
                         <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">
-                            Último Gran Premio celebrado
+                            Último Gran Premio celebrado.
                         </span>
                     </div>
                     <div class="flex items-center gap-3">
@@ -272,7 +273,6 @@ function formatearPorcentaje(valor) {
             <div v-if="!cargando" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
                 <button type="button" @click="alternarGuia"
                     class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
-                    <i class="pi pi-book text-[#D4A843] text-base"></i>
                     <div class="flex-1 flex flex-col">
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                             Guía rápida
@@ -285,20 +285,22 @@ function formatearPorcentaje(valor) {
                 </button>
 
                 <div v-if="guiaAbierta" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-2">
-                    <p class="text-[11px] text-zinc-400 leading-relaxed">
+                    <p class="text-[11px] text-zinc-400">
                         Cada carta tiene una <span class="text-white font-bold">puntuación base</span>
-                        (suma ponderada de los atributos del piloto) y un
+                        (suma ponderada de los atributos del piloto que dependiente de su clase) y un
                         <span class="text-white font-bold">factor de peso de jornada,</span> que depende de cómo le
                         fue al piloto en este Gran Premio. Los puntos finales son
                         <span class="text-white font-bold">puntuación base × factor de peso de jornada</span>.
                     </p>
 
+                    <!-- Variantes de puntuación -->
                     <div v-for="variante in VARIANTES" :key="variante.id"
                         class="bg-[#121218] border border-zinc-800 overflow-hidden">
                         <button type="button" @click="alternarVarianteGuia(variante.id)"
-                            class="w-full flex items-center gap-3 p-2.5 cursor-pointer bg-transparent border-none text-left transition-colors">
+                            class="w-full flex items-center gap-3 p-2.5 border-none text-left transition-colors">
                             <i class="pi text-base" :class="variante.icono" :style="{ color: variante.color }"></i>
-                            <span class="flex-1 text-xs font-bold text-white">{{ variante.etiqueta }}</span>
+                            <span :style="{ color: variante.color }" class="flex-1 text-xs font-bold text-white">{{
+                                variante.etiqueta }}</span>
                             <i class="pi text-zinc-500 text-[10px]"
                                 :class="varianteGuiaExpandida === variante.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
                         </button>
@@ -306,15 +308,15 @@ function formatearPorcentaje(valor) {
                         <div v-if="varianteGuiaExpandida === variante.id"
                             class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
                             <ul class="flex flex-col gap-0.5 list-none p-0 m-0">
-                                <li v-for="(regla, idx) in perfilesPuntuacion[variante.id]?.reglasUsuario || []"
-                                    :key="idx" class="text-[11px] text-zinc-300">
+                                <li v-for="(regla, idx) in perfilesPuntuacion[variante.id].reglasUsuario" :key="idx"
+                                    class="text-[11px] text-zinc-300">
                                     {{ regla }}
                                 </li>
                             </ul>
                             <div v-if="EJEMPLOS_VARIANTE[variante.id]" class="flex flex-col gap-1 p-2 bg-[#1A1A1F]"
                                 :style="{ borderColor: variante.color }">
                                 <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                                    Ejemplo
+                                    Ejemplo:
                                 </span>
                                 <span class="text-[11px] text-zinc-300">
                                     {{ EJEMPLOS_VARIANTE[variante.id].escenario }}
@@ -334,7 +336,7 @@ function formatearPorcentaje(valor) {
                 <template #content>
                     <div class="flex items-center gap-3">
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                            <span class="text-[10px] font-black uppercase text-zinc-500">
                                 Último Gran Premio
                             </span>
                             <span class="text-base font-black text-white">
@@ -385,7 +387,7 @@ function formatearPorcentaje(valor) {
 
                         <!-- Datos crudos de OpenF1 -->
                         <section class="flex flex-col gap-2">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                            <span class="text-[10px] font-black uppercase text-zinc-500">
                                 Datos recogidos por OpenF1
                             </span>
                             <!-- Resultados recogidos de openf1 -->
@@ -440,7 +442,7 @@ function formatearPorcentaje(valor) {
 
                         <!-- Simulación por variante del piloto -->
                         <section class="flex flex-col gap-2">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                            <span class="text-[10px] font-black uppercase text-zinc-500">
                                 Puntos por variante de carta
                             </span>
                             <div class="flex flex-col gap-1.5">
