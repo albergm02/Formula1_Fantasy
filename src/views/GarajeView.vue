@@ -197,12 +197,10 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Chásis</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
-        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black">
-          {{storeEscuderia.garaje.coches.filter((c) => c.equipado).length}} titulares
-        </span>
       </header>
-
-
+      <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
+        {{storeEscuderia.garaje.coches.filter((c) => c.equipado).length}} titulares
+      </span>
       <div v-if="storeEscuderia.garaje.coches.length > 0" class="grid grid-cols-1 gap-3">
         <article v-for="coche in storeEscuderia.garaje.coches" :key="coche.instancia_id"
           class="flex flex-col bg-[#121218]">
@@ -253,10 +251,10 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
-        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black">
-          {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
-        </span>
       </header>
+      <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
+        {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
+      </span>
       <div v-if="storeEscuderia.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
         <article v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col bg-[#121218] border border-zinc-800">
@@ -308,10 +306,11 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Potenciadores</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
-        <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black">
-          {{storeEscuderia.garaje.potenciadores.filter((p) => p.equipado).length}} instalados
-        </span>
       </header>
+
+      <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
+        {{storeEscuderia.garaje.potenciadores.filter((p) => p.equipado).length}} instalados
+      </span>
 
       <div v-if="storeEscuderia.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-3">
         <article v-for="potenciador in storeEscuderia.garaje.potenciadores" :key="potenciador.instancia_id"

@@ -1,22 +1,3 @@
-/**
- * Cloud Function principal — procesarJornadaGP.
- * Orquesta el cálculo de puntos de todos los participantes de todas las ligas
- * tras finalizar un Gran Premio, usando datos reales de OpenF1.
- *
- * Flujo:
- *  1. Detecta el último GP finalizado de la temporada.
- *  2. Comprueba idempotencia (colección 'jornadas').
- *  3. Recopila datos de OpenF1 (qualy, carrera, condiciones).
- *  4. Para cada participación con garaje no vacío:
- *     a. Calcula factores por piloto según variante + actuación real.
- *     b. Calcula puntos del garaje (pilotos + coche).
- *     c. Aplica sinergias.
- *     d. Suma los puntos al acumulado del participante.
- *  5. Escribe todo en batch (participaciones + documento de jornada).
- *
- * @module index
- */
-
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { initializeApp } = require('firebase-admin/app')
@@ -42,8 +23,6 @@ initializeApp()
 const db = getFirestore()
 
 const TEMPORADA_ACTUAL = 2026
-
-/* ─── Utilidades internas ───────────────────────────────────────────────── */
 
 /**
  * Convierte la puntuación total de una jornada en un premio económico (en M).

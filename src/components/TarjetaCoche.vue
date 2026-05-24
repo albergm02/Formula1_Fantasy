@@ -52,16 +52,11 @@ const confirmarEliminarPuja = () => {
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Columna superior derecha: precio + pujas -->
-        <div v-if="modoMercado" class="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
-          <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
-            <span class="text-[10px] font-black text-emerald-400">{{ Number(props.coche.precio).toFixed(2) }} M</span>
-          </div>
-          <div v-if="totalPujas > 0"
-            class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
-            <i class="pi pi-users text-[8px] text-zinc-300"></i>
-            <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
-          </div>
+        <!-- Pujas arriba a la derecha -->
+        <div v-if="modoMercado && totalPujas > 0"
+          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
+          <i class="pi pi-users text-[8px] text-zinc-300"></i>
+          <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
         </div>
 
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
@@ -73,30 +68,36 @@ const confirmarEliminarPuja = () => {
             </div>
           </div>
 
-          <div class="flex-1"></div>
+          <!-- Etiquetas de precio y botones -->
+          <div class="flex flex-col gap-1.5">
+            <!-- Precio encima del botón (solo en modo mercado) -->
+            <div v-if="modoMercado" class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 self-start">
+              <span class="text-[10px] font-black text-emerald-400">{{ Number(props.coche.precio).toFixed(2) }} M</span>
+            </div>
 
-          <!-- Botones: Detalles + Pujar -->
-          <div v-if="modoMercado" class="flex gap-2">
-            <button @click="mostrarDetalles = true"
-              class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
-              <i class="pi pi-info-circle text-white text-xs"></i>
-              <span class="text-white text-[9px] font-black uppercase">INFO</span>
-            </button>
-            <button @click="abrirPuja"
-              class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
-              <span class="text-[10px] font-black uppercase tracking-widest"
-                :class="miPuja != null ? 'text-amber-400' : 'text-white'">
-                {{ miPuja != null ? 'EDITAR PUJA' : 'PUJAR' }}
-              </span>
+            <!-- Botones: Detalles + Pujar -->
+            <div v-if="modoMercado" class="flex gap-2">
+              <button @click="mostrarDetalles = true"
+                class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
+                <i class="pi pi-info-circle text-white text-xs"></i>
+                <span class="text-white text-[9px] font-black uppercase">INFO</span>
+              </button>
+              <button @click="abrirPuja"
+                class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
+                <span class="text-[10px] font-black uppercase tracking-widest"
+                  :class="miPuja != null ? 'text-amber-400' : 'text-white'">
+                  {{ miPuja != null ? 'EDITAR PUJA' : 'PUJAR' }}
+                </span>
+              </button>
+            </div>
+
+            <!-- Botón detalles fuera de mercado -->
+            <button v-else @click="mostrarDetalles = true"
+              class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
+              <i class="pi pi-info-circle text-white text-xs mr-2"></i>
+              <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
             </button>
           </div>
-
-          <!-- Botón detalles fuera de mercado -->
-          <button v-else @click="mostrarDetalles = true"
-            class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
-            <i class="pi pi-info-circle text-white text-xs mr-2"></i>
-            <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
-          </button>
         </div>
 
       </div>
