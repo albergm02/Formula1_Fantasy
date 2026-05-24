@@ -94,8 +94,8 @@ function alternarVarianteGuia(id) {
 onMounted(async () => {
     try {
         catalogoPilotos.value = await cargarCatalogoPilotos()
-    } catch (error) {
-        console.warn('No se ha podido cargar el catálogo de pilotos:', error.message)
+    } catch {
+        catalogoPilotos.value = []
     }
 
     // Nos suscribimos al historial de jornadas para mostrar la más reciente y permitir navegar por las anteriores si estas existen.
@@ -111,8 +111,8 @@ onMounted(async () => {
         if (jornadas.length === 0 && !ultimoGranPremioPendiente.value) {
             try {
                 ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
-            } catch (error) {
-                console.warn('No se ha podido recuperar el último GP de OpenF1:', error.message)
+            } catch {
+                ultimoGranPremioPendiente.value = null
             }
         }
     })

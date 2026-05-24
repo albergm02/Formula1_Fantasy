@@ -10,7 +10,8 @@
  */
 
 import { httpsCallable } from 'firebase/functions'
-import { functions } from '@/services/servicioFirebase'
+import { collection, getDocs } from 'firebase/firestore'
+import { db, functions } from '@/services/servicioFirebase'
 
 const llamadaPujas = httpsCallable(functions, 'dispararResolucionPujasManual')
 const llamadaJornada = httpsCallable(functions, 'dispararJornadaSemanalManual')
@@ -80,4 +81,40 @@ export async function eliminarUsuarioComoAdministrador(email) {
 export async function resembrarCatalogo() {
   const respuesta = await llamadaResembrarCatalogo()
   return respuesta.data
+}
+
+/**
+ * Carga la lista de todas las ligas existentes para el panel de administración.
+ * @returns {Promise<Array<{ id: string, nombre: string }>>}
+ */
+export async function cargarListaLigas() {
+  const snap = await getDocs(collection(db, 'ligas'))
+  return snap.docs.map((d) => ({ id: d.id, nombre: d.data().nombre || d.id }))
+}
+
+/**
+ * Carga los mercados actualmente abiertos para el panel de administración.
+ * @returns {Promise<Array<{ id: string, idLiga: string, estado: string }>>}
+ */
+export async function cargarListaMercados() {
+  const snap = await getDocs(collection(db, 'mercados'))
+  return snap.docs
+    .map((d) => ({ id: d.id, idLiga: d.data().idLiga, estado: d.data().estado }))
+    .filter((m) => m.estado === 'abierto')
+}
+
+/**
+ * Carga la lista de usuarios no administradores para el panel de administración.
+ * @returns {Promise<Array<{ email: string, nombre: string, etiqueta: string }>>}
+ */
+export async function cargarListaUsuarios() {
+  const snap = await getDocs(collection(db, 'usuarios'))
+  return snap.docs
+    .map((d) => ({
+      email: d.id,
+      nombre: d.data().nombre || d.id,
+      esAdministrador: d.data().esAdministrador === true,
+    }))
+    .filter((u) => !u.esAdministrador)
+    .map((u) => ({ ...u, etiqueta: `${u.nombre} (${u.email})` }))
 }

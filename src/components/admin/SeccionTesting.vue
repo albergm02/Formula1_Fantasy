@@ -1,13 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '@/services/servicioFirebase'
 import {
     dispararResolucionPujas,
     dispararProcesamientoJornada,
     eliminarLigaComoAdministrador,
     eliminarUsuarioComoAdministrador,
     resembrarCatalogo,
+    cargarListaLigas,
+    cargarListaMercados,
+    cargarListaUsuarios,
 } from '@/services/servicioAdministracion'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -44,27 +45,15 @@ const ligasConMercadoAbierto = computed(() => {
 })
 
 async function cargarLigas() {
-    const snap = await getDocs(collection(db, 'ligas'))
-    ligas.value = snap.docs.map((d) => ({ id: d.id, nombre: d.data().nombre || d.id }))
+    ligas.value = await cargarListaLigas()
 }
 
 async function cargarMercados() {
-    const snap = await getDocs(collection(db, 'mercados'))
-    mercadosAbiertos.value = snap.docs
-        .map((d) => ({ id: d.id, idLiga: d.data().idLiga, estado: d.data().estado }))
-        .filter((m) => m.estado === 'abierto')
+    mercadosAbiertos.value = await cargarListaMercados()
 }
 
 async function cargarUsuarios() {
-    const snap = await getDocs(collection(db, 'usuarios'))
-    usuarios.value = snap.docs
-        .map((d) => ({
-            email: d.id,
-            nombre: d.data().nombre || d.id,
-            esAdministrador: d.data().esAdministrador === true,
-        }))
-        .filter((u) => !u.esAdministrador)
-        .map((u) => ({ ...u, etiqueta: `${u.nombre} (${u.email})` }))
+    usuarios.value = await cargarListaUsuarios()
 }
 
 onMounted(async () => {

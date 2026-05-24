@@ -124,9 +124,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await vincularLigaAlUsuario(correoUsuario, idLiga)
       storeAutenticacion.usuarioActual.idsLigas.push(idLiga)
 
-      inicializarMercadoLiga(idLiga).catch((error) => {
-        console.warn(`No se pudo inicializar el mercado de la liga ${idLiga}:`, error.message)
-      })
+      inicializarMercadoLiga(idLiga).catch(() => {})
 
       const storeNotificaciones = usarStoreNotificaciones()
       storeNotificaciones.registrarCreacionLiga(idLiga, nombreLiga).catch(() => {})
