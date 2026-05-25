@@ -46,9 +46,9 @@ const manejarPuja = async ({ carta, cantidad }) => {
   const resultado = await storeMercado.pujarPorCarta(carta, cantidad)
 
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Puja registrada', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: 'Puja registrada', detail: resultado.message, life: 4000 })
   } else {
-    notificacion.add({ severity: 'error', summary: 'Puja fallida', detail: resultado.message })
+    notificacion.add({ severity: 'error', summary: 'Puja fallida', detail: resultado.message, life: 5000 })
   }
 }
 
@@ -60,9 +60,9 @@ const manejarEliminarPuja = async (carta) => {
   const resultado = await storeMercado.eliminarPujaCarta(carta)
 
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Puja eliminada', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: 'Puja eliminada', detail: resultado.message, life: 4000 })
   } else {
-    notificacion.add({ severity: 'error', summary: 'Error', detail: resultado.message })
+    notificacion.add({ severity: 'error', summary: 'Error', detail: resultado.message, life: 5000 })
   }
 }
 </script>

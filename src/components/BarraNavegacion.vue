@@ -2,10 +2,10 @@
 import { useRoute, useRouter } from 'vue-router'
 
 const ruta = useRoute()
-const enrutador = useRouter()
+const router = useRouter()
 
 const navegar = (destino) => {
-  enrutador.push({ path: destino, query: { liga: ruta.query.liga || undefined } })
+  router.push({ path: destino, query: { liga: ruta.query.liga || undefined } })
 }
 
 const elementos = [
@@ -20,12 +20,12 @@ const elementos = [
 
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1F] border-t border-[#E10600]">
-    <div class="flex items-center justify-around px-1 py-2">
+    <div class="flex items-center justify-around px-1 py-4">
       <button v-for="el in elementos" :key="el.ruta" @click="navegar(el.ruta)"
-        class="flex flex-col items-center gap-0.5 px-1.5 py-1 sm:px-3 cursor-pointer bg-transparent border-none min-w-0 flex-1"
+        class="flex flex-col items-center gap-0.5 bg-transparent min-w-0 flex-1"
         :class="ruta.path === el.ruta ? 'text-[#E10600]' : 'text-zinc-400'">
         <i class="pi text-base sm:text-lg" :class="el.icono"></i>
-        <span class="text-[8px] sm:text-[10px] font-bold uppercase tracking-tight sm:tracking-wide truncate">
+        <span class="text-[8px] sm:text-[12px] font-bold uppercase truncate">
           {{ el.etiqueta }}
         </span>
       </button>

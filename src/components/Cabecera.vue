@@ -7,7 +7,7 @@ import { usarStoreMercado } from '@/stores/storeMercado'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import Button from 'primevue/button'
 
-const enrutador = useRouter()
+const router = useRouter()
 const ruta = useRoute()
 const storeAutenticacion = usarStoreAutenticacion()
 const escuderiaStore = usarStoreEscuderia()
@@ -15,16 +15,16 @@ const storeMercado = usarStoreMercado()
 
 const manejarCerrarSesion = async () => {
     await cerrarSesion()
-    enrutador.push({ name: 'login' })
+    router.push({ name: 'login' })
 }
 
 // Si el usuario está dentro de una liga, vuelve a su panel; si no, al listado.
 const irADashboard = () => {
     const idLiga = escuderiaStore.idLigaActiva || ruta.query.liga || null
     if (idLiga) {
-        enrutador.push({ name: 'inicio', query: { liga: idLiga } })
+        router.push({ name: 'inicio', query: { liga: idLiga } })
     } else {
-        enrutador.push({ name: 'ligas' })
+        router.push({ name: 'ligas' })
     }
 }
 
@@ -42,7 +42,7 @@ const ocultarResumenEquipo = computed(() => {
                 <p v-if="!ocultarResumenEquipo" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ escuderiaStore.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ Number(escuderiaStore.presupuesto || 0).toFixed(2)
-                    }}M</span>
+                        }}M</span>
                     <span v-if="storeMercado.totalPujasComprometidas > 0" class="text-amber-400 font-bold">
                         (-{{ storeMercado.totalPujasComprometidas.toFixed(2) }}M)
                     </span>
@@ -51,12 +51,11 @@ const ocultarResumenEquipo = computed(() => {
         </div>
 
         <div class="flex items-center gap-2">
-            <Button @click="enrutador.push({ name: 'ligas' })" icon="pi pi-trophy" text
+            <Button @click="router.push({ name: 'ligas' })" icon="pi pi-trophy" text
                 class="!text-zinc-400 cursor-pointer" />
-            <Button @click="enrutador.push({ name: 'perfil' })" icon="pi pi-user" text
+            <Button @click="router.push({ name: 'perfil' })" icon="pi pi-user" text
                 class="!text-zinc-400 cursor-pointer" />
-            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text
-                class="!text-zinc-400 cursor-pointer" />
+            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400 cursor-pointer" />
         </div>
     </header>
 </template>

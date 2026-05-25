@@ -47,7 +47,7 @@ const esFichajeDeshabilitado = (elemento) => {
  */
 const confirmarEjecucionClausula = (elemento) => {
     if (jornadaIniciada.value) {
-        notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada })
+        notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada, life: 4000 })
         return
     }
     const precioClausula = calcularPrecioClausula(elemento)
@@ -65,9 +65,9 @@ const confirmarEjecucionClausula = (elemento) => {
             )
 
             if (resultado.success) {
-                notificacion.add({ severity: 'success', summary: 'Cláusula ejecutada', detail: resultado.message })
+                notificacion.add({ severity: 'success', summary: 'Cláusula ejecutada', detail: resultado.message, life: 4000 })
             } else {
-                notificacion.add({ severity: 'warn', summary: 'Cláusula denegada', detail: resultado.message })
+                notificacion.add({ severity: 'warn', summary: 'Cláusula denegada', detail: resultado.message, life: 5000 })
             }
         },
     })

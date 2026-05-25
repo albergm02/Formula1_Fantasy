@@ -20,7 +20,7 @@ const esquemaValidacion = zodResolver(
   })
 )
 
-const enrutador = useRouter()
+const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 
 const cargando = ref(false)
@@ -45,7 +45,7 @@ const handleCompletarPerfil = async ({ valid, values }) => {
       storeAutenticacion.usuarioActual.correoAutenticacion,
       nombreNormalizado
     )
-    enrutador.push('/ligas')
+    router.push('/ligas')
   } catch (error) {
     errorAutenticacion.value = `Error al completar el registro con Google: ${error.message}`
   } finally {
@@ -58,7 +58,7 @@ const cancelarRegistroConGoogle = async () => {
   if (cargando.value) return
 
   await cerrarSesion()
-  enrutador.push('/')
+  router.push('/')
 }
 </script>
 

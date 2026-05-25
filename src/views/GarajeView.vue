@@ -29,7 +29,7 @@ const ruta = useRoute()
 const { jornadaIniciada, mensajeBloqueoJornada } = usarBloqueoJornada()
 
 const notificarBloqueoJornada = () => {
-  notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada })
+  notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada, life: 4000 })
 }
 
 const dialogoProteccion = ref(false)
@@ -76,9 +76,9 @@ const confirmarVentaCoche = (coche) => {
     accept: async () => {
       const resultado = await storeEscuderia.venderElemento(coche)
       if (resultado.success) {
-        notificacion.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M` })
+        notificacion.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M`, life: 4000 })
       } else {
-        notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: resultado.message })
+        notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: resultado.message, life: 5000 })
       }
     },
   })
@@ -100,9 +100,9 @@ const confirmarVentaPiloto = (piloto) => {
     accept: async () => {
       const resultado = await storeEscuderia.venderElemento(piloto)
       if (resultado.success) {
-        notificacion.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M` })
+        notificacion.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M`, life: 4000 })
       } else {
-        notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: resultado.message })
+        notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: resultado.message, life: 5000 })
       }
     },
   })
@@ -119,7 +119,7 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
   }
   const resultado = await storeEscuderia.alternarPotenciador(idInstancia)
   if (!resultado.success) {
-    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
   }
 }
 
@@ -134,7 +134,7 @@ const alternarEquipoCoche = async (instanciaId) => {
   }
   const resultado = await storeEscuderia.alternarCoche(instanciaId)
   if (!resultado.success) {
-    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
   }
 }
 
@@ -149,7 +149,7 @@ const alternarEquipoPiloto = async (instanciaId) => {
   }
   const resultado = await storeEscuderia.alternarPiloto(instanciaId)
   if (!resultado.success) {
-    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
   }
 }
 
@@ -173,10 +173,10 @@ const confirmarInversionClausula = async () => {
   )
 
   if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: 'Cláusula aumentada.', detail: resultado.message })
+    notificacion.add({ severity: 'success', summary: 'Cláusula aumentada.', detail: resultado.message, life: 4000 })
     dialogoProteccion.value = false
   } else {
-    notificacion.add({ severity: 'warn', summary: 'Cláusula no aumentada.', detail: resultado.message })
+    notificacion.add({ severity: 'warn', summary: 'Cláusula no aumentada.', detail: resultado.message, life: 5000 })
   }
 }
 </script>

@@ -27,7 +27,7 @@ const esquemaValidacion = zodResolver(
   })
 )
 
-const enrutador = useRouter()
+const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 
 const cargando = ref(false)
@@ -56,7 +56,7 @@ const handleRegistro = async ({ valid, values }) => {
     const credencialUsuario = await registrarse(correoNormalizado, values.password)
     await enviarVerificacionCorreo()
     await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.email, nombreNormalizado)
-    enrutador.push('/verificar-correo')
+    router.push('/verificar-correo')
   } catch (error) {
     if (error?.code === 'auth/email-already-in-use') {
       errorAutenticacion.value = 'El correo electrónico ya está registrado.'

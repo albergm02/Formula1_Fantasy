@@ -1,9 +1,3 @@
-/**
- * Funciones de sinergia — copia server-side (CommonJS).
- * Replica de src/utils/sinergia.js para Cloud Functions.
- * @module sinergiaServer
- */
-
 const BONUS_EQUIPO_COMPLETO = 0.1
 const BONUS_COMBO_VARIANTE = 0.05
 

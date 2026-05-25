@@ -14,13 +14,13 @@ import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
 const storeEscuderia = usarStoreEscuderia()
 const storeLigas = usarStoreLigas()
 const ruta = useRoute()
-const enrutador = useRouter()
+const router = useRouter()
 
 onMounted(async () => {
   const idLiga = ruta.query.liga || storeLigas.idLigaActiva
 
   if (!idLiga) {
-    enrutador.push('/ligas')
+    router.push('/ligas')
     return
   }
 

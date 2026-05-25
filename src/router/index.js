@@ -88,12 +88,12 @@ const rutas = [
   },
 ]
 
-const enrutador = createRouter({
+const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: rutas,
 })
 
-enrutador.beforeEach(async (to) => {
+router.beforeEach(async (to) => {
   const usuario = await obtenerUsuarioActual()
   const storeAutenticacion = usarStoreAutenticacion()
   const storeLigas = usarStoreLigas()
@@ -168,4 +168,4 @@ enrutador.beforeEach(async (to) => {
   return true
 })
 
-export default enrutador
+export default router

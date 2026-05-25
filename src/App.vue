@@ -9,7 +9,7 @@ import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
 
 const storeAutenticacion = usarStoreAutenticacion()
-const enrutador = useRouter()
+const router = useRouter()
 
 let cancelarObservadorAutenticacion = () => { }
 
@@ -19,9 +19,9 @@ onMounted(() => {
   cancelarObservadorAutenticacion = escucharCambioEstadoAutenticacion((usuario) => {
     if (!usuario) {
       storeAutenticacion.limpiarSesion()
-      const rutaActual = enrutador.currentRoute.value.path
+      const rutaActual = router.currentRoute.value.path
       const estaEnRutaPublica = rutaActual === '/' || rutaActual === '/registro'
-      if (!estaEnRutaPublica) enrutador.push('/')
+      if (!estaEnRutaPublica) router.push('/')
     }
   })
 })
