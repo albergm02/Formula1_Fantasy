@@ -11,7 +11,6 @@
   reauthenticateWithCredential,
   reauthenticateWithPopup,
   updatePassword,
-  updateEmail,
 } from 'firebase/auth'
 
 import { doc, getDoc, setDoc } from 'firebase/firestore'
@@ -150,19 +149,4 @@ export const cambiarContrasenaUsuario = async (contrasenaNueva) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
   await updatePassword(usuario, contrasenaNueva)
-}
-
-/**
- * Cambia el correo del usuario actual en Firebase Auth y envía verificación
- * al nuevo correo. La migración de documentos Firestore se hace después
- * llamando a la callable `migrarCorreoUsuario`.
- * @param {string} correoNuevo
- * @returns {Promise<void>}
- */
-export const cambiarCorreoUsuario = async (correoNuevo) => {
-  const usuario = auth.currentUser
-  if (!usuario) throw new Error('No hay sesión activa.')
-  await updateEmail(usuario, correoNuevo)
-  await usuario.reload()
-  await sendEmailVerification(usuario)
 }

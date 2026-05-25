@@ -158,8 +158,6 @@ module.exports = {
   invalidarCacheCatalogo,
   cargarPreciosPilotos,
   aplicarPreciosDinamicosACatalogo,
-  construirClavePiloto,
   seleccionarCartasDiarias,
   sembrarCatalogoEnFirestore,
-  CARTAS_POR_DIA,
 }
