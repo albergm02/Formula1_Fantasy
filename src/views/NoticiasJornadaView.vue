@@ -8,10 +8,12 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
-import { suscribirseHistorialJornadas, cargarCatalogoPilotos } from '@/services/servicioJornada'
+import {
+    suscribirseHistorialJornadas,
+    cargarCatalogoPilotos,
+    cargarPerfilesPuntuacion,
+} from '@/services/servicioJornada'
 import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
-
-import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 
 import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
 
@@ -55,6 +57,7 @@ const EJEMPLOS_VARIANTE = {
 
 const historial = ref([])
 const catalogoPilotos = ref([])
+const perfilesPuntuacion = ref({})
 const idJornadaSeleccionada = ref(null)
 const cargando = ref(true)
 const pilotoExpandido = ref(null)
@@ -96,6 +99,12 @@ onMounted(async () => {
         catalogoPilotos.value = await cargarCatalogoPilotos()
     } catch {
         catalogoPilotos.value = []
+    }
+
+    try {
+        perfilesPuntuacion.value = await cargarPerfilesPuntuacion()
+    } catch {
+        perfilesPuntuacion.value = {}
     }
 
     // Nos suscribimos al historial de jornadas para mostrar la más reciente y permitir navegar por las anteriores si estas existen.
@@ -178,7 +187,7 @@ function alternarPiloto(numero) {
 
 // Cálculo de puntuación base dependiendo del perfil visitado en la guía rápida.
 function calcularPuntuacionBaseVariante(atributos, perfil) {
-    const pesos = perfilesPuntuacion[perfil].pesos
+    const pesos = perfilesPuntuacion.value[perfil]?.pesos || {}
     const valor =
         (pesos.ritmo || 0) * atributos.ritmo +
         (pesos.consistencia || 0) * atributos.consistencia +
@@ -308,8 +317,8 @@ function formatearPorcentaje(valor) {
                         <div v-if="varianteGuiaExpandida === variante.id"
                             class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
                             <ul class="flex flex-col gap-0.5 list-none p-0 m-0">
-                                <li v-for="(regla, idx) in perfilesPuntuacion[variante.id].reglasUsuario" :key="idx"
-                                    class="text-[11px] text-zinc-300">
+                                <li v-for="(regla, idx) in (perfilesPuntuacion[variante.id]?.reglasUsuario || [])"
+                                    :key="idx" class="text-[11px] text-zinc-300">
                                     {{ regla }}
                                 </li>
                             </ul>

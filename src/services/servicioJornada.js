@@ -56,3 +56,30 @@ export async function cargarCatalogoPilotos() {
 
   return Array.from(pilotosPorNumero.values())
 }
+
+/**
+ * Extrae los perfiles de puntuación (pesos y reglas) embebidos en las cartas
+ * del catálogo `catalogo/pilotos`. Devuelve un mapa indexado por el identificador
+ * del perfil (qualy, carrera, todo_terreno, base, remontador, estratega).
+ * @returns {Promise<Object<string, { pesos: Object, reglasUsuario: string[] }>>}
+ */
+export async function cargarPerfilesPuntuacion() {
+  const documento = await getDoc(doc(db, 'catalogo', 'pilotos'))
+  if (!documento.exists()) {
+    throw new Error('Catálogo de pilotos no encontrado en Firestore (catalogo/pilotos).')
+  }
+
+  const cartas = documento.data().items || []
+  const perfiles = {}
+
+  for (const carta of cartas) {
+    const clavePerfil = carta.perfilPuntuacion
+    if (!clavePerfil || perfiles[clavePerfil]) continue
+    perfiles[clavePerfil] = {
+      pesos: carta.pesos,
+      reglasUsuario: carta.reglasUsuario || [],
+    }
+  }
+
+  return perfiles
+}

@@ -143,7 +143,7 @@ const confirmarEliminarPuja = () => {
 
         <!-- Mejoras detalladas -->
         <div v-if="etiquetasMejora.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
-          <p class="text-sm font-black text-sky-400 uppercase leading-tight mb-2">Mejoras de Atributos</p>
+          <p class="text-sm font-black uppercase mb-2">Mejoras de Atributos</p>
           <div class="space-y-2">
             <div v-for="m in etiquetasMejora" :key="m.atributo" class="flex justify-between items-center">
               <span class="text-xs font-bold uppercase" :style="{ color: m.colorAtributo }">{{ m.atributo }}</span>

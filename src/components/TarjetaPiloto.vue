@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
-import { perfilesPuntuacion } from '@/data/perfilesPuntuacion'
 
 const mostrarDetalles = ref(false)
 const mostrarPuja = ref(false)
@@ -29,10 +28,7 @@ const props = defineProps({
 
 const emit = defineEmits(['pujar', 'eliminarPuja'])
 
-const reglasVariante = computed(() => {
-  const clave = props.piloto.perfilPuntuacion || props.piloto.variante
-  return perfilesPuntuacion[clave]?.reglasUsuario || props.piloto.reglasUsuario || []
-})
+const reglasVariante = computed(() => props.piloto.reglasUsuario || [])
 
 const barrasAtributos = computed(() => {
   const a = props.piloto.atributos
