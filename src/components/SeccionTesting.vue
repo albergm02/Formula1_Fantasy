@@ -83,7 +83,7 @@ async function manejarResolverPujas() {
             severity: 'success',
             summary: 'Pujas resueltas',
             detail: idNuevoMercado
-                ? `Mercado de "${liga.nombre}" cerrado y nuevo mercado generado (${idNuevoMercado}).`
+                ? `Mercado de "${liga.nombre}" cerrado y nuevo mercado generado.`
                 : `Mercado de "${liga.nombre}" cerrado.`,
             life: 5000,
         })
@@ -148,12 +148,14 @@ async function manejarReprocesarJornada() {
     }
 }
 
-function manejarResembrarCatalogo() {
+function manejarActualizarCatalogo() {
     confirm.require({
         message: 'Se sobrescribirán los documentos catalogo/{pilotos,coches,potenciadores} con los datos actuales del código (atributos, pesos, precios base). Los precios dinámicos por puja se conservan. ¿Continuar?',
-        header: 'Resembrar catálogo',
-        acceptLabel: 'Sí, resembrar',
+        header: 'Actualizar catálogo',
+        acceptLabel: 'Sí, actualizar',
         rejectLabel: 'Cancelar',
+        acceptClass: '!bg-red-700 !border-red-700 !text-white',
+        rejectClass: '!bg-gray-700 !border-gray-700 !text-white',
         accept: async () => {
             cargandoResiembra.value = true
             ultimoResultado.value = null
@@ -169,7 +171,7 @@ function manejarResembrarCatalogo() {
             } catch (error) {
                 toast.add({
                     severity: 'error',
-                    summary: 'Error resembrando catálogo',
+                    summary: 'Error actualizando catálogo',
                     detail: error.message,
                     life: 6000,
                 })
@@ -198,7 +200,8 @@ function manejarEliminarUsuario() {
         header: 'Confirmar eliminación de usuario',
         acceptLabel: 'Sí, eliminar',
         rejectLabel: 'Cancelar',
-        acceptClass: '!bg-red-700 !border-red-700',
+        acceptClass: '!bg-red-700 !border-red-700 !text-white',
+        rejectClass: '!bg-gray-700 !border-gray-700 !text-white',
         accept: async () => {
             cargandoEliminacionUsuario.value = true
             ultimoResultado.value = null
@@ -208,7 +211,7 @@ function manejarEliminarUsuario() {
                 toast.add({
                     severity: 'success',
                     summary: 'Usuario eliminado',
-                    detail: `${datos.email}: ${datos.participacionesBorradas} participaciones, ${datos.ligasBorradas} ligas borradas.`,
+                    detail: `Usuario eliminado correctamente.`,
                     life: 6000,
                 })
                 usuarioAEliminar.value = null
@@ -245,7 +248,8 @@ function manejarEliminarLiga() {
         header: 'Confirmar eliminación de liga',
         acceptLabel: 'Sí, eliminar',
         rejectLabel: 'Cancelar',
-        acceptClass: '!bg-red-700 !border-red-700',
+        acceptClass: '!bg-red-700 !border-red-700 !text-white',
+        rejectClass: '!bg-gray-700 !border-gray-700 !text-white',
         accept: async () => {
             cargandoEliminacion.value = true
             ultimoResultado.value = null
@@ -255,7 +259,7 @@ function manejarEliminarLiga() {
                 toast.add({
                     severity: 'success',
                     summary: 'Liga eliminada',
-                    detail: `${datos.nombreLiga}: ${datos.participacionesBorradas} participaciones, ${datos.mercadosBorrados} mercados, ${datos.usuariosDesvinculados} usuarios desvinculados.`,
+                    detail: `Liga eliminada correctamente.`,
                     life: 6000,
                 })
                 ligaAEliminar.value = null
@@ -277,37 +281,32 @@ function manejarEliminarLiga() {
 
 <template>
     <div class="space-y-4">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
+        <div class="grid grid-cols-1 gap-3">
+            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC]">
                 <template #title>
-                    <span class="text-sm">Resolver pujas</span>
+                    <span class="text-sm">Testing de mercado: resolver pujas</span>
                 </template>
                 <template #content>
                     <p class="text-xs text-zinc-400 mb-3">
-                        Equivale al cierre nocturno automático: cierra el mercado de la liga, resuelve
-                        las pujas según el resultado real del GP, actualiza los garajes de los participantes
-                        y notifica a los usuarios afectados.
+                        Cierra el mercado de la liga, resuelvo las pujas según el resultado real del GP,
+                        y actualizo los garajes de los participantes.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-2">
                         <Select v-model="ligaParaPujas" :options="ligasConMercadoAbierto" optionLabel="nombre"
-                            optionValue="id" placeholder="Selecciona una liga con mercado abierto" filter
-                            class="flex-1" />
+                            optionValue="id" placeholder="Seleccionar liga..." filter class="flex-1" />
                         <Button @click="manejarResolverPujas" :loading="cargandoPujas" label="Resolver pujas"
                             size="small" class="!bg-white !border-white !text-black" />
                     </div>
                 </template>
             </Card>
 
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800">
+            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] ">
                 <template #title>
                     <span class="text-sm">Reprocesar jornada</span>
                 </template>
                 <template #content>
                     <p class="text-xs text-zinc-400 mb-3">
-                        Recalcula la puntuación del último Gran Premio finalizado para todas las
-                        participaciones de la liga seleccionada, sobrescribiendo puntos y precios.
-                        No afecta a otras ligas ni al documento global de la jornada. Útil para
-                        verificar cambios en la fórmula de puntuación sobre una liga activa concreta.
+                        Recalcula la puntuación del último Gran Premio finalizado para la liga seleccionada.
                     </p>
                     <div class="flex flex-col gap-2">
                         <div class="flex flex-col sm:flex-row gap-2">
@@ -316,70 +315,63 @@ function manejarEliminarLiga() {
                             <Button @click="manejarReprocesarJornada" :loading="cargandoJornada"
                                 label="Reprocesar jornada" size="small" class="!bg-white !border-white !text-black" />
                         </div>
-                        <InputText v-model="meetingKeyJornada" placeholder="Meeting key (opcional, ej: 1254 para Japón)"
+                        <InputText v-model="meetingKeyJornada" placeholder="Meeting key (opcional, ej: 1284 para Japón)"
                             class="w-full text-xs" size="small" />
-                        <p class="text-[10px] text-zinc-500">Deja vacío para usar el último GP finalizado. Especifica el
-                            meeting_key para forzar un GP concreto (útil cuando ya ha empezado el siguiente).</p>
                     </div>
                 </template>
             </Card>
 
             <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border border-zinc-800 lg:col-span-2">
                 <template #title>
-                    <span class="text-sm">Resembrar catálogo</span>
+                    <span class="text-sm">Actualizar catálogo</span>
                 </template>
                 <template #content>
                     <p class="text-xs text-zinc-400 mb-3">
-                        Sobrescribe los documentos <code>catalogo/pilotos</code>, <code>catalogo/coches</code>
-                        y <code>catalogo/potenciadores</code> en Firestore con los datos actuales del
-                        código fuente (<code>catalogoBase.js</code>). Útil tras cambiar atributos, pesos
-                        de perfiles de puntuación o precios base. Los precios dinámicos generados por
-                        las pujas se conservan en el documento <code>catalogo/precios_pilotos</code>.
+                        Cuando se realice un cambio en las características, pesos o precios base de pilotos, coches o
+                        potenciadores en el código, esta acción actualizará los documentos de catálogo en Firestore con
+                        los nuevos datos. No afecta a los precios dinámicos por puja ni a las cartas ya adquiridas por
+                        los usuarios.
                     </p>
                     <div class="flex justify-end">
-                        <Button @click="manejarResembrarCatalogo" :loading="cargandoResiembra"
-                            label="Resembrar catálogo" size="small" class="!bg-white !border-white !text-black" />
+                        <Button @click="manejarActualizarCatalogo" :loading="cargandoResiembra"
+                            label="Actualizar catálogo" size="small" class="!bg-white !border-white !text-black" />
                     </div>
                 </template>
             </Card>
 
-            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] border-2 border-red-900/60 lg:col-span-2">
+            <div class="border-t border-zinc-800/40 my-4 lg:col-span-2"></div>
+
+            <Card class="!bg-[#1A1A1F] !text-[#F0ECEC] lg:col-span-2">
                 <template #content>
                     <div class="space-y-5">
                         <div>
                             <h3 class="text-sm font-semibold text-red-400 mb-2">Eliminar usuario</h3>
                             <p class="text-xs text-zinc-400 mb-3">
-                                Borra <strong>permanentemente</strong> al usuario seleccionado: su perfil,
+                                Borra al usuario seleccionado: su perfil,
                                 participaciones, pujas activas en mercados abiertos y su cuenta de Firebase
-                                Authentication. Si el usuario era el único participante de alguna liga, esa
-                                liga también se elimina; si era administrador con más participantes, el rol
-                                se cede automáticamente al siguiente.
-                                <strong class="text-red-400">Acción irreversible.</strong>
+                                Authentication.
                             </p>
-                            <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
+                            <div class="flex flex-col gap-2">
                                 <Select v-model="usuarioAEliminar" :options="usuarios" optionLabel="etiqueta"
                                     optionValue="email" placeholder="Usuario a eliminar" filter class="flex-1" />
                                 <Button @click="manejarEliminarUsuario" :loading="cargandoEliminacionUsuario"
                                     label="Eliminar" size="small" severity="danger"
-                                    class="!bg-red-700 !border-red-700" />
+                                    class="!bg-red-700 !border-red-700 !text-white" />
                             </div>
                         </div>
 
                         <div class="border-t border-red-900/40 pt-4">
                             <h3 class="text-sm font-semibold text-red-400 mb-2">Eliminar liga</h3>
                             <p class="text-xs text-zinc-400 mb-3">
-                                Borra <strong>permanentemente</strong> la liga seleccionada: el documento de la
+                                Borra la liga seleccionada: el documento de la
                                 liga, todas sus participaciones, mercados, pujas y actividad. Además la desvincula
-                                del perfil de cualquier usuario que la tuviera asociada. A diferencia del
-                                flujo normal, el administrador global puede eliminar <strong>cualquier liga</strong>,
-                                no solo las propias.
-                                <strong class="text-red-400">Acción irreversible.</strong>
+                                del perfil de cualquier usuario que la tuviera asociada.
                             </p>
-                            <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end">
+                            <div class="flex flex-col gap-2">
                                 <Select v-model="ligaAEliminar" :options="ligas" optionLabel="nombre" optionValue="id"
                                     placeholder="Liga a eliminar" filter class="flex-1" />
                                 <Button @click="manejarEliminarLiga" :loading="cargandoEliminacion" label="Eliminar"
-                                    size="small" severity="danger" class="!bg-red-700 !border-red-700" />
+                                    size="small" severity="danger" class="!bg-red-700 !border-red-700 !text-white" />
                             </div>
                         </div>
                     </div>

@@ -65,6 +65,7 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
     hora,
     imagen: siguienteReunion.circuit_image,
     fechaInicio: siguienteReunion.date_start,
+    meetingKey: siguienteReunion.meeting_key,
   }
 }
 
