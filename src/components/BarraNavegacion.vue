@@ -20,7 +20,7 @@ const elementos = [
 
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1F] border-t border-[#E10600]">
-    <div class="flex items-center justify-around px-1 py-1.5 sm:px-2 sm:py-2">
+    <div class="flex items-center justify-around px-1 py-2">
       <button v-for="el in elementos" :key="el.ruta" @click="navegar(el.ruta)"
         class="flex flex-col items-center gap-0.5 px-1.5 py-1 sm:px-3 cursor-pointer bg-transparent border-none min-w-0 flex-1"
         :class="ruta.path === el.ruta ? 'text-[#E10600]' : 'text-zinc-400'">
