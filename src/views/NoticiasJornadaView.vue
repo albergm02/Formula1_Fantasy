@@ -296,7 +296,7 @@ function formatearPorcentaje(valor) {
                 <div v-if="guiaAbierta" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-2">
                     <p class="text-[11px] text-zinc-400">
                         Cada carta tiene una <span class="text-white font-bold">puntuación base</span>
-                        (suma ponderada de los atributos del piloto que dependiente de su clase) y un
+                        (suma ponderada de los atributos del piloto que depende de su clase) y un
                         <span class="text-white font-bold">factor de peso de jornada,</span> que depende de cómo le
                         fue al piloto en este Gran Premio. Los puntos finales son
                         <span class="text-white font-bold">puntuación base × factor de peso de jornada</span>.

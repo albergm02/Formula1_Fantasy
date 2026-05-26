@@ -15,9 +15,8 @@ const {
   cargarPreciosPilotos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,
-  sembrarCatalogoEnFirestore,
-  invalidarCacheCatalogo,
 } = require('./mercadoServer')
+const { seleccionarPujasGanadoras } = require('./pujasServer')
 
 initializeApp()
 const db = getFirestore()
@@ -365,14 +364,7 @@ async function resolverPujasMercado(idMercado) {
   }
 
   /* Agrupar pujas por idCarta y encontrar la mayor de cada una */
-  const pujasPorCarta = {}
-  for (const doc of pujasSnapshot.docs) {
-    const puja = doc.data()
-    const actual = pujasPorCarta[puja.idCarta]
-    if (!actual || puja.cantidad > actual.cantidad) {
-      pujasPorCarta[puja.idCarta] = puja
-    }
-  }
+  const pujasPorCarta = seleccionarPujasGanadoras(pujasSnapshot.docs.map((doc) => doc.data()))
 
   /* ── Agrupar cartas ganadas por participante para evitar sobrescrituras en el batch ── */
   const cartasPorParticipante = {}
@@ -666,70 +658,6 @@ exports.generarMercadoInicialLiga = onCall({ region: 'europe-west1' }, async (re
 
   const resultado = await ejecutarGeneracionMercadoParaLiga(idLiga)
   return { ok: true, ...resultado }
-})
-
-/**
- * Callable — fuerza la resolución de pujas, cierra el mercado actual y genera
- * inmediatamente uno nuevo para la misma liga. Útil para probar todo el flujo
- * de pujas + apertura encadenada sin esperar al cierre automático.
- * Acepta `{ idMercado }` (obligatorio).
- */
-exports.dispararResolucionPujasManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { idMercado } = request.data || {}
-  if (!idMercado) {
-    throw new HttpsError('invalid-argument', 'Falta idMercado.')
-  }
-  const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
-  if (!mercadoSnap.exists) {
-    throw new HttpsError('not-found', `Mercado ${idMercado} no encontrado.`)
-  }
-
-  const { idLiga } = mercadoSnap.data()
-  if (!idLiga) {
-    throw new HttpsError('failed-precondition', `Mercado ${idMercado} no tiene idLiga asociado.`)
-  }
-
-  await resolverPujasMercado(idMercado)
-  await db.collection('mercados').doc(idMercado).update({ estado: 'cerrado' })
-
-  const nuevoMercado = await ejecutarGeneracionMercadoParaLiga(idLiga, { forzar: true })
-
-  return {
-    ok: true,
-    idMercado,
-    estado: 'cerrado',
-    nuevoMercado,
-  }
-})
-
-/**
- * Callable — dispara el procesamiento de la jornada del último GP finalizado.
- */
-exports.dispararJornadaSemanalManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { forzar = false, idLiga = null, meetingKey = null } = request.data || {}
-  const resultado = await ejecutarProcesarJornada({ forzar, idLiga, meetingKey })
-  return resultado
-})
-
-/**
- * Callable — re-siembra el catálogo (pilotos, coches, potenciadores) en
- * Firestore con los datos actuales de `catalogoBase.js`. Sobrescribe los
- * documentos `catalogo/pilotos`, `catalogo/coches` y `catalogo/potenciadores`,
- * e invalida la cache en memoria de las Cloud Functions. Útil tras cambiar
- * atributos, pesos o precios base en el código fuente.
- */
-exports.resembrarCatalogoManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const resultado = await sembrarCatalogoEnFirestore(db)
-  invalidarCacheCatalogo()
-  return {
-    ok: true,
-    pilotosSembrados: resultado.pilotos.length,
-    cochesSembrados: resultado.coches.length,
-    potenciadoresSembrados: resultado.potenciadores.length,
-  }
 })
 
 /**

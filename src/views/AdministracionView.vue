@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 
-import SeccionTesting from '@/components/SeccionTesting.vue'
+import SeccionAdmin from '@/components/SeccionAdmin.vue'
 
 import Button from 'primevue/button'
 
@@ -25,7 +25,7 @@ async function manejarCerrarSesion() {
         </header>
 
         <main class="flex-1 p-10 max-w-6xl mx-auto w-full space-y-4">
-            <SeccionTesting />
+            <SeccionAdmin />
         </main>
     </div>
 </template>
