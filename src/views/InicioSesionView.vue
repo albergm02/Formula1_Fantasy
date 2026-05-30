@@ -5,7 +5,10 @@ import { useRouter } from 'vue-router'
 import {
   iniciarSesion,
   iniciarSesionConGoogle,
-  restablecerContraseña
+  restablecerContraseña,
+  verificarBloqueoAcceso,
+  registrarIntentoFallido,
+  reiniciarContadorIntentos,
 } from '@/services/servicioAutenticacion'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
@@ -52,15 +55,18 @@ const handleInicioSesion = async ({ valid, values }) => {
   errorAuth.value = ''
 
   try {
+    await verificarBloqueoAcceso(values.email.trim())
     const credencialUsuario = await iniciarSesion(values.email, values.password)
-    // Verifica que el perfil exista.
+    await reiniciarContadorIntentos(credencialUsuario.user.email)
     await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.email)
-    // Redirige según el rol del usuario.
     const destino = storeAuth.esAdministrador ? '/admin' : '/ligas'
     router.push(destino)
   } catch (error) {
     const codigosCredencialesInvalidas = ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password']
-    if (codigosCredencialesInvalidas.includes(error?.code)) {
+    if (error.message?.startsWith('Acceso bloqueado')) {
+      errorAuth.value = error.message
+    } else if (codigosCredencialesInvalidas.includes(error?.code)) {
+      await registrarIntentoFallido(values.email.trim())
       errorAuth.value = 'Correo o contraseña incorrectos.'
     } else if (error?.code === 'auth/too-many-requests') {
       errorAuth.value = 'Demasiados intentos. Inténtalo más tarde.'

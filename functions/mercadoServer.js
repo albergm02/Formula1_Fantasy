@@ -4,11 +4,10 @@ let catalogoEnMemoria = null
 
 async function sembrarCatalogoEnFirestore(db) {
   const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
-  const fechaSiembra = new Date().toISOString()
   const batch = db.batch()
-  batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos, fechaSiembra })
-  batch.set(db.collection('catalogo').doc('coches'), { items: coches, fechaSiembra })
-  batch.set(db.collection('catalogo').doc('potenciadores'), { items: potenciadores, fechaSiembra })
+  batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos })
+  batch.set(db.collection('catalogo').doc('coches'), { items: coches })
+  batch.set(db.collection('catalogo').doc('potenciadores'), { items: potenciadores })
   await batch.commit()
   console.log('[Catalogo] Auto-seed ejecutado correctamente.')
   return { pilotos, coches, potenciadores }

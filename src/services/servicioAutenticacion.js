@@ -13,7 +13,7 @@
   updatePassword,
 } from 'firebase/auth'
 
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { auth, db } from './servicioFirebase'
 
 const googleProvider = new GoogleAuthProvider()
@@ -114,6 +114,9 @@ export const crearPerfilUsuario = async (correoUsuario, nombreUsuario) => {
     correoAutenticacion: correoUsuario,
     nombre: nombreUsuario,
     ligasIds: [],
+    fechaRegistro: serverTimestamp(),
+    contadorIntentosFallidos: 0,
+    fechaBloqueoDeSesion: null,
   })
 }
 
@@ -127,8 +130,9 @@ export const reautenticarUsuario = async (contrasenaActual) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
 
-  const proveedor = usuario.providerData[0]?.providerId
-  if (proveedor === 'google.com') {
+  const tieneContrasena = usuario.providerData.some((p) => p.providerId === 'password')
+
+  if (!tieneContrasena) {
     await reauthenticateWithPopup(usuario, googleProvider)
     return
   }
@@ -149,4 +153,71 @@ export const cambiarContrasenaUsuario = async (contrasenaNueva) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
   await updatePassword(usuario, contrasenaNueva)
+  const docRef = doc(db, 'usuarios', usuario.email)
+  await updateDoc(docRef, { fechaUltimoCambioContrasena: serverTimestamp() })
+}
+
+const MAXIMO_INTENTOS_FALLIDOS = 5
+const DURACION_BLOQUEO_MINUTOS = 5
+
+/**
+ * Verifica si el correo tiene un bloqueo temporal activo por intentos fallidos.
+ * Lanza un error con los minutos restantes si el bloqueo sigue vigente.
+ * @param {string} correo - Correo del usuario a verificar.
+ * @returns {Promise<void>}
+ */
+export const verificarBloqueoAcceso = async (correo) => {
+  const docRef = doc(db, 'usuarios', correo)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) return
+
+  const { fechaBloqueoDeSesion } = docSnap.data()
+  if (!fechaBloqueoDeSesion) return
+
+  const fechaDesbloqueo = fechaBloqueoDeSesion.toDate()
+  if (new Date() < fechaDesbloqueo) {
+    const minutosRestantes = Math.ceil((fechaDesbloqueo - new Date()) / 60000)
+    throw new Error(
+      `Acceso bloqueado. Intenta de nuevo en ${minutosRestantes} minuto${minutosRestantes > 1 ? 's' : ''}.`,
+    )
+  }
+}
+
+/**
+ * Registra un intento fallido de inicio de sesión.
+ * Al alcanzar el máximo de intentos, activa un bloqueo temporal de 5 minutos.
+ * @param {string} correo - Correo del usuario que falló el intento.
+ * @returns {Promise<void>}
+ */
+export const registrarIntentoFallido = async (correo) => {
+  const docRef = doc(db, 'usuarios', correo)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) return
+
+  const intentosPrevios = docSnap.data().contadorIntentosFallidos || 0
+  const nuevosIntentos = intentosPrevios + 1
+  const actualizacion = { contadorIntentosFallidos: nuevosIntentos }
+
+  if (nuevosIntentos >= MAXIMO_INTENTOS_FALLIDOS) {
+    const fechaDesbloqueo = new Date(Date.now() + DURACION_BLOQUEO_MINUTOS * 60 * 1000)
+    actualizacion.fechaBloqueoDeSesion = Timestamp.fromDate(fechaDesbloqueo)
+  }
+
+  await updateDoc(docRef, actualizacion)
+}
+
+/**
+ * Reinicia el contador de intentos fallidos tras un inicio de sesión exitoso.
+ * @param {string} correo - Correo del usuario autenticado.
+ * @returns {Promise<void>}
+ */
+export const reiniciarContadorIntentos = async (correo) => {
+  const docRef = doc(db, 'usuarios', correo)
+  const docSnap = await getDoc(docRef)
+  if (!docSnap.exists()) return
+
+  await updateDoc(docRef, {
+    contadorIntentosFallidos: 0,
+    fechaBloqueoDeSesion: null,
+  })
 }

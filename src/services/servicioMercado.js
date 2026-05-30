@@ -4,7 +4,7 @@
  * Los stores importan únicamente desde este módulo; nunca desde Firebase directamente.
  *
  * Esquema leído → mercados/{idLiga}_{YYYY-MM-DD}:
- *   { idLiga, estado, fechaApertura, fechaCierre, totalCartas, cartas[] }
+ *   { idLiga, estado, fechaCierre, cartas[] }
  *
  * Esquema pujas → mercados/{idMercado}/pujas/{emailSanitizado}_{idCarta}:
  *   { idCarta, tipoCarta, nombreCarta, precioCarta, emailUsuario, idParticipante, cantidad, fecha }

@@ -26,7 +26,7 @@ import { usarStoreNotificaciones } from './storeNotificaciones'
 const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) =>
   Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
-const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 8).toUpperCase()
+const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 10).toUpperCase()
 const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [] })
 
 /**

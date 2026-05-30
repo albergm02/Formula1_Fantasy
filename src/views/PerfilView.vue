@@ -23,23 +23,21 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Message from 'primevue/message'
-import Toast from 'primevue/toast'
-import ConfirmDialog from 'primevue/confirmdialog'
 import { useToast } from 'primevue/usetoast'
-import { useConfirm } from 'primevue/useconfirm'
 
 const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 const toast = useToast()
-const confirm = useConfirm()
 
-// Devuelve password ó google.com u otro proveedor según cómo inició sesión el usuario
-const proveedorAutenticacion = computed(() => {
-    return auth.currentUser?.providerData[0]?.providerId || 'password'
+// Determina si el usuario tiene el proveedor de contraseña (email/password),
+// aunque también tenga Google u otro proveedor enlazado.
+const puedeUsarContrasena = computed(() => {
+    return auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false
 })
 
 // Metadatos del perfil para gestionar restricciones de cambios
 const fechaUltimoCambioNombre = ref(null)
+const fechaUltimoCambioContrasena = ref(null)
 const diasRestantesParaCambiarNombre = computed(() => {
     if (!fechaUltimoCambioNombre.value) return 0
     // Calcula días transcurridos desde el último cambio de nombre, 86_400_000 ms = 1 día
@@ -51,6 +49,8 @@ async function cargarMetadatosPerfil() {
     const datos = await cargarPerfilUsuario(storeAutenticacion.usuarioActual.correoAutenticacion)
     fechaUltimoCambioNombre.value =
         datos.fechaUltimoCambioNombre ? new Date(datos.fechaUltimoCambioNombre) : null
+    fechaUltimoCambioContrasena.value =
+        datos.fechaUltimoCambioContrasena ? datos.fechaUltimoCambioContrasena.toDate() : null
 }
 
 onMounted(cargarMetadatosPerfil)
@@ -129,6 +129,7 @@ async function confirmarCambioContrasena() {
         await reautenticarUsuario(contrasenaActual.value)
         await cambiarContrasenaUsuario(contrasenaNueva.value)
         dialogoContrasenaAbierto.value = false
+        fechaUltimoCambioContrasena.value = new Date()
         toast.add({
             severity: 'success',
             summary: 'Contraseña actualizada',
@@ -156,19 +157,6 @@ const eliminandoCuenta = ref(false)
 function abrirDialogoBaja() {
     contrasenaParaBaja.value = ''
     dialogoBajaAbierto.value = true
-}
-
-function pedirConfirmacionBaja() {
-    confirm.require({
-        message:
-            'Esta acción borrará tu cuenta, todas tus participaciones y las ligas que administres en solitario. No se puede deshacer.',
-        header: '¿Eliminar tu cuenta?',
-        acceptLabel: 'Sí, eliminar',
-        rejectLabel: 'Cancelar',
-        acceptClass: '!bg-red-600 !border-red-600 !text-white',
-        rejectClass: '!bg-zinc-700 !border-zinc-700 !text-white',
-        accept: ejecutarBaja,
-    })
 }
 
 async function ejecutarBaja() {
@@ -216,8 +204,6 @@ function mensajeFirebase(error) {
 <template>
     <div class="min-h-screen bg-[#0F0F12] text-[#F0ECEC] pb-24">
         <Cabecera />
-        <Toast />
-        <ConfirmDialog />
 
         <main class="max-w-3xl mx-auto p-4 flex flex-col gap-4">
 
@@ -255,6 +241,15 @@ function mensajeFirebase(error) {
                                     : `En ${diasRestantesParaCambiarNombre} días` }}
                             </p>
                         </div>
+                        <div v-if="puedeUsarContrasena && fechaUltimoCambioContrasena">
+                            <p class="text-[10px] text-zinc-500 uppercase">Último cambio de contraseña</p>
+                            <p class="font-bold text-white">
+                                {{ fechaUltimoCambioContrasena.toLocaleDateString('es-ES', {
+                                    day: '2-digit', month:
+                                        'long', year: 'numeric'
+                                }) }}
+                            </p>
+                        </div>
                     </div>
                 </template>
             </Card>
@@ -270,10 +265,9 @@ function mensajeFirebase(error) {
                         <Button @click="abrirDialogoNombre" label="Cambiar nombre de usuario"
                             class="!bg-zinc-900 !border-zinc-700 !text-white justify-center"
                             :disabled="diasRestantesParaCambiarNombre > 0" />
-                        <Button v-if="proveedorAutenticacion !== 'google.com'" @click="abrirDialogoContrasena"
-                            label="Cambiar contraseña"
+                        <Button v-if="puedeUsarContrasena" @click="abrirDialogoContrasena" label="Cambiar contraseña"
                             class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
-                        <Message v-if="proveedorAutenticacion === 'google.com'" severity="info" :closable="false">
+                        <Message v-if="!puedeUsarContrasena" severity="info" :closable="false">
                             Iniciaste sesión con Google: gestiona tu contraseña desde tu cuenta de Google.
                         </Message>
                         <Button @click="abrirDialogoBaja" icon="pi pi-trash" label="Eliminar mi cuenta"
@@ -330,15 +324,15 @@ function mensajeFirebase(error) {
                 <Message severity="error" :closable="false">
                     Esta acción es permanente. Se borrarán tus participaciones y las ligas que administres en solitario.
                 </Message>
-                <label v-if="proveedorAutenticacion !== 'google.com'" class="text-xs text-zinc-400 uppercase">
+                <label v-if="puedeUsarContrasena" class="text-xs text-zinc-400 uppercase">
                     Confirma con tu contraseña.
                 </label>
-                <Password v-if="proveedorAutenticacion !== 'google.com'" v-model="contrasenaParaBaja" :feedback="false"
-                    toggleMask inputClass="w-full" />
+                <Password v-if="puedeUsarContrasena" v-model="contrasenaParaBaja" :feedback="false" toggleMask
+                    inputClass="w-full" />
                 <div class="flex justify-end gap-2 mt-2">
                     <Button label="Cancelar" text @click="dialogoBajaAbierto = false"
                         class="!bg-zinc-900 !border-zinc-700 !text-white" />
-                    <Button label="Eliminar" :loading="eliminandoCuenta" @click="pedirConfirmacionBaja"
+                    <Button label="Eliminar" :loading="eliminandoCuenta" @click="ejecutarBaja"
                         class="!bg-red-700 !border-red-700" />
                 </div>
             </div>

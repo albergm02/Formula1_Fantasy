@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
     eliminarLigaComoAdministrador,
     eliminarUsuarioComoAdministrador,
@@ -22,6 +22,16 @@ const ligas = ref([])
 const usuarios = ref([])
 const ligaAEliminar = ref(null)
 const usuarioAEliminar = ref(null)
+
+const fechaRegistroUsuarioSeleccionado = computed(() => {
+    const usuario = usuarios.value.find((u) => u.email === usuarioAEliminar.value)
+    if (!usuario?.fechaRegistro) return null
+    return usuario.fechaRegistro.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+    })
+})
 
 async function cargarLigas() {
     ligas.value = await cargarListaLigas()
@@ -145,6 +155,9 @@ function manejarEliminarLiga() {
                             <div class="flex flex-col gap-2">
                                 <Select v-model="usuarioAEliminar" :options="usuarios" optionLabel="etiqueta"
                                     optionValue="email" placeholder="Usuario a eliminar" filter class="flex-1" />
+                                <p v-if="fechaRegistroUsuarioSeleccionado" class="text-xs text-zinc-500">
+                                    Registrado el {{ fechaRegistroUsuarioSeleccionado }}
+                                </p>
                                 <Button @click="manejarEliminarUsuario" :loading="cargandoEliminacionUsuario"
                                     label="Eliminar" size="small" severity="danger"
                                     class="!bg-red-700 !border-red-700 !text-white" />

@@ -80,10 +80,10 @@ const handleUnirseLiga = async () => {
   }
 
   const resultado = await storeLigas.unirseALiga(codigoUnionNormalizado)
+  codigoUnion.value = ''
+  dialogoUnirseVisible.value = false
   if (resultado.success) {
     notificacion.add({ severity: 'success', summary: '¡Bienvenido!', detail: resultado.message })
-    codigoUnion.value = ''
-    dialogoUnirseVisible.value = false
   } else {
     notificacion.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.message })
   }
@@ -238,8 +238,8 @@ const handleEliminarLiga = () => {
 
     <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA">
       <div class="flex flex-col gap-4">
-        <span class="text-sm text-[#F0ECEC]">Introduce el código de invitación de 6 dígitos.</span>
-        <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3"
+        <span class="text-sm text-[#F0ECEC]">Introduce el código de invitación de 8 dígitos.</span>
+        <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3D4" maxlength="8"
           class="w-full !bg-[#121218] uppercase focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoUnirseVisible = false"

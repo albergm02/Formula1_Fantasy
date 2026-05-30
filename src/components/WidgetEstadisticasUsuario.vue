@@ -14,23 +14,21 @@ const nombreLigaActiva = computed(() => {
 </script>
 
 <template>
-  <!-- Bienvenida -->
-  <div class="flex items-center justify-between p-5 bg-transparent border-b border-zinc-800">
-    <div class="flex flex-col">
-      <span class="mb-1 text-[#D4A843] text-[10px] font-black uppercase">Bienvenido al Paddock:</span>
-      <h1 class="w-32 text-xl font-black text-white uppercase">
-        {{ nombreLigaActiva }}
-      </h1>
+  <div class="flex flex-col items-center gap-3 p-5 bg-transparent border-b border-zinc-800">
+    <!-- Bienvenida y nombre de liga centrados -->
+    <div class="flex flex-col items-center">
+      <span class="text-[#D4A843] text-xs font-black uppercase tracking-widest">Bienvenido al Paddock</span>
+      <h1 class="text-2xl font-black text-white uppercase text-center">{{ nombreLigaActiva }}</h1>
     </div>
-    <!-- Estadísticas del usuario -->
-    <div class="flex flex-col items-end gap-1">
-      <div class="flex items-center gap-2">
-        <span class="text-[#F0ECEC] text-xs font-medium uppercase">Puntos:</span>
-        <span class="px-2 text-white font-black text-lg">{{ storeEscuderia.puntos || 0 }}</span>
+    <!-- Estadísticas centradas -->
+    <div class="flex gap-8">
+      <div class="flex flex-col items-center">
+        <span class="text-[#F0ECEC] text-[10px] font-black uppercase tracking-widest">Presupuesto</span>
+        <span class="text-green-400 font-black text-xl">${{ (storeEscuderia.presupuesto || 50).toFixed(2) }}M</span>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-[#F0ECEC] text-xs font-medium uppercase">Presupuesto:</span>
-        <span class="text-green-400 font-black text-lg">${{ (storeEscuderia.presupuesto || 50).toFixed(2) }}M</span>
+      <div class="flex flex-col items-center">
+        <span class="text-[#F0ECEC] text-[10px] font-black uppercase tracking-widest">Puntos</span>
+        <span class="text-white font-black text-xl">{{ storeEscuderia.puntos || 0 }}</span>
       </div>
     </div>
   </div>

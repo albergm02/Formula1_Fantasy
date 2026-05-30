@@ -51,17 +51,17 @@ const pilotosBase = [
 
 // prettier-ignore
 const cochesBase = [
-  { id: 'alpine',       nombre: 'BWT Alpine F1', puntos: 20, imagen: '/Coches/alpine.webp',      tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Alpine.' } },
-  { id: 'aston_martin', nombre: 'Aston Martin Aramco', puntos: 10, imagen: '/Coches/astonmartin.webp', tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Aston Martin.' } },
-  { id: 'audi',         nombre: 'Audi Revolut F1', puntos: 15, imagen: '/Coches/audi.webp',        tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Audi.' } },
-  { id: 'cadillac',     nombre: 'Cadillac F1', puntos: 10, imagen: '/Coches/cadillac.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Cadillac.' } },
-  { id: 'ferrari',      nombre: 'Ferrari', puntos: 35, imagen: '/Coches/ferrari.webp',     tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 35, descripcion: 'Bono si alineas pilotos Ferrari.' } },
-  { id: 'haas',         nombre: 'TGR Haas F1', puntos: 25, imagen: '/Coches/haas.webp',        tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Bono si alineas pilotos Haas.' } },
-  { id: 'mclaren',      nombre: 'McLaren Mastercard', puntos: 30, imagen: '/Coches/mclaren.webp',     tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 30, descripcion: 'Bono si alineas pilotos McLaren.' } },
-  { id: 'mercedes',     nombre: 'Mercedes-AMG', puntos: 40, imagen: '/Coches/mercedes.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 40, descripcion: 'Bono si alineas pilotos Mercedes.' } },
-  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB', puntos: 20, imagen: '/Coches/racingbulls.webp', tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Racing Bulls.' } },
-  { id: 'red_bull',     nombre: 'Red Bull Racing', puntos: 20, imagen: '/Coches/redbull.webp',     tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Red Bull.' } },
-  { id: 'williams',     nombre: 'Atlassian Williams', puntos: 15, imagen: '/Coches/williams.webp',    tipoCarta: 'coche', perfilPuntuacion: 'coche_base_v1', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Williams.' } },
+  { id: 'alpine',       nombre: 'BWT Alpine F1', puntos: 20, imagen: '/Coches/alpine.webp',      tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Alpine.' } },
+  { id: 'aston_martin', nombre: 'Aston Martin Aramco', puntos: 10, imagen: '/Coches/astonmartin.webp', tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Aston Martin.' } },
+  { id: 'audi',         nombre: 'Audi Revolut F1', puntos: 15, imagen: '/Coches/audi.webp',        tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Audi.' } },
+  { id: 'cadillac',     nombre: 'Cadillac F1', puntos: 10, imagen: '/Coches/cadillac.webp',    tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Cadillac.' } },
+  { id: 'ferrari',      nombre: 'Ferrari', puntos: 35, imagen: '/Coches/ferrari.webp',     tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 35, descripcion: 'Bono si alineas pilotos Ferrari.' } },
+  { id: 'haas',         nombre: 'TGR Haas F1', puntos: 25, imagen: '/Coches/haas.webp',        tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Bono si alineas pilotos Haas.' } },
+  { id: 'mclaren',      nombre: 'McLaren Mastercard', puntos: 30, imagen: '/Coches/mclaren.webp',     tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 30, descripcion: 'Bono si alineas pilotos McLaren.' } },
+  { id: 'mercedes',     nombre: 'Mercedes-AMG', puntos: 40, imagen: '/Coches/mercedes.webp',    tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 40, descripcion: 'Bono si alineas pilotos Mercedes.' } },
+  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB', puntos: 20, imagen: '/Coches/racingbulls.webp', tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Racing Bulls.' } },
+  { id: 'red_bull',     nombre: 'Red Bull Racing', puntos: 20, imagen: '/Coches/redbull.webp',     tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Red Bull.' } },
+  { id: 'williams',     nombre: 'Atlassian Williams', puntos: 15, imagen: '/Coches/williams.webp',    tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Williams.' } },
 ]
 
 /* eslint-disable */

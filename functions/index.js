@@ -243,7 +243,6 @@ async function ejecutarProcesarJornada(opciones = {}) {
       fechaCarrera: granPremio.date_end,
       fechaProcesamiento: new Date().toISOString(),
       temporada: TEMPORADA_ACTUAL,
-      participacionesProcesadas,
       condiciones,
       actuacionesPorPiloto,
       desglose: desgloseJornada,
@@ -312,9 +311,7 @@ exports.procesarJornadaSemanal = onSchedule(
    {
      idLiga: string,
      estado: 'abierto' | 'cerrado',
-     fechaApertura: string (ISO),
      fechaCierre: string (ISO),   ← siguiente día a las 06:00 UTC
-     totalCartas: 18,
      cartas: [ { id, nombre, tipoCarta, precio, imagen, ... } ]
    }
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -562,15 +559,12 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
   const cartasDelDia = seleccionarCartasDiarias(catalogoConPrecios, exclusionesLiga)
 
   /* ── Crear documento del mercado de hoy para esta liga ── */
-  const fechaApertura = ahora
   const fechaCierre = calcularFechaCierre(ahora)
 
   await db.collection('mercados').doc(idMercadoHoy).set({
     idLiga,
     estado: 'abierto',
-    fechaApertura: fechaApertura.toISOString(),
     fechaCierre: fechaCierre.toISOString(),
-    totalCartas: cartasDelDia.length,
     cartas: cartasDelDia,
   })
 
@@ -1234,6 +1228,7 @@ async function eliminarCuentaUsuarioEnCascada(email) {
 
   if (uidEliminar) {
     try {
+      await getAuth().revokeRefreshTokens(uidEliminar)
       await getAuth().deleteUser(uidEliminar)
     } catch (error) {
       throw new HttpsError(

@@ -74,6 +74,7 @@ export async function cargarListaUsuarios() {
       email: d.id,
       nombre: d.data().nombre || d.id,
       esAdministrador: d.data().esAdministrador === true,
+      fechaRegistro: d.data().fechaRegistro?.toDate() ?? null,
     }))
     .filter((u) => !u.esAdministrador)
     .map((u) => ({ ...u, etiqueta: `${u.nombre} (${u.email})` }))
