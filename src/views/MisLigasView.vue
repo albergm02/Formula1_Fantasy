@@ -27,10 +27,14 @@ const ligaSeleccionada = ref(null)
 
 const cargando = ref(false)
 const cargandoAccion = ref(false)
+const cargandoParticipantes = ref(false)
 
 const dialogoCrearVisible = ref(false)
 const dialogoUnirseVisible = ref(false)
 const dialogoOpcionesVisible = ref(false)
+const dialogoParticipantesVisible = ref(false)
+
+const participantesLiga = ref([])
 
 
 onMounted(async () => {
@@ -124,6 +128,44 @@ const handleAbandonarLiga = () => {
         dialogoOpcionesVisible.value = false
       } else {
         notificacion.add({ severity: 'error', summary: 'Error al abandonar.', detail: resultado.message })
+      }
+    },
+  })
+}
+
+/* Abre el diálogo de gestión de participantes y carga la lista actualizada */
+const abrirGestionParticipantes = async () => {
+  dialogoOpcionesVisible.value = false
+  cargandoParticipantes.value = true
+  dialogoParticipantesVisible.value = true
+  try {
+    participantesLiga.value = await storeLigas.cargarParticipantesLiga(ligaSeleccionada.value.id)
+  } catch {
+    notificacion.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar la lista de participantes.' })
+  } finally {
+    cargandoParticipantes.value = false
+  }
+}
+
+/* Expulsa a un participante de la liga con confirmación previa */
+const handleExpulsarParticipante = (participante) => {
+  confirmar.require({
+    message: `¿Seguro que quieres expulsar a ${participante.nombre_usuario} de la liga?`,
+    header: 'CONFIRMACIÓN DE EXPULSIÓN',
+    acceptLabel: 'Expulsar',
+    rejectClass: '!bg-transparent !border-none !text-white',
+    acceptClass: '!bg-[#E10600] !border-none !text-white',
+    accept: async () => {
+      cargandoAccion.value = true
+      const resultado = await storeLigas.expulsarParticipante(ligaSeleccionada.value.id, participante.email_usuario)
+      cargandoAccion.value = false
+
+      if (resultado.success) {
+        notificacion.add({ severity: 'success', summary: 'Participante expulsado', detail: resultado.message })
+        participantesLiga.value = participantesLiga.value.filter((p) => p.email_usuario !== participante.email_usuario)
+        await storeLigas.cargarLigasUsuario()
+      } else {
+        notificacion.add({ severity: 'error', summary: 'Error al expulsar', detail: resultado.message })
       }
     },
   })
@@ -258,10 +300,31 @@ const handleEliminarLiga = () => {
 
         <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
           @click="handleAbandonarLiga" :loading="cargandoAccion" />
-        <!-- Aqui compruebo que la liga seleccionada pertenece al administrador o no -->
-        <Button v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion"
-          label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
-          @click="handleEliminarLiga" :loading="cargandoAccion" />
+        <!-- Opciones exclusivas del administrador de la liga -->
+        <template v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion">
+          <Button label="GESTIONAR PARTICIPANTES" class="w-full !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
+            @click="abrirGestionParticipantes" :loading="cargandoAccion" />
+          <Button label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
+            @click="handleEliminarLiga" :loading="cargandoAccion" />
+        </template>
+      </div>
+    </Dialog>
+
+    <Dialog v-model:visible="dialogoParticipantesVisible" modal header="PARTICIPANTES">
+      <div class="flex flex-col gap-3 min-w-64">
+        <div v-if="cargandoParticipantes" class="text-center text-[#F0ECEC] py-4">Cargando...</div>
+        <div v-else-if="participantesLiga.length === 0" class="text-center text-[#F0ECEC] py-4">No hay participantes.
+        </div>
+        <div v-else v-for="participante in participantesLiga" :key="participante.email_usuario"
+          class="flex items-center justify-between p-3 bg-[#1A1A1F] rounded-lg">
+          <div class="flex flex-col">
+            <span class="font-black text-white uppercase text-sm">{{ participante.nombre_usuario }}</span>
+            <span class="text-[10px] text-[#D4A843] uppercase font-bold">{{ participante.rol }}</span>
+          </div>
+          <Button v-if="participante.email_usuario !== storeAutenticacion.usuarioActual.correoAutenticacion"
+            icon="pi pi-user-minus" class="!bg-[#E10600] !border-none !text-white" :loading="cargandoAccion"
+            @click="handleExpulsarParticipante(participante)" />
+        </div>
       </div>
     </Dialog>
   </div>

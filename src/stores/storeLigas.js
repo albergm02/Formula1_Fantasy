@@ -18,6 +18,7 @@ import {
   desvincularLigaDelUsuario,
   cargarRankingLiga,
   inicializarMercadoLiga,
+  añadirEmailExpulsado,
 } from '@/services/servicioLigas'
 
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
@@ -159,6 +160,14 @@ export const usarStoreLigas = defineStore('ligas', () => {
         return { success: false, message: 'Ya perteneces a esta liga.' }
       }
 
+      const expulsados = liga.expulsados || []
+      if (expulsados.includes(correoUsuario)) {
+        return {
+          success: false,
+          message: 'Has sido expulsado de esta liga y no puedes volver a unirte.',
+        }
+      }
+
       await crearParticipacion({
         id_liga: liga.id,
         email_usuario: correoUsuario,
@@ -254,6 +263,72 @@ export const usarStoreLigas = defineStore('ligas', () => {
   }
 
   /**
+   * Expulsa a un participante concreto de la liga.
+   * Solo el administrador puede ejecutar esta acción.
+   * No se puede expulsar al propio administrador mediante esta función.
+   * @param {string} idLiga
+   * @param {string} emailParticipante - Email del participante a expulsar.
+   * @returns {Promise<{ success: boolean, message: string }>}
+   */
+  async function expulsarParticipante(idLiga, emailParticipante) {
+    const storeAutenticacion = usarStoreAutenticacion()
+    const correoAdmin = storeAutenticacion.usuarioActual.correoAutenticacion
+
+    if (emailParticipante === correoAdmin) {
+      return { success: false, message: 'No puedes expulsarte a ti mismo. Usa "Abandonar liga".' }
+    }
+
+    try {
+      const datosLiga = await cargarLiga(idLiga)
+      if (!datosLiga) return { success: false, message: 'La liga no existe.' }
+
+      if (datosLiga.admin !== correoAdmin) {
+        return { success: false, message: 'Solo el administrador puede expulsar participantes.' }
+      }
+
+      const participaciones = await cargarParticipacionesLiga(idLiga)
+      const participacionExpulsado = participaciones.find(
+        (p) => p.email_usuario === emailParticipante,
+      )
+
+      if (!participacionExpulsado) {
+        return { success: false, message: 'El participante no pertenece a esta liga.' }
+      }
+
+      await eliminarParticipacion(participacionExpulsado.id)
+      await desvincularLigaDelUsuario(emailParticipante, idLiga)
+      await añadirEmailExpulsado(idLiga, emailParticipante)
+      await actualizarLiga(idLiga, { participantes: datosLiga.participantes - 1 })
+
+      registrarActividad(idLiga, {
+        nombreUsuario: participacionExpulsado.nombre_usuario || emailParticipante,
+        tipo: TIPOS_ACTIVIDAD.ABANDONO,
+        descripcion: `ha sido expulsado del campeonato ${datosLiga.nombre}`,
+      }).catch(() => {})
+
+      return {
+        success: true,
+        message: `${participacionExpulsado.nombre_usuario || emailParticipante} ha sido expulsado.`,
+      }
+    } catch (error) {
+      return { success: false, message: `Error al expulsar al participante: ${error.message}` }
+    }
+  }
+
+  /**
+   * Devuelve la lista de participantes de una liga con sus datos básicos.
+   * @param {string} idLiga
+   * @returns {Promise<Array>}
+   */
+  async function cargarParticipantesLiga(idLiga) {
+    try {
+      return await cargarParticipacionesLiga(idLiga)
+    } catch (error) {
+      throw new Error(`Error al cargar los participantes de la liga ${idLiga}: ${error.message}`)
+    }
+  }
+
+  /**
    * Elimina la liga y expulsa a todos sus participantes.
    * Solo puede ejecutarla el administrador de la liga.
    * @param {string} idLiga
@@ -315,6 +390,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
     crearLiga,
     unirseALiga,
     abandonarLiga,
+    expulsarParticipante,
+    cargarParticipantesLiga,
     eliminarLiga,
     cargarClasificacion,
   }

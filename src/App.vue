@@ -6,28 +6,51 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import GestorPWA from '@/components/GestorPWA.vue'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
+import { usarStoreLigas } from '@/stores/storeLigas'
+import { escucharCambioEstadoAutenticacion, escucharPerfilUsuario } from '@/services/servicioAutenticacion'
 
 const storeAutenticacion = usarStoreAutenticacion()
+const storeLigas = usarStoreLigas()
 const router = useRouter()
 
 let cancelarObservadorAutenticacion = () => { }
+let cancelarEscuchaPerfil = () => { }
 
-// Si Firebase detecta que el usuario cerró sesión, limpiamos el store y
-// expulsamos al login salvo que ya esté en una ruta pública.
 onMounted(() => {
   cancelarObservadorAutenticacion = escucharCambioEstadoAutenticacion((usuario) => {
     if (!usuario) {
+      cancelarEscuchaPerfil()
+      cancelarEscuchaPerfil = () => { }
       storeAutenticacion.limpiarSesion()
       const rutaActual = router.currentRoute.value.path
       const estaEnRutaPublica = rutaActual === '/' || rutaActual === '/registro'
       if (!estaEnRutaPublica) router.push('/')
+    } else {
+      cancelarEscuchaPerfil()
+      cancelarEscuchaPerfil = escucharPerfilUsuario(usuario.email, async (datosPerfil) => {
+        if (!storeAutenticacion.datosCargados) return
+
+        const idsNuevos = datosPerfil.ligasIds || []
+        const idsAnteriores = storeAutenticacion.usuarioActual.idsLigas
+        const ligasEliminadas = idsAnteriores.filter((id) => !idsNuevos.includes(id))
+
+        if (ligasEliminadas.length === 0) return
+
+        storeAutenticacion.actualizarIdsLigas(idsNuevos)
+        await storeLigas.cargarLigasUsuario()
+
+        if (ligasEliminadas.includes(storeLigas.idLigaActiva)) {
+          storeLigas.idLigaActiva = null
+          router.push({ name: 'ligas' })
+        }
+      })
     }
   })
 })
 
 onUnmounted(() => {
   cancelarObservadorAutenticacion()
+  cancelarEscuchaPerfil()
 })
 </script>
 

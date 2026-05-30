@@ -95,6 +95,17 @@ export const actualizarLiga = async (idLiga, datos) => {
 }
 
 /**
+ * Añade un correo a la lista de usuarios expulsados de una liga.
+ * Impide que el usuario pueda volver a unirse con el mismo código de invitación.
+ * @param {string} idLiga
+ * @param {string} correoExpulsado
+ * @returns {Promise<void>}
+ */
+export const añadirEmailExpulsado = async (idLiga, correoExpulsado) => {
+  await updateDoc(doc(db, 'ligas', idLiga), { expulsados: arrayUnion(correoExpulsado) })
+}
+
+/**
  * Elimina el documento de una liga de Firestore.
  * @param {string} idLiga
  * @returns {Promise<void>}

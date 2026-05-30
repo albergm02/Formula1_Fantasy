@@ -90,6 +90,16 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     datosCargados.value = true
   }
 
+  /**
+   * Actualiza la lista de IDs de ligas del usuario en el estado local.
+   * Invocado por el listener en tiempo real de App.vue cuando Firestore notifica
+   * que ligasIds cambió (p.ej. tras una expulsión por parte del administrador).
+   * @param {string[]} idsNuevos - El nuevo array de IDs de ligas.
+   */
+  function actualizarIdsLigas(idsNuevos) {
+    usuarioActual.value.idsLigas = idsNuevos
+  }
+
   return {
     usuarioActual,
     perfilExiste,
@@ -98,5 +108,6 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     cargarOCrearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,
+    actualizarIdsLigas,
   }
 })

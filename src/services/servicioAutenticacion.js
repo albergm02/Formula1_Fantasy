@@ -13,7 +13,15 @@
   updatePassword,
 } from 'firebase/auth'
 
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  Timestamp,
+  onSnapshot,
+} from 'firebase/firestore'
 import { auth, db } from './servicioFirebase'
 
 const googleProvider = new GoogleAuthProvider()
@@ -221,3 +229,16 @@ export const reiniciarContadorIntentos = async (correo) => {
     fechaBloqueoDeSesion: null,
   })
 }
+
+/**
+ * Registra un observador en tiempo real sobre el documento de perfil del usuario.
+ * Invoca el callback con los datos actualizados cada vez que Firestore notifica un cambio.
+ * Usado para detectar expulsiones de ligas sin necesidad de recargar la página.
+ * @param {string} correoUsuario - El correo del usuario (ID del documento en /usuarios).
+ * @param {function} callback - Recibe los datos del perfil en cada cambio.
+ * @returns {function} Función para cancelar el observador (unsubscribe).
+ */
+export const escucharPerfilUsuario = (correoUsuario, callback) =>
+  onSnapshot(doc(db, 'usuarios', correoUsuario), (instantanea) => {
+    if (instantanea.exists()) callback(instantanea.data())
+  })
