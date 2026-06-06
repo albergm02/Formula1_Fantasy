@@ -2,8 +2,8 @@
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 
 /**
- * Bandera compartida para evitar un bucle de recargas si varios mecanismos
- * se disparan en la misma sesión.
+ * Bandera compartida para evitar un bucle de recargas si ambos mecanismos
+ * (onNeedRefresh y controllerchange) se disparan en la misma sesión.
  */
 let actualizandoPagina = false
 
@@ -33,33 +33,6 @@ if ('serviceWorker' in navigator) {
         window.location.reload()
     })
 }
-
-/**
- * Mecanismo de seguridad para iOS con la app en background (NO cerrada del todo).
- * Cuando el usuario vuelve a la app tras más de 5 minutos suspendida, iOS puede
- * haber dejado el JS antiguo en memoria. Forzamos recarga para evitar que Vue
- * Router intente cargar chunks con hashes desactualizados.
- * Nota: el caso «app cerrada y reabierta» (cold start) está resuelto a nivel
- * de servidor — firebase.json sirve index.html con Cache-Control: no-cache en
- * la ruta «/», garantizando que iOS siempre descargue el index.html más reciente.
- */
-const MINUTOS_PARA_FORZAR_RECARGA = 5
-let momentoOcultacion = null
-
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        momentoOcultacion = Date.now()
-        return
-    }
-
-    if (!momentoOcultacion) return
-    const minutosEnBackground = (Date.now() - momentoOcultacion) / 60000
-
-    if (minutosEnBackground >= MINUTOS_PARA_FORZAR_RECARGA && !actualizandoPagina) {
-        actualizandoPagina = true
-        window.location.reload()
-    }
-})
 </script>
 
 <template>

@@ -19,8 +19,8 @@ const {
 const { seleccionarPujasGanadoras } = require('./pujasServer')
 
 initializeApp()
-const db = getFirestore()
 
+const db = getFirestore()
 const TEMPORADA_ACTUAL = 2026
 
 /**
@@ -92,10 +92,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
   const { forzar = false, idLiga = null, meetingKey: meetingKeyForzado = null } = opciones
   const reprocesoPorLiga = Boolean(idLiga)
 
-  // Buscamos el GP más reciente con datos disponibles en OpenF1.
-  // Algunos GPs pueden estar marcados como finalizados pero no tener datos
-  // (cancelados por fuerza mayor, sin /position publicado, etc.). Iteramos
-  // hacia atrás hasta encontrar uno válido o agotar la lista.
+  // Buscamos el GP más reciente con datos disponibles en OpenF1
   let candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
   if (candidatos.length === 0) {
     console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
@@ -284,15 +281,24 @@ async function ejecutarProcesarJornada(opciones = {}) {
  * Cloud Function programada — procesa la jornada del último GP finalizado.
  * Se ejecuta cada lunes a las 02:00 UTC, una vez concluido el fin de semana de F1.
  * Es idempotente: si la jornada ya fue procesada, no repite cálculos.
+ *
+ * Si la función lanza un error (p.ej. OpenF1 no responde), Cloud Scheduler
+ * la reintentará automáticamente hasta 3 veces con una espera mínima de
+ * 30 minutos entre intentos, sin consumir tiempo de ejecución esperando.
  */
 exports.procesarJornadaSemanal = onSchedule(
   {
     schedule: 'every monday 02:00',
     timeZone: 'UTC',
     region: 'europe-west1',
+    retryCount: 3,
+    minBackoffSeconds: 1800,
   },
   async () => {
-    await ejecutarProcesarJornada()
+    const resultado = await ejecutarProcesarJornada()
+    if (!resultado.ok && resultado.motivo !== 'jornada_ya_procesada') {
+      throw new Error(`[Jornada] Procesamiento fallido: ${resultado.motivo}`)
+    }
   },
 )
 
@@ -579,23 +585,40 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
 /**
  * Cloud Function programada — se ejecuta cada día a las 06:00 UTC.
  * Genera el mercado diario para TODAS las ligas existentes.
+ *
+ * Si alguna liga falla tras sus reintentos inmediatos, la función lanza
+ * un error para que Cloud Scheduler la reintente completa tras 30 minutos
+ * (hasta 3 veces). Las ligas ya procesadas son idempotentes y no se duplican.
  */
 exports.generarMercadoDiario = onSchedule(
   {
     schedule: 'every day 06:00',
     timeZone: 'UTC',
     region: 'europe-west1',
+    retryCount: 3,
+    minBackoffSeconds: 1800,
   },
   async () => {
     const todasLigas = await db.collection('ligas').get()
     const resultados = []
+    const ligasFallidas = []
 
     for (const docLiga of todasLigas.docs) {
-      const resultado = await ejecutarGeneracionMercadoParaLiga(docLiga.id)
-      resultados.push(resultado)
+      try {
+        const resultado = await ejecutarGeneracionMercadoParaLiga(docLiga.id)
+        resultados.push(resultado)
+      } catch (error) {
+        console.error(`[Mercado Diario] Liga ${docLiga.id} fallida: ${error.message}`)
+        resultados.push({ idLiga: docLiga.id, error: error.message })
+        ligasFallidas.push(docLiga.id)
+      }
     }
 
-    console.log(`[Mercado Diario] ${resultados.length} ligas procesadas.`)
+    if (ligasFallidas.length > 0) {
+      throw new Error(
+        `[Mercado Diario] ${ligasFallidas.length} liga(s) fallida(s): ${ligasFallidas.join(', ')}`,
+      )
+    }
   },
 )
 
@@ -1023,12 +1046,38 @@ exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request
     throw new HttpsError('already-exists', 'Ese nombre ya está en uso.')
   }
 
-  await db.collection('usuarios').doc(email).update({
+  const nombreAnterior = datos.nombre
+
+  const [participacionesSnap, actividadSnap] = await Promise.all([
+    db.collection('participaciones').where('email_usuario', '==', email).get(),
+    nombreAnterior
+      ? db.collection('actividad').where('nombreUsuario', '==', nombreAnterior).get()
+      : Promise.resolve({ docs: [] }),
+  ])
+
+  const batch = db.batch()
+
+  batch.update(db.collection('usuarios').doc(email), {
     nombre: nombreNuevo,
     fechaUltimoCambioNombre: new Date().toISOString(),
   })
 
-  return { ok: true, nombre: nombreNuevo }
+  for (const documento of participacionesSnap.docs) {
+    batch.update(documento.ref, { nombre_usuario: nombreNuevo })
+  }
+
+  for (const documento of actividadSnap.docs) {
+    batch.update(documento.ref, { nombreUsuario: nombreNuevo })
+  }
+
+  await batch.commit()
+
+  return {
+    ok: true,
+    nombre: nombreNuevo,
+    participacionesActualizadas: participacionesSnap.size,
+    eventosActividadActualizados: actividadSnap.docs.length,
+  }
 })
 
 /**
@@ -1248,6 +1297,94 @@ exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) =>
   const email = exigirEmailAutenticado(request)
   const resultado = await eliminarCuentaUsuarioEnCascada(email)
   return { ok: true, email, ...resultado }
+})
+
+/* ─── Protección anti fuerza bruta ──────────────────────────────────────── */
+
+const MAXIMO_INTENTOS_FALLIDOS = 5
+const DURACION_BLOQUEO_MINUTOS = 5
+
+/**
+ * Callable pública — verifica si un correo tiene bloqueo temporal activo.
+ * No requiere sesión de Firebase Auth porque se invoca antes del login.
+ * Si el correo no existe en Firestore, retorna sin bloqueo.
+ * @param {{ correo: string }} data
+ * @returns {{ bloqueado: false } | never}
+ */
+exports.verificarBloqueoAcceso = onCall(
+  { region: 'europe-west1', invoker: 'public' },
+  async (request) => {
+    const correo = String(request.data?.correo || '')
+      .trim()
+      .toLowerCase()
+    if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
+
+    const usuarioSnap = await db.collection('usuarios').doc(correo).get()
+    if (!usuarioSnap.exists) return { bloqueado: false }
+
+    const { fechaBloqueoDeSesion } = usuarioSnap.data()
+    if (!fechaBloqueoDeSesion) return { bloqueado: false }
+
+    const fechaDesbloqueo = fechaBloqueoDeSesion.toDate()
+    if (new Date() < fechaDesbloqueo) {
+      const minutosRestantes = Math.ceil((fechaDesbloqueo - new Date()) / 60000)
+      throw new HttpsError(
+        'resource-exhausted',
+        `Acceso bloqueado. Intenta de nuevo en ${minutosRestantes} minuto${minutosRestantes > 1 ? 's' : ''}.`,
+      )
+    }
+
+    return { bloqueado: false }
+  },
+)
+
+/**
+ * Callable pública — incrementa el contador de intentos fallidos de un correo.
+ * Al alcanzar el límite activa un bloqueo temporal de 5 minutos.
+ * No requiere sesión de Firebase Auth porque se invoca tras un fallo de credenciales.
+ * @param {{ correo: string }} data
+ * @returns {{ ok: true }}
+ */
+exports.registrarIntentoFallido = onCall(
+  { region: 'europe-west1', invoker: 'public' },
+  async (request) => {
+    const correo = String(request.data?.correo || '')
+      .trim()
+      .toLowerCase()
+    if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
+
+    const docRef = db.collection('usuarios').doc(correo)
+    const usuarioSnap = await docRef.get()
+    if (!usuarioSnap.exists) return { ok: true }
+
+    const intentosPrevios = usuarioSnap.data().contadorIntentosFallidos || 0
+    const nuevosIntentos = intentosPrevios + 1
+    const actualizacion = { contadorIntentosFallidos: nuevosIntentos }
+
+    if (nuevosIntentos >= MAXIMO_INTENTOS_FALLIDOS) {
+      const fechaDesbloqueo = new Date(Date.now() + DURACION_BLOQUEO_MINUTOS * 60 * 1000)
+      actualizacion.fechaBloqueoDeSesion = fechaDesbloqueo
+    }
+
+    await docRef.update(actualizacion)
+    return { ok: true }
+  },
+)
+
+/**
+ * Callable autenticada — reinicia el contador de intentos fallidos tras un login exitoso.
+ * Solo puede llamarla el propio usuario autenticado.
+ * @returns {{ ok: true }}
+ */
+exports.reiniciarContadorIntentos = onCall({ region: 'europe-west1' }, async (request) => {
+  const email = exigirEmailAutenticado(request)
+
+  const docRef = db.collection('usuarios').doc(email)
+  const usuarioSnap = await docRef.get()
+  if (!usuarioSnap.exists) return { ok: true }
+
+  await docRef.update({ contadorIntentosFallidos: 0, fechaBloqueoDeSesion: null })
+  return { ok: true }
 })
 
 /**

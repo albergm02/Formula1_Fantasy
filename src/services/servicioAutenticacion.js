@@ -13,16 +13,13 @@
   updatePassword,
 } from 'firebase/auth'
 
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-  Timestamp,
-  onSnapshot,
-} from 'firebase/firestore'
-import { auth, db } from './servicioFirebase'
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore'
+import { httpsCallable } from 'firebase/functions'
+import { auth, db, functions } from './servicioFirebase'
+
+const llamadaVerificarBloqueo = httpsCallable(functions, 'verificarBloqueoAcceso')
+const llamadaRegistrarIntentoFallido = httpsCallable(functions, 'registrarIntentoFallido')
+const llamadaReiniciarContador = httpsCallable(functions, 'reiniciarContadorIntentos')
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -170,64 +167,38 @@ const DURACION_BLOQUEO_MINUTOS = 5
 
 /**
  * Verifica si el correo tiene un bloqueo temporal activo por intentos fallidos.
+ * Delega en la Cloud Function `verificarBloqueoAcceso` que opera con permisos de administrador.
  * Lanza un error con los minutos restantes si el bloqueo sigue vigente.
  * @param {string} correo - Correo del usuario a verificar.
  * @returns {Promise<void>}
  */
 export const verificarBloqueoAcceso = async (correo) => {
-  const docRef = doc(db, 'usuarios', correo)
-  const docSnap = await getDoc(docRef)
-  if (!docSnap.exists()) return
-
-  const { fechaBloqueoDeSesion } = docSnap.data()
-  if (!fechaBloqueoDeSesion) return
-
-  const fechaDesbloqueo = fechaBloqueoDeSesion.toDate()
-  if (new Date() < fechaDesbloqueo) {
-    const minutosRestantes = Math.ceil((fechaDesbloqueo - new Date()) / 60000)
-    throw new Error(
-      `Acceso bloqueado. Intenta de nuevo en ${minutosRestantes} minuto${minutosRestantes > 1 ? 's' : ''}.`,
-    )
+  try {
+    await llamadaVerificarBloqueo({ correo: correo.trim().toLowerCase() })
+  } catch (error) {
+    throw new Error(error.message)
   }
 }
 
 /**
  * Registra un intento fallido de inicio de sesión.
  * Al alcanzar el máximo de intentos, activa un bloqueo temporal de 5 minutos.
+ * Delega en la Cloud Function `registrarIntentoFallido` que opera con permisos de administrador.
  * @param {string} correo - Correo del usuario que falló el intento.
  * @returns {Promise<void>}
  */
 export const registrarIntentoFallido = async (correo) => {
-  const docRef = doc(db, 'usuarios', correo)
-  const docSnap = await getDoc(docRef)
-  if (!docSnap.exists()) return
-
-  const intentosPrevios = docSnap.data().contadorIntentosFallidos || 0
-  const nuevosIntentos = intentosPrevios + 1
-  const actualizacion = { contadorIntentosFallidos: nuevosIntentos }
-
-  if (nuevosIntentos >= MAXIMO_INTENTOS_FALLIDOS) {
-    const fechaDesbloqueo = new Date(Date.now() + DURACION_BLOQUEO_MINUTOS * 60 * 1000)
-    actualizacion.fechaBloqueoDeSesion = Timestamp.fromDate(fechaDesbloqueo)
-  }
-
-  await updateDoc(docRef, actualizacion)
+  await llamadaRegistrarIntentoFallido({ correo: correo.trim().toLowerCase() }).catch(() => {})
 }
 
 /**
  * Reinicia el contador de intentos fallidos tras un inicio de sesión exitoso.
+ * Delega en la Cloud Function `reiniciarContadorIntentos` que opera con permisos de administrador.
  * @param {string} correo - Correo del usuario autenticado.
  * @returns {Promise<void>}
  */
 export const reiniciarContadorIntentos = async (correo) => {
-  const docRef = doc(db, 'usuarios', correo)
-  const docSnap = await getDoc(docRef)
-  if (!docSnap.exists()) return
-
-  await updateDoc(docRef, {
-    contadorIntentosFallidos: 0,
-    fechaBloqueoDeSesion: null,
-  })
+  await llamadaReiniciarContador({ correo }).catch(() => {})
 }
 
 /**

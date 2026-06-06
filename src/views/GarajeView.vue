@@ -62,9 +62,14 @@ onMounted(async () => {
 
 /**
  * Solicita confirmación antes de vender el coche del garaje.
+ * Bloquea la venta si la jornada está en curso y el chasis está en uso.
  * @param {Object} coche - El objeto coche que se desea vender.
  */
 const confirmarVentaCoche = (coche) => {
+  if (jornadaIniciada.value && coche.equipado) {
+    notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: 'No puedes vender un chasis alineado mientras la jornada está en curso.', life: 5000 })
+    return
+  }
   const valorReventa = calcularValorReventa(coche.precio).toFixed(2)
 
   confirmar.require({
@@ -86,9 +91,14 @@ const confirmarVentaCoche = (coche) => {
 
 /**
  * Solicita confirmación antes de rescindir el contrato de un piloto.
+ * Bloquea la venta si la jornada está en curso y el piloto está alineado como titular.
  * @param {Object} piloto - El objeto piloto que se desea despedir.
  */
 const confirmarVentaPiloto = (piloto) => {
+  if (jornadaIniciada.value && piloto.equipado) {
+    notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: 'No puedes despedir a un piloto titular mientras la jornada está en curso.', life: 5000 })
+    return
+  }
   const valorReventa = calcularValorReventa(piloto.precio).toFixed(2)
 
   confirmar.require({
