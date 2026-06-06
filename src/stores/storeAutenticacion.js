@@ -4,6 +4,7 @@ import { cargarPerfilUsuario, crearPerfilUsuario } from '@/services/servicioAute
 
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const usuarioActual = ref({
+    uid: '',
     correoAutenticacion: '',
     nombreVisible: '',
     idsLigas: [],
@@ -16,15 +17,17 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
    * Carga el perfil del usuario desde Firestore y actualiza el estado.
    * Si el perfil no existe, lo crea con los datos básicos proporcionados.
    * Usado en los flujos de registro (email/contraseña y Google completado).
+   * @param {string} uid - UID de Firebase Auth (clave del documento en Firestore).
    * @param {string} correoUsuario
    * @param {string} nombreUsuario
    */
-  async function cargarOCrearPerfil(correoUsuario, nombreUsuario = '') {
+  async function cargarOCrearPerfil(uid, correoUsuario, nombreUsuario = '') {
     datosCargados.value = false
+    usuarioActual.value.uid = uid
     usuarioActual.value.correoAutenticacion = correoUsuario
 
     try {
-      const datosPerfil = await cargarPerfilUsuario(correoUsuario)
+      const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
         usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
@@ -34,7 +37,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
         return
       }
 
-      await crearPerfilUsuario(correoUsuario, nombreUsuario)
+      await crearPerfilUsuario(uid, correoUsuario, nombreUsuario)
       usuarioActual.value.nombreVisible = nombreUsuario
       usuarioActual.value.idsLigas = []
       perfilExiste.value = true
@@ -47,15 +50,17 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
    * Verifica si el perfil del usuario existe en Firestore y carga sus datos.
    * No crea el perfil si no existe: devuelve false para que el llamador decida.
    * Usado en el inicio de sesión y en el guardia de navegación del router.
+   * @param {string} uid - UID de Firebase Auth (clave del documento en Firestore).
    * @param {string} correoUsuario
    * @returns {Promise<boolean>} true si el perfil existe y se cargó, false si no existe.
    */
-  async function verificarExistenciaPerfil(correoUsuario) {
+  async function verificarExistenciaPerfil(uid, correoUsuario) {
     datosCargados.value = false
+    usuarioActual.value.uid = uid
     usuarioActual.value.correoAutenticacion = correoUsuario
 
     try {
-      const datosPerfil = await cargarPerfilUsuario(correoUsuario)
+      const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
         usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
@@ -81,6 +86,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   function limpiarSesion() {
     datosCargados.value = false
     usuarioActual.value = {
+      uid: '',
       correoAutenticacion: '',
       nombreVisible: '',
       idsLigas: [],

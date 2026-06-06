@@ -55,7 +55,7 @@ const handleRegistro = async ({ valid, values }) => {
   try {
     const credencialUsuario = await registrarse(correoNormalizado, values.password)
     await enviarVerificacionCorreo()
-    await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.email, nombreNormalizado)
+    await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.uid, credencialUsuario.user.email, nombreNormalizado)
     router.push('/verificar-correo')
   } catch (error) {
     if (error?.code === 'auth/email-already-in-use') {

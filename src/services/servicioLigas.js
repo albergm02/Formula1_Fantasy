@@ -176,22 +176,24 @@ export const contarLigasAdministradas = async (correoUsuario) => {
 
 /**
  * Añade el ID de una liga al array de ligas del usuario en Firestore.
- * @param {string} correoUsuario
+ * El documento se identifica por el UID de Firebase Auth, no por el correo.
+ * @param {string} uid - UID de Firebase Auth del usuario.
  * @param {string} idLiga
  * @returns {Promise<void>}
  */
-export const vincularLigaAlUsuario = async (correoUsuario, idLiga) => {
-  await updateDoc(doc(db, 'usuarios', correoUsuario), { ligasIds: arrayUnion(idLiga) })
+export const vincularLigaAlUsuario = async (uid, idLiga) => {
+  await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayUnion(idLiga) })
 }
 
 /**
  * Elimina el ID de una liga del array de ligas del usuario en Firestore.
- * @param {string} correoUsuario
+ * El documento se identifica por el UID de Firebase Auth, no por el correo.
+ * @param {string} uid - UID de Firebase Auth del usuario.
  * @param {string} idLiga
  * @returns {Promise<void>}
  */
-export const desvincularLigaDelUsuario = async (correoUsuario, idLiga) => {
-  await updateDoc(doc(db, 'usuarios', correoUsuario), { ligasIds: arrayRemove(idLiga) })
+export const desvincularLigaDelUsuario = async (uid, idLiga) => {
+  await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayRemove(idLiga) })
 }
 
 /**

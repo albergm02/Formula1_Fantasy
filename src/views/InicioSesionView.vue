@@ -57,8 +57,8 @@ const handleInicioSesion = async ({ valid, values }) => {
   try {
     await verificarBloqueoAcceso(values.email.trim())
     const credencialUsuario = await iniciarSesion(values.email, values.password)
-    await reiniciarContadorIntentos(credencialUsuario.user.email)
-    await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.email)
+    await reiniciarContadorIntentos()
+    await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.uid, credencialUsuario.user.email)
     const destino = storeAuth.esAdministrador ? '/admin' : '/ligas'
     router.push(destino)
   } catch (error) {
@@ -97,7 +97,7 @@ const handleInicioSesionGoogle = async () => {
     }
 
     // ¿Estaba ya registrado? ->
-    const perfilEncontrado = await storeAuth.verificarExistenciaPerfil(correoGoogle)
+    const perfilEncontrado = await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.uid, correoGoogle)
 
     // Sí.
     if (perfilEncontrado) {

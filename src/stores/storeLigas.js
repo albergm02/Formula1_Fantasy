@@ -22,6 +22,7 @@ import {
 } from '@/services/servicioLigas'
 
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
+import { buscarUidPorCorreo } from '@/services/servicioAutenticacion'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
 const MAX_LIGAS = 5
@@ -67,9 +68,9 @@ export const usarStoreLigas = defineStore('ligas', () => {
       const idsHuerfanos = idsAlmacenados.filter((id) => !idsValidos.includes(id))
 
       if (idsHuerfanos.length > 0) {
-        const correo = storeAutenticacion.usuarioActual.correoAutenticacion
+        const uid = storeAutenticacion.usuarioActual.uid
         for (const idHuerfano of idsHuerfanos) {
-          await desvincularLigaDelUsuario(correo, idHuerfano)
+          await desvincularLigaDelUsuario(uid, idHuerfano)
         }
         storeAutenticacion.usuarioActual.idsLigas = idsValidos
       }
@@ -88,6 +89,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
   async function crearLiga(nombreLiga) {
     const storeAutenticacion = usarStoreAutenticacion()
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
+    const uid = storeAutenticacion.usuarioActual.uid
 
     if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
       return { success: false, message: 'Solo puedes pertenecer a un máximo de 5 ligas.' }
@@ -113,6 +115,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       await crearParticipacion({
         id_liga: idLiga,
+        uid_usuario: uid,
         email_usuario: correoUsuario,
         nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
         rol: 'admin',
@@ -122,7 +125,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         fecha_union: new Date(),
       })
 
-      await vincularLigaAlUsuario(correoUsuario, idLiga)
+      await vincularLigaAlUsuario(uid, idLiga)
       storeAutenticacion.usuarioActual.idsLigas.push(idLiga)
 
       inicializarMercadoLiga(idLiga).catch(() => {})
@@ -145,6 +148,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
   async function unirseALiga(codigoInvitacion) {
     const storeAutenticacion = usarStoreAutenticacion()
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
+    const uid = storeAutenticacion.usuarioActual.uid
 
     if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
       return { success: false, message: 'Solo puedes pertenecer a un máximo de 5 ligas.' }
@@ -170,6 +174,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       await crearParticipacion({
         id_liga: liga.id,
+        uid_usuario: uid,
         email_usuario: correoUsuario,
         nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
         rol: 'miembro',
@@ -180,7 +185,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       })
 
       await actualizarLiga(liga.id, { participantes: liga.participantes + 1 })
-      await vincularLigaAlUsuario(correoUsuario, liga.id)
+      await vincularLigaAlUsuario(uid, liga.id)
       storeAutenticacion.usuarioActual.idsLigas.push(liga.id)
 
       registrarActividad(liga.id, {
@@ -245,7 +250,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }).catch(() => {})
 
       await eliminarParticipacion(participacionPropia.id)
-      await desvincularLigaDelUsuario(correoUsuario, idLiga)
+      await desvincularLigaDelUsuario(storeAutenticacion.usuarioActual.uid, idLiga)
 
       storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,
@@ -296,7 +301,11 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }
 
       await eliminarParticipacion(participacionExpulsado.id)
-      await desvincularLigaDelUsuario(emailParticipante, idLiga)
+
+      const uidExpulsado =
+        participacionExpulsado.uid_usuario || (await buscarUidPorCorreo(emailParticipante))
+      if (uidExpulsado) await desvincularLigaDelUsuario(uidExpulsado, idLiga)
+
       await añadirEmailExpulsado(idLiga, emailParticipante)
       await actualizarLiga(idLiga, { participantes: datosLiga.participantes - 1 })
 
@@ -337,6 +346,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
   async function eliminarLiga(idLiga) {
     const storeAutenticacion = usarStoreAutenticacion()
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
+    const uid = storeAutenticacion.usuarioActual.uid
 
     try {
       const datosLiga = await cargarLiga(idLiga)
@@ -353,7 +363,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         await eliminarParticipacion(participacion.id)
       }
 
-      await desvincularLigaDelUsuario(correoUsuario, idLiga)
+      await desvincularLigaDelUsuario(uid, idLiga)
       await eliminarDocumentoLiga(idLiga)
       storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,

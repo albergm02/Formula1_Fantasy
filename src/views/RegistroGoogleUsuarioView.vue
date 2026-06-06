@@ -42,6 +42,7 @@ const handleCompletarPerfil = async ({ valid, values }) => {
     }
 
     await storeAutenticacion.cargarOCrearPerfil(
+      storeAutenticacion.usuarioActual.uid,
       storeAutenticacion.usuarioActual.correoAutenticacion,
       nombreNormalizado
     )

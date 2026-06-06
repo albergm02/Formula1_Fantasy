@@ -59,7 +59,7 @@ const comprobarVerificacion = async () => {
         const usuario = await obtenerUsuarioActual()
         await usuario.reload()
         if (usuario.emailVerified) {
-            await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
+            await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
             router.push('/ligas')
         } else {
             notificacion.add({

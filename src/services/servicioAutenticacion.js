@@ -13,7 +13,19 @@
   updatePassword,
 } from 'firebase/auth'
 
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore'
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  onSnapshot,
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+} from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { auth, db, functions } from './servicioFirebase'
 
@@ -96,25 +108,28 @@ export const obtenerUsuarioActual = () =>
   })
 
 /**
- * Carga el perfil del usuario desde Firestore.
+ * Carga el perfil del usuario desde Firestore usando el UID como clave primaria.
  * Devuelve un objeto vacío si el documento no existe.
- * @param {string} correoUsuario - El correo que actúa como identificador del documento.
+ * @param {string} uid - El UID de Firebase Auth que identifica el documento.
  * @returns {Promise<Object>} Datos del perfil o {} si no existe.
  */
-export const cargarPerfilUsuario = async (correoUsuario) => {
-  const docRef = doc(db, 'usuarios', correoUsuario)
+export const cargarPerfilUsuario = async (uid) => {
+  const docRef = doc(db, 'usuarios', uid)
   const docSnap = await getDoc(docRef)
   return docSnap.exists() ? docSnap.data() : {}
 }
 
 /**
  * Crea un nuevo documento de perfil en la colección 'usuarios' de Firestore.
- * @param {string} correoUsuario - El correo del usuario (usado como ID del documento).
+ * El documento se indexa por el UID de Firebase Auth, no por el correo,
+ * de modo que un cambio de email no requiere migrar el documento.
+ * @param {string} uid - El UID de Firebase Auth (clave del documento).
+ * @param {string} correoUsuario - El correo del usuario (guardado como campo).
  * @param {string} nombreUsuario - El nombre visible elegido por el usuario.
  * @returns {Promise<void>}
  */
-export const crearPerfilUsuario = async (correoUsuario, nombreUsuario) => {
-  const docRef = doc(db, 'usuarios', correoUsuario)
+export const crearPerfilUsuario = async (uid, correoUsuario, nombreUsuario) => {
+  const docRef = doc(db, 'usuarios', uid)
   await setDoc(docRef, {
     correoAutenticacion: correoUsuario,
     nombre: nombreUsuario,
@@ -123,6 +138,24 @@ export const crearPerfilUsuario = async (correoUsuario, nombreUsuario) => {
     contadorIntentosFallidos: 0,
     fechaBloqueoDeSesion: null,
   })
+}
+
+/**
+ * Busca el UID del documento de usuario a partir de su correo electrónico.
+ * Se usa como puente hacia datos históricos donde solo se dispone del correo
+ * (p.ej. expulsión de participantes con participaciones antiguas sin uid_usuario).
+ * @param {string} correo - Correo electrónico a buscar.
+ * @returns {Promise<string|null>} El UID del usuario o null si no existe.
+ */
+export const buscarUidPorCorreo = async (correo) => {
+  const consulta = query(
+    collection(db, 'usuarios'),
+    where('correoAutenticacion', '==', correo.trim().toLowerCase()),
+    limit(1),
+  )
+  const instantanea = await getDocs(consulta)
+  if (instantanea.empty) return null
+  return instantanea.docs[0].id
 }
 
 /**
@@ -158,7 +191,7 @@ export const cambiarContrasenaUsuario = async (contrasenaNueva) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
   await updatePassword(usuario, contrasenaNueva)
-  const docRef = doc(db, 'usuarios', usuario.email)
+  const docRef = doc(db, 'usuarios', usuario.uid)
   await updateDoc(docRef, { fechaUltimoCambioContrasena: serverTimestamp() })
 }
 
@@ -193,23 +226,23 @@ export const registrarIntentoFallido = async (correo) => {
 
 /**
  * Reinicia el contador de intentos fallidos tras un inicio de sesión exitoso.
- * Delega en la Cloud Function `reiniciarContadorIntentos` que opera con permisos de administrador.
- * @param {string} correo - Correo del usuario autenticado.
+ * Delega en la Cloud Function `reiniciarContadorIntentos` que identifica al usuario
+ * por su UID desde el token de autenticación; no requiere parámetros adicionales.
  * @returns {Promise<void>}
  */
-export const reiniciarContadorIntentos = async (correo) => {
-  await llamadaReiniciarContador({ correo }).catch(() => {})
+export const reiniciarContadorIntentos = async () => {
+  await llamadaReiniciarContador({}).catch(() => {})
 }
 
 /**
  * Registra un observador en tiempo real sobre el documento de perfil del usuario.
  * Invoca el callback con los datos actualizados cada vez que Firestore notifica un cambio.
  * Usado para detectar expulsiones de ligas sin necesidad de recargar la página.
- * @param {string} correoUsuario - El correo del usuario (ID del documento en /usuarios).
+ * @param {string} uid - El UID de Firebase Auth (clave del documento en /usuarios).
  * @param {function} callback - Recibe los datos del perfil en cada cambio.
  * @returns {function} Función para cancelar el observador (unsubscribe).
  */
-export const escucharPerfilUsuario = (correoUsuario, callback) =>
-  onSnapshot(doc(db, 'usuarios', correoUsuario), (instantanea) => {
+export const escucharPerfilUsuario = (uid, callback) =>
+  onSnapshot(doc(db, 'usuarios', uid), (instantanea) => {
     if (instantanea.exists()) callback(instantanea.data())
   })

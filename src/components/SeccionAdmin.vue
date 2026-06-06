@@ -24,7 +24,7 @@ const ligaAEliminar = ref(null)
 const usuarioAEliminar = ref(null)
 
 const fechaRegistroUsuarioSeleccionado = computed(() => {
-    const usuario = usuarios.value.find((u) => u.email === usuarioAEliminar.value)
+    const usuario = usuarios.value.find((u) => u.uid === usuarioAEliminar.value)
     if (!usuario?.fechaRegistro) return null
     return usuario.fechaRegistro.toLocaleDateString('es-ES', {
         day: '2-digit',
@@ -56,7 +56,7 @@ function manejarEliminarUsuario() {
         })
         return
     }
-    const usuario = usuarios.value.find((u) => u.email === usuarioAEliminar.value)
+    const usuario = usuarios.value.find((u) => u.uid === usuarioAEliminar.value)
     const etiquetaUsuario = usuario?.etiqueta || usuarioAEliminar.value
 
     confirm.require({
@@ -154,7 +154,7 @@ function manejarEliminarLiga() {
                             </p>
                             <div class="flex flex-col gap-2">
                                 <Select v-model="usuarioAEliminar" :options="usuarios" optionLabel="etiqueta"
-                                    optionValue="email" placeholder="Usuario a eliminar" filter class="flex-1" />
+                                    optionValue="uid" placeholder="Usuario a eliminar" filter class="flex-1" />
                                 <p v-if="fechaRegistroUsuarioSeleccionado" class="text-xs text-zinc-500">
                                     Registrado el {{ fechaRegistroUsuarioSeleccionado }}
                                 </p>

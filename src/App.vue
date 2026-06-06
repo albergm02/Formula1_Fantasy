@@ -27,7 +27,7 @@ onMounted(() => {
       if (!estaEnRutaPublica) router.push('/')
     } else {
       cancelarEscuchaPerfil()
-      cancelarEscuchaPerfil = escucharPerfilUsuario(usuario.email, async (datosPerfil) => {
+      cancelarEscuchaPerfil = escucharPerfilUsuario(usuario.uid, async (datosPerfil) => {
         if (!storeAutenticacion.datosCargados) return
 
         const idsNuevos = datosPerfil.ligasIds || []

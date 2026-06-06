@@ -401,18 +401,10 @@ async function resolverPujasMercado(idMercado) {
       delete garaje.coche
     }
 
-    /* Resolver nombre del usuario una sola vez por participante */
+    /* Resolver nombre del usuario directamente desde la participación,
+     * que ya almacena nombre_usuario al crearse o actualizarse. */
     const emailUsuario = participacion.email_usuario
-    let nombreUsuario = emailUsuario
-    try {
-      const usuarioSnap = await db.collection('usuarios').doc(emailUsuario).get()
-      if (usuarioSnap.exists) {
-        const datosUsuario = usuarioSnap.data()
-        nombreUsuario = datosUsuario.username || datosUsuario.nombre || emailUsuario
-      }
-    } catch (_) {
-      /* si falla la lectura del nombre, usamos el email */
-    }
+    const nombreUsuario = participacion.nombre_usuario || emailUsuario
 
     for (const { idCarta, pujaGanadora } of cartasGanadas) {
       const { cantidad, tipoCarta } = pujaGanadora
@@ -625,13 +617,15 @@ exports.generarMercadoDiario = onSchedule(
 /* ═══════════════════════════════════════════════════════════════════════════
    CALLABLES DE ADMINISTRACIÓN — Disparo manual desde la UI
    ───────────────────────────────────────────────────────────────────────────
-   Permiten al administrador (flag `esAdministrador` en `usuarios/{email}`)
+   Permiten al administrador (flag `esAdministrador` en `usuarios/{uid}`)
    disparar manualmente el mercado, la resolución de pujas y el procesamiento
    de la jornada desde AdministracionView.vue, sin esperar al schedule.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /**
  * Verifica que el invocador esté autenticado y sea administrador.
+ * Usa el UID del token para consultar `usuarios/{uid}` directamente,
+ * sin depender del campo email del token.
  * Lanza HttpsError en caso contrario.
  * @param {import('firebase-functions/v2/https').CallableRequest} request
  */
@@ -639,11 +633,8 @@ async function exigirAdministrador(request) {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   }
-  const email = request.auth.token.email
-  if (!email) {
-    throw new HttpsError('permission-denied', 'Token sin email.')
-  }
-  const usuarioSnap = await db.collection('usuarios').doc(email).get()
+  const uid = request.auth.uid
+  const usuarioSnap = await db.collection('usuarios').doc(uid).get()
   if (!usuarioSnap.exists || usuarioSnap.data().esAdministrador !== true) {
     throw new HttpsError('permission-denied', 'Permisos de administrador requeridos.')
   }
@@ -1007,7 +998,9 @@ function exigirEmailAutenticado(request) {
  * Reglas: formato A-Z 0-9 _ (3-20 chars), unicidad global, máximo un cambio cada 30 días.
  */
 exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request) => {
-  const email = exigirEmailAutenticado(request)
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  const uid = request.auth.uid
+  const email = request.auth.token.email
   const nombreNuevo = String(request.data?.nombreNuevo || '').trim()
 
   if (!FORMATO_NOMBRE.test(nombreNuevo)) {
@@ -1017,7 +1010,7 @@ exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request
     )
   }
 
-  const usuarioSnap = await db.collection('usuarios').doc(email).get()
+  const usuarioSnap = await db.collection('usuarios').doc(uid).get()
   if (!usuarioSnap.exists) {
     throw new HttpsError('not-found', 'No existe tu perfil.')
   }
@@ -1057,7 +1050,7 @@ exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request
 
   const batch = db.batch()
 
-  batch.update(db.collection('usuarios').doc(email), {
+  batch.update(db.collection('usuarios').doc(uid), {
     nombre: nombreNuevo,
     fechaUltimoCambioNombre: new Date().toISOString(),
   })
@@ -1081,12 +1074,16 @@ exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request
 })
 
 /**
- * Callable — migra todos los documentos de Firestore tras un cambio de correo en Auth.
- * El cliente debe haber ejecutado primero `updateEmail()` y volver a obtener el token.
- * El token recibido aquí ya lleva el nuevo correo: si no coincide, abortamos.
+/**
+ * Callable — migra los documentos de Firestore tras un cambio de correo en Auth.
+ * Al estar el documento de usuario indexado por UID (no por email), ya no es
+ * necesario copiar ni borrar el documento: basta con actualizar el campo
+ * `correoAutenticacion` y propagar el cambio a participaciones y ligas.
+ * El cliente debe haber ejecutado primero `updateEmail()` y refrescar el token.
  */
 exports.migrarCorreoUsuario = onCall({ region: 'europe-west1' }, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
+  const uid = request.auth.uid
   const correoAnterior = String(request.data?.correoAnterior || '')
     .trim()
     .toLowerCase()
@@ -1104,31 +1101,22 @@ exports.migrarCorreoUsuario = onCall({ region: 'europe-west1' }, async (request)
     )
   }
 
-  const docAnterior = await db.collection('usuarios').doc(correoAnterior).get()
-  if (!docAnterior.exists) {
-    throw new HttpsError('not-found', 'No existe el perfil anterior.')
+  const docUsuario = await db.collection('usuarios').doc(uid).get()
+  if (!docUsuario.exists) {
+    throw new HttpsError('not-found', 'No existe el perfil del usuario.')
   }
-  const docNuevoExistente = await db.collection('usuarios').doc(correoNuevo).get()
-  if (docNuevoExistente.exists) {
-    throw new HttpsError('already-exists', 'Ya existe un perfil con ese correo.')
-  }
+
+  const [participacionesSnap, ligasAdminSnap] = await Promise.all([
+    db.collection('participaciones').where('email_usuario', '==', correoAnterior).get(),
+    db.collection('ligas').where('admin', '==', correoAnterior).get(),
+  ])
 
   const batch = db.batch()
-  batch.set(db.collection('usuarios').doc(correoNuevo), {
-    ...docAnterior.data(),
-    correoAutenticacion: correoNuevo,
-  })
-  batch.delete(db.collection('usuarios').doc(correoAnterior))
+  batch.update(db.collection('usuarios').doc(uid), { correoAutenticacion: correoNuevo })
 
-  const participacionesSnap = await db
-    .collection('participaciones')
-    .where('email_usuario', '==', correoAnterior)
-    .get()
   for (const documento of participacionesSnap.docs) {
     batch.update(documento.ref, { email_usuario: correoNuevo })
   }
-
-  const ligasAdminSnap = await db.collection('ligas').where('admin', '==', correoAnterior).get()
   for (const documento of ligasAdminSnap.docs) {
     batch.update(documento.ref, { admin: correoNuevo })
   }
@@ -1181,16 +1169,17 @@ async function borrarLigaCompleta(idLiga) {
 }
 
 /**
- * Borra en cascada todos los datos del usuario `email`:
+ * Borra en cascada todos los datos del usuario identificado por `uid` y `email`:
  *  · Si era único participante de una liga → borra la liga entera.
  *  · Si era admin con más participantes → cede admin al siguiente.
  *  · Borra su participación y resta 1 al contador de la liga.
  *  · Borra todas sus pujas activas en mercados abiertos.
- *  · Borra el documento `usuarios/{email}` y el usuario de Firebase Auth.
- * @param {string} email
+ *  · Borra el documento `usuarios/{uid}` y el usuario de Firebase Auth.
+ * @param {string} uid - UID de Firebase Auth (clave del documento en Firestore).
+ * @param {string} email - Correo del usuario (para localizar participaciones y pujas).
  * @returns {Promise<{participacionesBorradas: number, ligasBorradas: number}>}
  */
-async function eliminarCuentaUsuarioEnCascada(email) {
+async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db
     .collection('participaciones')
     .where('email_usuario', '==', email)
@@ -1260,31 +1249,16 @@ async function eliminarCuentaUsuarioEnCascada(email) {
     if (!pujasSnap.empty) await batchPujas.commit()
   }
 
-  await db.collection('usuarios').doc(email).delete()
+  await db.collection('usuarios').doc(uid).delete()
 
-  let uidEliminar = null
   try {
-    const usuarioAuth = await getAuth().getUserByEmail(email)
-    uidEliminar = usuarioAuth.uid
+    await getAuth().revokeRefreshTokens(uid)
+    await getAuth().deleteUser(uid)
   } catch (error) {
-    if (error.code !== 'auth/user-not-found') {
-      throw new HttpsError(
-        'internal',
-        `Error consultando el usuario de Auth para ${email}: ${error.message}`,
-      )
-    }
-  }
-
-  if (uidEliminar) {
-    try {
-      await getAuth().revokeRefreshTokens(uidEliminar)
-      await getAuth().deleteUser(uidEliminar)
-    } catch (error) {
-      throw new HttpsError(
-        'internal',
-        `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`,
-      )
-    }
+    throw new HttpsError(
+      'internal',
+      `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`,
+    )
   }
 
   return { participacionesBorradas: participacionesSnap.size, ligasBorradas }
@@ -1294,8 +1268,10 @@ async function eliminarCuentaUsuarioEnCascada(email) {
  * Callable — elimina la cuenta del usuario autenticado en cascada.
  */
 exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) => {
-  const email = exigirEmailAutenticado(request)
-  const resultado = await eliminarCuentaUsuarioEnCascada(email)
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  const uid = request.auth.uid
+  const email = request.auth.token.email || ''
+  const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
   return { ok: true, email, ...resultado }
 })
 
@@ -1307,6 +1283,8 @@ const DURACION_BLOQUEO_MINUTOS = 5
 /**
  * Callable pública — verifica si un correo tiene bloqueo temporal activo.
  * No requiere sesión de Firebase Auth porque se invoca antes del login.
+ * Al estar el documento indexado por UID, busca el usuario por el campo
+ * `correoAutenticacion` (aprovecha el índice automático de Firestore).
  * Si el correo no existe en Firestore, retorna sin bloqueo.
  * @param {{ correo: string }} data
  * @returns {{ bloqueado: false } | never}
@@ -1319,9 +1297,14 @@ exports.verificarBloqueoAcceso = onCall(
       .toLowerCase()
     if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
 
-    const usuarioSnap = await db.collection('usuarios').doc(correo).get()
-    if (!usuarioSnap.exists) return { bloqueado: false }
+    const resultadoBusqueda = await db
+      .collection('usuarios')
+      .where('correoAutenticacion', '==', correo)
+      .limit(1)
+      .get()
+    if (resultadoBusqueda.empty) return { bloqueado: false }
 
+    const usuarioSnap = resultadoBusqueda.docs[0]
     const { fechaBloqueoDeSesion } = usuarioSnap.data()
     if (!fechaBloqueoDeSesion) return { bloqueado: false }
 
@@ -1342,6 +1325,7 @@ exports.verificarBloqueoAcceso = onCall(
  * Callable pública — incrementa el contador de intentos fallidos de un correo.
  * Al alcanzar el límite activa un bloqueo temporal de 5 minutos.
  * No requiere sesión de Firebase Auth porque se invoca tras un fallo de credenciales.
+ * Busca el documento de usuario por el campo `correoAutenticacion`.
  * @param {{ correo: string }} data
  * @returns {{ ok: true }}
  */
@@ -1353,11 +1337,15 @@ exports.registrarIntentoFallido = onCall(
       .toLowerCase()
     if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
 
-    const docRef = db.collection('usuarios').doc(correo)
-    const usuarioSnap = await docRef.get()
-    if (!usuarioSnap.exists) return { ok: true }
+    const resultadoBusqueda = await db
+      .collection('usuarios')
+      .where('correoAutenticacion', '==', correo)
+      .limit(1)
+      .get()
+    if (resultadoBusqueda.empty) return { ok: true }
 
-    const intentosPrevios = usuarioSnap.data().contadorIntentosFallidos || 0
+    const docRef = resultadoBusqueda.docs[0].ref
+    const intentosPrevios = resultadoBusqueda.docs[0].data().contadorIntentosFallidos || 0
     const nuevosIntentos = intentosPrevios + 1
     const actualizacion = { contadorIntentosFallidos: nuevosIntentos }
 
@@ -1373,13 +1361,15 @@ exports.registrarIntentoFallido = onCall(
 
 /**
  * Callable autenticada — reinicia el contador de intentos fallidos tras un login exitoso.
+ * Usa el UID del token para localizar el documento directamente, sin necesitar el correo.
  * Solo puede llamarla el propio usuario autenticado.
  * @returns {{ ok: true }}
  */
 exports.reiniciarContadorIntentos = onCall({ region: 'europe-west1' }, async (request) => {
-  const email = exigirEmailAutenticado(request)
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  const uid = request.auth.uid
 
-  const docRef = db.collection('usuarios').doc(email)
+  const docRef = db.collection('usuarios').doc(uid)
   const usuarioSnap = await docRef.get()
   if (!usuarioSnap.exists) return { ok: true }
 
@@ -1390,18 +1380,18 @@ exports.reiniciarContadorIntentos = onCall({ region: 'europe-west1' }, async (re
 /**
  * Callable — el administrador global elimina la cuenta de cualquier usuario
  * en cascada (participaciones, pujas, perfil y usuario de Auth).
- * Acepta `{ email }` (obligatorio).
+ * Acepta `{ uid }` (obligatorio): el UID de Firebase Auth del usuario a eliminar.
  */
 exports.eliminarUsuarioManual = onCall({ region: 'europe-west1' }, async (request) => {
   await exigirAdministrador(request)
-  const { email } = request.data || {}
-  if (!email) {
-    throw new HttpsError('invalid-argument', 'Falta email.')
+  const { uid } = request.data || {}
+  if (!uid) {
+    throw new HttpsError('invalid-argument', 'Falta uid.')
   }
 
-  const usuarioSnap = await db.collection('usuarios').doc(email).get()
+  const usuarioSnap = await db.collection('usuarios').doc(uid).get()
   if (!usuarioSnap.exists) {
-    throw new HttpsError('not-found', `Usuario ${email} no encontrado.`)
+    throw new HttpsError('not-found', `Usuario ${uid} no encontrado.`)
   }
   if (usuarioSnap.data().esAdministrador === true) {
     throw new HttpsError(
@@ -1410,6 +1400,7 @@ exports.eliminarUsuarioManual = onCall({ region: 'europe-west1' }, async (reques
     )
   }
 
-  const resultado = await eliminarCuentaUsuarioEnCascada(email)
-  return { ok: true, email, ...resultado }
+  const email = usuarioSnap.data().correoAutenticacion || ''
+  const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
+  return { ok: true, uid, email, ...resultado }
 })

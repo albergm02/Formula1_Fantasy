@@ -99,12 +99,12 @@ router.beforeEach(async (to) => {
   const storeLigas = usarStoreLigas()
 
   if (usuario && !storeAutenticacion.datosCargados) {
-    await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
+    await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
   }
 
   // En rutas de admin recargamos el perfil para asegurar el flag actualizado.
   if (usuario && to.meta.requiresAdmin) {
-    await storeAutenticacion.verificarExistenciaPerfil(usuario.email)
+    await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
   }
 
   if (!usuario && !storeAutenticacion.datosCargados) {
