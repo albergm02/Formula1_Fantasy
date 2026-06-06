@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreMercado } from '@/stores/storeMercado'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import Button from 'primevue/button'
@@ -10,7 +10,7 @@ import Button from 'primevue/button'
 const router = useRouter()
 const ruta = useRoute()
 const storeAutenticacion = usarStoreAutenticacion()
-const escuderiaStore = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const storeMercado = usarStoreMercado()
 
 const manejarCerrarSesion = async () => {
@@ -20,7 +20,7 @@ const manejarCerrarSesion = async () => {
 
 // Si el usuario está dentro de una liga, vuelve a su panel; si no, al listado.
 const irADashboard = () => {
-    const idLiga = escuderiaStore.idLigaActiva || ruta.query.liga || null
+    const idLiga = storeGaraje.idLigaActiva || ruta.query.liga || null
     if (idLiga) {
         router.push({ name: 'inicio', query: { liga: idLiga } })
     } else {
@@ -40,9 +40,9 @@ const ocultarResumenEquipo = computed(() => {
             <div class="text-left">
                 <p class="text-white font-bold uppercase text">{{ storeAutenticacion.usuarioActual.nombreVisible }}</p>
                 <p v-if="!ocultarResumenEquipo" class="mt-0.5 text-xs text-white">
-                    Pts: <strong class="text-[#D4A843]">{{ escuderiaStore.puntos }}</strong>
-                    | <span class="text-emerald-500 font-bold">{{ Number(escuderiaStore.presupuesto || 0).toFixed(2)
-                        }}M</span>
+                    Pts: <strong class="text-[#D4A843]">{{ storeGaraje.puntos }}</strong>
+                    | <span class="text-emerald-500 font-bold">{{ Number(storeGaraje.presupuesto || 0).toFixed(2)
+                    }}M</span>
                     <span v-if="storeMercado.totalPujasComprometidas > 0" class="text-amber-400 font-bold">
                         (-{{ storeMercado.totalPujasComprometidas.toFixed(2) }}M)
                     </span>

@@ -3,7 +3,7 @@ import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarBloqueoJornada } from '@/composables/usarBloqueoJornada'
 
 import Button from 'primevue/button'
@@ -20,7 +20,7 @@ const props = defineProps({
 
 defineEmits(['cerrar'])
 
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const notificacion = useToast()
 const confirmar = useConfirm()
 
@@ -36,7 +36,7 @@ const esFichajeDeshabilitado = (elemento) => {
     if (estaEnPeriodoDeGracia(elemento)) return true
 
     const precioClausula = calcularPrecioClausula(elemento)
-    if (precioClausula > storeEscuderia.presupuesto) return true
+    if (precioClausula > storeGaraje.presupuesto) return true
 
     return false
 }
@@ -59,7 +59,7 @@ const confirmarEjecucionClausula = (elemento) => {
         acceptLabel: 'Sí, fichar',
         rejectLabel: 'Cancelar',
         accept: async () => {
-            const resultado = await storeEscuderia.ejecutarClausulaRival(
+            const resultado = await storeGaraje.ejecutarClausulaRival(
                 props.participacion.id,
                 elemento,
             )

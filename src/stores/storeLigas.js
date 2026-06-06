@@ -107,7 +107,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       const codigoInvitacion = generarCodigoInvitacionLiga()
       const idLiga = await crearDocumentoLiga({
         nombre: nombreLiga,
-        admin: correoUsuario,
+        correoOrganizador: correoUsuario,
         codigo_invitacion: codigoInvitacion,
         participantes: 1,
         fecha_creacion: new Date(),
@@ -118,7 +118,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         uid_usuario: uid,
         email_usuario: correoUsuario,
         nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
-        rol: 'admin',
+        rol: 'organizador',
         presupuesto: 50.0,
         puntos: 0,
         garaje: crearGarajeVacio(),
@@ -232,11 +232,11 @@ export const usarStoreLigas = defineStore('ligas', () => {
         return await eliminarLiga(idLiga)
       }
 
-      if (participacionPropia.rol === 'admin') {
-        const siguienteAdministrador = elegirSiguienteAdministrador(participacionesRestantes)
-        await actualizarParticipacion(siguienteAdministrador.id, { rol: 'admin' })
+      if (participacionPropia.rol === 'organizador') {
+        const siguienteOrganizador = elegirSiguienteAdministrador(participacionesRestantes)
+        await actualizarParticipacion(siguienteOrganizador.id, { rol: 'organizador' })
         await actualizarLiga(idLiga, {
-          admin: siguienteAdministrador.email_usuario,
+          correoOrganizador: siguienteOrganizador.email_usuario,
           participantes: datosLiga.participantes - 1,
         })
       } else {
@@ -287,7 +287,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       const datosLiga = await cargarLiga(idLiga)
       if (!datosLiga) return { success: false, message: 'La liga no existe.' }
 
-      if (datosLiga.admin !== correoAdmin) {
+      if (datosLiga.correoOrganizador !== correoAdmin) {
         return { success: false, message: 'Solo el administrador puede expulsar participantes.' }
       }
 
@@ -354,7 +354,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         return { success: false, message: 'La liga no existe.' }
       }
 
-      if (datosLiga.admin !== correoUsuario) {
+      if (datosLiga.correoOrganizador !== correoUsuario) {
         return { success: false, message: 'Acceso denegado: No eres el administrador.' }
       }
 

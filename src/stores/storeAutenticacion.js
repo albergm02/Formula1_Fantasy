@@ -1,6 +1,7 @@
 ﻿import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { cargarPerfilUsuario, crearPerfilUsuario } from '@/services/servicioAutenticacion'
+import { migrarCorreoUsuario } from '@/services/servicioPerfil'
 
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const usuarioActual = ref({
@@ -47,6 +48,23 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   }
 
   /**
+   * Propaga a Firestore un cambio de correo ya verificado en Firebase Auth.
+   * Tras confirmar el correo nuevo, el token lo refleja pero el perfil conserva
+   * el anterior; esta reconciliación actualiza usuarios, participaciones y ligas.
+   * Tolera fallos para no impedir el acceso: el desfase se reintenta en el
+   * siguiente inicio de sesión.
+   * @param {string} correoToken - Correo actual del token autenticado (el nuevo).
+   * @param {string} correoPerfil - Correo guardado en Firestore (el anterior).
+   * @returns {Promise<void>}
+   */
+  async function reconciliarCorreoMigrado(correoToken, correoPerfil) {
+    const correoNuevo = correoToken.trim().toLowerCase()
+    const correoAnterior = correoPerfil.trim().toLowerCase()
+    if (!correoAnterior || correoAnterior === correoNuevo) return
+    await migrarCorreoUsuario(correoAnterior, correoNuevo).catch(() => {})
+  }
+
+  /**
    * Verifica si el perfil del usuario existe en Firestore y carga sus datos.
    * No crea el perfil si no existe: devuelve false para que el llamador decida.
    * Usado en el inicio de sesión y en el guardia de navegación del router.
@@ -63,6 +81,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
       const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
+        await reconciliarCorreoMigrado(correoUsuario, datosPerfil.correoAutenticacion)
         usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
         usuarioActual.value.idsLigas = datosPerfil.ligasIds || []
         esAdministrador.value = datosPerfil.esAdministrador === true

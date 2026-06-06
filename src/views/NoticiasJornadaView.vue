@@ -19,7 +19,7 @@ import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion
 
 // Variantes de puntuación para mostrar en la guía rápida
 const VARIANTES = [
-    { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
+    { id: 'qualy', etiqueta: 'Clasificación', icono: 'pi-stopwatch', color: '#38bdf8' },
     { id: 'carrera', etiqueta: 'Carrera', icono: 'pi-flag-fill', color: '#f97316' },
     { id: 'todo_terreno', etiqueta: 'Todo Terreno', icono: 'pi-cloud', color: '#a78bfa' },
     { id: 'remontador', etiqueta: 'Remontador', icono: 'pi-arrow-up', color: '#ef4444' },
@@ -38,7 +38,7 @@ const EJEMPLOS_VARIANTE = {
         calculo: 'Factor P3 = ×1.30 -> 68 × 1.30 = 88,4 pts.',
     },
     todo_terreno: {
-        escenario: 'GP sin lluvia, 2 Safety Cars y 3 abandonos. Base del piloto 65.',
+        escenario: 'GP sin lluvia, 2 Coches de Seguridad y 3 abandonos. Base del piloto 65.',
         calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 -> 65 × 0.90 = 58,5 pts.',
     },
     remontador: {
@@ -165,17 +165,17 @@ const condicionesTexto = computed(() => {
     else etiquetas.push({ texto: 'Seco', color: 'text-amber-300' })
     if (c.numeroSafetyCarActivos > 0)
         etiquetas.push({
-            texto: `${c.numeroSafetyCarActivos} Safety Car`,
+            texto: `${c.numeroSafetyCarActivos} Coche de Seguridad`,
             color: 'text-amber-400',
         })
     if (c.numeroVirtualSafetyCarActivos > 0)
         etiquetas.push({
-            texto: `${c.numeroVirtualSafetyCarActivos} VSC`,
+            texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`,
             color: 'text-yellow-400',
         })
     if (c.numeroDNFs > 0)
         etiquetas.push({
-            texto: `${c.numeroDNFs} DNFs`,
+            texto: `${c.numeroDNFs} Abandonos`,
             color: 'text-red-400',
         })
     return etiquetas
@@ -211,9 +211,9 @@ function obtenerSimulacionVariantes(piloto) {
 
 // Muestro estados si son necesarios en caso de DSQ, DNS o DNF.
 function obtenerEstadoCarrera(actuacion) {
-    if (actuacion?.dsq) return 'DSQ'
-    if (actuacion?.dns) return 'DNS'
-    if (actuacion?.dnf) return 'DNF'
+    if (actuacion?.dsq) return 'DESC'
+    if (actuacion?.dns) return 'N/S'
+    if (actuacion?.dnf) return 'ABN'
     return null
 }
 

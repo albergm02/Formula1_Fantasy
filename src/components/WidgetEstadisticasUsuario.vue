@@ -1,9 +1,9 @@
 ﻿<script setup>
 import { computed } from 'vue'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const storeLigas = usarStoreLigas()
 const nombreLigaActiva = computed(() => {
   const ligaActiva = storeLigas.detallesLigas.find(
@@ -24,11 +24,11 @@ const nombreLigaActiva = computed(() => {
     <div class="flex gap-8">
       <div class="flex flex-col items-center">
         <span class="text-[#F0ECEC] text-[10px] font-black uppercase tracking-widest">Presupuesto</span>
-        <span class="text-green-400 font-black text-xl">${{ (storeEscuderia.presupuesto || 50).toFixed(2) }}M</span>
+        <span class="text-green-400 font-black text-xl">${{ (storeGaraje.presupuesto || 50).toFixed(2) }}M</span>
       </div>
       <div class="flex flex-col items-center">
         <span class="text-[#F0ECEC] text-[10px] font-black uppercase tracking-widest">Puntos</span>
-        <span class="text-white font-black text-xl">{{ storeEscuderia.puntos || 0 }}</span>
+        <span class="text-white font-black text-xl">{{ storeGaraje.puntos || 0 }}</span>
       </div>
     </div>
   </div>

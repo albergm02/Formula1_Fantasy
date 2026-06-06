@@ -5,7 +5,7 @@ import { useToast } from 'primevue/usetoast'
 
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 import { cargarGarajeDeParticipante } from '@/services/servicioLigas'
 
@@ -17,7 +17,7 @@ import Dialog from 'primevue/dialog'
 
 const storeLigas = usarStoreLigas()
 const storeAutenticacion = usarStoreAutenticacion()
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const ruta = useRoute()
 const toast = useToast()
 
@@ -71,8 +71,8 @@ async function verEquipoRival(jugador) {
 }
 
 onMounted(async () => {
-  if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
-    await storeEscuderia.cargarEquipo(ruta.query.liga)
+  if (!storeGaraje.idLigaActiva && ruta.query.liga) {
+    await storeGaraje.cargarEquipo(ruta.query.liga)
   }
 
   await cargarClasificacion()

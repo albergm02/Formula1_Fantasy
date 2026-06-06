@@ -11,6 +11,7 @@
   reauthenticateWithCredential,
   reauthenticateWithPopup,
   updatePassword,
+  verifyBeforeUpdateEmail,
 } from 'firebase/auth'
 
 import {
@@ -193,6 +194,21 @@ export const cambiarContrasenaUsuario = async (contrasenaNueva) => {
   await updatePassword(usuario, contrasenaNueva)
   const docRef = doc(db, 'usuarios', usuario.uid)
   await updateDoc(docRef, { fechaUltimoCambioContrasena: serverTimestamp() })
+}
+
+/**
+ * Solicita el cambio de correo del usuario actual mediante verificación previa.
+ * Firebase envía un enlace de confirmación al correo nuevo; el correo en Auth
+ * NO cambia hasta que el usuario lo confirma desde ese enlace, momento en el
+ * que la sesión se cierra. La migración de los documentos de Firestore se
+ * completa en el siguiente inicio de sesión. Requiere reautenticación previa.
+ * @param {string} correoNuevo - El nuevo correo electrónico a verificar.
+ * @returns {Promise<void>}
+ */
+export const solicitarCambioCorreo = async (correoNuevo) => {
+  const usuario = auth.currentUser
+  if (!usuario) throw new Error('No hay sesión activa.')
+  await verifyBeforeUpdateEmail(usuario, correoNuevo.trim().toLowerCase())
 }
 
 const MAXIMO_INTENTOS_FALLIDOS = 5

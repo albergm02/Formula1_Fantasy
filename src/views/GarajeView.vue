@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
@@ -20,7 +20,7 @@ import TarjetaCoche from '@/components/TarjetaCoche.vue'
 import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const storeLigas = usarStoreLigas()
 const notificacion = useToast()
 const confirmar = useConfirm()
@@ -51,12 +51,12 @@ const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.
 const formatearPrecioActual = (carta) => Number(carta?.precio ?? 0).toFixed(2)
 
 onMounted(async () => {
-  const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
+  const idLiga = storeGaraje.idLigaActiva || ruta.query.liga
   if (idLiga && !storeLigas.idLigaActiva) {
     storeLigas.idLigaActiva = idLiga
   }
-  if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
-    await storeEscuderia.cargarEquipo(ruta.query.liga)
+  if (!storeGaraje.idLigaActiva && ruta.query.liga) {
+    await storeGaraje.cargarEquipo(ruta.query.liga)
   }
 })
 
@@ -79,7 +79,7 @@ const confirmarVentaCoche = (coche) => {
     acceptLabel: 'Sí, vender',
     rejectLabel: 'Cancelar',
     accept: async () => {
-      const resultado = await storeEscuderia.venderElemento(coche)
+      const resultado = await storeGaraje.venderElemento(coche)
       if (resultado.success) {
         notificacion.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M`, life: 4000 })
       } else {
@@ -108,7 +108,7 @@ const confirmarVentaPiloto = (piloto) => {
     acceptLabel: 'Sí, despedir',
     rejectLabel: 'Cancelar',
     accept: async () => {
-      const resultado = await storeEscuderia.venderElemento(piloto)
+      const resultado = await storeGaraje.venderElemento(piloto)
       if (resultado.success) {
         notificacion.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M`, life: 4000 })
       } else {
@@ -127,7 +127,7 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
     notificarBloqueoJornada()
     return
   }
-  const resultado = await storeEscuderia.alternarPotenciador(idInstancia)
+  const resultado = await storeGaraje.alternarPotenciador(idInstancia)
   if (!resultado.success) {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
   }
@@ -142,7 +142,7 @@ const alternarEquipoCoche = async (instanciaId) => {
     notificarBloqueoJornada()
     return
   }
-  const resultado = await storeEscuderia.alternarCoche(instanciaId)
+  const resultado = await storeGaraje.alternarCoche(instanciaId)
   if (!resultado.success) {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
   }
@@ -157,7 +157,7 @@ const alternarEquipoPiloto = async (instanciaId) => {
     notificarBloqueoJornada()
     return
   }
-  const resultado = await storeEscuderia.alternarPiloto(instanciaId)
+  const resultado = await storeGaraje.alternarPiloto(instanciaId)
   if (!resultado.success) {
     notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
   }
@@ -177,7 +177,7 @@ const abrirDialogoProteccion = (elemento) => {
  * Confirma la inversión en cláusula y notifica el resultado.
  */
 const confirmarInversionClausula = async () => {
-  const resultado = await storeEscuderia.invertirEnClausula(
+  const resultado = await storeGaraje.invertirEnClausula(
     elementoProtegiendo.value.instancia_id,
     cantidadInversion.value,
   )
@@ -209,10 +209,10 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
       </header>
       <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
-        {{storeEscuderia.garaje.coches.filter((c) => c.equipado).length}} titulares
+        {{storeGaraje.garaje.coches.filter((c) => c.equipado).length}} titulares
       </span>
-      <div v-if="storeEscuderia.garaje.coches.length > 0" class="grid grid-cols-1 gap-3">
-        <article v-for="coche in storeEscuderia.garaje.coches" :key="coche.instancia_id"
+      <div v-if="storeGaraje.garaje.coches.length > 0" class="grid grid-cols-1 gap-3">
+        <article v-for="coche in storeGaraje.garaje.coches" :key="coche.instancia_id"
           class="flex flex-col bg-[#121218]">
           <TarjetaCoche :coche="coche" :modoMercado="false" />
 
@@ -263,10 +263,10 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
       </header>
       <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
-        {{storeEscuderia.garaje.pilotos.filter((p) => p.equipado).length}} titulares
+        {{storeGaraje.garaje.pilotos.filter((p) => p.equipado).length}} titulares
       </span>
-      <div v-if="storeEscuderia.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
-        <article v-for="piloto in storeEscuderia.garaje.pilotos" :key="piloto.instancia_id"
+      <div v-if="storeGaraje.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
+        <article v-for="piloto in storeGaraje.garaje.pilotos" :key="piloto.instancia_id"
           class="flex flex-col bg-[#121218] border border-zinc-800">
           <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
 
@@ -319,11 +319,11 @@ const confirmarInversionClausula = async () => {
       </header>
 
       <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
-        {{storeEscuderia.garaje.potenciadores.filter((p) => p.equipado).length}} instalados
+        {{storeGaraje.garaje.potenciadores.filter((p) => p.equipado).length}} instalados
       </span>
 
-      <div v-if="storeEscuderia.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-3">
-        <article v-for="potenciador in storeEscuderia.garaje.potenciadores" :key="potenciador.instancia_id"
+      <div v-if="storeGaraje.garaje.potenciadores.length > 0" class="grid grid-cols-1 gap-3">
+        <article v-for="potenciador in storeGaraje.garaje.potenciadores" :key="potenciador.instancia_id"
           class="flex flex-col bg-[#121218] border border-zinc-800">
           <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
           <div class="flex flex-col gap-2 px-2 py-2 items-center border-t border-zinc-800/70">
@@ -362,7 +362,7 @@ const confirmarInversionClausula = async () => {
           <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400">
             Invertir (×2 en cláusula)
           </label>
-          <InputNumber v-model="cantidadInversion" :min="1" :max="storeEscuderia.presupuesto" suffix="M"
+          <InputNumber v-model="cantidadInversion" :min="1" :max="storeGaraje.presupuesto" suffix="M"
             :minFractionDigits="1" :maxFractionDigits="1" inputClass="!bg-black !text-white !border-zinc-700 w-full"
             class="w-full" />
           <span class="text-[10px] text-zinc-500">
@@ -371,7 +371,7 @@ const confirmarInversionClausula = async () => {
         </div>
 
         <Button label="CONFIRMAR INVERSIÓN" icon="pi pi-shield" @click="confirmarInversionClausula"
-          :disabled="cantidadInversion <= 0 || cantidadInversion > storeEscuderia.presupuesto"
+          :disabled="cantidadInversion <= 0 || cantidadInversion > storeGaraje.presupuesto"
           class="w-full !bg-amber-900/20 !border-amber-500/50" :pt="{
             label: { class: 'text-[10px] font-black uppercase tracking-widest text-amber-400' },
             icon: { class: 'text-amber-400' },

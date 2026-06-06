@@ -1,4 +1,4 @@
-﻿import { ref } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreAutenticacion } from './storeAutenticacion'
 
@@ -42,7 +42,7 @@ const migrarGaraje = (garajeOriginal) => {
   return garaje
 }
 
-export const usarStoreEscuderia = defineStore('escuderia', () => {
+export const usarStoreGaraje = defineStore('garaje', () => {
   const idLigaActiva = ref(null)
   const idParticipanteActivo = ref(null)
   const presupuesto = ref(0)
@@ -226,7 +226,7 @@ export const usarStoreEscuderia = defineStore('escuderia', () => {
   }
 
   /**
-   * Limpia el estado de la escudería al cerrar sesión o cambiar de liga.
+   * Limpia el estado del garaje al cerrar sesión o cambiar de liga.
    */
   function limpiarEstadoLigaActiva() {
     idLigaActiva.value = null

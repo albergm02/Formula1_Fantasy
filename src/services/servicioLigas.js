@@ -166,7 +166,7 @@ export const contarLigasAdministradas = async (correoUsuario) => {
   const consulta = query(
     collection(db, 'participaciones'),
     where('email_usuario', '==', correoUsuario),
-    where('rol', '==', 'admin'),
+    where('rol', '==', 'organizador'),
   )
   const instantanea = await getDocs(consulta)
   return instantanea.size

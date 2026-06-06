@@ -8,6 +8,7 @@ import {
     cargarPerfilUsuario,
     reautenticarUsuario,
     cambiarContrasenaUsuario,
+    solicitarCambioCorreo,
     cerrarSesion,
 } from '@/services/servicioAutenticacion'
 import {
@@ -46,7 +47,7 @@ const diasRestantesParaCambiarNombre = computed(() => {
 })
 
 async function cargarMetadatosPerfil() {
-    const datos = await cargarPerfilUsuario(storeAutenticacion.usuarioActual.correoAutenticacion)
+    const datos = await cargarPerfilUsuario(storeAutenticacion.usuarioActual.uid)
     fechaUltimoCambioNombre.value =
         datos.fechaUltimoCambioNombre ? new Date(datos.fechaUltimoCambioNombre) : null
     fechaUltimoCambioContrasena.value =
@@ -148,6 +149,59 @@ async function confirmarCambioContrasena() {
     }
 }
 
+// CAMBIO DE CORREO
+
+const dialogoCorreoAbierto = ref(false)
+const correoNuevo = ref('')
+const contrasenaParaCorreo = ref('')
+const enviandoCorreo = ref(false)
+
+function abrirDialogoCorreo() {
+    correoNuevo.value = ''
+    contrasenaParaCorreo.value = ''
+    dialogoCorreoAbierto.value = true
+}
+
+const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validarSolicitudCorreo() {
+    const correoLimpio = correoNuevo.value.trim().toLowerCase()
+    if (!FORMATO_CORREO.test(correoLimpio)) {
+        toast.add({ severity: 'warn', summary: 'Correo no válido', detail: 'Introduce un correo con formato correcto.', life: 4000 })
+        return false
+    }
+    if (correoLimpio === storeAutenticacion.usuarioActual.correoAutenticacion.toLowerCase()) {
+        toast.add({ severity: 'warn', summary: 'Mismo correo', detail: 'Introduce un correo distinto al actual.', life: 4000 })
+        return false
+    }
+    return true
+}
+
+async function confirmarCambioCorreo() {
+    if (!validarSolicitudCorreo()) return
+    enviandoCorreo.value = true
+    try {
+        await reautenticarUsuario(contrasenaParaCorreo.value)
+        await solicitarCambioCorreo(correoNuevo.value)
+        dialogoCorreoAbierto.value = false
+        toast.add({
+            severity: 'success',
+            summary: 'Confirma tu nuevo correo',
+            detail: 'Te hemos enviado un enlace al correo nuevo. Ábrelo para completar el cambio; después deberás iniciar sesión de nuevo.',
+            life: 8000,
+        })
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'No se pudo cambiar',
+            detail: mensajeFirebase(error),
+            life: 6000,
+        })
+    } finally {
+        enviandoCorreo.value = false
+    }
+}
+
 // ELIMINACIÓN DE CUENTA
 
 const dialogoBajaAbierto = ref(false)
@@ -193,6 +247,9 @@ function mensajeFirebase(error) {
     }
     if (codigo === 'auth/email-already-in-use') {
         return 'Ese correo ya está en uso por otra cuenta.'
+    }
+    if (codigo === 'auth/invalid-email') {
+        return 'El correo introducido no tiene un formato válido.'
     }
     if (codigo === 'auth/requires-recent-login') {
         return 'Por seguridad, vuelve a iniciar sesión antes de hacer este cambio.'
@@ -267,6 +324,8 @@ function mensajeFirebase(error) {
                             :disabled="diasRestantesParaCambiarNombre > 0" />
                         <Button v-if="puedeUsarContrasena" @click="abrirDialogoContrasena" label="Cambiar contraseña"
                             class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
+                        <Button v-if="puedeUsarContrasena" @click="abrirDialogoCorreo" label="Cambiar correo"
+                            class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
                         <Message v-if="!puedeUsarContrasena" severity="info" :closable="false">
                             Iniciaste sesión con Google: gestiona tu contraseña desde tu cuenta de Google.
                         </Message>
@@ -311,6 +370,28 @@ function mensajeFirebase(error) {
                     <Button label="Cancelar" text @click="dialogoContrasenaAbierto = false"
                         class="!bg-zinc-900 !border-zinc-700 !text-white" />
                     <Button label="Cambiar" :loading="guardandoContrasena" @click="confirmarCambioContrasena"
+                        class="!bg-[#D4A843] !border-[#D4A843]" />
+                </div>
+            </div>
+        </Dialog>
+
+        <!-- Diálogo cambio de correo -->
+        <Dialog v-model:visible="dialogoCorreoAbierto" modal header="Cambiar correo"
+            :style="{ width: '90vw', maxWidth: '420px' }"
+            :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
+            <div class="flex flex-col gap-3">
+                <Message severity="info" :closable="false">
+                    Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras, y
+                    después tendrás que iniciar sesión de nuevo.
+                </Message>
+                <label class="text-xs text-zinc-400 uppercase">Nuevo correo</label>
+                <InputText v-model="correoNuevo" type="email" placeholder="nombre@ejemplo.com" />
+                <label class="text-xs text-zinc-400 uppercase">Contraseña actual</label>
+                <Password v-model="contrasenaParaCorreo" :feedback="false" toggleMask inputClass="w-full" />
+                <div class="flex justify-end gap-2 mt-2">
+                    <Button label="Cancelar" text @click="dialogoCorreoAbierto = false"
+                        class="!bg-zinc-900 !border-zinc-700 !text-white" />
+                    <Button label="Enviar enlace" :loading="enviandoCorreo" @click="confirmarCambioCorreo"
                         class="!bg-[#D4A843] !border-[#D4A843]" />
                 </div>
             </div>

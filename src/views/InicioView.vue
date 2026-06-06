@@ -2,7 +2,7 @@
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
 import Cabecera from '@/components/Cabecera.vue'
@@ -11,7 +11,7 @@ import WidgetGranPremio from '@/components/WidgetGranPremio.vue'
 import WidgetEstadisticasUsuario from '@/components/WidgetEstadisticasUsuario.vue'
 import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
 
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const storeLigas = usarStoreLigas()
 const ruta = useRoute()
 const router = useRouter()
@@ -25,7 +25,7 @@ onMounted(async () => {
   }
 
   storeLigas.idLigaActiva = idLiga
-  await storeEscuderia.cargarEquipo(idLiga)
+  await storeGaraje.cargarEquipo(idLiga)
 })
 </script>
 

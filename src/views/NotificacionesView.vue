@@ -3,13 +3,13 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { usarStoreNotificaciones } from '@/stores/storeNotificaciones'
 import { usarStoreLigas } from '@/stores/storeLigas'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
 const storeNotificaciones = usarStoreNotificaciones()
 const storeLigas = usarStoreLigas()
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const ruta = useRoute()
 
 /**
@@ -51,8 +51,8 @@ onMounted(async () => {
 
   storeLigas.idLigaActiva = idLiga
 
-  if (!storeEscuderia.idLigaActiva) {
-    await storeEscuderia.cargarEquipo(idLiga)
+  if (!storeGaraje.idLigaActiva) {
+    await storeGaraje.cargarEquipo(idLiga)
   }
 
   await storeNotificaciones.cargarActividad()

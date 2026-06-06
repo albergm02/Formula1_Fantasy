@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreMercado } from '@/stores/storeMercado'
 import { usarStoreLigas } from '@/stores/storeLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
@@ -11,19 +11,19 @@ import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
 import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
 import TarjetaCoche from '@/components/TarjetaCoche.vue'
 
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const storeMercado = usarStoreMercado()
 const storeLigas = usarStoreLigas()
 const notificacion = useToast()
 const ruta = useRoute()
 
 onMounted(async () => {
-  const idLiga = storeEscuderia.idLigaActiva || ruta.query.liga
+  const idLiga = storeGaraje.idLigaActiva || ruta.query.liga
   if (idLiga && !storeLigas.idLigaActiva) {
     storeLigas.idLigaActiva = idLiga
   }
-  if (!storeEscuderia.idLigaActiva && ruta.query.liga) {
-    await storeEscuderia.cargarEquipo(ruta.query.liga)
+  if (!storeGaraje.idLigaActiva && ruta.query.liga) {
+    await storeGaraje.cargarEquipo(ruta.query.liga)
   }
 
   /* Carga el mercado activo de la liga desde Firestore e inicia la cuenta atrás */

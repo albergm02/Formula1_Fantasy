@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from 'vue'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 import Dialog from 'primevue/dialog'
 import { ref } from 'vue'
 
-const storeEscuderia = usarStoreEscuderia()
+const storeGaraje = usarStoreGaraje()
 const mostrarDetalle = ref(false)
-const jornada = computed(() => storeEscuderia.ultimaJornada)
+const jornada = computed(() => storeGaraje.ultimaJornada)
 
 const tieneSinergia = computed(() => {
   if (!jornada.value) return false
@@ -38,15 +38,15 @@ const condicionesTexto = computed(() => {
   const c = jornada.value.condiciones
   const etiquetas = []
   if (c.llovio) etiquetas.push({ texto: 'Lluvia', icono: 'pi-cloud', color: 'text-blue-400' })
-  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Safety Car`, icono: 'pi-exclamation-triangle', color: 'text-amber-400' })
-  if (c.numeroVirtualSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} VSC`, icono: 'pi-exclamation-circle', color: 'text-yellow-400' })
-  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} DNFs`, icono: 'pi-times-circle', color: 'text-red-400' })
+  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Coche de Seguridad`, icono: 'pi-exclamation-triangle', color: 'text-amber-400' })
+  if (c.numeroVirtualSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`, icono: 'pi-exclamation-circle', color: 'text-yellow-400' })
+  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} Abandonos`, icono: 'pi-times-circle', color: 'text-red-400' })
   if (etiquetas.length === 0) etiquetas.push({ texto: 'Sin incidentes', icono: 'pi-check-circle', color: 'text-emerald-400' })
   return etiquetas
 })
 
 const NOMBRES_VARIANTE = {
-  qualy: 'Qualy',
+  qualy: 'Clasificación',
   carrera: 'Carrera',
   todo_terreno: 'Todoterreno',
   base: 'Base',
@@ -78,7 +78,7 @@ function explicarFactor(piloto) {
     const clima = condiciones.llovio ? 'Con lluvia' : 'En seco'
     lineas.push(`${clima} + incidentes de carrera → factor ×${factor}`)
   } else if (piloto.variante === 'base') {
-    lineas.push(`Media de Qualy, Carrera y Todoterreno → factor ×${factor}`)
+    lineas.push(`Media de Clasificación, Carrera y Todoterreno → factor ×${factor}`)
   } else if (piloto.variante === 'remontador') {
     const adelantamientos = actuacion.numeroAdelantos || 0
     const adelantado = actuacion.numeroVecesAdelantado || 0

@@ -18,7 +18,7 @@ import {
   cargarResumenPujas,
 } from '@/services/servicioMercado'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { usarStoreEscuderia } from '@/stores/storeEquipo'
+import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 export const usarStoreMercado = defineStore('mercado', () => {
   /* ─── Estado reactivo ─────────────────────────────────────────────────── */
@@ -152,7 +152,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
    */
   async function pujarPorCarta(carta, cantidad) {
     const storeAuth = usarStoreAutenticacion()
-    const storeEscuderia = usarStoreEscuderia()
+    const storeGaraje = usarStoreGaraje()
 
     const cantidadNum = Number(cantidad)
     if (isNaN(cantidadNum) || cantidadNum < carta.precio) {
@@ -161,7 +161,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
     const pujaAnteriorEstaCarta = misPujas.value[carta.id] || 0
     const totalComprometidoSinEstaCarta = totalPujasComprometidas.value - pujaAnteriorEstaCarta
-    const presupuestoDisponible = storeEscuderia.presupuesto - totalComprometidoSinEstaCarta
+    const presupuestoDisponible = storeGaraje.presupuesto - totalComprometidoSinEstaCarta
 
     if (cantidadNum > presupuestoDisponible) {
       return {
@@ -171,7 +171,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     }
 
     const email = storeAuth.usuarioActual.correoAutenticacion
-    const idParticipante = storeEscuderia.idParticipanteActivo
+    const idParticipante = storeGaraje.idParticipanteActivo
 
     const esPujaExistente = misPujas.value[carta.id] !== undefined
 

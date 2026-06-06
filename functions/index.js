@@ -76,35 +76,18 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
 /* ─── Cloud Function ────────────────────────────────────────────────────── */
 
 /**
- * Lógica pura del procesamiento de jornada. Reutilizable desde el schedule
- * y desde el callable manual (botón de admin).
- * @param {Object} [opciones]
- * @param {boolean} [opciones.forzar=false] - Si true, reprocesa el último GP
- *        aunque ya exista en `jornadas`, revirtiendo los puntos y premio
- *        previos antes de aplicar los nuevos. Útil para testing.
- * @param {string} [opciones.idLiga] - Si se indica, sólo se reprocesa esa
- *        liga (sus participaciones) y no se sobrescribe el documento global
- *        de `jornadas/{idJornada}`. Pensado para testing puntual desde el
- *        panel de administración sin afectar a otras ligas.
+ * Lógica pura del procesamiento de jornada. La invoca el disparador programado
+ * `procesarJornadaSemanal` una vez concluido el fin de semana de Fórmula 1.
+ * Es idempotente: si el último Gran Premio con datos ya está en `jornadas`,
+ * no repite los cálculos.
  * @returns {Promise<Object>} Resumen del resultado.
  */
-async function ejecutarProcesarJornada(opciones = {}) {
-  const { forzar = false, idLiga = null, meetingKey: meetingKeyForzado = null } = opciones
-  const reprocesoPorLiga = Boolean(idLiga)
-
+async function ejecutarProcesarJornada() {
   // Buscamos el GP más reciente con datos disponibles en OpenF1
-  let candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
+  const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
   if (candidatos.length === 0) {
     console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
     return { ok: false, motivo: 'sin_gp_finalizado' }
-  }
-
-  // Si se especifica un meeting_key concreto, filtramos para procesar solo ese GP.
-  if (meetingKeyForzado) {
-    candidatos = candidatos.filter((c) => c.meeting_key === meetingKeyForzado)
-    if (candidatos.length === 0) {
-      return { ok: false, motivo: 'meeting_key_no_encontrado', meetingKey: meetingKeyForzado }
-    }
   }
 
   let granPremio = null
@@ -115,7 +98,7 @@ async function ejecutarProcesarJornada(opciones = {}) {
   for (const candidato of candidatos) {
     const idCandidato = `gp_${candidato.meeting_key}`
     const yaProcesada = await db.collection('jornadas').doc(idCandidato).get()
-    if (yaProcesada.exists && !forzar) {
+    if (yaProcesada.exists) {
       // Si el más reciente con datos ya está procesado, no rebobinamos más.
       console.log(`[Jornada] ${idCandidato} ya fue procesada previamente. Omitida.`)
       return { ok: false, motivo: 'jornada_ya_procesada', idJornada: idCandidato }
@@ -150,13 +133,9 @@ async function ejecutarProcesarJornada(opciones = {}) {
 
   const idJornada = `gp_${granPremio.meeting_key}`
 
-  const consultaParticipaciones = reprocesoPorLiga
-    ? db.collection('participaciones').where('id_liga', '==', idLiga)
-    : db.collection('participaciones')
-  const todasParticipaciones = await consultaParticipaciones.get()
+  const todasParticipaciones = await db.collection('participaciones').get()
   const batch = db.batch()
   let participacionesProcesadas = 0
-  const desgloseJornada = []
 
   for (const documento of todasParticipaciones.docs) {
     const participacion = documento.data()
@@ -189,21 +168,13 @@ async function ejecutarProcesarJornada(opciones = {}) {
     const { multiplicadorTotal, sinergias } = calcularSinergias(garaje)
     const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
 
-    const reprocesoMismoGP =
-      forzar &&
-      participacion.ultimaJornada &&
-      participacion.ultimaJornada.nombreGranPremio === granPremio.meeting_name
-    const puntosPrevios = reprocesoMismoGP ? participacion.ultimaJornada.puntosJornada || 0 : 0
-    const premioPrevio = reprocesoMismoGP ? participacion.ultimaJornada.premioJornada || 0 : 0
-
-    const puntosAcumulados = (participacion.puntos || 0) - puntosPrevios + puntosJornada
+    const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
     const premioJornada = calcularPremioJornada(puntosJornada)
     const presupuestoActualizado =
-      Math.round(((participacion.presupuesto || 0) - premioPrevio + premioJornada) * 100) / 100
+      Math.round(((participacion.presupuesto || 0) + premioJornada) * 100) / 100
 
     const desgloseParticipante = {
       nombreGranPremio: granPremio.meeting_name,
-      fechaProcesamiento: new Date().toISOString(),
       puntosJornada,
       premioJornada,
       multiplicadorSinergia: multiplicadorTotal,
@@ -218,50 +189,18 @@ async function ejecutarProcesarJornada(opciones = {}) {
       ultimaJornada: desgloseParticipante,
     })
 
-    desgloseJornada.push({
-      participacionId: documento.id,
-      emailUsuario: participacion.email_usuario,
-      idLiga: participacion.id_liga,
-      puntosJornada,
-      puntosAcumulados,
-      premioJornada,
-      presupuesto: presupuestoActualizado,
-      multiplicadorSinergia: multiplicadorTotal,
-      desglose: resultadoGaraje.desglose,
-    })
-
     participacionesProcesadas++
   }
 
-  if (!reprocesoPorLiga) {
-    batch.set(db.collection('jornadas').doc(idJornada), {
-      meetingKey: granPremio.meeting_key,
-      nombreGranPremio: granPremio.meeting_name,
-      fechaCarrera: granPremio.date_end,
-      fechaProcesamiento: new Date().toISOString(),
-      temporada: TEMPORADA_ACTUAL,
-      condiciones,
-      actuacionesPorPiloto,
-      desglose: desgloseJornada,
-    })
-  } else if (forzar) {
-    // Reproceso por liga forzado: refrescamos los campos no dependientes de
-    // liga (actuaciones y condiciones) para que NoticiasJornadaView muestre
-    // los datos recién calculados con las fórmulas actualizadas.
-    batch.set(
-      db.collection('jornadas').doc(idJornada),
-      {
-        meetingKey: granPremio.meeting_key,
-        nombreGranPremio: granPremio.meeting_name,
-        fechaCarrera: granPremio.date_end,
-        fechaProcesamiento: new Date().toISOString(),
-        temporada: TEMPORADA_ACTUAL,
-        condiciones,
-        actuacionesPorPiloto,
-      },
-      { merge: true },
-    )
-  }
+  batch.set(db.collection('jornadas').doc(idJornada), {
+    meetingKey: granPremio.meeting_key,
+    nombreGranPremio: granPremio.meeting_name,
+    fechaCarrera: granPremio.date_end,
+    fechaProcesamiento: new Date().toISOString(),
+    temporada: TEMPORADA_ACTUAL,
+    condiciones,
+    actuacionesPorPiloto,
+  })
 
   await batch.commit()
 
@@ -660,8 +599,8 @@ exports.generarMercadoInicialLiga = onCall({ region: 'europe-west1' }, async (re
   if (!ligaSnap.exists) {
     throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
   }
-  if (ligaSnap.data().admin !== email) {
-    throw new HttpsError('permission-denied', 'Solo el admin de la liga puede inicializarla.')
+  if (ligaSnap.data().correoOrganizador !== email) {
+    throw new HttpsError('permission-denied', 'Solo el organizador de la liga puede inicializarla.')
   }
 
   const resultado = await ejecutarGeneracionMercadoParaLiga(idLiga)
@@ -1108,7 +1047,7 @@ exports.migrarCorreoUsuario = onCall({ region: 'europe-west1' }, async (request)
 
   const [participacionesSnap, ligasAdminSnap] = await Promise.all([
     db.collection('participaciones').where('email_usuario', '==', correoAnterior).get(),
-    db.collection('ligas').where('admin', '==', correoAnterior).get(),
+    db.collection('ligas').where('correoOrganizador', '==', correoAnterior).get(),
   ])
 
   const batch = db.batch()
@@ -1118,7 +1057,7 @@ exports.migrarCorreoUsuario = onCall({ region: 'europe-west1' }, async (request)
     batch.update(documento.ref, { email_usuario: correoNuevo })
   }
   for (const documento of ligasAdminSnap.docs) {
-    batch.update(documento.ref, { admin: correoNuevo })
+    batch.update(documento.ref, { correoOrganizador: correoNuevo })
   }
 
   await batch.commit()
@@ -1213,14 +1152,14 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
       continue
     }
 
-    if (datosPropios.rol === 'admin') {
+    if (datosPropios.rol === 'organizador') {
       const siguiente = elegirSiguienteAdministrador(restantes)
-      await db.collection('participaciones').doc(siguiente.id).update({ rol: 'admin' })
+      await db.collection('participaciones').doc(siguiente.id).update({ rol: 'organizador' })
       await db
         .collection('ligas')
         .doc(idLiga)
         .update({
-          admin: siguiente.email_usuario,
+          correoOrganizador: siguiente.email_usuario,
           participantes: (datosLiga.participantes || restantes.length + 1) - 1,
         })
     } else {

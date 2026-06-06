@@ -301,7 +301,7 @@ const handleEliminarLiga = () => {
         <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
           @click="handleAbandonarLiga" :loading="cargandoAccion" />
         <!-- Opciones exclusivas del administrador de la liga -->
-        <template v-if="ligaSeleccionada.admin === storeAutenticacion.usuarioActual.correoAutenticacion">
+        <template v-if="ligaSeleccionada.correoOrganizador === storeAutenticacion.usuarioActual.correoAutenticacion">
           <Button label="GESTIONAR PARTICIPANTES" class="w-full !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
             @click="abrirGestionParticipantes" :loading="cargandoAccion" />
           <Button label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
