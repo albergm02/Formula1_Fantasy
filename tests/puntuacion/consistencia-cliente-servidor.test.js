@@ -71,6 +71,34 @@ const casosDeJornada = [
     condiciones: { ...sinCondiciones, llovio: true },
     variante: 'base',
   },
+  {
+    nombre: 'Todo Terreno anulado por abandono del propio piloto',
+    actuacion: { dnf: true },
+    condiciones: {
+      llovio: true,
+      numeroDNFs: 3,
+      numeroSafetyCarActivos: 2,
+      numeroVirtualSafetyCarActivos: 0,
+    },
+    variante: 'todo_terreno',
+  },
+  {
+    nombre: 'Estratega anulado por descalificación del piloto',
+    actuacion: { posicionCarrera: 4, numeroPitStops: 1, porcentajeStintMaximo: 0.6, dsq: true },
+    condiciones: sinCondiciones,
+    variante: 'estratega',
+  },
+  {
+    nombre: 'Todo Terreno anulado porque el piloto no sale (DNS)',
+    actuacion: { dns: true },
+    condiciones: {
+      llovio: true,
+      numeroDNFs: 2,
+      numeroSafetyCarActivos: 1,
+      numeroVirtualSafetyCarActivos: 1,
+    },
+    variante: 'todo_terreno',
+  },
 ]
 
 describe('Coherencia entre cliente y servidor', () => {

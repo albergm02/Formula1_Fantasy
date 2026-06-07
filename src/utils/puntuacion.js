@@ -16,9 +16,13 @@
 export function calcularFactorJornada(actuacion, condiciones, variante) {
   if (variante === 'qualy') return acotarFactor(calcularFactorQualy(actuacion))
   if (variante === 'carrera') return acotarFactor(calcularFactorCarrera(actuacion))
-  if (variante === 'todo_terreno') return acotarFactor(calcularFactorTodoTerreno(condiciones))
+  if (variante === 'todo_terreno') {
+    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
+    return acotarFactor(calcularFactorTodoTerreno(condiciones))
+  }
   if (variante === 'remontador') return acotarFactor(calcularFactorRemontador(actuacion))
   if (variante === 'estratega') {
+    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
     return acotarFactor(calcularFactorEstrategia(actuacion))
   }
 
@@ -35,6 +39,17 @@ function acotarFactor(factor) {
   if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
   if (factor > FACTOR_MAXIMO) return FACTOR_MAXIMO
   return Math.round(factor * 100) / 100
+}
+
+/**
+ * Indica si el piloto no tuvo una actuación válida en carrera: no salió (DNS),
+ * abandonó (DNF) o fue descalificado (DSQ). En ese caso las variantes Todo
+ * Terreno y Estratega no premian su actuación y reciben el factor mínimo.
+ * @param {{ dnf?: boolean, dns?: boolean, dsq?: boolean }} actuacion
+ * @returns {boolean}
+ */
+function pilotoSinActuacionValida(actuacion) {
+  return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq)
 }
 
 /**
@@ -86,16 +101,9 @@ function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
   return 1 + diferencial * 0.1
 }
 
-function calcularFactorEstrategia({
-  posicionCarrera,
-  numeroPitStops,
-  porcentajeStintMaximo = 0.5,
-  dnf = false,
-}) {
+function calcularFactorEstrategia({ posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 }) {
   let factor = 0.7
-  if (!dnf) {
-    factor += resolverBonusGestionStint(porcentajeStintMaximo)
-  }
+  factor += resolverBonusGestionStint(porcentajeStintMaximo)
   factor += resolverBonusEstrategiaParadas(numeroPitStops)
   factor += resolverBonusPosicionEstratega(posicionCarrera)
   return factor

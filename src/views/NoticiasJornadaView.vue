@@ -19,7 +19,7 @@ import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion
 
 // Variantes de puntuación para mostrar en la guía rápida
 const VARIANTES = [
-    { id: 'qualy', etiqueta: 'Clasificación', icono: 'pi-stopwatch', color: '#38bdf8' },
+    { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
     { id: 'carrera', etiqueta: 'Carrera', icono: 'pi-flag-fill', color: '#f97316' },
     { id: 'todo_terreno', etiqueta: 'Todo Terreno', icono: 'pi-cloud', color: '#a78bfa' },
     { id: 'remontador', etiqueta: 'Remontador', icono: 'pi-arrow-up', color: '#ef4444' },
@@ -39,7 +39,7 @@ const EJEMPLOS_VARIANTE = {
     },
     todo_terreno: {
         escenario: 'GP sin lluvia, 2 Coches de Seguridad y 3 abandonos. Base del piloto 65.',
-        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 -> 65 × 0.90 = 58,5 pts.',
+        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 -> 65 × 0.90 = 58,5 pts. Si ese piloto no sale (N/S), abandona (DNF) o es descalificado (DSQ), su factor sería 0.50 -> 65 × 0.50 = 33 pts.',
     },
     remontador: {
         escenario: 'Piloto con base 60 que realiza 8 adelantamientos y recibe 3 (diferencial +5).',
@@ -47,7 +47,7 @@ const EJEMPLOS_VARIANTE = {
     },
     estratega: {
         escenario: 'Piloto con base 70, 1 parada, mejor stint del 50%, termina P5.',
-        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 -> 70 × 1.20 = 84 pts.',
+        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 -> 70 × 1.20 = 84 pts. Si no sale (N/S), abandona (DNF) o es descalificado (DSQ), el factor cae a 0.50 -> 70 × 0.50 = 35 pts.',
     },
     base: {
         escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/Todo Terreno son 1.20, 1.10 y 1.00.',

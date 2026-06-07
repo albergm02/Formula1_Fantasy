@@ -65,6 +65,36 @@ describe('Variante Todo Terreno', () => {
     // base 1.0 + (2 SC × 0.05) + (3 DNF × 0.10) = 1.40
     expect(calcularFactorJornada({}, condicionesCaoticas, 'todo_terreno')).toBe(1.4)
   })
+
+  it('debería anular el bonus de caos (0.5) si el propio piloto abandona', () => {
+    const condicionesCaoticas = {
+      llovio: true,
+      numeroDNFs: 3,
+      numeroSafetyCarActivos: 2,
+      numeroVirtualSafetyCarActivos: 0,
+    }
+    expect(calcularFactorJornada({ dnf: true }, condicionesCaoticas, 'todo_terreno')).toBe(0.5)
+  })
+
+  it('debería anular el bonus de caos (0.5) si el propio piloto es descalificado', () => {
+    const condicionesCaoticas = {
+      llovio: true,
+      numeroDNFs: 3,
+      numeroSafetyCarActivos: 2,
+      numeroVirtualSafetyCarActivos: 0,
+    }
+    expect(calcularFactorJornada({ dsq: true }, condicionesCaoticas, 'todo_terreno')).toBe(0.5)
+  })
+
+  it('debería anular el bonus de caos (0.5) si el propio piloto no sale (DNS)', () => {
+    const condicionesCaoticas = {
+      llovio: true,
+      numeroDNFs: 3,
+      numeroSafetyCarActivos: 2,
+      numeroVirtualSafetyCarActivos: 0,
+    }
+    expect(calcularFactorJornada({ dns: true }, condicionesCaoticas, 'todo_terreno')).toBe(0.5)
+  })
 })
 
 describe('Variante Remontador', () => {
@@ -96,15 +126,34 @@ describe('Variante Estratega', () => {
     expect(calcularFactorJornada(actuacion, sinCondiciones, 'estratega')).toBe(1.5)
   })
 
-  it('no debería contar el bonus de stint si el piloto sufre DNF', () => {
+  it('debería anular la actuación (0.5) si el piloto sufre DNF', () => {
     const actuacion = {
       posicionCarrera: 18,
       numeroPitStops: 1,
       porcentajeStintMaximo: 0.6,
       dnf: true,
     }
-    // 0.7 + 0.15 (1 parada) + (-0.1, fuera del top 15) = 0.75
-    expect(calcularFactorJornada(actuacion, sinCondiciones, 'estratega')).toBe(0.75)
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'estratega')).toBe(0.5)
+  })
+
+  it('debería anular la actuación (0.5) si el piloto es descalificado', () => {
+    const actuacion = {
+      posicionCarrera: 5,
+      numeroPitStops: 1,
+      porcentajeStintMaximo: 0.6,
+      dsq: true,
+    }
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'estratega')).toBe(0.5)
+  })
+
+  it('debería anular la actuación (0.5) si el piloto no sale (DNS)', () => {
+    const actuacion = {
+      posicionCarrera: 5,
+      numeroPitStops: 1,
+      porcentajeStintMaximo: 0.6,
+      dns: true,
+    }
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'estratega')).toBe(0.5)
   })
 })
 

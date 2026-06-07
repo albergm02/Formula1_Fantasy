@@ -67,12 +67,27 @@ function acotarFactor(factor) {
   return Math.round(factor * 100) / 100
 }
 
+/**
+ * Indica si el piloto no tuvo una actuación válida en carrera: no salió (DNS),
+ * abandonó (DNF) o fue descalificado (DSQ). En ese caso las variantes Todo
+ * Terreno y Estratega no premian su actuación y reciben el factor mínimo.
+ * @param {{ dnf?: boolean, dns?: boolean, dsq?: boolean }} actuacion
+ * @returns {boolean}
+ */
+function pilotoSinActuacionValida(actuacion) {
+  return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq)
+}
+
 function calcularFactorJornada(actuacion, condiciones, variante) {
   if (variante === 'qualy') return acotarFactor(calcularFactorQualy(actuacion))
   if (variante === 'carrera') return acotarFactor(calcularFactorCarrera(actuacion))
-  if (variante === 'todo_terreno') return acotarFactor(calcularFactorTodoTerreno(condiciones))
+  if (variante === 'todo_terreno') {
+    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
+    return acotarFactor(calcularFactorTodoTerreno(condiciones))
+  }
   if (variante === 'remontador') return acotarFactor(calcularFactorRemontador(actuacion))
   if (variante === 'estratega') {
+    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
     return acotarFactor(calcularFactorEstrategia(actuacion))
   }
 
@@ -123,20 +138,13 @@ function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
 /**
  * Factor basado en métricas de gestión de stints de OpenF1 (/stints).
  * Premia stints largos, pocas paradas y posición final como validación.
- * Si el piloto ha sufrido un DNF no se contabiliza el bonus de stint.
- * @param {{ posicionCarrera: number, numeroPitStops: number, porcentajeStintMaximo: number, dnf: boolean }} actuacion
+ * Los abandonos y descalificaciones se filtran antes en `calcularFactorJornada`.
+ * @param {{ posicionCarrera: number, numeroPitStops: number, porcentajeStintMaximo: number }} actuacion
  * @returns {number}
  */
-function calcularFactorEstrategia({
-  posicionCarrera,
-  numeroPitStops,
-  porcentajeStintMaximo = 0.5,
-  dnf = false,
-}) {
+function calcularFactorEstrategia({ posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 }) {
   let factor = 0.7
-  if (!dnf) {
-    factor += resolverBonusGestionStint(porcentajeStintMaximo)
-  }
+  factor += resolverBonusGestionStint(porcentajeStintMaximo)
   factor += resolverBonusEstrategiaParadas(numeroPitStops)
   factor += resolverBonusPosicionEstratega(posicionCarrera)
   return factor
