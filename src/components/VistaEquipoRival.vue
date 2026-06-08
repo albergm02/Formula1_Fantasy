@@ -47,7 +47,7 @@ const esFichajeDeshabilitado = (elemento) => {
  */
 const confirmarEjecucionClausula = (elemento) => {
     if (jornadaIniciada.value) {
-        notificacion.add({ severity: 'warn', summary: 'Jornada en curso', detail: mensajeBloqueoJornada, life: 4000 })
+        notificacion.add({ severity: 'warn', summary: 'Jornada sin procesar', detail: mensajeBloqueoJornada, life: 4000 })
         return
     }
     const precioClausula = calcularPrecioClausula(elemento)

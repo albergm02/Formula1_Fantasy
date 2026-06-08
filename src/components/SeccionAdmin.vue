@@ -178,6 +178,7 @@ function manejarEliminarLiga() {
                                     size="small" severity="danger" class="!bg-red-700 !border-red-700 !text-white" />
                             </div>
                         </div>
+
                     </div>
                 </template>
             </Card>

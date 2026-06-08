@@ -346,7 +346,6 @@ export const usarStoreLigas = defineStore('ligas', () => {
   async function eliminarLiga(idLiga) {
     const storeAutenticacion = usarStoreAutenticacion()
     const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
-    const uid = storeAutenticacion.usuarioActual.uid
 
     try {
       const datosLiga = await cargarLiga(idLiga)
@@ -360,10 +359,14 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       const participaciones = await cargarParticipacionesLiga(idLiga)
       for (const participacion of participaciones) {
+        const uidParticipante =
+          participacion.uid_usuario || (await buscarUidPorCorreo(participacion.email_usuario))
+        if (uidParticipante) {
+          await desvincularLigaDelUsuario(uidParticipante, idLiga)
+        }
         await eliminarParticipacion(participacion.id)
       }
 
-      await desvincularLigaDelUsuario(uid, idLiga)
       await eliminarDocumentoLiga(idLiga)
       storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,
@@ -376,7 +379,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: 'Has eliminado la liga.' }
     } catch (error) {
-      return { success: false, message: 'Error al eliminar la liga.' }
+      console.error(`Error al eliminar la liga ${idLiga}:`, error)
+      return { success: false, message: `Error al eliminar la liga: ${error.message}` }
     }
   }
 

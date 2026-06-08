@@ -38,15 +38,15 @@ const condicionesTexto = computed(() => {
   const c = jornada.value.condiciones
   const etiquetas = []
   if (c.llovio) etiquetas.push({ texto: 'Lluvia', icono: 'pi-cloud', color: 'text-blue-400' })
-  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Coche de Seguridad`, icono: 'pi-exclamation-triangle', color: 'text-amber-400' })
-  if (c.numeroVirtualSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`, icono: 'pi-exclamation-circle', color: 'text-yellow-400' })
-  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} Abandonos`, icono: 'pi-times-circle', color: 'text-red-400' })
+  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Safety Car`, icono: 'pi-exclamation-triangle', color: 'text-amber-400' })
+  if (c.numeroVirtualSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} VSC`, icono: 'pi-exclamation-circle', color: 'text-yellow-400' })
+  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} ABN`, icono: 'pi-times-circle', color: 'text-red-400' })
   if (etiquetas.length === 0) etiquetas.push({ texto: 'Sin incidentes', icono: 'pi-check-circle', color: 'text-emerald-400' })
   return etiquetas
 })
 
 const NOMBRES_VARIANTE = {
-  qualy: 'Clasificación',
+  qualy: 'Qualy',
   carrera: 'Carrera',
   todo_terreno: 'Todoterreno',
   base: 'Base',

@@ -112,6 +112,21 @@ describe('Variante Remontador', () => {
     const actuacion = { numeroAdelantos: 0, numeroVecesAdelantado: 10 }
     expect(calcularFactorJornada(actuacion, sinCondiciones, 'remontador')).toBe(0.5)
   })
+
+  it('debería anular la actuación (0.5) si el piloto sufre ABN', () => {
+    const actuacion = { numeroAdelantos: 6, numeroVecesAdelantado: 1, dnf: true }
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'remontador')).toBe(0.5)
+  })
+
+  it('debería anular la actuación (0.5) si el piloto es descalificado', () => {
+    const actuacion = { numeroAdelantos: 6, numeroVecesAdelantado: 1, dsq: true }
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'remontador')).toBe(0.5)
+  })
+
+  it('debería anular la actuación (0.5) si el piloto no sale (N/S)', () => {
+    const actuacion = { numeroAdelantos: 0, numeroVecesAdelantado: 0, dns: true }
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'remontador')).toBe(0.5)
+  })
 })
 
 describe('Variante Estratega', () => {

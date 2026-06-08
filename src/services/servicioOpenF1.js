@@ -108,6 +108,7 @@ export const obtenerUltimoGranPremioFinalizado = async ({
     imagen: ultimaReunion.circuit_image,
     fechaInicio: ultimaReunion.date_start,
     fechaFin: ultimaReunion.date_end,
+    meetingKey: ultimaReunion.meeting_key,
   }
 }
 

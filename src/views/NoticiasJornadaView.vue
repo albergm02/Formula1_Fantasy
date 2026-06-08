@@ -39,15 +39,15 @@ const EJEMPLOS_VARIANTE = {
     },
     todo_terreno: {
         escenario: 'GP sin lluvia, 2 Coches de Seguridad y 3 abandonos. Base del piloto 65.',
-        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 -> 65 × 0.90 = 58,5 pts. Si ese piloto no sale (N/S), abandona (DNF) o es descalificado (DSQ), su factor sería 0.50 -> 65 × 0.50 = 33 pts.',
+        calculo: 'Factor = 0.50 + 2 × 0.05 + 3 × 0.10 = 0.50 + 0.10 + 0.30 = 0.90 -> 65 × 0.90 = 58,5 pts. Si ese piloto no sale (N/S), abandona (ABN) o es descalificado (DESC), su factor sería 0.50 -> 65 × 0.50 = 33 pts.',
     },
     remontador: {
         escenario: 'Piloto con base 60 que realiza 8 adelantamientos y recibe 3 (diferencial +5).',
-        calculo: 'Factor = 1.0 + 5 × 0.1 = 1.50 -> 60 × 1.50 = 90 pts.',
+        calculo: 'Factor = 1.0 + 5 × 0.1 = 1.50 -> 60 × 1.50 = 90 pts. Si no sale (N/S), abandona (ABN) o es descalificado (DESC), el factor cae a 0.50 -> 60 × 0.50 = 30 pts.',
     },
     estratega: {
         escenario: 'Piloto con base 70, 1 parada, mejor stint del 50%, termina P5.',
-        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 -> 70 × 1.20 = 84 pts. Si no sale (N/S), abandona (DNF) o es descalificado (DSQ), el factor cae a 0.50 -> 70 × 0.50 = 35 pts.',
+        calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 -> 70 × 1.20 = 84 pts. Si no sale (N/S), abandona (ABN) o es descalificado (DESC), el factor cae a 0.50 -> 70 × 0.50 = 35 pts.',
     },
     base: {
         escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/Todo Terreno son 1.20, 1.10 y 1.00.',
@@ -175,7 +175,7 @@ const condicionesTexto = computed(() => {
         })
     if (c.numeroDNFs > 0)
         etiquetas.push({
-            texto: `${c.numeroDNFs} Abandonos`,
+            texto: `${c.numeroDNFs} ABN`,
             color: 'text-red-400',
         })
     return etiquetas
@@ -209,7 +209,7 @@ function obtenerSimulacionVariantes(piloto) {
 }
 
 
-// Muestro estados si son necesarios en caso de DSQ, DNS o DNF.
+// Muestro estados si son necesarios en caso de DESC, N/S o ABN.
 function obtenerEstadoCarrera(actuacion) {
     if (actuacion?.dsq) return 'DESC'
     if (actuacion?.dns) return 'N/S'
