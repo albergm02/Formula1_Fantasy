@@ -16,7 +16,7 @@ import { z } from 'zod'
 
 const esquemaValidacion = zodResolver(
   z.object({
-    username: z.string().trim().min(3, 'El nombre debe tener al menos 3 caracteres.').max(10, 'El nombre no debe exceder los 10 caracteres'),
+    username: z.string().trim().min(3, 'El nombre debe tener al menos 3 caracteres.').max(12, 'El nombre no debe exceder los 12 caracteres.'),
   })
 )
 

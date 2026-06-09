@@ -11,11 +11,9 @@ const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import {
   calcularPrecioClausula,
-  estaEnPeriodoDeGracia,
-  ejecutarClausula,
+  ejecutarClausulazo,
   persistirInversionClausula,
 } from '@/services/servicioClausulas'
-import { calcularIdMercado, cargarMisPujas } from '@/services/servicioMercado'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
 /**
@@ -279,82 +277,26 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Ejecuta la cláusula de rescisión de una carta del garaje de un rival.
-   * Valida presupuesto, periodo de gracia y límites de roster antes de proceder.
+   * La validación de permisos, precio y presupuesto se realiza en servidor.
    * @param {string} idParticipanteRival - ID de participación del rival.
    * @param {Object} elemento - Carta del rival a fichar.
    * @returns {Promise<{ success: boolean, message: string }>}
    */
   async function ejecutarClausulaRival(idParticipanteRival, elemento) {
-    const precioClausulaTotal = calcularPrecioClausula(elemento)
-    const tipoElemento = elemento.tipo || elemento.tipoCarta
-
-    if (tipoElemento === 'potenciador') {
-      return {
-        success: false,
-        message: 'Los potenciadores no pueden ser fichados mediante cláusula.',
-      }
-    }
-    if (estaEnPeriodoDeGracia(elemento)) {
-      return { success: false, message: 'Esta carta está protegida por periodo de gracia.' }
-    }
-    if (precioClausulaTotal > presupuesto.value) {
-      return {
-        success: false,
-        message: `No tienes presupuesto suficiente. Necesitas ${precioClausulaTotal.toFixed(1)}M.`,
-      }
-    }
-
-    const totalComprometidoEnPujas = await calcularTotalComprometidoEnPujas()
-    if (precioClausulaTotal + totalComprometidoEnPujas > presupuesto.value) {
-      return {
-        success: false,
-        message:
-          `Tienes ${totalComprometidoEnPujas.toFixed(1)}M comprometidos en pujas del mercado. ` +
-          `Cancela o reduce alguna puja antes de ejecutar este clausulazo (${precioClausulaTotal.toFixed(1)}M).`,
-      }
-    }
-
     try {
-      await ejecutarClausula(
+      const resultado = await ejecutarClausulazo(
         idParticipanteRival,
         idParticipanteActivo.value,
         elemento.instancia_id,
-        precioClausulaTotal,
       )
-
       await cargarEquipo(idLigaActiva.value)
-
-      const storeNotificaciones = usarStoreNotificaciones()
-      storeNotificaciones
-        .registrarClausula(elemento.nombre, tipoElemento, precioClausulaTotal)
-        .catch(() => {})
-
       return {
         success: true,
-        message: `Has fichado a ${elemento.nombre} por ${precioClausulaTotal.toFixed(1)}M de cláusula.`,
+        message: `Has fichado a ${resultado.nombre} por ${resultado.precioClausula.toFixed(1)}M de cláusula.`,
       }
     } catch (error) {
-      return {
-        success: false,
-        message: `Error al ejecutar la cláusula: ${error.message}`,
-      }
+      return { success: false, message: error.message }
     }
-  }
-
-  /**
-   * Suma el dinero comprometido por el usuario actual en pujas del mercado
-   * activo de su liga. Devuelve 0 si no hay mercado abierto o si el usuario
-   * no tiene pujas registradas hoy.
-   * @returns {Promise<number>} Total comprometido en millones.
-   */
-  async function calcularTotalComprometidoEnPujas() {
-    const storeAuth = usarStoreAutenticacion()
-    const emailUsuario = storeAuth.usuarioActual?.correoAutenticacion
-    if (!emailUsuario || !idLigaActiva.value) return 0
-
-    const idMercadoHoy = calcularIdMercado(idLigaActiva.value)
-    const mapaPujas = await cargarMisPujas(idMercadoHoy, emailUsuario)
-    return Object.values(mapaPujas).reduce((suma, cantidad) => suma + cantidad, 0)
   }
 
   /**

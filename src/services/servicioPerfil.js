@@ -1,6 +1,6 @@
 /**
  * Servicio de perfil — wrappers de Callable Functions que tocan
- * datos persistentes del usuario (nombre, correo, baja de cuenta).
+ * datos persistentes del usuario (correo, baja de cuenta).
  *
  * Las operaciones sensibles (cambio de correo y baja) requieren que
  * el cliente haya reautenticado al usuario justo antes de llamarlas.
@@ -11,19 +11,8 @@
 import { httpsCallable } from 'firebase/functions'
 import { functions } from '@/services/servicioFirebase'
 
-const llamadaCambiarNombre = httpsCallable(functions, 'cambiarNombreUsuario')
 const llamadaMigrarCorreo = httpsCallable(functions, 'migrarCorreoUsuario')
 const llamadaEliminarCuenta = httpsCallable(functions, 'eliminarMiCuenta')
-
-/**
- * Cambia el nombre visible. Backend valida formato, unicidad y bloqueo de 30 días.
- * @param {string} nombreNuevo
- * @returns {Promise<{ ok: boolean, nombre: string }>}
- */
-export async function cambiarNombreUsuario(nombreNuevo) {
-  const respuesta = await llamadaCambiarNombre({ nombreNuevo })
-  return respuesta.data
-}
 
 /**
  * Migra los documentos Firestore (usuarios, participaciones, ligas) tras

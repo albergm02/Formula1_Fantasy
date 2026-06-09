@@ -126,26 +126,6 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
     })
   }
 
-  /**
-   * Registra que el usuario ha ejecutado una cláusula de rescisión.
-   * @param {string} nombreElemento - Nombre de la carta fichada.
-   * @param {string} tipoElemento - Tipo de la carta ('piloto', 'coche', 'potenciador').
-   * @param {number} precioClausula - Precio pagado por la cláusula.
-   * @returns {Promise<void>}
-   */
-  async function registrarClausula(nombreElemento, tipoElemento, precioClausula) {
-    const idLiga = storeLigas.idLigaActiva
-    const nombreUsuario = storeAutenticacion.usuarioActual.nombreVisible
-
-    await registrarActividad(idLiga, {
-      nombreUsuario,
-      tipo: TIPOS_ACTIVIDAD.CLAUSULA,
-      descripcion: `ha activado la cláusula de ${tipoElemento} ${nombreElemento} por ${precioClausula.toFixed(1)}M`,
-    })
-
-    await cargarActividad()
-  }
-
   return {
     actividad,
     cargando,
@@ -155,7 +135,6 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
     registrarVenta,
     registrarIncorporacion,
     registrarAbandono,
-    registrarClausula,
     registrarCreacionLiga,
   }
 })

@@ -23,6 +23,12 @@ initializeApp()
 const db = getFirestore()
 const TEMPORADA_ACTUAL = 2026
 
+const REGION = 'europe-west1'
+const OPCIONES = { region: REGION, enforceAppCheck: true }
+const OPCIONES_PUBLICAS = { region: REGION, invoker: 'public', enforceAppCheck: true }
+const HORAS_PERIODO_GRACIA = 48
+const DIAS_BLOQUEO_CAMBIO_CORREO = 7
+
 /**
  * Convierte la puntuación total de una jornada en un premio económico (en M).
  * Conversión: 10 puntos equivalen a 1M (108 pts → 10.8M).
@@ -585,7 +591,7 @@ async function exigirAdministrador(request) {
  * administrador de esa liga. Es idempotente: si el mercado de hoy ya existe,
  * no lo recrea.
  */
-exports.generarMercadoInicialLiga = onCall({ region: 'europe-west1' }, async (request) => {
+exports.generarMercadoInicialLiga = onCall(OPCIONES, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   }
@@ -608,26 +614,15 @@ exports.generarMercadoInicialLiga = onCall({ region: 'europe-west1' }, async (re
 })
 
 /**
- * Callable — ELIMINACIÓN COMPLETA de una liga (solo administrador global).
- * A diferencia del flujo del usuario `eliminarLiga` (que exige ser admin de la
- * liga), este callable permite al administrador global borrar cualquier liga.
- * Borra: participaciones, mercados (y sus pujas), actividad, el documento de
- * la liga, y desvincula la liga del array `ligasIds` de todos los usuarios
- * que la tuvieran asociada.
- * Acepta `{ idLiga }` (obligatorio).
+ * Borrado atómico en cascada de una liga: participaciones (con sus garajes),
+ * mercados con sus pujas, eventos de actividad, desvinculación del array
+ * `ligasIds` de cada usuario afectado y el propio documento de la liga.
+ * Toda la operación se ejecuta en un único `batch.commit()`.
+ * @param {string} idLiga
+ * @param {FirebaseFirestore.DocumentSnapshot} ligaSnap - Snapshot ya cargado del documento de liga.
+ * @returns {Promise<{nombreLiga: string, participacionesBorradas: number, mercadosBorrados: number, eventosActividadBorrados: number, usuariosDesvinculados: number}>}
  */
-exports.eliminarLigaManual = onCall({ region: 'europe-west1' }, async (request) => {
-  await exigirAdministrador(request)
-  const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
-
-  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
-
+async function borrarLigaEnCascada(idLiga, ligaSnap) {
   const batch = db.batch()
 
   const participacionesSnap = await db
@@ -665,14 +660,294 @@ exports.eliminarLigaManual = onCall({ region: 'europe-west1' }, async (request) 
   await batch.commit()
 
   return {
-    ok: true,
-    idLiga,
     nombreLiga: ligaSnap.data().nombre || idLiga,
     participacionesBorradas: participacionesSnap.size,
     mercadosBorrados: mercadosSnap.size,
     eventosActividadBorrados: actividadSnap.size,
     usuariosDesvinculados: usuariosSnap.size,
   }
+}
+
+/**
+ * Callable — ELIMINACIÓN COMPLETA de una liga (solo administrador global).
+ * Permite al administrador global borrar cualquier liga del sistema.
+ * Acepta `{ idLiga }` (obligatorio).
+ */
+exports.eliminarLigaManual = onCall(OPCIONES, async (request) => {
+  await exigirAdministrador(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+
+  const resumen = await borrarLigaEnCascada(idLiga, ligaSnap)
+  return { ok: true, idLiga, ...resumen }
+})
+
+/**
+ * Callable — el organizador de la liga la elimina en cascada.
+ * Ejecuta la misma limpieza atómica que `eliminarLigaManual` (participaciones,
+ * mercados, pujas, actividad, vínculos en usuarios y el documento de liga),
+ * pero verifica que el invocador sea el organizador de esa liga concreta.
+ * Acepta `{ idLiga }` (obligatorio).
+ */
+exports.eliminarLigaComoOrganizador = onCall(OPCIONES, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+  if (ligaSnap.data().correoOrganizador !== email) {
+    throw new HttpsError('permission-denied', 'Solo el organizador puede eliminar la liga.')
+  }
+
+  const resumen = await borrarLigaEnCascada(idLiga, ligaSnap)
+  return { ok: true, idLiga, ...resumen }
+})
+
+/**
+ * Callable — el organizador de la liga expulsa a un participante concreto.
+ * Verifica en servidor todos los permisos y ejecuta la operación en un
+ * único batch atómico: borra la participación del expulsado, elimina la
+ * liga de su array `ligasIds`, registra su correo en `expulsados`,
+ * decrementa el contador de participantes y crea el evento de actividad.
+ * Acepta `{ idLiga, emailExpulsado }` (ambos obligatorios).
+ */
+exports.expulsarParticipanteComoOrganizador = onCall(OPCIONES, async (request) => {
+  const emailOrganizador = exigirEmailAutenticado(request)
+  const { idLiga, emailExpulsado } = request.data || {}
+  if (!idLiga || !emailExpulsado) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga o emailExpulsado.')
+  }
+
+  const correoExpulsado = String(emailExpulsado).trim().toLowerCase()
+  if (correoExpulsado === emailOrganizador.toLowerCase()) {
+    throw new HttpsError('failed-precondition', 'No puedes expulsarte a ti mismo.')
+  }
+
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+  const datosLiga = ligaSnap.data()
+  if (datosLiga.correoOrganizador !== emailOrganizador) {
+    throw new HttpsError('permission-denied', 'Solo el organizador puede expulsar participantes.')
+  }
+
+  const participacionSnap = await db
+    .collection('participaciones')
+    .where('id_liga', '==', idLiga)
+    .where('email_usuario', '==', correoExpulsado)
+    .limit(1)
+    .get()
+  if (participacionSnap.empty) {
+    throw new HttpsError('not-found', 'El participante no pertenece a esta liga.')
+  }
+  const participacionExpulsado = participacionSnap.docs[0]
+  const datosParticipacion = participacionExpulsado.data()
+
+  let uidExpulsado = datosParticipacion.uid_usuario || null
+  if (!uidExpulsado) {
+    const usuarioSnap = await db
+      .collection('usuarios')
+      .where('correoAutenticacion', '==', correoExpulsado)
+      .limit(1)
+      .get()
+    if (!usuarioSnap.empty) uidExpulsado = usuarioSnap.docs[0].id
+  }
+
+  const batch = db.batch()
+  batch.delete(participacionExpulsado.ref)
+  batch.update(ligaSnap.ref, {
+    expulsados: FieldValue.arrayUnion(correoExpulsado),
+    participantes: FieldValue.increment(-1),
+  })
+  if (uidExpulsado) {
+    batch.update(db.collection('usuarios').doc(uidExpulsado), {
+      ligasIds: FieldValue.arrayRemove(idLiga),
+    })
+  }
+  batch.create(db.collection('actividad').doc(), {
+    idLiga,
+    nombreUsuario: datosParticipacion.nombre_usuario || correoExpulsado,
+    tipo: 'abandono',
+    descripcion: `ha sido expulsado del campeonato ${datosLiga.nombre}`,
+    fecha: FieldValue.serverTimestamp(),
+  })
+
+  await batch.commit()
+
+  return {
+    ok: true,
+    idLiga,
+    emailExpulsado: correoExpulsado,
+    nombreExpulsado: datosParticipacion.nombre_usuario || correoExpulsado,
+  }
+})
+
+/**
+ * Calcula el precio de una cláusula a partir del precio pagado por el dueño.
+ * Fórmula: precioCompra + (inversión del dueño × 2).
+ * @param {Object} carta - Carta del garaje rival.
+ * @returns {number} Precio total de la cláusula.
+ */
+function calcularPrecioClausula(carta) {
+  const precioBase = carta.precioCompra ?? carta.precio
+  const inversionDueño = carta.clausulaInvertida || 0
+  return precioBase + inversionDueño * 2
+}
+
+/**
+ * Indica si una carta sigue protegida por el periodo de gracia tras adquirirse.
+ * @param {Object} carta - Carta con campo fechaAdquisicion (ISO string).
+ * @returns {boolean}
+ */
+function estaEnPeriodoDeGracia(carta) {
+  if (!carta.fechaAdquisicion) return false
+  const fechaAdquisicion = new Date(carta.fechaAdquisicion)
+  const milisegundosGracia = HORAS_PERIODO_GRACIA * 60 * 60 * 1000
+  return Date.now() - fechaAdquisicion.getTime() < milisegundosGracia
+}
+
+/**
+ * Extrae una carta del garaje por instancia_id, mutando el garaje recibido.
+ * @param {Object} garaje - Garaje del participante origen.
+ * @param {number} instanciaId
+ * @returns {{ carta: Object|null }}
+ */
+function extraerCartaPorInstancia(garaje, instanciaId) {
+  for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
+    const lista = garaje[coleccion] || []
+    const indice = lista.findIndex((carta) => carta.instancia_id === instanciaId)
+    if (indice !== -1) {
+      const carta = lista.splice(indice, 1)[0]
+      garaje[coleccion] = lista
+      return { carta }
+    }
+  }
+  return { carta: null }
+}
+
+/**
+ * Añade una carta al garaje destino según su tipo, mutando el garaje recibido.
+ * @param {Object} garaje - Garaje del participante destino.
+ * @param {Object} carta - Carta a añadir.
+ */
+function añadirCartaAGaraje(garaje, carta) {
+  const tipo = carta.tipo || carta.tipoCarta
+  const coleccion = tipo === 'coche' ? 'coches' : tipo === 'piloto' ? 'pilotos' : 'potenciadores'
+  if (!garaje[coleccion]) garaje[coleccion] = []
+  garaje[coleccion].push(carta)
+}
+
+/**
+ * Suma el dinero que un usuario tiene comprometido en pujas del mercado de hoy.
+ * @param {string} idLiga
+ * @param {string} email
+ * @returns {Promise<number>} Total comprometido en millones.
+ */
+async function calcularComprometidoEnPujas(idLiga, email) {
+  const idMercado = calcularIdMercado(idLiga, new Date())
+  const pujasSnap = await db
+    .collection('mercados')
+    .doc(idMercado)
+    .collection('pujas')
+    .where('emailUsuario', '==', email)
+    .get()
+  return pujasSnap.docs.reduce((suma, documento) => suma + (documento.data().cantidad || 0), 0)
+}
+
+/**
+ * Callable — ejecuta una cláusula de rescisión validando todo en servidor.
+ * Recalcula el precio (sin fiarse del cliente), comprueba periodo de gracia y
+ * presupuesto disponible (incluido el comprometido en pujas), y transfiere la
+ * carta entre participaciones en un único batch atómico. Acepta
+ * `{ idParticipanteRival, idParticipantePropio, instanciaId }`.
+ */
+exports.ejecutarClausulazo = onCall(OPCIONES, async (request) => {
+  const emailAtacante = exigirEmailAutenticado(request)
+  const { idParticipanteRival, idParticipantePropio, instanciaId } = request.data || {}
+  if (!idParticipanteRival || !idParticipantePropio || instanciaId === undefined) {
+    throw new HttpsError('invalid-argument', 'Faltan datos de la cláusula.')
+  }
+  if (idParticipanteRival === idParticipantePropio) {
+    throw new HttpsError('failed-precondition', 'No puedes fichar una carta de tu propio equipo.')
+  }
+
+  const refRival = db.collection('participaciones').doc(idParticipanteRival)
+  const refPropio = db.collection('participaciones').doc(idParticipantePropio)
+  const [snapRival, snapPropio] = await Promise.all([refRival.get(), refPropio.get()])
+  if (!snapRival.exists || !snapPropio.exists) {
+    throw new HttpsError('not-found', 'Participación no encontrada.')
+  }
+
+  const datosRival = snapRival.data()
+  const datosPropio = snapPropio.data()
+  if (datosPropio.email_usuario !== emailAtacante) {
+    throw new HttpsError('permission-denied', 'Solo puedes fichar para tu propio equipo.')
+  }
+  if (datosRival.id_liga !== datosPropio.id_liga) {
+    throw new HttpsError('failed-precondition', 'Ambos equipos deben competir en la misma liga.')
+  }
+
+  const garajeRival = datosRival.garaje || {}
+  const { carta } = extraerCartaPorInstancia(garajeRival, instanciaId)
+  if (!carta) {
+    throw new HttpsError('not-found', 'La carta ya no está en el equipo rival.')
+  }
+
+  const tipoCarta = carta.tipo || carta.tipoCarta
+  if (tipoCarta === 'potenciador') {
+    throw new HttpsError('failed-precondition', 'Los potenciadores no admiten cláusula.')
+  }
+  if (estaEnPeriodoDeGracia(carta)) {
+    throw new HttpsError('failed-precondition', 'La carta está protegida por periodo de gracia.')
+  }
+
+  const precioClausula = calcularPrecioClausula(carta)
+  const comprometidoEnPujas = await calcularComprometidoEnPujas(datosPropio.id_liga, emailAtacante)
+  if (precioClausula + comprometidoEnPujas > datosPropio.presupuesto) {
+    throw new HttpsError('failed-precondition', 'No tienes presupuesto suficiente.')
+  }
+
+  const garajePropio = datosPropio.garaje || {}
+  añadirCartaAGaraje(garajePropio, {
+    ...carta,
+    precioCompra: precioClausula,
+    clausulaInvertida: 0,
+    fechaAdquisicion: new Date().toISOString(),
+    equipado: false,
+  })
+
+  const batch = db.batch()
+  batch.update(refRival, {
+    garaje: garajeRival,
+    presupuesto: datosRival.presupuesto + precioClausula,
+  })
+  batch.update(refPropio, {
+    garaje: garajePropio,
+    presupuesto: datosPropio.presupuesto - precioClausula,
+  })
+  batch.create(db.collection('actividad').doc(), {
+    idLiga: datosPropio.id_liga,
+    nombreUsuario: datosPropio.nombre_usuario || emailAtacante,
+    tipo: 'clausula',
+    descripcion: `ha activado la cláusula de ${tipoCarta} ${carta.nombre} por ${precioClausula.toFixed(1)}M`,
+    fecha: FieldValue.serverTimestamp(),
+  })
+  await batch.commit()
+
+  return { ok: true, nombre: carta.nombre, precioClausula }
 })
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -912,10 +1187,6 @@ async function propagarDeltasAMercadosAbiertos(deltasPorClave) {
    haya reautenticado al usuario justo antes de invocar la callable.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const FORMATO_NOMBRE = /^[A-Za-z0-9_]{3,20}$/
-const DIAS_BLOQUEO_CAMBIO_NOMBRE = 30
-const MILISEGUNDOS_POR_DIA = 24 * 60 * 60 * 1000
-
 /**
  * Devuelve el email del usuario autenticado o lanza si no hay sesión.
  * @param {import('firebase-functions/v2/https').CallableRequest} request
@@ -933,86 +1204,62 @@ function exigirEmailAutenticado(request) {
 }
 
 /**
- * Callable — cambia el nombre visible del usuario autenticado.
- * Reglas: formato A-Z 0-9 _ (3-20 chars), unicidad global, máximo un cambio cada 30 días.
+ * Exige que el usuario se haya autenticado hace menos de `maxSegundos`.
+ * Protege acciones sensibles (borrar cuenta, cambiar correo) frente a sesiones
+ * antiguas: el cliente debe reautenticar y refrescar el token antes de invocar.
+ * @param {import('firebase-functions/v2/https').CallableRequest} request
+ * @param {number} [maxSegundos=300] - Antigüedad máxima admitida del login.
  */
-exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request) => {
-  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
-  const uid = request.auth.uid
-  const email = request.auth.token.email
-  const nombreNuevo = String(request.data?.nombreNuevo || '').trim()
-
-  if (!FORMATO_NOMBRE.test(nombreNuevo)) {
+function exigirReautenticacionReciente(request, maxSegundos = 300) {
+  const instanteLogin = request.auth?.token?.auth_time
+  const ahoraSegundos = Math.floor(Date.now() / 1000)
+  if (!instanteLogin || ahoraSegundos - instanteLogin > maxSegundos) {
     throw new HttpsError(
-      'invalid-argument',
-      'El nombre debe tener entre 3 y 20 caracteres alfanuméricos o guion bajo.',
+      'failed-precondition',
+      'Esta acción exige que vuelvas a introducir tus credenciales.',
+    )
+  }
+}
+
+/**
+ * Indica si ya transcurrió el periodo de bloqueo entre cambios de correo.
+ * @param {FirebaseFirestore.Timestamp|string|number} marcaTemporal
+ * @returns {boolean} true si han pasado al menos DIAS_BLOQUEO_CAMBIO_CORREO días.
+ */
+function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
+  const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)
+  const milisegundosBloqueo = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
+  return Date.now() - fecha.getTime() >= milisegundosBloqueo
+}
+
+/**
+ * Callable — autoriza el inicio de un cambio de correo y registra el momento.
+ * El cliente debe invocarla ANTES de `verifyBeforeUpdateEmail`: aquí se valida
+ * en servidor la reautenticación reciente y el periodo de bloqueo de 7 días,
+ * de modo que la restricción no dependa solo del cliente.
+ */
+exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
+  exigirEmailAutenticado(request)
+  exigirReautenticacionReciente(request)
+  const uid = request.auth.uid
+
+  const docUsuario = await db.collection('usuarios').doc(uid).get()
+  if (!docUsuario.exists) {
+    throw new HttpsError('not-found', 'No existe el perfil del usuario.')
+  }
+
+  const ultimoCambio = docUsuario.data().fechaUltimoCambioCorreo
+  if (ultimoCambio && !haExpiradoElBloqueoDeCorreo(ultimoCambio)) {
+    throw new HttpsError(
+      'failed-precondition',
+      `Solo puedes cambiar el correo una vez cada ${DIAS_BLOQUEO_CAMBIO_CORREO} días.`,
     )
   }
 
-  const usuarioSnap = await db.collection('usuarios').doc(uid).get()
-  if (!usuarioSnap.exists) {
-    throw new HttpsError('not-found', 'No existe tu perfil.')
-  }
-  const datos = usuarioSnap.data()
-
-  if (datos.nombre === nombreNuevo) {
-    throw new HttpsError('already-exists', 'Ya tienes ese nombre.')
-  }
-
-  const fechaUltimoCambio = datos.fechaUltimoCambioNombre
-    ? new Date(datos.fechaUltimoCambioNombre)
-    : null
-  if (fechaUltimoCambio) {
-    const diasTranscurridos = (Date.now() - fechaUltimoCambio.getTime()) / MILISEGUNDOS_POR_DIA
-    if (diasTranscurridos < DIAS_BLOQUEO_CAMBIO_NOMBRE) {
-      const diasRestantes = Math.ceil(DIAS_BLOQUEO_CAMBIO_NOMBRE - diasTranscurridos)
-      throw new HttpsError(
-        'failed-precondition',
-        `Solo puedes cambiar el nombre una vez cada 30 días. Faltan ${diasRestantes} días.`,
-      )
-    }
-  }
-
-  const colision = await db.collection('usuarios').where('nombre', '==', nombreNuevo).limit(1).get()
-  if (!colision.empty) {
-    throw new HttpsError('already-exists', 'Ese nombre ya está en uso.')
-  }
-
-  const nombreAnterior = datos.nombre
-
-  const [participacionesSnap, actividadSnap] = await Promise.all([
-    db.collection('participaciones').where('email_usuario', '==', email).get(),
-    nombreAnterior
-      ? db.collection('actividad').where('nombreUsuario', '==', nombreAnterior).get()
-      : Promise.resolve({ docs: [] }),
-  ])
-
-  const batch = db.batch()
-
-  batch.update(db.collection('usuarios').doc(uid), {
-    nombre: nombreNuevo,
-    fechaUltimoCambioNombre: new Date().toISOString(),
-  })
-
-  for (const documento of participacionesSnap.docs) {
-    batch.update(documento.ref, { nombre_usuario: nombreNuevo })
-  }
-
-  for (const documento of actividadSnap.docs) {
-    batch.update(documento.ref, { nombreUsuario: nombreNuevo })
-  }
-
-  await batch.commit()
-
-  return {
-    ok: true,
-    nombre: nombreNuevo,
-    participacionesActualizadas: participacionesSnap.size,
-    eventosActividadActualizados: actividadSnap.docs.length,
-  }
+  await docUsuario.ref.update({ fechaUltimoCambioCorreo: FieldValue.serverTimestamp() })
+  return { ok: true }
 })
 
-/**
 /**
  * Callable — migra los documentos de Firestore tras un cambio de correo en Auth.
  * Al estar el documento de usuario indexado por UID (no por email), ya no es
@@ -1020,8 +1267,9 @@ exports.cambiarNombreUsuario = onCall({ region: 'europe-west1' }, async (request
  * `correoAutenticacion` y propagar el cambio a participaciones y ligas.
  * El cliente debe haber ejecutado primero `updateEmail()` y refrescar el token.
  */
-exports.migrarCorreoUsuario = onCall({ region: 'europe-west1' }, async (request) => {
+exports.migrarCorreoUsuario = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
+  exigirReautenticacionReciente(request)
   const uid = request.auth.uid
   const correoAnterior = String(request.data?.correoAnterior || '')
     .trim()
@@ -1206,8 +1454,9 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
 /**
  * Callable — elimina la cuenta del usuario autenticado en cascada.
  */
-exports.eliminarMiCuenta = onCall({ region: 'europe-west1' }, async (request) => {
+exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  exigirReautenticacionReciente(request)
   const uid = request.auth.uid
   const email = request.auth.token.email || ''
   const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
@@ -1228,37 +1477,34 @@ const DURACION_BLOQUEO_MINUTOS = 5
  * @param {{ correo: string }} data
  * @returns {{ bloqueado: false } | never}
  */
-exports.verificarBloqueoAcceso = onCall(
-  { region: 'europe-west1', invoker: 'public' },
-  async (request) => {
-    const correo = String(request.data?.correo || '')
-      .trim()
-      .toLowerCase()
-    if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
+exports.verificarBloqueoAcceso = onCall(OPCIONES_PUBLICAS, async (request) => {
+  const correo = String(request.data?.correo || '')
+    .trim()
+    .toLowerCase()
+  if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
 
-    const resultadoBusqueda = await db
-      .collection('usuarios')
-      .where('correoAutenticacion', '==', correo)
-      .limit(1)
-      .get()
-    if (resultadoBusqueda.empty) return { bloqueado: false }
+  const resultadoBusqueda = await db
+    .collection('usuarios')
+    .where('correoAutenticacion', '==', correo)
+    .limit(1)
+    .get()
+  if (resultadoBusqueda.empty) return { bloqueado: false }
 
-    const usuarioSnap = resultadoBusqueda.docs[0]
-    const { fechaBloqueoDeSesion } = usuarioSnap.data()
-    if (!fechaBloqueoDeSesion) return { bloqueado: false }
+  const usuarioSnap = resultadoBusqueda.docs[0]
+  const { fechaBloqueoDeSesion } = usuarioSnap.data()
+  if (!fechaBloqueoDeSesion) return { bloqueado: false }
 
-    const fechaDesbloqueo = fechaBloqueoDeSesion.toDate()
-    if (new Date() < fechaDesbloqueo) {
-      const minutosRestantes = Math.ceil((fechaDesbloqueo - new Date()) / 60000)
-      throw new HttpsError(
-        'resource-exhausted',
-        `Acceso bloqueado. Intenta de nuevo en ${minutosRestantes} minuto${minutosRestantes > 1 ? 's' : ''}.`,
-      )
-    }
+  const fechaDesbloqueo = fechaBloqueoDeSesion.toDate()
+  if (new Date() < fechaDesbloqueo) {
+    const minutosRestantes = Math.ceil((fechaDesbloqueo - new Date()) / 60000)
+    throw new HttpsError(
+      'resource-exhausted',
+      `Acceso bloqueado. Intenta de nuevo en ${minutosRestantes} minuto${minutosRestantes > 1 ? 's' : ''}.`,
+    )
+  }
 
-    return { bloqueado: false }
-  },
-)
+  return { bloqueado: false }
+})
 
 /**
  * Callable pública — incrementa el contador de intentos fallidos de un correo.
@@ -1268,35 +1514,32 @@ exports.verificarBloqueoAcceso = onCall(
  * @param {{ correo: string }} data
  * @returns {{ ok: true }}
  */
-exports.registrarIntentoFallido = onCall(
-  { region: 'europe-west1', invoker: 'public' },
-  async (request) => {
-    const correo = String(request.data?.correo || '')
-      .trim()
-      .toLowerCase()
-    if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
+exports.registrarIntentoFallido = onCall(OPCIONES_PUBLICAS, async (request) => {
+  const correo = String(request.data?.correo || '')
+    .trim()
+    .toLowerCase()
+  if (!correo) throw new HttpsError('invalid-argument', 'Falta el correo.')
 
-    const resultadoBusqueda = await db
-      .collection('usuarios')
-      .where('correoAutenticacion', '==', correo)
-      .limit(1)
-      .get()
-    if (resultadoBusqueda.empty) return { ok: true }
+  const resultadoBusqueda = await db
+    .collection('usuarios')
+    .where('correoAutenticacion', '==', correo)
+    .limit(1)
+    .get()
+  if (resultadoBusqueda.empty) return { ok: true }
 
-    const docRef = resultadoBusqueda.docs[0].ref
-    const intentosPrevios = resultadoBusqueda.docs[0].data().contadorIntentosFallidos || 0
-    const nuevosIntentos = intentosPrevios + 1
-    const actualizacion = { contadorIntentosFallidos: nuevosIntentos }
+  const docRef = resultadoBusqueda.docs[0].ref
+  const intentosPrevios = resultadoBusqueda.docs[0].data().contadorIntentosFallidos || 0
+  const nuevosIntentos = intentosPrevios + 1
+  const actualizacion = { contadorIntentosFallidos: nuevosIntentos }
 
-    if (nuevosIntentos >= MAXIMO_INTENTOS_FALLIDOS) {
-      const fechaDesbloqueo = new Date(Date.now() + DURACION_BLOQUEO_MINUTOS * 60 * 1000)
-      actualizacion.fechaBloqueoDeSesion = fechaDesbloqueo
-    }
+  if (nuevosIntentos >= MAXIMO_INTENTOS_FALLIDOS) {
+    const fechaDesbloqueo = new Date(Date.now() + DURACION_BLOQUEO_MINUTOS * 60 * 1000)
+    actualizacion.fechaBloqueoDeSesion = fechaDesbloqueo
+  }
 
-    await docRef.update(actualizacion)
-    return { ok: true }
-  },
-)
+  await docRef.update(actualizacion)
+  return { ok: true }
+})
 
 /**
  * Callable autenticada — reinicia el contador de intentos fallidos tras un login exitoso.
@@ -1304,7 +1547,7 @@ exports.registrarIntentoFallido = onCall(
  * Solo puede llamarla el propio usuario autenticado.
  * @returns {{ ok: true }}
  */
-exports.reiniciarContadorIntentos = onCall({ region: 'europe-west1' }, async (request) => {
+exports.reiniciarContadorIntentos = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid
 
@@ -1321,7 +1564,7 @@ exports.reiniciarContadorIntentos = onCall({ region: 'europe-west1' }, async (re
  * en cascada (participaciones, pujas, perfil y usuario de Auth).
  * Acepta `{ uid }` (obligatorio): el UID de Firebase Auth del usuario a eliminar.
  */
-exports.eliminarUsuarioManual = onCall({ region: 'europe-west1' }, async (request) => {
+exports.eliminarUsuarioManual = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { uid } = request.data || {}
   if (!uid) {

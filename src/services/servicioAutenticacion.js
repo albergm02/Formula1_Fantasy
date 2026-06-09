@@ -10,7 +10,6 @@
   EmailAuthProvider,
   reauthenticateWithCredential,
   reauthenticateWithPopup,
-  updatePassword,
   verifyBeforeUpdateEmail,
 } from 'firebase/auth'
 
@@ -18,7 +17,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   serverTimestamp,
   onSnapshot,
   collection,
@@ -33,6 +31,7 @@ import { auth, db, functions } from './servicioFirebase'
 const llamadaVerificarBloqueo = httpsCallable(functions, 'verificarBloqueoAcceso')
 const llamadaRegistrarIntentoFallido = httpsCallable(functions, 'registrarIntentoFallido')
 const llamadaReiniciarContador = httpsCallable(functions, 'reiniciarContadorIntentos')
+const llamadaAutorizarCambioCorreo = httpsCallable(functions, 'autorizarCambioCorreo')
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -173,6 +172,7 @@ export const reautenticarUsuario = async (contrasenaActual) => {
 
   if (!tieneContrasena) {
     await reauthenticateWithPopup(usuario, googleProvider)
+    await usuario.getIdToken(true)
     return
   }
 
@@ -181,33 +181,36 @@ export const reautenticarUsuario = async (contrasenaActual) => {
   }
   const credencial = EmailAuthProvider.credential(usuario.email, contrasenaActual)
   await reauthenticateWithCredential(usuario, credencial)
+  await usuario.getIdToken(true)
 }
 
 /**
- * Cambia la contraseña del usuario actual. Requiere reautenticación previa.
- * @param {string} contrasenaNueva
+ * Envía al correo de la cuenta autenticada un enlace de restablecimiento de
+ * contraseña (mismo mecanismo que «¿olvidaste tu contraseña?»). El usuario
+ * define la contraseña nueva desde el enlace, fuera de la aplicación.
  * @returns {Promise<void>}
  */
-export const cambiarContrasenaUsuario = async (contrasenaNueva) => {
+export const solicitarRestablecimientoContrasena = async () => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
-  await updatePassword(usuario, contrasenaNueva)
-  const docRef = doc(db, 'usuarios', usuario.uid)
-  await updateDoc(docRef, { fechaUltimoCambioContrasena: serverTimestamp() })
+  await sendPasswordResetEmail(auth, usuario.email)
 }
 
 /**
  * Solicita el cambio de correo del usuario actual mediante verificación previa.
- * Firebase envía un enlace de confirmación al correo nuevo; el correo en Auth
- * NO cambia hasta que el usuario lo confirma desde ese enlace, momento en el
- * que la sesión se cierra. La migración de los documentos de Firestore se
- * completa en el siguiente inicio de sesión. Requiere reautenticación previa.
+ * Primero pide autorización al servidor (`autorizarCambioCorreo`), que valida la
+ * reautenticación reciente y el bloqueo de 7 días y registra la fecha del cambio.
+ * Después Firebase envía un enlace de confirmación al correo nuevo; el correo en
+ * Auth NO cambia hasta que el usuario lo confirma desde ese enlace, momento en el
+ * que la sesión se cierra. La migración de los documentos de Firestore se completa
+ * en el siguiente inicio de sesión. Requiere reautenticación previa.
  * @param {string} correoNuevo - El nuevo correo electrónico a verificar.
  * @returns {Promise<void>}
  */
 export const solicitarCambioCorreo = async (correoNuevo) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
+  await llamadaAutorizarCambioCorreo()
   await verifyBeforeUpdateEmail(usuario, correoNuevo.trim().toLowerCase())
 }
 

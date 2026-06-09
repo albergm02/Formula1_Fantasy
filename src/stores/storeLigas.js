@@ -8,7 +8,8 @@ import {
   buscarLigaPorCodigo,
   crearDocumentoLiga,
   actualizarLiga,
-  eliminarDocumentoLiga,
+  eliminarLigaComoOrganizador,
+  expulsarParticipanteComoOrganizador,
   crearParticipacion,
   cargarParticipacionesLiga,
   actualizarParticipacion,
@@ -18,11 +19,9 @@ import {
   desvincularLigaDelUsuario,
   cargarRankingLiga,
   inicializarMercadoLiga,
-  añadirEmailExpulsado,
 } from '@/services/servicioLigas'
 
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
-import { buscarUidPorCorreo } from '@/services/servicioAutenticacion'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
 const MAX_LIGAS = 5
@@ -269,55 +268,20 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Expulsa a un participante concreto de la liga.
-   * Solo el administrador puede ejecutar esta acción.
-   * No se puede expulsar al propio administrador mediante esta función.
+   * Delega la operación atómica al callable `expulsarParticipanteComoOrganizador`,
+   * que verifica en servidor que el invocador sea el organizador, borra la
+   * participación, desvincula la liga del usuario expulsado, actualiza la lista
+   * de expulsados y registra el evento de actividad en un único batch.
    * @param {string} idLiga
    * @param {string} emailParticipante - Email del participante a expulsar.
    * @returns {Promise<{ success: boolean, message: string }>}
    */
   async function expulsarParticipante(idLiga, emailParticipante) {
-    const storeAutenticacion = usarStoreAutenticacion()
-    const correoAdmin = storeAutenticacion.usuarioActual.correoAutenticacion
-
-    if (emailParticipante === correoAdmin) {
-      return { success: false, message: 'No puedes expulsarte a ti mismo. Usa "Abandonar liga".' }
-    }
-
     try {
-      const datosLiga = await cargarLiga(idLiga)
-      if (!datosLiga) return { success: false, message: 'La liga no existe.' }
-
-      if (datosLiga.correoOrganizador !== correoAdmin) {
-        return { success: false, message: 'Solo el administrador puede expulsar participantes.' }
-      }
-
-      const participaciones = await cargarParticipacionesLiga(idLiga)
-      const participacionExpulsado = participaciones.find(
-        (p) => p.email_usuario === emailParticipante,
-      )
-
-      if (!participacionExpulsado) {
-        return { success: false, message: 'El participante no pertenece a esta liga.' }
-      }
-
-      await eliminarParticipacion(participacionExpulsado.id)
-
-      const uidExpulsado =
-        participacionExpulsado.uid_usuario || (await buscarUidPorCorreo(emailParticipante))
-      if (uidExpulsado) await desvincularLigaDelUsuario(uidExpulsado, idLiga)
-
-      await añadirEmailExpulsado(idLiga, emailParticipante)
-      await actualizarLiga(idLiga, { participantes: datosLiga.participantes - 1 })
-
-      registrarActividad(idLiga, {
-        nombreUsuario: participacionExpulsado.nombre_usuario || emailParticipante,
-        tipo: TIPOS_ACTIVIDAD.ABANDONO,
-        descripcion: `ha sido expulsado del campeonato ${datosLiga.nombre}`,
-      }).catch(() => {})
-
+      const resultado = await expulsarParticipanteComoOrganizador(idLiga, emailParticipante)
       return {
         success: true,
-        message: `${participacionExpulsado.nombre_usuario || emailParticipante} ha sido expulsado.`,
+        message: `${resultado.nombreExpulsado} ha sido expulsado.`,
       }
     } catch (error) {
       return { success: false, message: `Error al expulsar al participante: ${error.message}` }
@@ -338,36 +302,19 @@ export const usarStoreLigas = defineStore('ligas', () => {
   }
 
   /**
-   * Elimina la liga y expulsa a todos sus participantes.
-   * Solo puede ejecutarla el administrador de la liga.
+   * Elimina la liga en cascada: participaciones (con sus garajes), mercados
+   * con sus pujas, eventos de actividad y vínculos en usuarios. Delega la
+   * operación atómica al callable `eliminarLigaComoOrganizador`, que verifica
+   * en servidor que el invocador sea el organizador.
    * @param {string} idLiga
    * @returns {Promise<{ success: boolean, message: string }>}
    */
   async function eliminarLiga(idLiga) {
     const storeAutenticacion = usarStoreAutenticacion()
-    const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
 
     try {
-      const datosLiga = await cargarLiga(idLiga)
-      if (!datosLiga) {
-        return { success: false, message: 'La liga no existe.' }
-      }
+      await eliminarLigaComoOrganizador(idLiga)
 
-      if (datosLiga.correoOrganizador !== correoUsuario) {
-        return { success: false, message: 'Acceso denegado: No eres el administrador.' }
-      }
-
-      const participaciones = await cargarParticipacionesLiga(idLiga)
-      for (const participacion of participaciones) {
-        const uidParticipante =
-          participacion.uid_usuario || (await buscarUidPorCorreo(participacion.email_usuario))
-        if (uidParticipante) {
-          await desvincularLigaDelUsuario(uidParticipante, idLiga)
-        }
-        await eliminarParticipacion(participacion.id)
-      }
-
-      await eliminarDocumentoLiga(idLiga)
       storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,
       )
@@ -379,7 +326,6 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: 'Has eliminado la liga.' }
     } catch (error) {
-      console.error(`Error al eliminar la liga ${idLiga}:`, error)
       return { success: false, message: `Error al eliminar la liga: ${error.message}` }
     }
   }

@@ -7,14 +7,11 @@ import { auth } from '@/services/servicioFirebase'
 import {
     cargarPerfilUsuario,
     reautenticarUsuario,
-    cambiarContrasenaUsuario,
+    solicitarRestablecimientoContrasena,
     solicitarCambioCorreo,
     cerrarSesion,
 } from '@/services/servicioAutenticacion'
-import {
-    cambiarNombreUsuario,
-    eliminarMiCuenta,
-} from '@/services/servicioPerfil'
+import { eliminarMiCuenta } from '@/services/servicioPerfil'
 
 import Cabecera from '@/components/Cabecera.vue'
 
@@ -37,115 +34,59 @@ const puedeUsarContrasena = computed(() => {
 })
 
 // Metadatos del perfil para gestionar restricciones de cambios
-const fechaUltimoCambioNombre = ref(null)
-const fechaUltimoCambioContrasena = ref(null)
-const diasRestantesParaCambiarNombre = computed(() => {
-    if (!fechaUltimoCambioNombre.value) return 0
-    // Calcula días transcurridos desde el último cambio de nombre, 86_400_000 ms = 1 día
-    const transcurridos = (Date.now() - fechaUltimoCambioNombre.value.getTime()) / 86_400_000
-    return Math.max(0, Math.ceil(30 - transcurridos))
-})
+const DIAS_BLOQUEO_CAMBIO_CORREO = 7
+const MILISEGUNDOS_POR_DIA = 86_400_000
+const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const fechaUltimoCambioCorreo = ref(null)
+
+function calcularDiasRestantes(fechaUltimoCambio) {
+    if (!fechaUltimoCambio) return 0
+    const diasTranscurridos = (Date.now() - fechaUltimoCambio.getTime()) / MILISEGUNDOS_POR_DIA
+    return Math.max(0, Math.ceil(DIAS_BLOQUEO_CAMBIO_CORREO - diasTranscurridos))
+}
+
+const diasRestantesParaCambiarCorreo = computed(() =>
+    calcularDiasRestantes(fechaUltimoCambioCorreo.value),
+)
 
 async function cargarMetadatosPerfil() {
     const datos = await cargarPerfilUsuario(storeAutenticacion.usuarioActual.uid)
-    fechaUltimoCambioNombre.value =
-        datos.fechaUltimoCambioNombre ? new Date(datos.fechaUltimoCambioNombre) : null
-    fechaUltimoCambioContrasena.value =
-        datos.fechaUltimoCambioContrasena ? datos.fechaUltimoCambioContrasena.toDate() : null
+    fechaUltimoCambioCorreo.value =
+        datos.fechaUltimoCambioCorreo ? datos.fechaUltimoCambioCorreo.toDate() : null
 }
 
 onMounted(cargarMetadatosPerfil)
 
-
-const dialogoNombreAbierto = ref(false)
-const nombreNuevo = ref('')
-const guardandoNombre = ref(false)
-
-function abrirDialogoNombre() {
-    nombreNuevo.value = storeAutenticacion.usuarioActual.nombreVisible
-    dialogoNombreAbierto.value = true
-}
-
-async function confirmarCambioNombre() {
-    guardandoNombre.value = true
-    try {
-        const datos = await cambiarNombreUsuario(nombreNuevo.value.trim())
-        storeAutenticacion.usuarioActual.nombreVisible = datos.nombre
-        fechaUltimoCambioNombre.value = new Date()
-        dialogoNombreAbierto.value = false
-        toast.add({
-            severity: 'success',
-            summary: 'Nombre actualizado',
-            detail: `Ahora apareces como "${datos.nombre}".`,
-            life: 4000,
-        })
-    } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'No se pudo cambiar',
-            detail: error.message,
-            life: 6000,
-        })
-    } finally {
-        guardandoNombre.value = false
-    }
-}
-
-// CAMBIO DE CONTRASEÑA
+// CAMBIO DE CONTRASEÑA (vía enlace de restablecimiento)
 
 const dialogoContrasenaAbierto = ref(false)
-const contrasenaActual = ref('')
-const contrasenaNueva = ref('')
-const contrasenaRepetida = ref('')
-const guardandoContrasena = ref(false)
+const enviandoEnlaceContrasena = ref(false)
 
 function abrirDialogoContrasena() {
-    contrasenaActual.value = ''
-    contrasenaNueva.value = ''
-    contrasenaRepetida.value = ''
     dialogoContrasenaAbierto.value = true
 }
 
 async function confirmarCambioContrasena() {
-    if (contrasenaNueva.value.length < 6) {
-        toast.add({
-            severity: 'warn',
-            summary: 'Contraseña débil',
-            detail: 'Mínimo 6 caracteres.',
-            life: 4000,
-        })
-        return
-    }
-    if (contrasenaNueva.value !== contrasenaRepetida.value) {
-        toast.add({
-            severity: 'warn',
-            summary: 'No coinciden',
-            detail: 'Repite la contraseña correctamente.',
-            life: 4000,
-        })
-        return
-    }
-    guardandoContrasena.value = true
+    enviandoEnlaceContrasena.value = true
     try {
-        await reautenticarUsuario(contrasenaActual.value)
-        await cambiarContrasenaUsuario(contrasenaNueva.value)
+        await solicitarRestablecimientoContrasena()
         dialogoContrasenaAbierto.value = false
-        fechaUltimoCambioContrasena.value = new Date()
         toast.add({
             severity: 'success',
-            summary: 'Contraseña actualizada',
-            detail: 'La próxima vez que inicies sesión, usa la nueva contraseña.',
-            life: 5000,
+            summary: 'Revisa tu correo',
+            detail: 'Te hemos enviado un enlace para restablecer tu contraseña.',
+            life: 6000,
         })
     } catch (error) {
         toast.add({
             severity: 'error',
-            summary: 'No se pudo cambiar',
+            summary: 'No se pudo enviar',
             detail: mensajeFirebase(error),
             life: 6000,
         })
     } finally {
-        guardandoContrasena.value = false
+        enviandoEnlaceContrasena.value = false
     }
 }
 
@@ -153,21 +94,26 @@ async function confirmarCambioContrasena() {
 
 const dialogoCorreoAbierto = ref(false)
 const correoNuevo = ref('')
+const correoNuevoConfirmacion = ref('')
 const contrasenaParaCorreo = ref('')
 const enviandoCorreo = ref(false)
 
 function abrirDialogoCorreo() {
     correoNuevo.value = ''
+    correoNuevoConfirmacion.value = ''
     contrasenaParaCorreo.value = ''
     dialogoCorreoAbierto.value = true
 }
 
-const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
 function validarSolicitudCorreo() {
     const correoLimpio = correoNuevo.value.trim().toLowerCase()
+    const confirmacionLimpia = correoNuevoConfirmacion.value.trim().toLowerCase()
     if (!FORMATO_CORREO.test(correoLimpio)) {
         toast.add({ severity: 'warn', summary: 'Correo no válido', detail: 'Introduce un correo con formato correcto.', life: 4000 })
+        return false
+    }
+    if (correoLimpio !== confirmacionLimpia) {
+        toast.add({ severity: 'warn', summary: 'Los correos no coinciden', detail: 'Ambos campos deben tener el mismo correo.', life: 4000 })
         return false
     }
     if (correoLimpio === storeAutenticacion.usuarioActual.correoAutenticacion.toLowerCase()) {
@@ -178,11 +124,21 @@ function validarSolicitudCorreo() {
 }
 
 async function confirmarCambioCorreo() {
+    if (diasRestantesParaCambiarCorreo.value > 0) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Cambio no disponible',
+            detail: `Podrás cambiar el correo dentro de ${diasRestantesParaCambiarCorreo.value} días.`,
+            life: 4000,
+        })
+        return
+    }
     if (!validarSolicitudCorreo()) return
     enviandoCorreo.value = true
     try {
         await reautenticarUsuario(contrasenaParaCorreo.value)
         await solicitarCambioCorreo(correoNuevo.value)
+        fechaUltimoCambioCorreo.value = new Date()
         dialogoCorreoAbierto.value = false
         toast.add({
             severity: 'success',
@@ -290,21 +246,12 @@ function mensajeFirebase(error) {
                                 {{ storeAutenticacion.usuarioActual.idsLigas.length }}
                             </p>
                         </div>
-                        <div>
-                            <p class="text-[10px] text-zinc-500 uppercase">Próximo cambio de nombre</p>
+                        <div v-if="puedeUsarContrasena">
+                            <p class="text-[10px] text-zinc-500 uppercase">Próximo cambio de correo</p>
                             <p class="font-bold text-white">
-                                {{ diasRestantesParaCambiarNombre === 0
+                                {{ diasRestantesParaCambiarCorreo === 0
                                     ? 'Cambio disponible'
-                                    : `En ${diasRestantesParaCambiarNombre} días` }}
-                            </p>
-                        </div>
-                        <div v-if="puedeUsarContrasena && fechaUltimoCambioContrasena">
-                            <p class="text-[10px] text-zinc-500 uppercase">Último cambio de contraseña</p>
-                            <p class="font-bold text-white">
-                                {{ fechaUltimoCambioContrasena.toLocaleDateString('es-ES', {
-                                    day: '2-digit', month:
-                                        'long', year: 'numeric'
-                                }) }}
+                                    : `En ${diasRestantesParaCambiarCorreo} días` }}
                             </p>
                         </div>
                     </div>
@@ -319,12 +266,10 @@ function mensajeFirebase(error) {
                 </template>
                 <template #content>
                     <div class="flex flex-col gap-2">
-                        <Button @click="abrirDialogoNombre" label="Cambiar nombre de usuario"
-                            class="!bg-zinc-900 !border-zinc-700 !text-white justify-center"
-                            :disabled="diasRestantesParaCambiarNombre > 0" />
                         <Button v-if="puedeUsarContrasena" @click="abrirDialogoContrasena" label="Cambiar contraseña"
                             class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
                         <Button v-if="puedeUsarContrasena" @click="abrirDialogoCorreo" label="Cambiar correo"
+                            :disabled="diasRestantesParaCambiarCorreo > 0"
                             class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
                         <Message v-if="!puedeUsarContrasena" severity="info" :closable="false">
                             Iniciaste sesión con Google: gestiona tu contraseña desde tu cuenta de Google.
@@ -336,40 +281,24 @@ function mensajeFirebase(error) {
             </Card>
         </main>
 
-        <!-- Diálogo cambio de nombre de usuario -->
-        <Dialog v-model:visible="dialogoNombreAbierto" modal header="Cambiar nombre de usuario"
-            :style="{ width: '90vw', maxWidth: '420px' }"
-            :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
-            <div class="flex flex-col gap-3">
-                <label class="text-xs text-zinc-400 uppercase">Nuevo nombre de usuario</label>
-                <InputText v-model="nombreNuevo" maxlength="10" minlength="3" placeholder="3-10 caracteres" />
-                <p class="text-xs text-zinc-500">
-                    Podrás volver a cambiarlo dentro de 30 días.
-                </p>
-                <div class="flex justify-end gap-2 mt-2">
-                    <Button label="Cancelar" text @click="dialogoNombreAbierto = false"
-                        class="!bg-zinc-900 !border-zinc-700 !text-white" />
-                    <Button label="Guardar" :loading="guardandoNombre" @click="confirmarCambioNombre"
-                        class="!bg-[#D4A843] !border-[#D4A843]" />
-                </div>
-            </div>
-        </Dialog>
-
         <!-- Diálogo cambio de contraseña -->
         <Dialog v-model:visible="dialogoContrasenaAbierto" modal header="Cambiar contraseña"
             :style="{ width: '90vw', maxWidth: '420px' }"
             :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
             <div class="flex flex-col gap-3">
-                <label class="text-xs text-zinc-400 uppercase">Contraseña actual</label>
-                <Password v-model="contrasenaActual" :feedback="false" toggleMask inputClass="w-full" />
-                <label class="text-xs text-zinc-400 uppercase">Nueva contraseña</label>
-                <Password v-model="contrasenaNueva" toggleMask inputClass="w-full" :feedback="false" />
-                <label class="text-xs text-zinc-400 uppercase">Repite la nueva contraseña</label>
-                <Password v-model="contrasenaRepetida" :feedback="false" toggleMask inputClass="w-full" />
+                <Message severity="info" :closable="false">
+                    Te enviaremos un enlace a tu correo para que definas una nueva contraseña.
+                </Message>
+                <div>
+                    <p class="text-[10px] text-zinc-500 uppercase">Correo de la cuenta</p>
+                    <p class="font-bold text-white break-all">
+                        {{ storeAutenticacion.usuarioActual.correoAutenticacion }}
+                    </p>
+                </div>
                 <div class="flex justify-end gap-2 mt-2">
                     <Button label="Cancelar" text @click="dialogoContrasenaAbierto = false"
                         class="!bg-zinc-900 !border-zinc-700 !text-white" />
-                    <Button label="Cambiar" :loading="guardandoContrasena" @click="confirmarCambioContrasena"
+                    <Button label="Enviar enlace" :loading="enviandoEnlaceContrasena" @click="confirmarCambioContrasena"
                         class="!bg-[#D4A843] !border-[#D4A843]" />
                 </div>
             </div>
@@ -381,13 +310,18 @@ function mensajeFirebase(error) {
             :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
             <div class="flex flex-col gap-3">
                 <Message severity="info" :closable="false">
-                    Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras, y
-                    después tendrás que iniciar sesión de nuevo.
+                    Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras,
+                    después tendrás que iniciar sesión de nuevo, y no podrás volver a cambiarlo durante 7 días.
                 </Message>
                 <label class="text-xs text-zinc-400 uppercase">Nuevo correo</label>
                 <InputText v-model="correoNuevo" type="email" placeholder="nombre@ejemplo.com" />
+                <label class="text-xs text-zinc-400 uppercase">Confirma el nuevo correo</label>
+                <InputText v-model="correoNuevoConfirmacion" type="email" placeholder="repite el correo" />
                 <label class="text-xs text-zinc-400 uppercase">Contraseña actual</label>
                 <Password v-model="contrasenaParaCorreo" :feedback="false" toggleMask inputClass="w-full" />
+                <p class="text-xs text-zinc-500">
+                    Podrás volver a cambiarlo dentro de 7 días.
+                </p>
                 <div class="flex justify-end gap-2 mt-2">
                     <Button label="Cancelar" text @click="dialogoCorreoAbierto = false"
                         class="!bg-zinc-900 !border-zinc-700 !text-white" />

@@ -20,6 +20,8 @@ import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 
 const llamadaInicializarMercado = httpsCallable(functions, 'generarMercadoInicialLiga')
+const llamadaEliminarLigaOrganizador = httpsCallable(functions, 'eliminarLigaComoOrganizador')
+const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipanteComoOrganizador')
 
 /**
  * Solicita al backend que genere el primer mercado de una liga recién creada.
@@ -29,6 +31,34 @@ const llamadaInicializarMercado = httpsCallable(functions, 'generarMercadoInicia
  */
 export const inicializarMercadoLiga = async (idLiga) => {
   const respuesta = await llamadaInicializarMercado({ idLiga })
+  return respuesta.data
+}
+
+/**
+ * Solicita al backend la eliminación completa y atómica de una liga por parte
+ * de su organizador: borra participaciones (con sus garajes), mercados con sus
+ * pujas, eventos de actividad, desvincula la liga del array `ligasIds` de todos
+ * los usuarios y elimina el documento de liga. Toda la operación ocurre en un
+ * único batch en servidor.
+ * @param {string} idLiga
+ * @returns {Promise<Object>} { ok, idLiga, nombreLiga, participacionesBorradas, mercadosBorrados, eventosActividadBorrados, usuariosDesvinculados }
+ */
+export const eliminarLigaComoOrganizador = async (idLiga) => {
+  const respuesta = await llamadaEliminarLigaOrganizador({ idLiga })
+  return respuesta.data
+}
+
+/**
+ * Solicita al backend la expulsión de un participante por parte del organizador.
+ * El callable valida permisos en servidor y ejecuta la operación en un único
+ * batch atómico: borra la participación, registra el correo en `expulsados`,
+ * decrementa el contador de participantes y desvincula la liga del usuario.
+ * @param {string} idLiga
+ * @param {string} emailExpulsado
+ * @returns {Promise<Object>} { ok, idLiga, emailExpulsado, nombreExpulsado }
+ */
+export const expulsarParticipanteComoOrganizador = async (idLiga, emailExpulsado) => {
+  const respuesta = await llamadaExpulsarParticipante({ idLiga, emailExpulsado })
   return respuesta.data
 }
 
