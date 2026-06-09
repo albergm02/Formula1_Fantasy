@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createRequire } from 'node:module'
 
 const cargarModuloServidor = createRequire(import.meta.url)
-const { calcularPuntuacionGaraje } = cargarModuloServidor('../../functions/puntuacionServer.js')
+const { calcularPuntuacionGaraje } = cargarModuloServidor('../../functions/dominio/puntuacion.js')
 
 /** Devuelve un piloto de prueba con atributos y pesos sencillos. */
 function construirPilotoDePrueba(id, equipado = true) {

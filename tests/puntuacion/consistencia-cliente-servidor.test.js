@@ -4,7 +4,7 @@ import { calcularFactorJornada as calcularFactorJornadaCliente } from '@/utils/p
 
 const cargarModuloServidor = createRequire(import.meta.url)
 const { calcularFactorJornada: calcularFactorJornadaServidor } = cargarModuloServidor(
-  '../../functions/puntuacionServer.js',
+  '../../functions/dominio/puntuacion.js',
 )
 
 const sinCondiciones = {

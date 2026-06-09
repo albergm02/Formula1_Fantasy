@@ -17,12 +17,9 @@ const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { db } = require('../comun/firebase')
 const { REGION, TEMPORADA_ACTUAL } = require('../comun/constantes')
 
-const {
-  recopilarDatosGranPremio,
-  obtenerGranPremiosFinalizados,
-} = require('../servicioOpenF1Server')
-const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../puntuacionServer')
-const { calcularSinergias, aplicarSinergia } = require('../sinergiaServer')
+const { recopilarDatosGranPremio, obtenerGranPremiosFinalizados } = require('../dominio/openF1')
+const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../dominio/puntuacion')
+const { calcularSinergias, aplicarSinergia } = require('../dominio/sinergia')
 
 /**
  * Convierte la puntuación total de una jornada en un premio económico (en M).

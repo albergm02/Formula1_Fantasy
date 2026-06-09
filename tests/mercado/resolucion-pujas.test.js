@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createRequire } from 'node:module'
 
 const cargarModuloServidor = createRequire(import.meta.url)
-const { seleccionarPujasGanadoras } = cargarModuloServidor('../../functions/pujasServer.js')
+const { seleccionarPujasGanadoras } = cargarModuloServidor('../../functions/dominio/pujas.js')
 
 describe('Resolución de pujas de un mercado', () => {
   it('debería devolver un mapa vacío si no se ha registrado ninguna puja', () => {

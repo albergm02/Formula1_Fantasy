@@ -1,7 +1,7 @@
 /**
  * Lógica pura de resolución de pujas de un mercado.
  * Aislada en su propio módulo para poder testarla sin depender de Firestore.
- * @module pujasServer
+ * @module dominio/pujas
  */
 
 /**

@@ -1,4 +1,4 @@
-﻿const { construirCatalogoCompleto } = require('./data/catalogoBase')
+﻿const { construirCatalogoCompleto } = require('../data/catalogoBase')
 
 let catalogoEnMemoria = null
 

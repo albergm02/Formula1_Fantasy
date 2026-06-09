@@ -1,6 +1,6 @@
 /**
  * Funciones puras de cálculo de factores y puntuación de jornada.
- * Réplica cliente de `functions/puntuacionServer.js` para poder simular,
+ * Réplica cliente de `functions/dominio/puntuacion.js` para poder simular,
  * en la vista de resultados, qué habría puntuado un piloto bajo cada variante.
  * @module utils/puntuacion
  */

@@ -34,8 +34,8 @@ const {
   cargarPreciosPilotos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,
-} = require('../mercadoServer')
-const { seleccionarPujasGanadoras } = require('../pujasServer')
+} = require('../dominio/mercado')
+const { seleccionarPujasGanadoras } = require('../dominio/pujas')
 
 /* ─── Constantes de precios dinámicos ───────────────────────────────────── */
 
@@ -50,7 +50,7 @@ const HISTORIAL_MAX_MUESTRAS = 5
 const FACTOR_DESINTERES = 0.95
 
 /* Suelo absoluto del precio para que ninguna carta se vuelva gratuita. */
-const PRECIO_MINIMO = 0.5
+const PRECIO_MINIMO = 5
 
 /* ─── Identificación temporal del mercado ───────────────────────────────── */
 

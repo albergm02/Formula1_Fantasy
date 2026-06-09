@@ -2,11 +2,11 @@
  * Servicio de comunicación con OpenF1 — server-side (CommonJS).
  * Encapsula TODAS las llamadas HTTP a api.openf1.org para Cloud Functions.
  * Usa fetch nativo de Node 24.
- * @module servicioOpenF1Server
+ * @module dominio/openF1
  */
 
 const URL_BASE = 'https://api.openf1.org/v1'
-const { pilotosBase } = require('./data/catalogoBase')
+const { pilotosBase } = require('../data/catalogoBase')
 
 /* ─── Utilidad HTTP ─────────────────────────────────────────────────────── */
 

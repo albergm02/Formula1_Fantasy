@@ -1,7 +1,7 @@
 /**
  * Funciones puras de puntuacion — copia server-side (CommonJS).
  * Replica exacta de src/utils/puntuacion.js para ejecutarse en Cloud Functions.
- * @module puntuacionServer
+ * @module dominio/puntuacion
  */
 
 /* ─── 1. Pipeline principal del garaje ──────────────────────────────────── */
