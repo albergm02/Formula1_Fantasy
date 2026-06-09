@@ -1,15 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createRequire } from 'node:module'
 
-/**
- * Pipeline completo de cálculo de la jornada de un garaje.
- *
- * Estos tests representan lo que antes se comprobaba a mano desde el panel de
- * administración con el botón "Procesar jornada": se construye un garaje de
- * ejemplo, se invoca `calcularPuntuacionGaraje` con los factores ya resueltos
- * y se verifica el total y el desglose. Si el cálculo se rompe, estos tests
- * lo detectan sin necesidad de lanzar el procesamiento real contra Firestore.
- */
 const cargarModuloServidor = createRequire(import.meta.url)
 const { calcularPuntuacionGaraje } = cargarModuloServidor('../../functions/puntuacionServer.js')
 

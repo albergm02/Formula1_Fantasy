@@ -1,14 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calcularFactorJornada } from '@/utils/puntuacion'
 
-/**
- * Factor de jornada por variante de carta.
- *
- * El factor se calcula a partir de la actuación real del piloto (datos de
- * OpenF1) y de las condiciones generales de la carrera. Siempre queda acotado
- * entre 0.5 y 1.5 para evitar que una carta dispare la puntuación.
- */
-
 const sinCondiciones = {
   llovio: false,
   numeroDNFs: 0,

@@ -2,16 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { createRequire } from 'node:module'
 import { calcularFactorJornada as calcularFactorJornadaCliente } from '@/utils/puntuacion'
 
-/**
- * Garantía de coherencia entre el cálculo de factores en el cliente y en el
- * servidor (Cloud Functions). Ambos módulos son réplicas: si divergen,
- * la simulación que ve el usuario en la vista de noticias mostraría puntos
- * distintos a los que el backend guarda en Firestore. Estos tests bloquean
- * esa divergencia.
- *
- * Se carga el módulo del servidor con `createRequire` porque es CommonJS y
- * los archivos de Vitest son ESM.
- */
 const cargarModuloServidor = createRequire(import.meta.url)
 const { calcularFactorJornada: calcularFactorJornadaServidor } = cargarModuloServidor(
   '../../functions/puntuacionServer.js',

@@ -1,14 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createRequire } from 'node:module'
 
-/**
- * Resolución de pujas de un mercado cerrado.
- *
- * Para cada carta a la venta se quedan todas las pujas registradas por los
- * participantes. La carta se adjudica siempre a la puja de mayor cantidad.
- * Antes este flujo se comprobaba a mano con el botón "Resolver pujas" del
- * panel de administración; estos tests cubren el caso pase lo que pase.
- */
 const cargarModuloServidor = createRequire(import.meta.url)
 const { seleccionarPujasGanadoras } = cargarModuloServidor('../../functions/pujasServer.js')
 

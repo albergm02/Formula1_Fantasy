@@ -1,14 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calcularPuntosJornada } from '@/utils/puntuacion'
 
-/**
- * Conversión de la puntuación base de un piloto en puntos finales de jornada
- * multiplicando por el factor calculado para su variante.
- *
- * La función es la última pieza del pipeline de puntuación, por eso se cubre
- * de forma aislada: redondeo, suelo a cero y factor por defecto.
- */
-
 describe('calcularPuntosJornada', () => {
   it('debería devolver la puntuación base sin cambios si no se pasa factor', () => {
     expect(calcularPuntosJornada(80)).toBe(80)
