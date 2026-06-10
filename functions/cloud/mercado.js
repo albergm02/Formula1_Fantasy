@@ -6,10 +6,6 @@
  * cierra el mercado del día anterior resolviendo sus pujas y se aplica el
  * impacto de esas pujas sobre los precios de los pilotos.
  *
- * Los precios dinámicos se calculan como media móvil de las últimas N pujas
- * por carta (N = HISTORIAL_MAX_MUESTRAS). El nuevo precio se propaga tanto al
- * catálogo como a los garajes y a los mercados abiertos, para que la valoración
- * del jugador refleje el mercado real en todo momento.
  *
  * Esquema Firestore → `mercados/{idLiga}_{YYYY-MM-DD}`:
  * ```
@@ -28,6 +24,7 @@ const { FieldValue } = require('firebase-admin/firestore')
 
 const { db } = require('../comun/firebase')
 const { OPCIONES, REGION } = require('../comun/constantes')
+const { exigirEmailAutenticado } = require('../comun/autenticacion')
 
 const {
   cargarCatalogo,
@@ -39,17 +36,13 @@ const { seleccionarPujasGanadoras } = require('../dominio/pujas')
 
 /* ─── Constantes de precios dinámicos ───────────────────────────────────── */
 
-/* Número de muestras que conservo del histórico para promediar el precio.
- * Con 5 muestras consigo un suavizado razonable: una sola puja anómala no
- * descalibra el precio, pero un cambio sostenido sí se acaba reflejando. */
+/* Número de muestras que conservo del histórico para promediar el precio.*/
 const HISTORIAL_MAX_MUESTRAS = 5
 
-/* Penalización aplicada a cartas que salen al mercado pero nadie puja.
- * Un 5% por día simula la pérdida de valor por falta de interés sin ser
- * agresivo: tras varias jornadas, un piloto irrelevante baja de precio. */
+/* Penalización aplicada a cartas que salen al mercado pero nadie puja. */
 const FACTOR_DESINTERES = 0.95
 
-/* Suelo absoluto del precio para que ninguna carta se vuelva gratuita. */
+/* Suelo del precio para que ninguna carta se vuelva gratuita. */
 const PRECIO_MINIMO = 5
 
 /* ─── Identificación temporal del mercado ───────────────────────────────── */
@@ -221,11 +214,10 @@ async function resolverPujasMercado(idMercado) {
 
 /**
  * Recopila las exclusiones del próximo mercado:
- *  - Combinaciones `<numero>|<variante>` de pilotos ya fichados (bloqueo
- *    fino: el mismo piloto puede aparecer en otras variantes).
+ *  - El mismo piloto puede aparecer en otras variantes).
  *  - IDs de coches y potenciadores que ya tiene algún participante.
  *
- * Esto evita ofrecer una carta que nadie podría comprar porque ya tiene dueño
+ * Se debe de evitar ofrecer una carta que nadie podría comprar porque ya tiene dueño
  * en la liga.
  *
  * @param {string} idLiga
@@ -236,7 +228,6 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
     .collection('participaciones')
     .where('id_liga', '==', idLiga)
     .get()
-
   const clavesPilotoBloqueadas = new Set()
   const idsCartas = new Set()
   for (const documento of participacionesSnap.docs) {
@@ -260,33 +251,22 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
  * Genera el mercado diario para UNA liga específica.
  *
  * Es idempotente: si el mercado de hoy ya existe, lo respeta y devuelve un
- * resumen indicando que se omitió. Con `forzar: true` borra el existente
- * (incluidas sus pujas) y lo regenera, lo cual uso en testing y en el
- * primer alta de la liga.
+ * resumen indicando que se omitió.
  *
  * @param {string} idLiga
- * @param {{ forzar?: boolean }} [opciones]
  * @returns {Promise<Object>} ID del mercado y total de cartas.
  */
-async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
-  const { forzar = false } = opciones
+async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   const ahora = new Date()
   const idMercadoHoy = calcularIdMercado(idLiga, ahora)
 
   const mercadoExistente = await db.collection('mercados').doc(idMercadoHoy).get()
   if (mercadoExistente.exists) {
-    if (!forzar) {
-      return {
-        mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`,
-        idMercado: idMercadoHoy,
-        omitido: true,
-      }
+    return {
+      mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`,
+      idMercado: idMercadoHoy,
+      omitido: true,
     }
-    const pujasSnap = await db.collection('mercados').doc(idMercadoHoy).collection('pujas').get()
-    const batchBorrado = db.batch()
-    pujasSnap.docs.forEach((doc) => batchBorrado.delete(doc.ref))
-    batchBorrado.delete(mercadoExistente.ref)
-    await batchBorrado.commit()
   }
 
   /* Si el mercado de ayer sigue abierto, lo resuelvo ANTES de crear el de hoy.
@@ -304,10 +284,8 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga, opciones = {}) {
   const catalogoBase = await cargarCatalogo(db)
   const preciosDinamicos = await cargarPreciosPilotos(db)
   const catalogoConPrecios = aplicarPreciosDinamicosACatalogo(catalogoBase, preciosDinamicos)
-
   const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
   const cartasDelDia = seleccionarCartasDiarias(catalogoConPrecios, exclusionesLiga)
-
   const fechaCierre = calcularFechaCierre(ahora)
 
   await db.collection('mercados').doc(idMercadoHoy).set({
@@ -599,6 +577,129 @@ exports.generarMercadoInicialLiga = onCall(OPCIONES, async (request) => {
 
   const resultado = await ejecutarGeneracionMercadoParaLiga(idLiga)
   return { ok: true, ...resultado }
+})
+
+/* ─── Pujas (callables) ─────────────────────────────────────────────────── */
+
+/* Convierto el correo en una clave segura para usar en el ID del documento.
+ * Tiene que coincidir con el saneado del cliente histórico para que las
+ * pujas existentes sigan localizables y para que `registrarPuja` y
+ * `eliminarPujaPropia` apunten al mismo documento. */
+function sanitizarEmailParaIdPuja(email) {
+  return email.replace(/[.@]/g, '_')
+}
+
+/**
+ * Suma el dinero comprometido por el usuario en el mismo mercado, ignorando
+ * la puja sobre `idCartaExcluida` para que actualizar una puja existente no
+ * cuente dos veces el importe anterior.
+ */
+async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
+  const pujasSnap = await db
+    .collection('mercados')
+    .doc(idMercado)
+    .collection('pujas')
+    .where('emailUsuario', '==', email)
+    .get()
+  return pujasSnap.docs.reduce((suma, documento) => {
+    const datos = documento.data()
+    if (datos.idCarta === idCartaExcluida) return suma
+    return suma + Number(datos.cantidad || 0)
+  }, 0)
+}
+
+/**
+ * Callable — registra o actualiza una puja del usuario sobre una carta del
+ * mercado activo. Recalculo el precio mínimo y el presupuesto disponible
+ * desde Firestore para que un cliente manipulado no pueda pujar más que su
+ * presupuesto real ni por debajo del precio base actual.
+ *
+ * @param {{ idLiga: string, idCarta: string, cantidad: number }} datos
+ */
+exports.registrarPujaCarta = onCall(OPCIONES, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const { idLiga, idCarta, cantidad } = request.data || {}
+  if (!idLiga || !idCarta) {
+    throw new HttpsError('invalid-argument', 'Faltan idLiga o idCarta.')
+  }
+  const cantidadNumerica = Number(cantidad)
+  if (!Number.isFinite(cantidadNumerica) || cantidadNumerica <= 0) {
+    throw new HttpsError('invalid-argument', 'La cantidad de la puja debe ser positiva.')
+  }
+
+  const idMercado = calcularIdMercado(idLiga, new Date())
+  const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
+  if (!mercadoSnap.exists || mercadoSnap.data().estado !== 'abierto') {
+    throw new HttpsError('failed-precondition', 'El mercado de hoy no está abierto.')
+  }
+
+  const cartas = mercadoSnap.data().cartas || []
+  const cartaObjetivo = cartas.find((carta) => carta.id === idCarta)
+  if (!cartaObjetivo) {
+    throw new HttpsError('not-found', 'La carta no está en el mercado de hoy.')
+  }
+  if (cantidadNumerica < Number(cartaObjetivo.precio || 0)) {
+    throw new HttpsError(
+      'failed-precondition',
+      `La puja mínima es ${cartaObjetivo.precio}M (precio base actual).`,
+    )
+  }
+
+  const participacionSnap = await db
+    .collection('participaciones')
+    .where('id_liga', '==', idLiga)
+    .where('email_usuario', '==', email)
+    .limit(1)
+    .get()
+  if (participacionSnap.empty) {
+    throw new HttpsError('not-found', 'No participas en esta liga.')
+  }
+  const participacion = participacionSnap.docs[0]
+  const presupuestoActual = Number(participacion.data().presupuesto || 0)
+  const comprometidoEnOtras = await sumarComprometidoEnMercado(idMercado, email, idCarta)
+  if (cantidadNumerica + comprometidoEnOtras > presupuestoActual) {
+    throw new HttpsError('failed-precondition', 'Presupuesto insuficiente para esta puja.')
+  }
+
+  const idPuja = `${sanitizarEmailParaIdPuja(email)}_${idCarta}`
+  await db.collection('mercados').doc(idMercado).collection('pujas').doc(idPuja).set({
+    idCarta,
+    tipoCarta: cartaObjetivo.tipoCarta,
+    nombreCarta: cartaObjetivo.nombre,
+    precioCarta: cartaObjetivo.precio,
+    emailUsuario: email,
+    idParticipante: participacion.id,
+    cantidad: cantidadNumerica,
+    fecha: new Date().toISOString(),
+  })
+
+  return { ok: true, cantidad: cantidadNumerica }
+})
+
+/**
+ * Callable — elimina la puja propia del usuario sobre una carta del mercado.
+ * Solo permito borrar la puja cuyo documento contiene el correo del invocador
+ * para evitar que un usuario malicioso retire pujas ajenas.
+ */
+exports.eliminarPujaPropia = onCall(OPCIONES, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const { idLiga, idCarta } = request.data || {}
+  if (!idLiga || !idCarta) {
+    throw new HttpsError('invalid-argument', 'Faltan idLiga o idCarta.')
+  }
+
+  const idMercado = calcularIdMercado(idLiga, new Date())
+  const idPuja = `${sanitizarEmailParaIdPuja(email)}_${idCarta}`
+  const refPuja = db.collection('mercados').doc(idMercado).collection('pujas').doc(idPuja)
+  const pujaSnap = await refPuja.get()
+  if (!pujaSnap.exists) {
+    return { ok: true, eliminado: false }
+  }
+  if (pujaSnap.data().emailUsuario !== email) {
+    throw new HttpsError('permission-denied', 'Solo puedes retirar tus propias pujas.')
+  }
+  await refPuja.delete()
+  return { ok: true, eliminado: true }
 })
 
 /* Exporto `calcularIdMercado` para que el módulo de cláusulas pueda

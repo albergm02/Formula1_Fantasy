@@ -69,6 +69,33 @@ async function obtenerGranPremiosFinalizados(anio) {
     })
 }
 
+/**
+ * Localiza el "Gran Premio en juego" para una temporada concreta: el meeting
+ * más reciente cuya fecha de inicio ya ha pasado (esté en curso o terminado).
+ *
+ * Lo uso desde el bloqueo de jornada para responder en servidor a la pregunta
+ * "¿qué GP está condicionando ahora mismo el equipo del usuario?". Si todavía
+ * no ha arrancado el primer GP de la temporada (pretemporada), devuelvo
+ * `null` y el llamador interpreta que no hay nada que bloquear.
+ *
+ * @param {number} anio - Temporada a consultar.
+ * @returns {Promise<number|null>} `meeting_key` del GP en juego o `null`.
+ */
+async function obtenerMeetingKeyEnJuego(anio) {
+  const reuniones = await consultarOpenF1(`/meetings?year=${anio}`)
+  const ahora = new Date()
+
+  const enJuego = reuniones
+    .filter(function (reunion) {
+      return new Date(reunion.date_start) <= ahora
+    })
+    .sort(function (a, b) {
+      return new Date(b.date_start) - new Date(a.date_start)
+    })[0]
+
+  return enJuego ? enJuego.meeting_key : null
+}
+
 /* ─── 2. Sesiones de un Gran Premio ─────────────────────────────────────── */
 
 /**
@@ -420,5 +447,6 @@ async function recopilarDatosGranPremio(meetingKey) {
 
 module.exports = {
   obtenerGranPremiosFinalizados,
+  obtenerMeetingKeyEnJuego,
   recopilarDatosGranPremio,
 }

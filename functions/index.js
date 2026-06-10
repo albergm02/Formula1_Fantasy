@@ -7,15 +7,6 @@
  * y para que cada feature (jornada, mercado, ligas…) sea responsable de su
  * propio comportamiento.
  *
- * Estructura del backend:
- *   functions/
- *     comun/        ← inicialización Firebase + constantes + helpers de auth
- *     cloud/        ← una capa por dominio funcional
- *     *Server.js    ← lógica pura sin Firestore (puntuación, sinergias,
- *                     selección de mercado, resolución de pujas, adapter
- *                     de OpenF1). Se mantiene aparte para poder testearla
- *                     sin levantar emuladores y para defender la separación
- *                     "cálculo puro vs efectos secundarios".
  */
 
 require('./comun/firebase')
@@ -24,6 +15,7 @@ const jornada = require('./cloud/jornada')
 const mercado = require('./cloud/mercado')
 const ligas = require('./cloud/ligas')
 const clausulas = require('./cloud/clausulas')
+const garaje = require('./cloud/garaje')
 const perfil = require('./cloud/perfil')
 const bloqueoSesion = require('./cloud/bloqueoSesion')
 
@@ -33,6 +25,8 @@ exports.generarMercadoDiario = mercado.generarMercadoDiario
 
 /* ─── Callables de mercado ──────────────────────────────────────────────── */
 exports.generarMercadoInicialLiga = mercado.generarMercadoInicialLiga
+exports.registrarPujaCarta = mercado.registrarPujaCarta
+exports.eliminarPujaPropia = mercado.eliminarPujaPropia
 
 /* ─── Callables de ligas ────────────────────────────────────────────────── */
 exports.eliminarLigaManual = ligas.eliminarLigaManual
@@ -41,6 +35,11 @@ exports.expulsarParticipanteComoOrganizador = ligas.expulsarParticipanteComoOrga
 
 /* ─── Callable de cláusulas ─────────────────────────────────────────────── */
 exports.ejecutarClausulazo = clausulas.ejecutarClausulazo
+
+/* ─── Callables de garaje ───────────────────────────────────────────────── */
+exports.venderCartaParticipante = garaje.venderCartaParticipante
+exports.alternarCartaEquipada = garaje.alternarCartaEquipada
+exports.invertirEnClausulaCarta = garaje.invertirEnClausulaCarta
 
 /* ─── Callables de perfil ───────────────────────────────────────────────── */
 exports.autorizarCambioCorreo = perfil.autorizarCambioCorreo

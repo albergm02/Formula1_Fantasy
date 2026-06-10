@@ -14,6 +14,7 @@ const { FieldValue } = require('firebase-admin/firestore')
 const { db } = require('../comun/firebase')
 const { OPCIONES, HORAS_PERIODO_GRACIA } = require('../comun/constantes')
 const { exigirEmailAutenticado } = require('../comun/autenticacion')
+const { exigirJornadaProcesada } = require('../comun/jornada')
 const { calcularIdMercado } = require('./mercado')
 
 /**
@@ -104,6 +105,7 @@ async function calcularComprometidoEnPujas(idLiga, email) {
  */
 exports.ejecutarClausulazo = onCall(OPCIONES, async (request) => {
   const emailAtacante = exigirEmailAutenticado(request)
+  await exigirJornadaProcesada()
   const { idParticipanteRival, idParticipantePropio, instanciaId } = request.data || {}
   if (!idParticipanteRival || !idParticipantePropio || instanciaId === undefined) {
     throw new HttpsError('invalid-argument', 'Faltan datos de la cláusula.')

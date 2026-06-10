@@ -1,17 +1,6 @@
-/**
- * Acceso a las jornadas procesadas en Firestore.
- * @module servicioJornada
- */
-
 import { collection, doc, getDoc, onSnapshot, orderBy, query, limit } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
 
-/**
- * Suscribe al historial de jornadas procesadas (más recientes primero).
- * @param {(jornadas: Array<Object>) => void} alActualizar
- * @param {number} [limiteJornadas=24]
- * @returns {() => void}
- */
 export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) {
   const consulta = query(
     collection(db, 'jornadas'),
@@ -28,12 +17,7 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
   })
 }
 
-/**
- * Recupera la lista única de pilotos del catálogo central (catalogo/pilotos).
- * El documento contiene cartas con variantes; se deduplica por número de piloto
- * para devolver una entrada por cada uno con los campos visuales y de atributos.
- * @returns {Promise<Array<{ numero: number, nombre: string, equipo: string, imagen: string, atributos: Object }>>}
- */
+/** Lista única de pilotos del catálogo (deduplicada por número). */
 export async function cargarCatalogoPilotos() {
   const documento = await getDoc(doc(db, 'catalogo', 'pilotos'))
   if (!documento.exists()) {
@@ -57,12 +41,7 @@ export async function cargarCatalogoPilotos() {
   return Array.from(pilotosPorNumero.values())
 }
 
-/**
- * Extrae los perfiles de puntuación (pesos y reglas) embebidos en las cartas
- * del catálogo `catalogo/pilotos`. Devuelve un mapa indexado por el identificador
- * del perfil (qualy, carrera, todo_terreno, base, remontador, estratega).
- * @returns {Promise<Object<string, { pesos: Object, reglasUsuario: string[] }>>}
- */
+/** Mapa de perfiles de puntuación embebidos en el catálogo, indexado por clave. */
 export async function cargarPerfilesPuntuacion() {
   const documento = await getDoc(doc(db, 'catalogo', 'pilotos'))
   if (!documento.exists()) {

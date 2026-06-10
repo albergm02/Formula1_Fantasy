@@ -39,10 +39,6 @@ async function cargarCatalogo(db) {
   return catalogoEnMemoria
 }
 
-function invalidarCacheCatalogo() {
-  catalogoEnMemoria = null
-}
-
 /**
  * Lee el documento `catalogo/precios_pilotos` con el precio dinámico actual
  * de cada piloto, calculado a partir del historial de pujas ganadoras.
@@ -86,7 +82,7 @@ function construirClavePiloto(piloto) {
 }
 
 const CARTAS_POR_DIA = {
-  pilotos: 7,
+  pilotos: 4,
   coches: 1,
   potenciadores: 3,
 }
@@ -154,7 +150,6 @@ function elegirPilotosDelDia(cartasPiloto, clavesBloqueadas) {
 
 module.exports = {
   cargarCatalogo,
-  invalidarCacheCatalogo,
   cargarPreciosPilotos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,

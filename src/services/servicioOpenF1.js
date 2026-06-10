@@ -1,20 +1,5 @@
-/**
- * Servicio de comunicación con la API pública de OpenF1.
- * Centraliza TODAS las llamadas HTTP a api.openf1.org.
- * Los componentes y widgets importan únicamente desde este módulo.
- * @module servicioOpenF1
- */
-
-/* ─── Utilidades internas ───────────────────────────────────────────────── */
-
-/**
- * Convierte una fecha ISO a un objeto con fecha y hora legibles en español.
- * @param {string} fechaIso - Fecha en formato ISO 8601.
- * @returns {{ fecha: string, hora: string }}
- */
 const formatearFechaGranPremio = (fechaIso) => {
   const fecha = new Date(fechaIso)
-
   return {
     fecha: fecha.toLocaleDateString('es-ES', {
       day: 'numeric',
@@ -28,17 +13,8 @@ const formatearFechaGranPremio = (fechaIso) => {
   }
 }
 
-/* ─── Exportaciones públicas ────────────────────────────────────────────── */
-
-/**
- * Obtiene los datos del próximo Gran Premio del año en curso.
- * Devuelve null si no quedan reuniones futuras en el calendario.
- * @param {{ fetchImpl?: Function, anio?: number }} opciones
- * @returns {Promise<Object|null>}
- */
 export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
-
   if (!respuesta.ok) {
     const cuerpoError = await respuesta.json().catch(() => ({}))
     throw new Error(cuerpoError?.detail || `Error HTTP ${respuesta.status}`)
@@ -46,17 +22,13 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
 
   const reuniones = await respuesta.json()
   const ahora = new Date()
-
   const siguienteReunion = reuniones
     .filter((reunion) => new Date(reunion.date_end) > ahora)
     .sort((primera, segunda) => new Date(primera.date_start) - new Date(segunda.date_start))[0]
 
-  if (!siguienteReunion) {
-    return null
-  }
+  if (!siguienteReunion) return null
 
   const { fecha, hora } = formatearFechaGranPremio(siguienteReunion.date_start)
-
   return {
     circuito: siguienteReunion.circuit_short_name,
     nombreGranPremio: siguienteReunion.meeting_name,
@@ -69,18 +41,11 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
   }
 }
 
-/**
- * Obtiene el último Gran Premio finalizado del año en curso.
- * Útil como fallback cuando aún no se ha procesado una jornada en Firestore.
- * @param {{ fetchImpl?: Function, anio?: number }} opciones
- * @returns {Promise<Object|null>}
- */
 export const obtenerUltimoGranPremioFinalizado = async ({
   fetchImpl = fetch,
   anio = 2026,
 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
-
   if (!respuesta.ok) {
     const cuerpoError = await respuesta.json().catch(() => ({}))
     throw new Error(cuerpoError?.detail || `Error HTTP ${respuesta.status}`)
@@ -88,17 +53,13 @@ export const obtenerUltimoGranPremioFinalizado = async ({
 
   const reuniones = await respuesta.json()
   const ahora = new Date()
-
   const ultimaReunion = reuniones
     .filter((reunion) => new Date(reunion.date_end) <= ahora)
     .sort((primera, segunda) => new Date(segunda.date_end) - new Date(primera.date_end))[0]
 
-  if (!ultimaReunion) {
-    return null
-  }
+  if (!ultimaReunion) return null
 
   const { fecha, hora } = formatearFechaGranPremio(ultimaReunion.date_start)
-
   return {
     circuito: ultimaReunion.circuit_short_name,
     nombreGranPremio: ultimaReunion.meeting_name,
@@ -112,12 +73,6 @@ export const obtenerUltimoGranPremioFinalizado = async ({
   }
 }
 
-/**
- * Calcula la cuenta regresiva hasta el inicio de un Gran Premio.
- * @param {string} fechaInicio - Fecha ISO del inicio de la carrera.
- * @param {Date} ahora - Fecha de referencia (inyectable para tests).
- * @returns {string} Texto con el formato "Xd Xh Xm Xs" o mensaje de inicio.
- */
 export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   const inicioCarrera = new Date(fechaInicio)
   const tiempoRestante = inicioCarrera - ahora
