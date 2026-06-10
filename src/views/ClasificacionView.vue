@@ -11,7 +11,7 @@ import { cargarGarajeDeParticipante } from '@/services/servicioLigas'
 
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
-import VistaEquipoRival from '@/components/VistaEquipoRival.vue'
+import VistaGaraje from '@/components/VistaGaraje.vue'
 
 import Dialog from 'primevue/dialog'
 
@@ -132,7 +132,7 @@ onMounted(async () => {
           <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
         </div>
 
-        <VistaEquipoRival v-else-if="participacionRival" :participacion="participacionRival" />
+        <VistaGaraje v-else-if="participacionRival" :modoRival="true" :participacion="participacionRival" />
       </Dialog>
     </main>
     <BarraNavegacion />
