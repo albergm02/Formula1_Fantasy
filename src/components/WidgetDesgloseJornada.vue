@@ -31,8 +31,6 @@ const puntosBaseSinSinergia = computed(() => {
   return puntosPilotosTotal.value + puntosCoche.value
 })
 
-/// Genera un texto descriptivo de las condiciones climáticas para la clase todoterreno
-//  de la jornada para mostrar en el diálogo.
 const condicionesTexto = computed(() => {
   if (!jornada.value?.condiciones) return []
   const c = jornada.value.condiciones
@@ -54,12 +52,6 @@ const NOMBRES_VARIANTE = {
   estratega: 'Estratega',
 }
 
-/**
- * Genera las líneas de explicación del factor de jornada de un piloto.
- * El factor multiplica la puntuación base de atributos según su variante y la actuación real en la jornada.
- * @param {Object} piloto - Objeto del desglose con variante, actuacion, factorJornada y puntuacionBase.
- * @returns {Array<string>}
- */
 function explicarFactor(piloto) {
   if (!piloto.variante || !piloto.factorJornada) return []
 
@@ -102,7 +94,6 @@ function explicarFactor(piloto) {
 
 <template>
   <div v-if="jornada" class="flex flex-col bg-transparent border-b border-zinc-800">
-    <!-- Resumen compacto -->
     <div class="flex items-center justify-between p-4 cursor-pointer" @click="mostrarDetalle = true">
       <div class="flex flex-col gap-1">
         <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">
@@ -123,7 +114,6 @@ function explicarFactor(piloto) {
       </div>
     </div>
 
-    <!-- Dialog de desglose detallado -->
     <Dialog v-model:visible="mostrarDetalle" modal header="DESGLOSE DE PUNTOS"
       :headerStyle="{ backgroundColor: '#1A1A1F', color: '#D4A843', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.25rem' }"
@@ -131,13 +121,11 @@ function explicarFactor(piloto) {
 
       <div class="flex flex-col gap-5">
 
-        <!-- Nombre del GP -->
         <div class="flex items-center gap-2 pb-3 border-b border-zinc-800">
           <i class="pi pi-flag-fill text-[#E10600]"></i>
           <span class="text-sm font-black uppercase tracking-wide text-white">{{ jornada.nombreGranPremio }}</span>
         </div>
 
-        <!-- Condiciones de carrera -->
         <div class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condiciones</span>
           <div class="flex flex-wrap gap-2">
@@ -150,7 +138,6 @@ function explicarFactor(piloto) {
           </div>
         </div>
 
-        <!-- Pilotos -->
         <div v-if="jornada.desglose?.pilotos?.length" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Pilotos</span>
           <div v-for="(piloto, idx) in jornada.desglose.pilotos" :key="idx"
@@ -172,7 +159,6 @@ function explicarFactor(piloto) {
               </div>
               <span class="text-lg font-black text-[#D4A843]">+{{ piloto.puntosJornada }}</span>
             </div>
-            <!-- Explicación del factor -->
             <div v-if="piloto.factorJornada" class="flex flex-col gap-0.5 pt-1 border-t border-zinc-800/50">
               <span v-for="(linea, i) in explicarFactor(piloto)" :key="i" class="text-[10px] text-zinc-400">
                 {{ linea }}
@@ -181,7 +167,6 @@ function explicarFactor(piloto) {
           </div>
         </div>
 
-        <!-- Coche -->
         <div v-if="jornada.desglose?.coche" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Coche</span>
           <div class="flex items-center justify-between p-3 bg-[#121218] border border-zinc-800">
@@ -193,7 +178,6 @@ function explicarFactor(piloto) {
           </div>
         </div>
 
-        <!-- Sinergias -->
         <div v-if="tieneSinergia" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Bonificaciones</span>
           <div class="flex flex-col gap-2">
@@ -221,7 +205,6 @@ function explicarFactor(piloto) {
           </div>
         </div>
 
-        <!-- Total -->
         <div class="flex items-center justify-between p-4 bg-[#D4A843]/10 border border-[#D4A843]/30">
           <div class="flex flex-col">
             <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">Total jornada</span>
@@ -232,7 +215,6 @@ function explicarFactor(piloto) {
           <span class="text-3xl font-black text-[#D4A843]">+{{ jornada.puntosJornada }}</span>
         </div>
 
-        <!-- Premio económico -->
         <div v-if="jornada.premioJornada"
           class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
           <div class="flex flex-col">
@@ -246,7 +228,6 @@ function explicarFactor(piloto) {
     </Dialog>
   </div>
 
-  <!-- Sin jornada procesada -->
   <div v-else class="p-4 bg-transparent border-b border-zinc-800">
     <div class="flex items-center gap-2">
       <i class="pi pi-info-circle text-zinc-600"></i>

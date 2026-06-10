@@ -5,31 +5,9 @@ import {
 } from '@/services/servicioOpenF1'
 import { suscribirseHistorialJornadas } from '@/services/servicioJornada'
 
-/**
- * Determina en tiempo real si el garaje debe permanecer bloqueado porque hay
- * una jornada pendiente de procesar.
- *
- * El bloqueo se ancla al "Gran Premio en juego": el Gran Premio más reciente
- * cuyo fin de semana ya ha comenzado.
- *  - Si el próximo Gran Premio ya ha arrancado (`fechaInicio` ≤ ahora), ese es
- *    el Gran Premio en juego (está en curso).
- *  - Si el próximo Gran Premio todavía es futuro, el Gran Premio en juego es el
- *    último que ya ha finalizado.
- *
- * El garaje sigue bloqueado mientras ese Gran Premio no figure en la colección
- * `jornadas` de Firestore, es decir, mientras no se hayan publicado sus
- * resultados. Así se cubre también la ventana entre el final de la carrera y el
- * procesamiento de la jornada, durante la cual el equipo no debe tocarse.
- *
- * Se suscribe a `jornadas` para levantar el bloqueo en cuanto el backend
- * registre el procesamiento, sin necesidad de recargar la página.
- *
- * `jornadaIniciada` se inicializa como `null` (estado desconocido) para evitar
- * mostrar el banner de bloqueo durante la carga inicial. Solo pasa a `true`
- * cuando se confirma que hay un Gran Premio en juego sin procesar.
- *
- * @returns {{ jornadaIniciada: import('vue').Ref<boolean|null>, mensajeBloqueoJornada: string }}
- */
+// Bloquea el garaje mientras el "Gran Premio en juego" (el más reciente cuyo
+// fin de semana ya ha comenzado) no figure en la colección `jornadas`.
+// El valor inicial null evita mostrar el banner durante la carga.
 export function usarBloqueoJornada() {
   const jornadaIniciada = ref(null)
 

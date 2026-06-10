@@ -15,12 +15,10 @@ const nombreLigaActiva = computed(() => {
 
 <template>
   <div class="flex flex-col items-center gap-3 p-5 bg-transparent border-b border-zinc-800">
-    <!-- Bienvenida y nombre de liga centrados -->
     <div class="flex flex-col items-center">
       <span class="text-[#D4A843] text-xs font-black uppercase tracking-widest">Bienvenido al Paddock</span>
       <h1 class="text-2xl font-black text-white uppercase text-center">{{ nombreLigaActiva }}</h1>
     </div>
-    <!-- Estadísticas centradas -->
     <div class="flex gap-8">
       <div class="flex flex-col items-center">
         <span class="text-[#F0ECEC] text-[10px] font-black uppercase tracking-widest">Presupuesto</span>

@@ -1,17 +1,3 @@
-/**
- * Gestión de perfil del usuario en servidor: cambio de correo y baja de cuenta.
- *
- * Estas operaciones son sensibles (afectan a credenciales y a datos en
- * cascada de varias colecciones) y deben validarse fuera del cliente:
- *  - El cambio de correo exige reautenticación reciente y respeta un
- *    bloqueo de 7 días entre cambios consecutivos.
- *  - La baja de cuenta borra participaciones, pujas, perfil y usuario de
- *    Auth en una sola operación.
- *
- * Si hubiera puesto esta lógica en cliente, un usuario con la app modificada
- * podría saltarse el bloqueo de correo o dejar datos huérfanos al borrarse.
- */
-
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
@@ -23,26 +9,15 @@ const {
   exigirReautenticacionReciente,
 } = require('../comun/autenticacion')
 
-/* ─── Cambio de correo ──────────────────────────────────────────────────── */
-
-/**
- * Comprueba si ya transcurrió el periodo de bloqueo entre cambios de correo.
- * Acepta `Timestamp` de Firestore o cualquier valor que `Date` admita.
- */
 function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
   const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)
   const milisegundosBloqueo = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
   return Date.now() - fecha.getTime() >= milisegundosBloqueo
 }
 
-/**
- * Callable — autoriza el inicio de un cambio de correo.
- *
- * El cliente debe invocarla ANTES de `verifyBeforeUpdateEmail`. Aquí valido la
- * reautenticación reciente y el bloqueo de 7 días, y dejo registrada la
- * marca temporal del cambio. Así la restricción no depende del cliente, que
- * podría haberse manipulado.
- */
+// El cliente invoca esta callable ANTES de verifyBeforeUpdateEmail: dejamos
+// el bloqueo de 7 días registrado para que la restricción no dependa del
+// cliente, que podría haberse manipulado.
 exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   exigirEmailAutenticado(request)
   exigirReautenticacionReciente(request)
@@ -65,18 +40,9 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   return { ok: true }
 })
 
-/**
- * Callable — migra los documentos de Firestore tras un cambio de correo en Auth.
- *
- * Al estar el documento de usuario indexado por UID (no por email), no hace
- * falta copiar ni borrar nada: actualizo el campo `correoAutenticacion` y
- * propago el cambio a participaciones (clave `email_usuario`) y a las ligas
- * que el usuario organice (`correoOrganizador`).
- *
- * Exijo que el token ya refleje el correo nuevo (`verifyBeforeUpdateEmail`
- * + login con el correo confirmado) para evitar dejar el sistema en un
- * estado inconsistente.
- */
+// El usuario se indexa por UID (no por email), así que no hay que copiar/borrar
+// nada: solo actualizo correoAutenticacion y propago el cambio a
+// participaciones y a las ligas que el usuario organice.
 exports.migrarCorreoUsuario = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
   exigirReautenticacionReciente(request)
@@ -128,12 +94,6 @@ exports.migrarCorreoUsuario = onCall(OPCIONES, async (request) => {
   }
 })
 
-/* ─── Baja de cuenta ────────────────────────────────────────────────────── */
-
-/**
- * Cede el rol de organizador al siguiente participante por fecha de unión.
- * Lo uso cuando el organizador se da de baja pero la liga sigue viva.
- */
 function elegirSiguienteAdministrador(participacionesRestantes) {
   if (participacionesRestantes.length === 0) return null
   const ordenadas = [...participacionesRestantes].sort((a, b) => {
@@ -144,14 +104,8 @@ function elegirSiguienteAdministrador(participacionesRestantes) {
   return ordenadas[0]
 }
 
-/**
- * Borra una liga huérfana: mercados (con pujas), actividad y la propia liga.
- *
- * Distinto de `borrarLigaEnCascada` (en `cloud/ligas.js`): aquí asumo que la
- * participación del usuario ya está borrada y el contador `participantes` no
- * importa porque la liga entera va a desaparecer. Lo invoco solo cuando se
- * elimina al último miembro.
- */
+// Versión simplificada de borrarLigaEnCascada (cloud/ligas.js): aquí ya no hay
+// que decrementar `participantes` porque la liga entera va a desaparecer.
 async function borrarLigaCompleta(idLiga) {
   const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
   for (const docMercado of mercadosSnap.docs) {
@@ -170,22 +124,8 @@ async function borrarLigaCompleta(idLiga) {
   await db.collection('ligas').doc(idLiga).delete()
 }
 
-/**
- * Borra en cascada todos los datos de un usuario.
- *
- * Distingo tres casos por liga:
- *  1. El usuario era el único participante → borro la liga entera.
- *  2. Era organizador con más miembros → cedo el rol al siguiente.
- *  3. Era participante normal → solo decremento el contador.
- *
- * Después limpio sus pujas activas en mercados abiertos, borro el documento
- * `usuarios/{uid}` y, por último, lo elimino de Firebase Auth con
- * `deleteUser`. Revoco también sus tokens activos para invalidar cualquier
- * sesión que tuviera abierta en otros dispositivos.
- *
- * @param {string} uid - UID de Firebase Auth (clave del documento).
- * @param {string} email - Correo del usuario (para localizar participaciones y pujas).
- */
+// Tres casos por liga: (1) único miembro → borrar la liga; (2) organizador con
+// más miembros → ceder rol al siguiente; (3) miembro normal → solo decrementar.
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db
     .collection('participaciones')
@@ -271,13 +211,6 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
   return { participacionesBorradas: participacionesSnap.size, ligasBorradas }
 }
 
-/**
- * Callable — el propio usuario elimina su cuenta.
- *
- * Exijo reautenticación reciente: una sesión vieja robada no debería poder
- * dejar al usuario sin cuenta. El cliente debe pedirle la contraseña justo
- * antes de invocar esta callable.
- */
 exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   exigirReautenticacionReciente(request)
@@ -287,12 +220,8 @@ exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   return { ok: true, email, ...resultado }
 })
 
-/**
- * Callable — el administrador global elimina la cuenta de cualquier usuario.
- *
- * Acepta `{ uid }`. Bloqueo expresamente la eliminación de otros
- * administradores desde el panel para evitar "tiroteos" entre admins.
- */
+// Bloqueo expresamente la eliminación de otros administradores desde el panel
+// para evitar "tiroteos" entre admins.
 exports.eliminarUsuarioManual = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { uid } = request.data || {}

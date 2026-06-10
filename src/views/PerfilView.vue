@@ -27,13 +27,11 @@ const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 const toast = useToast()
 
-// Determina si el usuario tiene el proveedor de contraseña (email/password),
-// aunque también tenga Google u otro proveedor enlazado.
+// `password` puede coexistir con Google u otro proveedor enlazado.
 const puedeUsarContrasena = computed(() => {
     return auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false
 })
 
-// Metadatos del perfil para gestionar restricciones de cambios
 const DIAS_BLOQUEO_CAMBIO_CORREO = 7
 const MILISEGUNDOS_POR_DIA = 86_400_000
 const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -57,8 +55,6 @@ async function cargarMetadatosPerfil() {
 }
 
 onMounted(cargarMetadatosPerfil)
-
-// CAMBIO DE CONTRASEÑA (vía enlace de restablecimiento)
 
 const dialogoContrasenaAbierto = ref(false)
 const enviandoEnlaceContrasena = ref(false)
@@ -89,8 +85,6 @@ async function confirmarCambioContrasena() {
         enviandoEnlaceContrasena.value = false
     }
 }
-
-// CAMBIO DE CORREO
 
 const dialogoCorreoAbierto = ref(false)
 const correoNuevo = ref('')
@@ -157,8 +151,6 @@ async function confirmarCambioCorreo() {
         enviandoCorreo.value = false
     }
 }
-
-// ELIMINACIÓN DE CUENTA
 
 const dialogoBajaAbierto = ref(false)
 const contrasenaParaBaja = ref('')
@@ -281,7 +273,6 @@ function mensajeFirebase(error) {
             </Card>
         </main>
 
-        <!-- Diálogo cambio de contraseña -->
         <Dialog v-model:visible="dialogoContrasenaAbierto" modal header="Cambiar contraseña"
             :style="{ width: '90vw', maxWidth: '420px' }"
             :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
@@ -304,7 +295,6 @@ function mensajeFirebase(error) {
             </div>
         </Dialog>
 
-        <!-- Diálogo cambio de correo -->
         <Dialog v-model:visible="dialogoCorreoAbierto" modal header="Cambiar correo"
             :style="{ width: '90vw', maxWidth: '420px' }"
             :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
@@ -331,7 +321,6 @@ function mensajeFirebase(error) {
             </div>
         </Dialog>
 
-        <!-- Diálogo baja -->
         <Dialog v-model:visible="dialogoBajaAbierto" modal header="Eliminar cuenta"
             :style="{ width: '90vw', maxWidth: '420px' }"
             :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-red-700' } }">

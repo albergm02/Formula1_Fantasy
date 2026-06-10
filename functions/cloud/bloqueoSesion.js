@@ -1,20 +1,3 @@
-/**
- * Protección anti fuerza bruta del login.
- *
- * Tres callables públicas (sin sesión Firebase Auth pero con App Check) que
- * implementan el clásico patrón "contador de intentos + bloqueo temporal":
- *
- *  - `verificarBloqueoAcceso` se llama ANTES de pedir credenciales para
- *    informar al usuario de que su cuenta está temporalmente bloqueada.
- *  - `registrarIntentoFallido` se llama tras un fallo de credenciales y, al
- *    llegar al límite, activa el bloqueo.
- *  - `reiniciarContadorIntentos` se llama tras un login correcto y limpia
- *    el contador.
- *
- * Vivir en servidor es la única forma de que el bloqueo sea efectivo: si
- * estuviera en cliente, bastaría con borrar la cookie para evitarlo.
- */
-
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 
 const { db } = require('../comun/firebase')
@@ -23,13 +6,9 @@ const { OPCIONES, OPCIONES_PUBLICAS } = require('../comun/constantes')
 const MAXIMO_INTENTOS_FALLIDOS = 5
 const DURACION_BLOQUEO_MINUTOS = 5
 
-/**
- * Callable pública — informa si un correo tiene un bloqueo temporal activo.
- *
- * No requiere sesión porque se invoca antes del login. Si el correo no
- * existe en Firestore devuelvo `{ bloqueado: false }` sin revelar nada más,
- * para no facilitar enumeración de usuarios.
- */
+// Callable previa al login: avisa si la cuenta está temporalmente bloqueada.
+// Si el correo no existe, devuelve { bloqueado: false } sin revelar nada
+// más, para evitar enumeración de usuarios.
 exports.verificarBloqueoAcceso = onCall(OPCIONES_PUBLICAS, async (request) => {
   const correo = String(request.data?.correo || '')
     .trim()
@@ -59,14 +38,8 @@ exports.verificarBloqueoAcceso = onCall(OPCIONES_PUBLICAS, async (request) => {
   return { bloqueado: false }
 })
 
-/**
- * Callable pública — incrementa el contador de intentos fallidos.
- *
- * Al alcanzar `MAXIMO_INTENTOS_FALLIDOS` activa un bloqueo temporal de
- * `DURACION_BLOQUEO_MINUTOS` minutos. Si el correo no existe ignoro el
- * intento silenciosamente para no convertir esta callable en un oráculo
- * de existencia de cuentas.
- */
+// Si el correo no existe, ignoro silenciosamente el intento para no
+// convertir esta callable en un oráculo de existencia de cuentas.
 exports.registrarIntentoFallido = onCall(OPCIONES_PUBLICAS, async (request) => {
   const correo = String(request.data?.correo || '')
     .trim()
@@ -94,12 +67,8 @@ exports.registrarIntentoFallido = onCall(OPCIONES_PUBLICAS, async (request) => {
   return { ok: true }
 })
 
-/**
- * Callable autenticada — limpia el contador tras un login exitoso.
- *
- * Solo puede llamarla el propio usuario y uso el UID del token para evitar
- * que un atacante limpie el contador de otro correo.
- */
+// Uso el UID del token (no un email del payload) para evitar que un atacante
+// reinicie el contador de otro correo.
 exports.reiniciarContadorIntentos = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid

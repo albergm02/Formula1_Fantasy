@@ -70,20 +70,16 @@ const confirmarEliminarPuja = () => {
     <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
 
-        <!-- Imagen de fondo completa, desplazada a la derecha -->
         <img v-if="props.potenciador.imagen" :src="props.potenciador.imagen" :alt="props.potenciador.nombre"
           class="absolute inset-0 w-full h-full object-cover" style="object-position: 20% center;" />
 
-        <!-- Pujas arriba a la derecha -->
         <div v-if="modoMercado && totalPujas > 0"
           class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
           <i class="pi pi-users text-[8px] text-zinc-300"></i>
           <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
         </div>
 
-        <!-- Overlay de info (lado derecho) -->
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
-          <!-- Header: nombre -->
           <div class="flex items-start justify-between gap-2">
             <div class="flex flex-col min-w-0">
               <span class="text-sm font-black text-white uppercase leading-tight truncate drop-shadow-md">
@@ -93,15 +89,12 @@ const confirmarEliminarPuja = () => {
             </div>
           </div>
 
-          <!-- Etiquetas de precio y botones -->
           <div class="flex flex-col gap-1.5">
-            <!-- Precio encima del botón (solo en modo mercado) -->
             <div v-if="modoMercado" class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 self-start">
               <span class="text-[10px] font-black text-emerald-400">{{ Number(props.potenciador.precio).toFixed(2) }}
                 M</span>
             </div>
 
-            <!-- Botones: Detalles + Pujar -->
             <div v-if="modoMercado" class="flex gap-2">
               <button @click="mostrarDetalles = true"
                 class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
@@ -117,7 +110,6 @@ const confirmarEliminarPuja = () => {
               </button>
             </div>
 
-            <!-- Boton detalles fuera de mercado -->
             <button v-else @click="mostrarDetalles = true"
               class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
               <i class="pi pi-info-circle text-white text-xs mr-2"></i>
@@ -129,19 +121,16 @@ const confirmarEliminarPuja = () => {
       </div>
     </div>
 
-    <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.potenciador.nombre" modal
       :style="{ width: '90vw', maxWidth: '400px' }">
       <div class="space-y-3">
 
-        <!-- Descripcion -->
         <div class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="mt-1.5 text-xs text-zinc-300">
             {{ props.potenciador.descripcion }}
           </p>
         </div>
 
-        <!-- Mejoras detalladas -->
         <div v-if="etiquetasMejora.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black uppercase mb-2">Mejoras de Atributos</p>
           <div class="space-y-2">
@@ -155,7 +144,6 @@ const confirmarEliminarPuja = () => {
       </div>
     </Dialog>
 
-    <!-- Dialog de puja -->
     <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
       :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">

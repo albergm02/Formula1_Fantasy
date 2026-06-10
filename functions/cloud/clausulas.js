@@ -1,13 +1,3 @@
-/**
- * Cláusula de rescisión ("clausulazo") en servidor.
- *
- * Toda la lógica vive aquí (no en cliente) porque es la única manera de
- * garantizar que el precio, las validaciones y la transferencia se ejecuten
- * de forma atómica y a prueba de manipulación: un cliente comprometido podría
- * inventarse el precio o el rival, pero el Admin SDK los recalcula desde los
- * documentos reales antes de mover nada.
- */
-
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
@@ -17,25 +7,16 @@ const { exigirEmailAutenticado } = require('../comun/autenticacion')
 const { exigirJornadaProcesada } = require('../comun/jornada')
 const { calcularIdMercado } = require('./mercado')
 
-/**
- * Calcula el precio de la cláusula a partir del precio pagado por el dueño.
- *
- * Fórmula: `precioCompra + (clausulaInvertida × 2)`. Uso `precioCompra` —
- * la inversión histórica del dueño — y no el precio actual de mercado, para
- * que la cláusula refleje el coste real de lo que el dueño puso por la carta
- * más el doble de lo que invirtió en blindarla.
- */
+// Precio = precioCompra + clausulaInvertida × 2. Uso precioCompra (la
+// inversión histórica del dueño) en lugar del precio actual de mercado, para
+// que la cláusula refleje el coste real de lo que el dueño puso por la carta.
 function calcularPrecioClausula(carta) {
   const precioBase = carta.precioCompra ?? carta.precio
   const inversionDueño = carta.clausulaInvertida || 0
   return precioBase + inversionDueño * 2
 }
 
-/**
- * Indica si una carta sigue protegida por el periodo de gracia tras adquirirse.
- * Lo aplico para evitar el "robo en caliente" justo después de una compra,
- * que sería frustrante y poco competitivo.
- */
+// Evita el "robo en caliente" justo después de una compra.
 function estaEnPeriodoDeGracia(carta) {
   if (!carta.fechaAdquisicion) return false
   const fechaAdquisicion = new Date(carta.fechaAdquisicion)
@@ -43,14 +24,9 @@ function estaEnPeriodoDeGracia(carta) {
   return Date.now() - fechaAdquisicion.getTime() < milisegundosGracia
 }
 
-/**
- * Extrae una carta del garaje por `instancia_id`, mutando el garaje recibido.
- *
- * Uso `instancia_id` (timestamp + random) en lugar de `id` o `numero|variante`
- * porque es el único identificador único e inmutable de una carta concreta:
- * dos jugadores pueden tener "Hamilton qualy" en su garaje, pero cada copia
- * es una instancia distinta con su propio historial.
- */
+// `instancia_id` (timestamp + random) es el único identificador único de
+// una carta concreta: dos jugadores pueden tener "Hamilton qualy" en su
+// garaje, pero cada copia es una instancia distinta con su propio historial.
 function extraerCartaPorInstancia(garaje, instanciaId) {
   for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
     const lista = garaje[coleccion] || []
@@ -64,23 +40,19 @@ function extraerCartaPorInstancia(garaje, instanciaId) {
   return { carta: null }
 }
 
-/**
- * Añade una carta al garaje destino según su tipo, mutando el garaje recibido.
- */
 function añadirCartaAGaraje(garaje, carta) {
   const tipo = carta.tipo || carta.tipoCarta
-  const coleccion = tipo === 'coche' ? 'coches' : tipo === 'piloto' ? 'pilotos' : 'potenciadores'
+  let coleccion
+  if (tipo === 'coche') coleccion = 'coches'
+  else if (tipo === 'piloto') coleccion = 'pilotos'
+  else coleccion = 'potenciadores'
   if (!garaje[coleccion]) garaje[coleccion] = []
   garaje[coleccion].push(carta)
 }
 
-/**
- * Suma el dinero que un usuario tiene reservado en pujas del mercado de hoy.
- *
- * Sin este cálculo, un jugador podría comprometer 30 M en pujas y a la vez
- * ejecutar un clausulazo de 30 M, dejando el presupuesto en negativo si
- * después se resolviera alguna puja a su favor.
- */
+// Sin este cálculo, un jugador podría comprometer 30 M en pujas y a la vez
+// ejecutar un clausulazo de 30 M, dejando el presupuesto en negativo si
+// después se resolviera alguna puja a su favor.
 async function calcularComprometidoEnPujas(idLiga, email) {
   const idMercado = calcularIdMercado(idLiga, new Date())
   const pujasSnap = await db
@@ -92,17 +64,6 @@ async function calcularComprometidoEnPujas(idLiga, email) {
   return pujasSnap.docs.reduce((suma, documento) => suma + (documento.data().cantidad || 0), 0)
 }
 
-/**
- * Callable — ejecuta una cláusula de rescisión validando todo en servidor.
- *
- * Acepta `{ idParticipanteRival, idParticipantePropio, instanciaId }`.
- * Recalcula el precio (sin fiarse del cliente), comprueba el periodo de gracia
- * y el presupuesto disponible (incluido el comprometido en pujas) y
- * transfiere la carta y el dinero en un único batch atómico.
- *
- * Registra además un evento de actividad para que el resto de jugadores se
- * entere de la jugada.
- */
 exports.ejecutarClausulazo = onCall(OPCIONES, async (request) => {
   const emailAtacante = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
@@ -150,9 +111,9 @@ exports.ejecutarClausulazo = onCall(OPCIONES, async (request) => {
     throw new HttpsError('failed-precondition', 'No tienes presupuesto suficiente.')
   }
 
-  /* La carta cambia de manos con `equipado: false`, `clausulaInvertida: 0` y
-   * una nueva `fechaAdquisicion`: el nuevo dueño tiene que decidir si la
-   * equipa y arranca su propio periodo de gracia. */
+  // La carta cambia de manos con equipado:false, clausulaInvertida:0 y nueva
+  // fechaAdquisicion: el nuevo dueño decide si la equipa y arranca su propio
+  // periodo de gracia.
   const garajePropio = datosPropio.garaje || {}
   añadirCartaAGaraje(garajePropio, {
     ...carta,

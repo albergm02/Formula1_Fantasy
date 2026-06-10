@@ -1,18 +1,18 @@
 const BONUS_EQUIPO_COMPLETO = 0.1
 const BONUS_COMBO_VARIANTE = 0.05
 
-/**
- * Calcula los bonus de sinergia aplicables al garaje del jugador.
- * @param {{ coche: Object|null, pilotos: Array, potenciadores: Array }} garaje
- * @returns {{ sinergias: Array, multiplicadorTotal: number }}
- */
+function obtenerCocheEquipado(garaje) {
+  if (garaje.coches) {
+    return garaje.coches.find(function (c) {
+      return c.equipado
+    })
+  }
+  return garaje.coche || null
+}
+
 function calcularSinergias(garaje) {
   const sinergias = []
-  const coche = garaje.coches
-    ? garaje.coches.find(function (c) {
-        return c.equipado
-      })
-    : garaje.coche || null
+  const coche = obtenerCocheEquipado(garaje)
   const pilotos = (garaje.pilotos || []).filter(function (p) {
     return p.equipado !== false
   })
@@ -48,12 +48,6 @@ function calcularSinergias(garaje) {
   return { sinergias, multiplicadorTotal }
 }
 
-/**
- * Aplica el multiplicador de sinergia a los puntos base.
- * @param {number} puntosBase
- * @param {number} multiplicador
- * @returns {number}
- */
 function aplicarSinergia(puntosBase, multiplicador) {
   return Math.round(puntosBase * multiplicador)
 }

@@ -14,10 +14,6 @@ const storeAutenticacion = usarStoreAutenticacion()
 const cargandoReenvio = ref(false)
 const cargandoComprobacion = ref(false)
 
-/**
- * Reenvía el correo de verificación al usuario actual.
- * Firebase impone un límite de intentos, así que capturamos el error de cuota.
- */
 const reenviarCorreo = async () => {
     cargandoReenvio.value = true
     try {
@@ -49,10 +45,6 @@ const reenviarCorreo = async () => {
     }
 }
 
-/**
- * Recarga el estado del usuario desde Firebase para comprobar si ya verificó.
- * Si el correo está verificado, redirige a /ligas.
- */
 const comprobarVerificacion = async () => {
     cargandoComprobacion.value = true
     try {
@@ -74,9 +66,6 @@ const comprobarVerificacion = async () => {
     }
 }
 
-/**
- * Cierra la sesión y redirige al login.
- */
 const salir = async () => {
     await cerrarSesion()
     router.push('/')

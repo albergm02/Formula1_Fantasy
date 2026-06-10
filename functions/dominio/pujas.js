@@ -1,18 +1,5 @@
-/**
- * Lógica pura de resolución de pujas de un mercado.
- * Aislada en su propio módulo para poder testarla sin depender de Firestore.
- * @module dominio/pujas
- */
-
-/**
- * A partir de la lista de pujas registradas en un mercado, devuelve un mapa
- * con la puja ganadora de cada carta. La ganadora es siempre la de mayor
- * cantidad; si dos pujas empatan en cantidad gana la primera registrada para
- * mantener un comportamiento determinista.
- *
- * @param {Array<{ idCarta: string, cantidad: number }>} pujas
- * @returns {Object<string, Object>} Mapa { idCarta: pujaGanadora }
- */
+// La ganadora es la puja de mayor cantidad. En caso de empate gana la primera
+// registrada, lo que mantiene un comportamiento determinista.
 function seleccionarPujasGanadoras(pujas) {
   const pujasPorCarta = {}
   for (const puja of pujas) {

@@ -26,22 +26,15 @@ onMounted(async () => {
     await storeGaraje.cargarEquipo(ruta.query.liga)
   }
 
-  /* Carga el mercado activo de la liga desde Firestore e inicia la cuenta atrás */
   if (idLiga) {
     await storeMercado.inicializarMercado(idLiga)
   }
 })
 
-/** Limpia la cuenta atrás al abandonar la vista */
 onUnmounted(() => {
   storeMercado.detenerCuentaAtras()
 })
 
-/**
- * Gestiona la puja de un usuario sobre una carta del mercado.
- * Delega la lógica de negocio al store y notifica el resultado al usuario.
- * @param {{ carta: Object, cantidad: number }} payload - Carta y cantidad de la puja.
- */
 const manejarPuja = async ({ carta, cantidad }) => {
   const resultado = await storeMercado.pujarPorCarta(carta, cantidad)
 
@@ -52,10 +45,6 @@ const manejarPuja = async ({ carta, cantidad }) => {
   }
 }
 
-/**
- * Elimina la puja del usuario sobre una carta del mercado.
- * @param {Object} carta - La carta cuya puja se elimina.
- */
 const manejarEliminarPuja = async (carta) => {
   const resultado = await storeMercado.eliminarPujaCarta(carta)
 
@@ -67,31 +56,21 @@ const manejarEliminarPuja = async (carta) => {
 }
 </script>
 
-<!-------------------------------------------------------------------------------------------------------------------------->
-
-<!-------------------------------------------------------TEMPLATE------------------------------------------------------------->
-
-<!-------------------------------------------------------------------------------------------------------------------------->
-
 <template>
   <Cabecera />
 
   <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-20 p-4 gap-6">
 
-    <!-- Estado de carga -->
     <div v-if="storeMercado.cargandoMercado" class="flex justify-center items-center py-20">
       <i class="pi pi-spin pi-spinner text-3xl text-zinc-400"></i>
     </div>
 
-    <!-- Sin mercado abierto -->
     <div v-else-if="!storeMercado.hayMercadoAbierto" class="flex flex-col items-center gap-3 py-20 text-zinc-400">
       <p class="text-sm">No hay mercado abierto en este momento.</p>
     </div>
 
-    <!-- Mercado activo -->
     <template v-else>
 
-      <!-- Cuenta atrás hasta el cierre -->
       <section class="flex items-center justify-between bg-zinc-900 border border-zinc-700 px-4 py-3">
         <div class="flex items-center gap-2">
           <span class="text-xs uppercase tracking-widest text-zinc-300">Cierre del mercado</span>

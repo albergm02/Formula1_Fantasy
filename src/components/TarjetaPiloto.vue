@@ -64,21 +64,17 @@ const confirmarEliminarPuja = () => {
     <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
 
-        <!-- Imagen de fondo completa -->
         <img v-if="props.piloto.imagen" :src="props.piloto.imagen" :alt="props.piloto.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Pujas arriba a la derecha -->
         <div v-if="modoMercado && totalPujas > 0"
           class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
           <i class="pi pi-users text-[8px] text-zinc-300"></i>
           <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
         </div>
 
-        <!-- Overlay de info (lado derecho, siempre visible) -->
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
 
-          <!-- Header: nombre + equipo -->
           <div>
             <div class="flex flex-col min-w-0">
               <span class="text-sm font-black text-white uppercase">
@@ -90,9 +86,7 @@ const confirmarEliminarPuja = () => {
             </div>
           </div>
 
-          <!-- Etiquetas de precio y clase + botones -->
           <div class="flex flex-col gap-1.5">
-            <!-- Precio y clase encima del botón -->
             <div class="flex items-center justify-between gap-1">
               <div v-if="modoMercado" class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
                 <span class="text-[10px] font-black text-emerald-400">{{ Number(props.piloto.precio).toFixed(2) }}
@@ -106,7 +100,6 @@ const confirmarEliminarPuja = () => {
               </span>
             </div>
 
-            <!-- Botones: Info + Pujar -->
             <div v-if="modoMercado" class="flex gap-2">
               <button @click="mostrarDetalles = true"
                 class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
@@ -122,7 +115,6 @@ const confirmarEliminarPuja = () => {
               </button>
             </div>
 
-            <!-- Botón detalles fuera de mercado -->
             <button v-else @click="mostrarDetalles = true"
               class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
               <i class="pi pi-info-circle text-white text-xs mr-2"></i>
@@ -134,12 +126,10 @@ const confirmarEliminarPuja = () => {
       </div>
     </div>
 
-    <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.piloto.nombre" modal
       :style="{ width: '90vw', maxWidth: '400px' }">
       <div class="space-y-3">
 
-        <!-- Puntuacion ponderada -->
         <div class="px-3 py-2.5 bg-zinc-800 border border-zinc-700 flex items-center justify-between">
           <p class="text-sm font-black text-white uppercase">Puntuacion Base</p>
           <span class="text-lg font-black" :style="{ color: props.piloto.colorVariante }">
@@ -147,7 +137,6 @@ const confirmarEliminarPuja = () => {
           </span>
         </div>
 
-        <!-- Barras de atributos -->
         <div class="px-3 py-2.5 bg-zinc-800 border border-zinc-700 space-y-2">
           <p class="text-sm font-black text-sky-400 uppercase leading-tight mb-2">Atributos del piloto</p>
           <div v-for="barra in barrasAtributos" :key="barra.nombre" class="space-y-0.5">
@@ -165,7 +154,6 @@ const confirmarEliminarPuja = () => {
           </div>
         </div>
 
-        <!-- Reglas de la variante -->
         <div v-if="reglasVariante.length" class="px-3 py-2.5 bg-zinc-800 border border-zinc-700">
           <p class="text-sm font-black uppercase leading-tight" :style="{ color: props.piloto.colorVariante }">
             <i class="pi mr-1" :class="props.piloto.iconoVariante"></i>
@@ -182,7 +170,6 @@ const confirmarEliminarPuja = () => {
       </div>
     </Dialog>
 
-    <!-- Dialog de puja -->
     <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
       :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">

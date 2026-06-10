@@ -28,10 +28,6 @@ const dialogoRivalVisible = ref(false)
 const participacionRival = ref(null)
 const cargandoRival = ref(false)
 
-/**
- * Carga la clasificación de la liga activa delegando al store.
- * @returns {Promise<void>}
- */
 async function cargarClasificacion() {
   cargando.value = true
 
@@ -49,10 +45,6 @@ async function cargarClasificacion() {
   }
 }
 
-/**
- * Carga y muestra el garaje de un rival al hacer click en su fila del ranking.
- * @param {Object} jugador - Entrada del ranking con id, correo, nombre, puntos, presupuesto.
- */
 async function verEquipoRival(jugador) {
   const esUsuarioActual = jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion
   if (esUsuarioActual) return

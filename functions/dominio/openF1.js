@@ -1,43 +1,23 @@
-/**
- * Servicio de comunicación con OpenF1 — server-side (CommonJS).
- * Encapsula TODAS las llamadas HTTP a api.openf1.org para Cloud Functions.
- * Usa fetch nativo de Node 24.
- * @module dominio/openF1
- */
-
 const URL_BASE = 'https://api.openf1.org/v1'
 const { pilotosBase } = require('../data/catalogoBase')
 
-/* ─── Utilidad HTTP ─────────────────────────────────────────────────────── */
-
-/**
- * Realiza una petición GET a la API de OpenF1 y devuelve el JSON.
- * Reintenta automáticamente ante errores 429 (rate limit) con espera progresiva.
- * @param {string} ruta - Ruta relativa (ej. '/meetings?year=2026').
- * @returns {Promise<Array|Object>}
- */
+// Reintenta automáticamente ante 429 (rate limit) con espera progresiva 2s/4s/6s.
+// OpenF1 devuelve 404 con `{ detail: 'No results found.' }` en lugar de [];
+// se trata como ausencia de datos para que el llamador decida.
 async function consultarOpenF1(ruta) {
   const url = `${URL_BASE}${ruta}`
   const MAXIMO_REINTENTOS = 3
 
-  // solucion al error 429 Too Many Requests: reintentos con espera progresiva (2s, 4s, 6s)
   for (let intento = 0; intento <= MAXIMO_REINTENTOS; intento++) {
     const respuesta = await fetch(url)
 
     if (respuesta.status === 429 && intento < MAXIMO_REINTENTOS) {
       const esperaMs = (intento + 1) * 2000
-      await new Promise(function (resolve) {
-        setTimeout(resolve, esperaMs)
-      })
+      await new Promise((resolve) => setTimeout(resolve, esperaMs))
       continue
     }
 
-    // OpenF1 responde 404 con `{ detail: 'No results found.' }` cuando una
-    // consulta no produce registros (en lugar de un array vacío). Lo tratamos
-    // como ausencia de datos para que el llamador decida cómo continuar.
-    if (respuesta.status === 404) {
-      return []
-    }
+    if (respuesta.status === 404) return []
 
     if (!respuesta.ok) {
       throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
@@ -47,100 +27,46 @@ async function consultarOpenF1(ruta) {
   }
 }
 
-/* ─── 1. Grandes Premios finalizados ──────────────────────── */
-
-/**
- * Obtiene TODOS los Grandes Premios finalizados del año, ordenados del más
- * reciente al más antiguo. Útil para iterar hacia atrás si alguno no tiene
- * datos disponibles (GP cancelado, sin /position en OpenF1, etc.).
- * @param {number} anio - Temporada a consultar.
- * @returns {Promise<Array<Object>>}
- */
 async function obtenerGranPremiosFinalizados(anio) {
   const reuniones = await consultarOpenF1(`/meetings?year=${anio}`)
   const ahora = new Date()
 
   return reuniones
-    .filter(function (reunion) {
-      return new Date(reunion.date_end) < ahora
-    })
-    .sort(function (a, b) {
-      return new Date(b.date_end) - new Date(a.date_end)
-    })
+    .filter((reunion) => new Date(reunion.date_end) < ahora)
+    .sort((a, b) => new Date(b.date_end) - new Date(a.date_end))
 }
 
-/**
- * Localiza el "Gran Premio en juego" para una temporada concreta: el meeting
- * más reciente cuya fecha de inicio ya ha pasado (esté en curso o terminado).
- *
- * Lo uso desde el bloqueo de jornada para responder en servidor a la pregunta
- * "¿qué GP está condicionando ahora mismo el equipo del usuario?". Si todavía
- * no ha arrancado el primer GP de la temporada (pretemporada), devuelvo
- * `null` y el llamador interpreta que no hay nada que bloquear.
- *
- * @param {number} anio - Temporada a consultar.
- * @returns {Promise<number|null>} `meeting_key` del GP en juego o `null`.
- */
+// Meeting más reciente cuya fecha de inicio ya ha pasado (en curso o terminado).
+// Devuelve null en pretemporada para que el llamador interprete que no hay
+// nada que bloquear.
 async function obtenerMeetingKeyEnJuego(anio) {
   const reuniones = await consultarOpenF1(`/meetings?year=${anio}`)
   const ahora = new Date()
 
   const enJuego = reuniones
-    .filter(function (reunion) {
-      return new Date(reunion.date_start) <= ahora
-    })
-    .sort(function (a, b) {
-      return new Date(b.date_start) - new Date(a.date_start)
-    })[0]
+    .filter((reunion) => new Date(reunion.date_start) <= ahora)
+    .sort((a, b) => new Date(b.date_start) - new Date(a.date_start))[0]
 
   return enJuego ? enJuego.meeting_key : null
 }
 
-/* ─── 2. Sesiones de un Gran Premio ─────────────────────────────────────── */
-
-/**
- * Obtiene todas las sesiones de un Gran Premio.
- * @param {number} meetingKey - Clave de la reunión.
- * @returns {Promise<Array>} Lista de sesiones con session_key, session_name, session_type…
- */
 async function obtenerSesiones(meetingKey) {
   return consultarOpenF1(`/sessions?meeting_key=${meetingKey}`)
 }
 
-/**
- * Filtra la sesión de Qualifying de una lista de sesiones.
- * @param {Array} sesiones - Lista devuelta por obtenerSesiones.
- * @returns {Object|null}
- */
 function extraerSesionQualy(sesiones) {
-  const qualy = sesiones.filter(function (s) {
-    return s.session_name === 'Qualifying'
-  })
+  const qualy = sesiones.filter((s) => s.session_name === 'Qualifying')
   return qualy.length > 0 ? qualy[qualy.length - 1] : null
 }
 
-/**
- * Filtra la sesión de Carrera de una lista de sesiones.
- * @param {Array} sesiones - Lista devuelta por obtenerSesiones.
- * @returns {Object|null}
- */
 function extraerSesionCarrera(sesiones) {
-  const carrera = sesiones.filter(function (s) {
-    return s.session_name === 'Race'
-  })
+  const carrera = sesiones.filter((s) => s.session_name === 'Race')
   return carrera.length > 0 ? carrera[carrera.length - 1] : null
 }
 
-/* ─── 3. Resultados de sesión ───────────────────────────────────────────── */
-
-/**
- * Obtiene los resultados oficiales de una sesión usando el endpoint dedicado
- * `/session_result` de OpenF1, que publica las posiciones finales tras la
- * sesión (con sanciones, DNF, DNS y DSQ aplicados). Reemplaza al obsoleto
- * uso de `/position`, que emite eventos en vivo y no garantiza el orden.
- * @param {number} sessionKey - Clave de la sesión.
- * @returns {Promise<Object>} Mapa { numeroPiloto → posicionFinal }.
- */
+// Uso `/session_result` (posiciones finales con sanciones, DNF, DNS, DSQ
+// aplicados) en lugar del obsoleto `/position`, que emite eventos en vivo y
+// no garantiza el orden final.
 async function obtenerResultadosSesion(sessionKey) {
   const resultados = await consultarOpenF1(`/session_result?session_key=${sessionKey}`)
   const posicionFinal = {}
@@ -156,25 +82,11 @@ async function obtenerResultadosSesion(sessionKey) {
   return posicionFinal
 }
 
-/**
- * Obtiene los registros completos de `/session_result` (incluye dnf, dns, dsq,
- * duración, número de vueltas) para análisis avanzado de la sesión.
- * @param {number} sessionKey - Clave de la sesión.
- * @returns {Promise<Array<Object>>}
- */
 async function obtenerResultadosCompletosSesion(sessionKey) {
   return consultarOpenF1(`/session_result?session_key=${sessionKey}`)
 }
 
-/* ─── 4. Parrilla de salida ─────────────────────────────────────────────── */
-
-/**
- * Obtiene la parrilla oficial de salida de una carrera usando el endpoint
- * dedicado `/starting_grid` de OpenF1, que devuelve directamente la posición
- * de cada piloto al apagado de luces (con sanciones aplicadas).
- * @param {number} sessionKey - Clave de la sesión de carrera.
- * @returns {Promise<Object>} Mapa { numeroPiloto → posicionSalida }.
- */
+// `/starting_grid` ya incluye sanciones aplicadas al apagado de luces.
 async function obtenerParrillaSalida(sessionKey) {
   const entradas = await consultarOpenF1(`/starting_grid?session_key=${sessionKey}`)
   const parrilla = {}
@@ -189,24 +101,12 @@ async function obtenerParrillaSalida(sessionKey) {
   return parrilla
 }
 
-/* ─── 5. Condiciones de carrera (clima + caos) ──────────────────────────── */
-
-/**
- * Agrega las condiciones relevantes de una sesión de carrera:
- * - Si llovió durante la sesión.
- * - Número de Safety Cars y Virtual Safety Cars activados.
- * - Número de abandonos (DNFs / retiros).
- * @param {number} sessionKey - Clave de la sesión.
- * @returns {Promise<{llovio: boolean, numeroDNFs: number, numeroSafetyCarActivos: number, numeroVirtualSafetyCarActivos: number}>}
- */
 async function obtenerCondicionesCarrera(sessionKey) {
   const datosClima = await consultarOpenF1(`/weather?session_key=${sessionKey}`)
   const datosControlCarrera = await consultarOpenF1(`/race_control?session_key=${sessionKey}`)
   const resultadosCompletos = await obtenerResultadosCompletosSesion(sessionKey)
 
-  const llovio = datosClima.some(function (lectura) {
-    return lectura.rainfall === true || lectura.rainfall === 1
-  })
+  const llovio = datosClima.some((lectura) => lectura.rainfall === true || lectura.rainfall === 1)
 
   let numeroSafetyCarActivos = 0
   let numeroVirtualSafetyCarActivos = 0
@@ -243,14 +143,6 @@ async function obtenerCondicionesCarrera(sessionKey) {
   return { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }
 }
 
-/* ─── 6. Adelantamientos reales (Remontador) ────────────────────────────── */
-
-/**
- * Obtiene el número de adelantamientos realizados y recibidos por cada piloto
- * en una sesión. Usa el endpoint /overtakes de OpenF1.
- * @param {number} sessionKey - Clave de la sesión de carrera.
- * @returns {Promise<Object>} Mapa { numeroPiloto → { realizados, recibidos } }.
- */
 async function obtenerAdelantamientosPorPiloto(sessionKey) {
   const adelantamientos = await consultarOpenF1(`/overtakes?session_key=${sessionKey}`)
   const conteo = {}
@@ -272,15 +164,6 @@ async function obtenerAdelantamientosPorPiloto(sessionKey) {
   return conteo
 }
 
-/* ─── 7. Datos de stints (Estratega) ────────────────────────────────────── */
-
-/**
- * Obtiene las métricas de gestión de stints de cada piloto en una sesión.
- * Calcula el número de pit stops y el porcentaje de vueltas en el stint más largo.
- * Usa el endpoint /stints de OpenF1.
- * @param {number} sessionKey - Clave de la sesión de carrera.
- * @returns {Promise<Object>} Mapa { numeroPiloto → { numeroPitStops, porcentajeStintMaximo } }
- */
 async function obtenerDatosStintsPorPiloto(sessionKey) {
   const stints = await consultarOpenF1(`/stints?session_key=${sessionKey}`)
   const stintsPorPiloto = {}
@@ -323,17 +206,9 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
   return resultado
 }
 
-/* ─── 7-bis. Paradas en boxes reales (endpoint /pit) ──────────────────── */
-
-/**
- * Cuenta las paradas reales en boxes de cada piloto en una sesión usando el
- * endpoint `/pit` de OpenF1 (un registro por cada paso por el pit lane con
- * `pit_duration` válido). Más fiable que inferirlo desde /stints, donde un
- * cambio de compuesto bajo bandera roja o un stint técnico no implica parada
- * real.
- * @param {number} sessionKey - Clave de la sesión de carrera.
- * @returns {Promise<Object<string, number>>} Mapa { numeroPiloto → numeroPitStops }.
- */
+// Uso `/pit` (un registro por paso por el pit lane con pit_duration válido)
+// porque es más fiable que inferirlo desde /stints, donde un cambio de
+// compuesto bajo bandera roja no implica parada real.
 async function obtenerParadasPorPiloto(sessionKey) {
   const paradas = await consultarOpenF1(`/pit?session_key=${sessionKey}`)
   const conteo = {}
@@ -348,15 +223,6 @@ async function obtenerParadasPorPiloto(sessionKey) {
   return conteo
 }
 
-/* ─── 8. Orquestación: actuación completa de un GP ─────────────────────── */
-
-/**
- * Recopila todos los datos necesarios de un GP finalizado para calcular factores.
- * Devuelve actuaciones por piloto (posición qualy, posición carrera, posición salida)
- * y las condiciones globales de la carrera.
- * @param {number} meetingKey - Clave de la reunión del GP.
- * @returns {Promise<{actuacionesPorPiloto: Object, condiciones: Object}>}
- */
 async function recopilarDatosGranPremio(meetingKey) {
   const sesiones = await obtenerSesiones(meetingKey)
   const sesionQualy = extraerSesionQualy(sesiones)
@@ -379,7 +245,7 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const actuacionesPorPiloto = {}
 
-  // 1º DNFs/DNS/DSQ desde resultados completos (sin posición final).
+  // DNFs/DNS/DSQ desde resultados completos (sin posición final).
   for (const fila of resultadosCompletosCarrera) {
     const numeroPiloto = fila.driver_number
     if (numeroPiloto == null) continue
@@ -400,7 +266,7 @@ async function recopilarDatosGranPremio(meetingKey) {
     }
   }
 
-  // 2º Pilotos con posición final válida.
+  // Pilotos con posición final válida.
   for (const numeroPiloto in resultadosCarrera) {
     if (Object.prototype.hasOwnProperty.call(resultadosCarrera, numeroPiloto)) {
       const stintsPiloto = datosStints[numeroPiloto] || { porcentajeStintMaximo: 0 }
@@ -420,7 +286,7 @@ async function recopilarDatosGranPremio(meetingKey) {
     }
   }
 
-  // 3º Pilotos del catalogo canonico ausentes en /session_result — marcar como DNF.
+  // Pilotos del catálogo canónico ausentes en /session_result: se marcan DNF.
   for (const piloto of pilotosBase) {
     const numeroPiloto = piloto.numero
     if (actuacionesPorPiloto[numeroPiloto]) continue

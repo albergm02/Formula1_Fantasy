@@ -1,18 +1,10 @@
-/**
- * Funciones puras de cálculo de factores y puntuación de jornada.
- * Réplica cliente de `functions/dominio/puntuacion.js` para poder simular,
- * en la vista de resultados, qué habría puntuado un piloto bajo cada variante.
- * @module utils/puntuacion
- */
+// Réplica cliente del cálculo de factores y puntos del servidor
+// (functions/dominio/puntuacion.js). Permite simular en la vista de resultados
+// qué habría puntuado un piloto bajo cada variante de carta.
 
-/**
- * Calcula el factor de jornada de un piloto según su variante,
- * la actuación real (datos de OpenF1) y las condiciones de carrera.
- * @param {Object} actuacion - { posicionQualy, posicionCarrera, posicionSalida, numeroAdelantos, numeroPitStops, porcentajeStintMaximo }
- * @param {Object} condiciones - { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }
- * @param {string} variante - 'qualy' | 'carrera' | 'todo_terreno' | 'remontador' | 'estratega' | 'base'
- * @returns {number}
- */
+const FACTOR_MINIMO = 0.5
+const FACTOR_MAXIMO = 1.5
+
 export function calcularFactorJornada(actuacion, condiciones, variante) {
   if (variante === 'qualy') return acotarFactor(calcularFactorQualy(actuacion))
   if (variante === 'carrera') return acotarFactor(calcularFactorCarrera(actuacion))
@@ -35,8 +27,9 @@ export function calcularFactorJornada(actuacion, condiciones, variante) {
   return acotarFactor((factorQ + factorC + factorT) / 3)
 }
 
-const FACTOR_MINIMO = 0.5
-const FACTOR_MAXIMO = 1.5
+export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
+  return Math.max(0, Math.round(puntuacionBase * factorJornada))
+}
 
 function acotarFactor(factor) {
   if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
@@ -44,31 +37,11 @@ function acotarFactor(factor) {
   return Math.round(factor * 100) / 100
 }
 
-/**
- * Indica si el piloto no tuvo una actuación válida en carrera: no salió (N/S),
- * abandonó (ABN) o fue descalificado (DESC). En ese caso las variantes Todo
- * Terreno, Remontador y Estratega no premian su actuación y reciben el factor
- * mínimo, porque ninguna de las tres tiene sentido sin haber completado la
- * carrera bajo condiciones reales.
- * @param {{ dnf?: boolean, dns?: boolean, dsq?: boolean }} actuacion
- * @returns {boolean}
- */
+// DNS/ABN/DSQ anulan Todo Terreno, Remontador y Estratega: ninguna tiene
+// sentido sin haber completado la carrera bajo condiciones reales.
 function pilotoSinActuacionValida(actuacion) {
   return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq)
 }
-
-/**
- * Convierte la puntuación base del piloto y el factor de jornada en puntos finales.
- * Sin reescalado: el resultado es directamente puntuacionBase × factorJornada.
- * @param {number} puntuacionBase
- * @param {number} factorJornada
- * @returns {number}
- */
-export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
-  return Math.max(0, Math.round(puntuacionBase * factorJornada))
-}
-
-/* ─── Factores por variante ─────────────────────────────────────────────── */
 
 function calcularFactorQualy({ posicionQualy }) {
   return resolverFactorPosicionQualy(posicionQualy)
@@ -93,14 +66,8 @@ function calcularFactorTodoTerreno({
   return Math.round((factorBase + bonusCaos) * 100) / 100
 }
 
-/**
- * Factor basado en el diferencial de adelantamientos: realizados menos
- * recibidos. Cada unidad de diferencial vale 0.1 puntos sobre la base 1.0
- * (ej: +5 → 1.5, 0 → 1.0, -5 → 0.5). El acotado final entre 0.5 y 1.5 lo
- * aplica `acotarFactor` para mantener todas las variantes en el mismo rango.
- * @param {{ numeroAdelantos: number, numeroVecesAdelantado: number }} actuacion
- * @returns {number}
- */
+// Diferencial de adelantamientos: cada unidad vale 0.1 sobre la base 1.0
+// (ej: +5 → 1.5, 0 → 1.0, -5 → 0.5). El acotado final lo aplica acotarFactor.
 function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
   const diferencial = (numeroAdelantos || 0) - (numeroVecesAdelantado || 0)
   return 1 + diferencial * 0.1
@@ -117,8 +84,6 @@ function calcularFactorEstrategia({
   factor += resolverBonusPosicionEstratega(posicionCarrera)
   return factor
 }
-
-/* ─── Tablas de resolución ──────────────────────────────────────────────── */
 
 function resolverFactorPosicionQualy(posicion) {
   if (posicion <= 3) return 1.5

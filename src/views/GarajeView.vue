@@ -31,23 +31,12 @@ const { jornadaIniciada, mensajeBloqueoJornada } = usarBloqueoJornada()
 const notificarBloqueoJornada = () => {
   notificacion.add({ severity: 'warn', summary: 'Jornada sin procesar', detail: mensajeBloqueoJornada, life: 4000 })
 }
-
 const dialogoProteccion = ref(false)
 const elementoProtegiendo = ref(null)
 const cantidadInversion = ref(1)
 
-/**
- * Valor que el usuario recupera al vender una carta (90 % del precio dinámico).
- * @param {number} precio
- * @returns {number}
- */
 const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
 
-/**
- * Formatea el precio actual de mercado de una carta del garaje.
- * @param {Object} carta - Carta del garaje (piloto o coche).
- * @returns {string} Precio formateado con dos decimales (ej. "12.45").
- */
 const formatearPrecioActual = (carta) => Number(carta?.precio ?? 0).toFixed(2)
 
 onMounted(async () => {
@@ -60,11 +49,6 @@ onMounted(async () => {
   }
 })
 
-/**
- * Solicita confirmación antes de vender el coche del garaje.
- * Bloquea la venta si la jornada aún no se ha procesado y el chasis está en uso.
- * @param {Object} coche - El objeto coche que se desea vender.
- */
 const confirmarVentaCoche = (coche) => {
   if (jornadaIniciada.value && coche.equipado) {
     notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: 'No puedes vender un chasis alineado mientras la jornada no se haya procesado.', life: 5000 })
@@ -89,11 +73,6 @@ const confirmarVentaCoche = (coche) => {
   })
 }
 
-/**
- * Solicita confirmación antes de rescindir el contrato de un piloto.
- * Bloquea la venta si la jornada aún no se ha procesado y el piloto está alineado como titular.
- * @param {Object} piloto - El objeto piloto que se desea despedir.
- */
 const confirmarVentaPiloto = (piloto) => {
   if (jornadaIniciada.value && piloto.equipado) {
     notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: 'No puedes despedir a un piloto titular mientras la jornada no se haya procesado.', life: 5000 })
@@ -118,10 +97,6 @@ const confirmarVentaPiloto = (piloto) => {
   })
 }
 
-/**
- * Alterna el estado de instalación de un potenciador (instalar / desinstalar).
- * @param {string} idInstancia - El identificador único de la instancia del potenciador.
- */
 const alternarInstalacionPotenciador = async (idInstancia) => {
   if (jornadaIniciada.value) {
     notificarBloqueoJornada()
@@ -133,10 +108,6 @@ const alternarInstalacionPotenciador = async (idInstancia) => {
   }
 }
 
-/**
- * Alterna el estado equipado de un coche en el garaje.
- * @param {number} instanciaId - instancia_id del coche.
- */
 const alternarEquipoCoche = async (instanciaId) => {
   if (jornadaIniciada.value) {
     notificarBloqueoJornada()
@@ -148,10 +119,6 @@ const alternarEquipoCoche = async (instanciaId) => {
   }
 }
 
-/**
- * Alterna el estado equipado/suplente de un piloto en el garaje.
- * @param {number} instanciaId - instancia_id del piloto.
- */
 const alternarEquipoPiloto = async (instanciaId) => {
   if (jornadaIniciada.value) {
     notificarBloqueoJornada()
@@ -163,19 +130,12 @@ const alternarEquipoPiloto = async (instanciaId) => {
   }
 }
 
-/**
- * Abre el diálogo de inversión en cláusula para el elemento seleccionado.
- * @param {Object} elemento - Carta del garaje a proteger.
- */
 const abrirDialogoProteccion = (elemento) => {
   elementoProtegiendo.value = elemento
   cantidadInversion.value = 1
   dialogoProteccion.value = true
 }
 
-/**
- * Confirma la inversión en cláusula y notifica el resultado.
- */
 const confirmarInversionClausula = async () => {
   const resultado = await storeGaraje.invertirEnClausula(
     elementoProtegiendo.value.instancia_id,
@@ -196,7 +156,6 @@ const confirmarInversionClausula = async () => {
 
   <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-24 px-3 gap-6">
 
-    <!-- Mensaje de bloqueo de jornada en caso de que ya haya comenzado -->
     <div v-if="jornadaIniciada"
       class="px-3 py-2 bg-yellow-900/20 text-[10px] font-black uppercase tracking-widest text-yellow-400 text-center">
       {{ mensajeBloqueoJornada }}
@@ -255,7 +214,6 @@ const confirmarInversionClausula = async () => {
       </div>
     </section>
 
-    <!-- ─────────────── PILOTOS ─────────────── -->
     <section>
       <header class="flex items-center gap-2 mb-2">
         <div class="flex-1 h-px bg-zinc-700"></div>
@@ -270,7 +228,6 @@ const confirmarInversionClausula = async () => {
           class="flex flex-col bg-[#121218] border border-zinc-800">
           <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
 
-          <!-- Información del piloto -->
           <div class="flex flex-col gap-2 px-3 py-2 border-t border-zinc-800/70">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
               <span class="text-zinc-400">
@@ -310,7 +267,6 @@ const confirmarInversionClausula = async () => {
       </div>
     </section>
 
-    <!-- ─────────────── POTENCIADORES ─────────────── -->
     <section>
       <header class="flex items-center gap-2 mb-2 px-1">
         <div class="flex-1 h-px bg-zinc-700"></div>
@@ -343,7 +299,6 @@ const confirmarInversionClausula = async () => {
       </div>
     </section>
 
-    <!-- Diálogo de inversión en cláusula -->
     <Dialog v-model:visible="dialogoProteccion" header="Proteger Carta" modal
       :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
       :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"

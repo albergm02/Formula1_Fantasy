@@ -26,11 +26,6 @@ const confirmar = useConfirm()
 
 const { jornadaIniciada, mensajeBloqueoJornada } = usarBloqueoJornada()
 
-/**
- * Determina si el botón de fichar por cláusula está deshabilitado.
- * @param {Object} elemento - Carta del garaje rival.
- * @returns {boolean}
- */
 const esFichajeDeshabilitado = (elemento) => {
     if (jornadaIniciada.value) return true
     if (estaEnPeriodoDeGracia(elemento)) return true
@@ -41,10 +36,6 @@ const esFichajeDeshabilitado = (elemento) => {
     return false
 }
 
-/**
- * Solicita confirmación antes de ejecutar la cláusula de rescisión de una carta rival.
- * @param {Object} elemento - Carta del garaje rival a fichar.
- */
 const confirmarEjecucionClausula = (elemento) => {
     if (jornadaIniciada.value) {
         notificacion.add({ severity: 'warn', summary: 'Jornada sin procesar', detail: mensajeBloqueoJornada, life: 4000 })
@@ -93,7 +84,6 @@ const confirmarEjecucionClausula = (elemento) => {
             </div>
         </div>
 
-        <!-- Resumen última jornada -->
         <section v-if="participacion.ultimaJornada" class="flex flex-col gap-2 p-3 bg-[#121218] border border-zinc-800">
             <div class="flex items-center justify-between">
                 <div class="flex flex-col">

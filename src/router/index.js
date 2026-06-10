@@ -102,7 +102,7 @@ router.beforeEach(async (to) => {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
   }
 
-  // En rutas de admin recargamos el perfil para asegurar el flag actualizado.
+  // Releo el perfil en cada navegación admin para tener el flag al día.
   if (usuario && to.meta.requiresAdmin) {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
   }
@@ -115,7 +115,7 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // El correo sin verificar bloquea el acceso a todo salvo a la propia vista de verificación.
+  // El correo sin verificar bloquea el acceso salvo a la propia vista de verificación.
   const rutaVerificacion = to.name === 'verificar-correo'
   if (usuario && !usuario.emailVerified && !rutaVerificacion) {
     return { name: 'verificar-correo' }
@@ -146,8 +146,7 @@ router.beforeEach(async (to) => {
     return { name: 'login' }
   }
 
-  // Las rutas que requieren liga necesitan que el usuario tenga al menos una;
-  // si las ligas no están cargadas todavía, las cargamos antes de continuar.
+  // Las rutas con `requiresLiga` necesitan al menos una liga cargada.
   if (to.meta.requiresLiga) {
     if (
       storeAutenticacion.usuarioActual.idsLigas.length > 0 &&

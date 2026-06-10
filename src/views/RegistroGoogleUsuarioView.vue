@@ -29,7 +29,6 @@ const valoresInicialesFormulario = ref({
   username: '',
 })
 
-/* Manejo de registro, aquí se completa el perfil del usuario de Google */
 const handleCompletarPerfil = async ({ valid, values }) => {
   if (!valid) return
   const nombreNormalizado = values.username.trim()
@@ -54,7 +53,6 @@ const handleCompletarPerfil = async ({ valid, values }) => {
   }
 }
 
-/* Si el usuario decide cancelar el proceso de completar perfil, se cierra la sesión de Google y se redirige al inicio */
 const cancelarRegistroConGoogle = async () => {
   if (cargando.value) return
 
@@ -67,10 +65,8 @@ const cancelarRegistroConGoogle = async () => {
 <template>
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
-    <!-- Tarjeta principal -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/20 backdrop-blur-md border border-zinc-800">
 
-      <!-- Encabezado con logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -80,7 +76,6 @@ const cancelarRegistroConGoogle = async () => {
         </div>
       </template>
 
-      <!-- Contenido del formulario -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
           :resolver="esquemaValidacion" @submit="handleCompletarPerfil">

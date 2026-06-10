@@ -43,12 +43,6 @@ const valoresInicialesFormulario = ref({
   confirmPassword: '',
 })
 
-/**
- * Gestiona el envío del formulario de registro.
- * Crea la cuenta en Firebase Auth, envía el correo de verificación,
- * crea el perfil en Firestore y redirige a la pantalla de verificación.
- * @param {{ valid: boolean, values: { username: string, email: string, password: string } }} formulario
- */
 const handleRegistro = async ({ valid, values }) => {
   if (!valid) return
   const correoNormalizado = values.email.trim()
@@ -81,10 +75,8 @@ const handleRegistro = async ({ valid, values }) => {
 <template>
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
-    <!-- Tarjeta principal de registro -->
     <Card class="w-full max-w-md !bg-black/20 backdrop-blur-md border border-zinc-800">
 
-      <!-- Encabezado con logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -94,12 +86,10 @@ const handleRegistro = async ({ valid, values }) => {
         </div>
       </template>
 
-      <!-- Contenido del formulario -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
           :resolver="esquemaValidacion" @submit="handleRegistro">
 
-          <!-- Campo: Nombre de usuario -->
           <div class="flex flex-col gap-1">
             <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de
               usuario</label>
@@ -110,7 +100,6 @@ const handleRegistro = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Campo: Email -->
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="Escribe aquí tu correo..."
@@ -120,7 +109,6 @@ const handleRegistro = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Campo: Contraseña -->
           <div class="flex flex-col gap-1">
             <label for="password"
               class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
@@ -132,7 +120,6 @@ const handleRegistro = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Campo: Confirmar Contraseña -->
           <div class="flex flex-col gap-1">
             <label for="confirmPassword"
               class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar Contraseña</label>
@@ -144,18 +131,15 @@ const handleRegistro = async ({ valid, values }) => {
             </Message>
           </div>
 
-          <!-- Mensaje de error de autenticación -->
           <Message v-if="errorAutenticacion" severity="error" :closable="false" class="mt-2 text-sm">
             {{ errorAutenticacion }}
           </Message>
 
-          <!-- Botones de acción -->
           <div class="flex flex-col gap-3 mt-4">
 
             <Button type="submit" label="CREAR EQUIPO" :loading="cargando"
               class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
 
-            <!-- Enlace a login -->
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿Ya tienes equipo? </span>
               <router-link to="/" class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843]">

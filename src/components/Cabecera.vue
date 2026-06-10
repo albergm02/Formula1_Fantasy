@@ -18,7 +18,6 @@ const manejarCerrarSesion = async () => {
     router.push({ name: 'login' })
 }
 
-// Si el usuario está dentro de una liga, vuelve a su panel; si no, al listado.
 const irADashboard = () => {
     const idLiga = storeGaraje.idLigaActiva || ruta.query.liga || null
     if (idLiga) {
@@ -42,7 +41,7 @@ const ocultarResumenEquipo = computed(() => {
                 <p v-if="!ocultarResumenEquipo" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ storeGaraje.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ Number(storeGaraje.presupuesto || 0).toFixed(2)
-                    }}M</span>
+                        }}M</span>
                     <span v-if="storeMercado.totalPujasComprometidas > 0" class="text-amber-400 font-bold">
                         (-{{ storeMercado.totalPujasComprometidas.toFixed(2) }}M)
                     </span>

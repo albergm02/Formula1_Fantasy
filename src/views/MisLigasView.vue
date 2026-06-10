@@ -43,18 +43,14 @@ onMounted(async () => {
   cargando.value = false
 })
 
-/* Abrir diálogo de opciones para la liga seleccionada */
 const abrirOpcionesLiga = (liga) => {
   ligaSeleccionada.value = liga
   dialogoOpcionesVisible.value = true
 }
 
-/* Manejar la creación de una nueva liga */
 const handleCrearLiga = async () => {
-  // Corto el nombre para eliminar espacios al inicio y al final por si acaso
   const nombreLigaNormalizado = nombreNuevaLiga.value.trim()
 
-  // Validaciones básicas de longitud del nombre
   if (nombreLigaNormalizado.length < 3) {
     notificacion.add({ severity: 'warn', summary: 'Nombre inválido', detail: 'El nombre debe tener al menos 3 carácteres.' })
     return
@@ -64,7 +60,6 @@ const handleCrearLiga = async () => {
     return
   }
 
-  // Llamo al store para crear la liga y manejo la respuesta
   const resultado = await storeLigas.crearLiga(nombreLigaNormalizado)
   if (resultado.success) {
     notificacion.add({ severity: 'success', summary: '¡Liga creada!', detail: resultado.message })
@@ -75,7 +70,6 @@ const handleCrearLiga = async () => {
   }
 }
 
-/* Manejar la acción de unirse a una liga mediante código de invitación */
 const handleUnirseLiga = async () => {
   const codigoUnionNormalizado = codigoUnion.value.trim().toUpperCase()
 
@@ -93,13 +87,11 @@ const handleUnirseLiga = async () => {
   }
 }
 
-/* Abrir la liga seleccionada y redirigir a la pantalla principal con la liga activa */
 const abrirLiga = (idLiga) => {
   storeLigas.idLigaActiva = idLiga
   router.push({ name: 'inicio', query: { liga: idLiga } })
 }
 
-/* Copiar el código de invitación de la liga al portapapeles y mostrar una notificación */
 async function copiarCodigoLiga(codigo) {
   await navigator.clipboard.writeText(codigo)
   notificacion.add({
@@ -110,7 +102,6 @@ async function copiarCodigoLiga(codigo) {
   })
 }
 
-/* Manejar la acción de abandonar la liga seleccionada con confirmación previa */
 const handleAbandonarLiga = () => {
   confirmar.require({
     message: `¿Estás seguro de que quieres abandonar la liga "${ligaSeleccionada.value.nombre}"?`,
@@ -133,7 +124,6 @@ const handleAbandonarLiga = () => {
   })
 }
 
-/* Abre el diálogo de gestión de participantes y carga la lista actualizada */
 const abrirGestionParticipantes = async () => {
   dialogoOpcionesVisible.value = false
   cargandoParticipantes.value = true
@@ -147,7 +137,6 @@ const abrirGestionParticipantes = async () => {
   }
 }
 
-/* Expulsa a un participante de la liga con confirmación previa */
 const handleExpulsarParticipante = (participante) => {
   confirmar.require({
     message: `¿Seguro que quieres expulsar a ${participante.nombre_usuario} de la liga?`,
@@ -171,8 +160,6 @@ const handleExpulsarParticipante = (participante) => {
   })
 }
 
-/* Manejar la acción de eliminar la liga seleccionada con confirmación previa. 
-Solo el admin puede eliminar la liga. */
 const handleEliminarLiga = () => {
   confirmar.require({
     message: `¿Estás seguro de que quieres eliminar la liga "${ligaSeleccionada.value.nombre}"? Todos los participantes serán expulsados y los datos serán borrados permanentemente.`,
@@ -204,7 +191,6 @@ const handleEliminarLiga = () => {
     <div class="p-4 mt-4 max-w-4xl mx-auto">
       <div class="flex flex-col gap-6">
 
-        <!-- Botones de crear y unirse a liga -->
         <section class="grid grid-cols-2 gap-4">
           <Button label="CREAR LIGA" icon="pi pi-plus"
             class="w-full py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#1A1A1F]"
@@ -214,14 +200,12 @@ const handleEliminarLiga = () => {
             @click="dialogoUnirseVisible = true" />
         </section>
 
-        <!-- Listado de ligas del usuario -->
         <section>
           <div v-if="storeLigas.detallesLigas.length > 0" class="flex flex-col justify-center w-full">
             <div class="mb-4 text-center font-bold uppercase tracking-wider text-[#F0ECEC]">
               Ligas disponibles: {{ storeLigas.detallesLigas.length }}/5
             </div>
 
-            <!-- DataView de ligas -->
             <DataView :value="storeLigas.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
               <template #list="slotProps">
                 <div class="flex flex-col w-full gap-4">
@@ -300,7 +284,6 @@ const handleEliminarLiga = () => {
 
         <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
           @click="handleAbandonarLiga" :loading="cargandoAccion" />
-        <!-- Opciones exclusivas del administrador de la liga -->
         <template v-if="ligaSeleccionada.correoOrganizador === storeAutenticacion.usuarioActual.correoAutenticacion">
           <Button label="GESTIONAR PARTICIPANTES" class="w-full !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
             @click="abrirGestionParticipantes" :loading="cargandoAccion" />

@@ -44,11 +44,6 @@ const modalRecuperacionVisible = ref(false)
 const correoRecuperacion = ref('')
 const cargandoRecuperacion = ref(false)
 
-/**
- * Gestiona el envío del formulario de inicio de sesión con email y contraseña.
- * Redirige al área de administración o a ligas según el rol del usuario.
- * @param {{ valid: boolean, values: { email: string, password: string } }} formulario
- */
 const handleInicioSesion = async ({ valid, values }) => {
   if (!valid) return
   cargando.value = true
@@ -78,11 +73,6 @@ const handleInicioSesion = async ({ valid, values }) => {
   }
 }
 
-/**
- * Gestiona el inicio de sesión mediante el popup de Google.
- * Si el usuario nunca se había registrado, lo redirige al flujo de registro-google
- * para que complete su nombre visible antes de continuar.
- */
 const handleInicioSesionGoogle = async () => {
   errorAuth.value = ''
   cargando.value = true
@@ -91,21 +81,17 @@ const handleInicioSesionGoogle = async () => {
     const credencialUsuario = await iniciarSesionConGoogle()
     const correoGoogle = credencialUsuario.user.email.trim()
 
-    // Verificamos que se haya obtenido un correo válido del proveedor de autenticación.
     if (!correoGoogle) {
       throw new Error('No se pudo obtener el correo de Google.')
     }
 
-    // ¿Estaba ya registrado? ->
     const perfilEncontrado = await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.uid, correoGoogle)
 
-    // Sí.
     if (perfilEncontrado) {
       const destino = storeAuth.esAdministrador ? '/admin' : '/ligas'
       router.push(destino)
       return
     }
-    // No, es su primera vez, pedimos que complete su registro.
     router.push('/registro-google')
   } catch (error) {
     if (error?.code !== 'auth/popup-closed-by-user') {
@@ -116,15 +102,11 @@ const handleInicioSesionGoogle = async () => {
   }
 }
 
-/**
- * Gestiona el restablecimiento de contraseña desde el modal.
- * Siempre muestra un mensaje de éxito genérico para no revelar si el correo
- * está registrado o no (protección contra user enumeration).
- */
+// Siempre devuelvo éxito genérico para no revelar si el correo existe
+// (protección anti user enumeration).
 const handleRecuperarContraseña = async () => {
   const correoAEnviar = correoRecuperacion.value.trim()
 
-  // Regex para validar el formato del correo electrónico.
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoAEnviar)) {
     notificacion.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
     return
@@ -149,7 +131,6 @@ const handleRecuperarContraseña = async () => {
   }
 }
 
-/** Limpia el estado del modal de recuperación al cerrarse para evitar datos residuales. */
 const alOcultarModalRecuperacion = () => {
   correoRecuperacion.value = ''
   cargandoRecuperacion.value = false
@@ -159,13 +140,10 @@ const alOcultarModalRecuperacion = () => {
 
 
 <template>
-  <!-- Contenedor principal -->
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
 
-    <!-- Tarjeta de inicio de sesión -->
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/20 shadow-2xl border border-[#2A2A32] backdrop-blur-sm">
 
-      <!-- Encabezado: Logo y título -->
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -175,12 +153,10 @@ const alOcultarModalRecuperacion = () => {
         </div>
       </template>
 
-      <!-- Contenido: Formulario de inicio de sesión -->
       <template #content>
         <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
           :resolver="esquemaValidacion" @submit="handleInicioSesion">
 
-          <!-- Campo de correo electrónico -->
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
             <InputText id="email" type="email" name="email" autocomplete="email" placeholder="Escribe aquí tu correo..."
@@ -190,7 +166,6 @@ const alOcultarModalRecuperacion = () => {
             </Message>
           </div>
 
-          <!-- Campo de contraseña -->
           <div class="flex flex-col gap-1">
             <label for="password"
               class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
@@ -202,29 +177,23 @@ const alOcultarModalRecuperacion = () => {
             </Message>
           </div>
 
-          <!-- Mensaje de error -->
           <Message v-if="errorAuth" severity="error" :closable="false" class="mt-2 text-sm">
             {{ errorAuth }}
           </Message>
 
-          <!-- Botones de acción -->
           <div class="flex flex-col gap-3 mt-4">
 
-            <!-- Botón de inicio de sesión -->
             <Button type="submit" label="Iniciar sesión" :loading="cargando"
               class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
 
-            <!-- Botón de inicio con Google -->
             <Button type="button" icon="pi pi-google" label="Entrar con Google"
               class="flex items-center justify-center w-full py-3 gap-2 !bg-white !border-none shadow-lg font-bold uppercase !text-black"
               @click="handleInicioSesionGoogle" />
 
-            <!-- Botón de contraseña olvidada -->
             <Button type="button" label="¿Olvidaste tu contraseña?" text
               class="w-full mt-1 !bg-transparent !border-none font-bold !text-[#D4A843]"
               @click="modalRecuperacionVisible = true" />
 
-            <!-- Enlace de registro -->
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿No tienes equipo? </span>
               <router-link to="/registro" class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843]">
@@ -236,7 +205,6 @@ const alOcultarModalRecuperacion = () => {
       </template>
     </Card>
 
-    <!-- Modal de recuperación de contraseña -->
     <Dialog v-model:visible="modalRecuperacionVisible" modal header="Recuperar Contraseña"
       @hide="alOcultarModalRecuperacion"
       :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }">

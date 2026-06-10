@@ -39,26 +39,16 @@ async function cargarCatalogo(db) {
   return catalogoEnMemoria
 }
 
-/**
- * Lee el documento `catalogo/precios_pilotos` con el precio dinámico actual
- * de cada piloto, calculado a partir del historial de pujas ganadoras.
- * @param {FirebaseFirestore.Firestore} db
- * @returns {Promise<Object<string, number>>} Mapa { "<numero>|<variante>": precio }.
- */
+// Mapa { "<numero>|<variante>": precio } calculado a partir del histórico
+// de pujas ganadoras.
 async function cargarPreciosPilotos(db) {
   const documento = await db.collection('catalogo').doc('precios_pilotos').get()
   if (!documento.exists) return {}
   return documento.data().precios || {}
 }
 
-/**
- * Devuelve un nuevo catálogo con los precios dinámicos aplicados a cada carta
- * de piloto (clave `<numero>|<variante>`). Si una carta no tiene precio
- * dinámico registrado, conserva su precio base. No muta el catálogo original.
- * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
- * @param {Object<string, number>} preciosPilotos
- * @returns {{ pilotos: Array, coches: Array, potenciadores: Array }}
- */
+// Devuelve una copia del catálogo con precios dinámicos aplicados a cada
+// piloto. Si una carta no tiene precio dinámico, conserva su precio base.
 function aplicarPreciosDinamicosACatalogo(catalogo, preciosPilotos = {}) {
   const pilotosConPrecio = catalogo.pilotos.map((piloto) => {
     const clave = construirClavePiloto(piloto)
@@ -70,13 +60,8 @@ function aplicarPreciosDinamicosACatalogo(catalogo, preciosPilotos = {}) {
   return { ...catalogo, pilotos: pilotosConPrecio }
 }
 
-/**
- * Construye la clave única de una carta de piloto, formada por su número
- * y su variante. Se utiliza como identificador para precios dinámicos y
- * para detectar duplicados (numero + variante) en garajes y mercados.
- * @param {{ numero: number|string, variante: string }} piloto
- * @returns {string}
- */
+// Clave única de una carta de piloto: <numero>|<variante>. Sirve como
+// identificador para precios dinámicos y para detectar duplicados.
 function construirClavePiloto(piloto) {
   return `${piloto.numero}|${piloto.variante}`
 }
@@ -95,30 +80,18 @@ function mezclarArray(array) {
   return array
 }
 
-/**
- * Selecciona aleatoriamente las cartas que aparecerán hoy en el mercado.
- *
- * Reglas de exclusión:
- *  - Pilotos: una carta concreta (numero + variante) se omite del mercado
- *    SOLO si está fichada por algún participante con esa misma variante. La
- *    misma persona puede aparecer en distintas variantes simultáneamente.
- *  - Coches y potenciadores: se filtran por `id` exacto.
- *
- * @param {{ pilotos: Array, coches: Array, potenciadores: Array }} catalogo
- * @param {Object} [exclusiones]
- * @param {Set<string>|Array<string>} [exclusiones.clavesPilotoBloqueadas] - Combinaciones "<numero>|<variante>" ocupadas.
- * @param {Set<string>|Array<string>} [exclusiones.idsCartas] - Coches/potenciadores bloqueados (por id).
- * @returns {Array} Cartas seleccionadas para el mercado del día.
- */
+function normalizarASet(valor) {
+  if (valor instanceof Set) return valor
+  return new Set(valor || [])
+}
+
+// Selecciona las cartas que aparecerán hoy en el mercado.
+// Pilotos: se excluye un (numero, variante) solo si está fichado con esa misma
+// variante; la misma persona puede aparecer en distintas variantes a la vez.
+// Coches y potenciadores: se filtran por id exacto.
 function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
-  const clavesBloqueadas =
-    exclusiones.clavesPilotoBloqueadas instanceof Set
-      ? exclusiones.clavesPilotoBloqueadas
-      : new Set(exclusiones.clavesPilotoBloqueadas || [])
-  const idsBloqueados =
-    exclusiones.idsCartas instanceof Set
-      ? exclusiones.idsCartas
-      : new Set(exclusiones.idsCartas || [])
+  const clavesBloqueadas = normalizarASet(exclusiones.clavesPilotoBloqueadas)
+  const idsBloqueados = normalizarASet(exclusiones.idsCartas)
 
   const pilotosDelDia = elegirPilotosDelDia(catalogo.pilotos, clavesBloqueadas)
   const cochesDelDia = mezclarArray(catalogo.coches.filter((c) => !idsBloqueados.has(c.id))).slice(
@@ -132,15 +105,6 @@ function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
   return [...pilotosDelDia, ...cochesDelDia, ...potenciadoresDelDia]
 }
 
-/**
- * Elige las cartas de piloto del día. La unicidad se mide por la combinación
- * `<numero>|<variante>`: el mismo piloto puede aparecer varias veces siempre
- * que cada aparición tenga una variante distinta y no esté bloqueada por
- * estar ya fichada en algún garaje.
- * @param {Array} cartasPiloto
- * @param {Set<string>} clavesBloqueadas
- * @returns {Array}
- */
 function elegirPilotosDelDia(cartasPiloto, clavesBloqueadas) {
   const disponibles = cartasPiloto.filter(
     (carta) => !clavesBloqueadas.has(construirClavePiloto(carta)),

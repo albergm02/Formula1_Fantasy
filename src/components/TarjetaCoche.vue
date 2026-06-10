@@ -52,7 +52,6 @@ const confirmarEliminarPuja = () => {
         <img v-if="props.coche.imagen" :src="props.coche.imagen" :alt="props.coche.nombre"
           class="w-full h-full object-cover block" />
 
-        <!-- Pujas arriba a la derecha -->
         <div v-if="modoMercado && totalPujas > 0"
           class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
           <i class="pi pi-users text-[8px] text-zinc-300"></i>
@@ -68,14 +67,11 @@ const confirmarEliminarPuja = () => {
             </div>
           </div>
 
-          <!-- Etiquetas de precio y botones -->
           <div class="flex flex-col gap-1.5">
-            <!-- Precio encima del botón (solo en modo mercado) -->
             <div v-if="modoMercado" class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70 self-start">
               <span class="text-[10px] font-black text-emerald-400">{{ Number(props.coche.precio).toFixed(2) }} M</span>
             </div>
 
-            <!-- Botones: Detalles + Pujar -->
             <div v-if="modoMercado" class="flex gap-2">
               <button @click="mostrarDetalles = true"
                 class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
@@ -91,7 +87,6 @@ const confirmarEliminarPuja = () => {
               </button>
             </div>
 
-            <!-- Botón detalles fuera de mercado -->
             <button v-else @click="mostrarDetalles = true"
               class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
               <i class="pi pi-info-circle text-white text-xs mr-2"></i>
@@ -103,10 +98,8 @@ const confirmarEliminarPuja = () => {
       </div>
     </div>
 
-    <!-- Modal de detalles -->
     <Dialog v-model:visible="mostrarDetalles" :header="props.coche.nombre" modal
       :style="{ width: '90vw', maxWidth: '400px' }">
-      <!-- Puntos por jornada -->
       <div class="space-y-3">
         <div class="px-3 py-3 bg-zinc-800 border border-zinc-700">
           <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mb-2">Puntos por jornada</p>
@@ -119,7 +112,6 @@ const confirmarEliminarPuja = () => {
           </div>
         </div>
 
-        <!-- Sinergia de equipo -->
         <div v-if="props.coche.habilidad" class="px-3 py-3 bg-zinc-800 border border-zinc-700">
           <div class="flex items-center gap-2 mb-2">
             <p class="text-xs font-black text-emerald-400 uppercase tracking-wide leading-tight">
@@ -134,7 +126,6 @@ const confirmarEliminarPuja = () => {
       </div>
     </Dialog>
 
-    <!-- Dialog de puja -->
     <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
       :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">

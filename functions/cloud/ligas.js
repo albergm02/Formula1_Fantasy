@@ -1,15 +1,3 @@
-/**
- * Gestión de ligas en servidor: borrado en cascada y expulsión de participantes.
- *
- * Estas operaciones afectan a varias colecciones (participaciones, mercados,
- * pujas, actividad, vínculos en `usuarios.ligasIds`…) y por eso vive en
- * Cloud Functions: el Admin SDK ignora las reglas de Firestore, así que aquí
- * puedo recoger todo en un único batch atómico y validar los permisos a mano.
- *
- * El criterio de autorización es siempre el correo del token: el invocador
- * debe ser administrador global o el organizador de la liga concreta.
- */
-
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
@@ -17,22 +5,9 @@ const { db } = require('../comun/firebase')
 const { OPCIONES } = require('../comun/constantes')
 const { exigirAdministrador, exigirEmailAutenticado } = require('../comun/autenticacion')
 
-/**
- * Borra una liga completa en un único batch atómico:
- *  - Participaciones (con sus garajes y presupuestos).
- *  - Mercados de la liga con sus subcolecciones de pujas.
- *  - Eventos de la colección `actividad` asociados a la liga.
- *  - Desvinculación del array `ligasIds` de cada usuario afectado.
- *  - El propio documento de la liga.
- *
- * Lo hago en un solo `commit` porque, si quedara una sola colección a medio
- * borrar, el usuario vería "fantasmas" de su antigua liga en la UI o la
- * volvería a recibir como invitación. Atomicidad o nada.
- *
- * @param {string} idLiga
- * @param {FirebaseFirestore.DocumentSnapshot} ligaSnap - Snapshot ya cargado.
- * @returns {Promise<Object>} Resumen con los conteos de lo borrado.
- */
+// Borra la liga y todo lo asociado (participaciones, mercados con pujas,
+// actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
+// una colección a medio borrar, el usuario vería "fantasmas" en la UI.
 async function borrarLigaEnCascada(idLiga, ligaSnap) {
   const batch = db.batch()
 
@@ -79,12 +54,6 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
   }
 }
 
-/**
- * Callable — el administrador global elimina cualquier liga del sistema.
- *
- * La uso desde el panel de administración (AdministracionView.vue) como
- * "botón rojo" para limpiar ligas problemáticas o de pruebas.
- */
 exports.eliminarLigaManual = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { idLiga } = request.data || {}
@@ -101,13 +70,6 @@ exports.eliminarLigaManual = onCall(OPCIONES, async (request) => {
   return { ok: true, idLiga, ...resumen }
 })
 
-/**
- * Callable — el organizador de una liga la elimina en cascada.
- *
- * Ejecuta la misma limpieza atómica que `eliminarLigaManual`, pero el
- * permiso aquí es más restrictivo: solo el organizador de esa liga
- * concreta puede invocarla.
- */
 exports.eliminarLigaComoOrganizador = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
@@ -127,21 +89,9 @@ exports.eliminarLigaComoOrganizador = onCall(OPCIONES, async (request) => {
   return { ok: true, idLiga, ...resumen }
 })
 
-/**
- * Callable — el organizador expulsa a un participante concreto de su liga.
- *
- * Ejecuta en un único batch:
- *  - Borrar la participación del expulsado.
- *  - Añadir su correo al array `expulsados` de la liga (para impedir reingreso).
- *  - Decrementar el contador `participantes` con `FieldValue.increment(-1)`
- *    (atómico: si dos expulsiones simultáneas ocurriesen, el contador
- *    quedaría correcto, cosa que un `participantes - 1` calculado en cliente
- *    no garantiza).
- *  - Quitar la liga del array `ligasIds` del usuario expulsado.
- *  - Crear un evento de actividad para que el resto de jugadores vea qué pasó.
- *
- * Acepta `{ idLiga, emailExpulsado }`.
- */
+// Uso FieldValue.increment(-1) para el contador `participantes`: dos
+// expulsiones simultáneas se sumarían correctamente, cosa que un
+// `participantes - 1` calculado en cliente no garantiza.
 exports.expulsarParticipanteComoOrganizador = onCall(OPCIONES, async (request) => {
   const emailOrganizador = exigirEmailAutenticado(request)
   const { idLiga, emailExpulsado } = request.data || {}
@@ -175,8 +125,8 @@ exports.expulsarParticipanteComoOrganizador = onCall(OPCIONES, async (request) =
   const participacionExpulsado = participacionSnap.docs[0]
   const datosParticipacion = participacionExpulsado.data()
 
-  /* Las participaciones antiguas no guardan `uid_usuario`. Si no lo tengo, lo
-   * busco por correo para poder limpiar también su array `ligasIds`. */
+  // Las participaciones antiguas no guardan uid_usuario: lo busco por correo
+  // para poder limpiar también su array ligasIds.
   let uidExpulsado = datosParticipacion.uid_usuario || null
   if (!uidExpulsado) {
     const usuarioSnap = await db

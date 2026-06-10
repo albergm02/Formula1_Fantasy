@@ -17,7 +17,6 @@ import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
 
 import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
 
-// Variantes de puntuación para mostrar en la guía rápida
 const VARIANTES = [
     { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
     { id: 'carrera', etiqueta: 'Carrera', icono: 'pi-flag-fill', color: '#f97316' },
@@ -27,7 +26,6 @@ const VARIANTES = [
     { id: 'base', etiqueta: 'Base', icono: 'pi-user', color: '#a1a1aa' },
 ]
 
-// Ejemplos para cada variante dentro de la guía para explicar como funciona el sistema de puntuación.
 const EJEMPLOS_VARIANTE = {
     qualy: {
         escenario: 'Piloto con base 72 que clasifica P2.',
@@ -107,7 +105,6 @@ onMounted(async () => {
         perfilesPuntuacion.value = {}
     }
 
-    // Nos suscribimos al historial de jornadas para mostrar la más reciente y permitir navegar por las anteriores si estas existen.
     cancelarSuscripcion = suscribirseHistorialJornadas(async (jornadas) => {
         historial.value = jornadas
         if (!idJornadaSeleccionada.value && jornadas.length > 0) {
@@ -115,8 +112,8 @@ onMounted(async () => {
         }
         cargando.value = false
 
-        // Si Firestore aún no tiene ninguna jornada, consultamos OpenF1
-        // directamente para informar del último GP corrido y evitar una pantalla vacía.
+        // Si Firestore aún no tiene jornada, consulto OpenF1 directamente
+        // para evitar una pantalla vacía mostrando el último GP corrido.
         if (jornadas.length === 0 && !ultimoGranPremioPendiente.value) {
             try {
                 ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
@@ -156,7 +153,6 @@ const filasPilotos = computed(() => {
     return filas.sort((a, b) => a.actuacion.posicionCarrera - b.actuacion.posicionCarrera)
 })
 
-// Condiciones que muestran las condiciones climáticas y de carrera del gran premio.
 const condicionesTexto = computed(() => {
     if (!hayJornada.value) return []
     const c = jornada.value.condiciones || {}
@@ -185,7 +181,6 @@ function alternarPiloto(numero) {
     pilotoExpandido.value = pilotoExpandido.value === numero ? null : numero
 }
 
-// Cálculo de puntuación base dependiendo del perfil visitado en la guía rápida.
 function calcularPuntuacionBaseVariante(atributos, perfil) {
     const pesos = perfilesPuntuacion.value[perfil]?.pesos || {}
     const valor =
@@ -197,7 +192,6 @@ function calcularPuntuacionBaseVariante(atributos, perfil) {
     return Math.round(valor * 10) / 10
 }
 
-// Cálculo de la puntuación final de cada variante aplicando el factor de jornada.
 function obtenerSimulacionVariantes(piloto) {
     const condiciones = jornada.value.condiciones || {}
     return VARIANTES.map((variante) => {
@@ -209,7 +203,6 @@ function obtenerSimulacionVariantes(piloto) {
 }
 
 
-// Muestro estados si son necesarios en caso de DESC, N/S o ABN.
 function obtenerEstadoCarrera(actuacion) {
     if (actuacion?.dsq) return 'DESC'
     if (actuacion?.dns) return 'N/S'
@@ -217,7 +210,6 @@ function obtenerEstadoCarrera(actuacion) {
     return null
 }
 
-// Porcentaje para el stint más largo, usado en la variante estratega.
 function formatearPorcentaje(valor) {
     if (valor == null || valor === 0) return '—'
     return `${Math.round(valor * 100)}%`
@@ -229,12 +221,10 @@ function formatearPorcentaje(valor) {
         <Cabecera />
 
         <main class="flex flex-col w-full max-w-3xl mx-auto mt-2 p-4 gap-4">
-            <!-- Cargando -->
             <div v-if="cargando" class="flex justify-center py-16">
                 <span class="ml-4 text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</span>
             </div>
 
-            <!-- Sin jornada -->
             <div v-else-if="!hayJornada" class="flex flex-col gap-3">
                 <Message severity="info" :closable="false">
                     No hay ninguna jornada procesada.
@@ -264,7 +254,6 @@ function formatearPorcentaje(valor) {
                 </div>
             </div>
 
-            <!-- Selector de historial de jornadas -->
             <div v-if="!cargando && historial.length > 1" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                 <button v-for="item in historial" :key="item.id" type="button" @click="seleccionarJornada(item.id)"
                     class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 cursor-pointer transition-colors"
@@ -278,7 +267,6 @@ function formatearPorcentaje(valor) {
                 </button>
             </div>
 
-            <!-- Guía de puntuación por clase -->
             <div v-if="!cargando" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
                 <button type="button" @click="alternarGuia"
                     class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
@@ -302,7 +290,6 @@ function formatearPorcentaje(valor) {
                         <span class="text-white font-bold">puntuación base × factor de peso de jornada</span>.
                     </p>
 
-                    <!-- Variantes de puntuación -->
                     <div v-for="variante in VARIANTES" :key="variante.id"
                         class="bg-[#121218] border border-zinc-800 overflow-hidden">
                         <button type="button" @click="alternarVarianteGuia(variante.id)"
@@ -339,7 +326,6 @@ function formatearPorcentaje(valor) {
                 </div>
             </div>
 
-            <!-- Resumen del GP -->
             <Card v-if="hayJornada"
                 :pt="{ root: { class: 'bg-[#1A1A1F] border border-zinc-800' }, body: { class: 'p-4' } }">
                 <template #content>
@@ -367,12 +353,10 @@ function formatearPorcentaje(valor) {
                 </template>
             </Card>
 
-            <!-- Lista de pilotos -->
             <div v-if="hayJornada" class="flex flex-col gap-2">
                 <div v-for="piloto in filasPilotos" :key="piloto.numero"
                     class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
 
-                    <!-- Cabecera del piloto (clickable) -->
                     <button type="button" @click="alternarPiloto(piloto.numero)"
                         class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
                         <span class="w-10 text-center text-2xl font-black"
@@ -390,16 +374,13 @@ function formatearPorcentaje(valor) {
                             :class="pilotoExpandido === piloto.numero ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
                     </button>
 
-                    <!-- Detalle expandible -->
                     <div v-if="pilotoExpandido === piloto.numero"
                         class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-4">
 
-                        <!-- Datos crudos de OpenF1 -->
                         <section class="flex flex-col gap-2">
                             <span class="text-[10px] font-black uppercase text-zinc-500">
                                 Datos recogidos por OpenF1
                             </span>
-                            <!-- Resultados recogidos de openf1 -->
                             <div class="grid grid-cols-2 gap-1">
                                 <div class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
@@ -449,7 +430,6 @@ function formatearPorcentaje(valor) {
                             </div>
                         </section>
 
-                        <!-- Simulación por variante del piloto -->
                         <section class="flex flex-col gap-2">
                             <span class="text-[10px] font-black uppercase text-zinc-500">
                                 Puntos por variante de carta

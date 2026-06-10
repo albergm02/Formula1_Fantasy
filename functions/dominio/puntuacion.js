@@ -1,10 +1,7 @@
-/**
- * Funciones puras de puntuacion — copia server-side (CommonJS).
- * Replica exacta de src/utils/puntuacion.js para ejecutarse en Cloud Functions.
- * @module dominio/puntuacion
- */
+// Réplica server-side (CommonJS) de src/utils/puntuacion.js.
 
-/* ─── 1. Pipeline principal del garaje ──────────────────────────────────── */
+const FACTOR_MINIMO = 0.5
+const FACTOR_MAXIMO = 1.5
 
 function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   const mejorasPotenciadores = acumularMejorasPotenciadores(garaje.potenciadores || [])
@@ -56,30 +53,6 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   }
 }
 
-/* ─── 2. Factores de jornada por variante ───────────────────────────────── */
-
-const FACTOR_MINIMO = 0.5
-const FACTOR_MAXIMO = 1.5
-
-function acotarFactor(factor) {
-  if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
-  if (factor > FACTOR_MAXIMO) return FACTOR_MAXIMO
-  return Math.round(factor * 100) / 100
-}
-
-/**
- * Indica si el piloto no tuvo una actuación válida en carrera: no salió (N/S),
- * abandonó (ABN) o fue descalificado (DESC). En ese caso las variantes Todo
- * Terreno, Remontador y Estratega no premian su actuación y reciben el factor
- * mínimo, porque ninguna de las tres tiene sentido sin haber completado la
- * carrera bajo condiciones reales.
- * @param {{ dnf?: boolean, dns?: boolean, dsq?: boolean }} actuacion
- * @returns {boolean}
- */
-function pilotoSinActuacionValida(actuacion) {
-  return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq)
-}
-
 function calcularFactorJornada(actuacion, condiciones, variante) {
   if (variante === 'qualy') return acotarFactor(calcularFactorQualy(actuacion))
   if (variante === 'carrera') return acotarFactor(calcularFactorCarrera(actuacion))
@@ -100,6 +73,18 @@ function calcularFactorJornada(actuacion, condiciones, variante) {
   const factorC = calcularFactorCarrera(actuacion)
   const factorT = calcularFactorTodoTerreno(condiciones)
   return acotarFactor((factorQ + factorC + factorT) / 3)
+}
+
+function acotarFactor(factor) {
+  if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
+  if (factor > FACTOR_MAXIMO) return FACTOR_MAXIMO
+  return Math.round(factor * 100) / 100
+}
+
+// DNS/ABN/DSQ anulan Todo Terreno, Remontador y Estratega: ninguna tiene
+// sentido sin haber completado la carrera bajo condiciones reales.
+function pilotoSinActuacionValida(actuacion) {
+  return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq)
 }
 
 function calcularFactorQualy({ posicionQualy }) {
@@ -125,28 +110,13 @@ function calcularFactorTodoTerreno({
   return Math.round((factorBase + bonusCaos) * 100) / 100
 }
 
-/* ─── 3. Factores específicos — Remontador y Estratega ──────────────────── */
-
-/**
- * Factor basado en el diferencial de adelantamientos: realizados menos
- * recibidos. Cada unidad de diferencial vale 0.1 puntos sobre la base 1.0
- * (ej: +5 → 1.5, 0 → 1.0, -5 → 0.5). El acotado final entre 0.5 y 1.5 lo
- * aplica `acotarFactor` para mantener todas las variantes en el mismo rango.
- * @param {{ numeroAdelantos: number, numeroVecesAdelantado: number }} actuacion
- * @returns {number}
- */
+// Diferencial de adelantamientos: cada unidad vale 0.1 sobre la base 1.0
+// (+5 → 1.5, 0 → 1.0, -5 → 0.5). El acotado final lo aplica acotarFactor.
 function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
   const diferencial = (numeroAdelantos || 0) - (numeroVecesAdelantado || 0)
   return 1 + diferencial * 0.1
 }
 
-/**
- * Factor basado en métricas de gestión de stints de OpenF1 (/stints).
- * Premia stints largos, pocas paradas y posición final como validación.
- * Los abandonos y descalificaciones se filtran antes en `calcularFactorJornada`.
- * @param {{ posicionCarrera: number, numeroPitStops: number, porcentajeStintMaximo: number }} actuacion
- * @returns {number}
- */
 function calcularFactorEstrategia({
   posicionCarrera,
   numeroPitStops,
@@ -180,8 +150,6 @@ function resolverBonusPosicionEstratega(posicionCarrera) {
   return -0.1
 }
 
-/* ─── 4. Tablas de resolución de posición ───────────────────────────────── */
-
 function resolverFactorPosicionQualy(posicion) {
   if (posicion <= 3) return 1.5
   if (posicion <= 6) return 1.25
@@ -200,8 +168,6 @@ function resolverFactorPosicionCarrera(posicion) {
   if (posicion <= 20) return 0.6
   return 0.5
 }
-
-/* ─── 5. Utilidades base ────────────────────────────────────────────────── */
 
 function calcularPuntuacionBase(atributos, pesos) {
   const valor =

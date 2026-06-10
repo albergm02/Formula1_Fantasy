@@ -12,11 +12,6 @@ const storeLigas = usarStoreLigas()
 const storeGaraje = usarStoreGaraje()
 const ruta = useRoute()
 
-/**
- * Convierte el tipo interno del evento en una etiqueta legible en español.
- * @param {string} tipo
- * @returns {string}
- */
 const etiquetaPorTipo = (tipo) => {
   const etiquetas = {
     compra: 'Fichaje',
@@ -29,16 +24,10 @@ const etiquetaPorTipo = (tipo) => {
   return etiquetas[tipo] ?? tipo
 }
 
-/**
- * Formatea una fecha JavaScript en texto relativo legible en español.
- * @param {Date} fecha
- * @returns {string}
- */
 const formatearFecha = (fecha) => {
   const ahora = new Date()
   const diferencia = Math.floor((ahora - fecha) / 1000)
 
-  // cambio de formato a "hace X min/h" o fecha corta si es más de un día
   if (diferencia < 60) return 'hace un momento'
   if (diferencia < 3600) return `hace ${Math.floor(diferencia / 60)} min`
   if (diferencia < 86400) return `hace ${Math.floor(diferencia / 3600)} h`
@@ -66,7 +55,6 @@ onMounted(async () => {
 
     <main class="flex flex-col w-full max-w-lg mx-auto mt-4 p-4 mt-6 gap-4">
 
-      <!-- Cabecera de sección -->
       <div class="flex justify-between items-center pb-2 border-b border-[#FFFFFF]/10">
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Actividad del campeonato</h2>
       </div>
@@ -75,7 +63,6 @@ onMounted(async () => {
         <p class="text-xs font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando...</p>
       </div>
 
-      <!-- Feed de actividad -->
       <div v-else-if="storeNotificaciones.actividad.length" class="flex flex-col gap-2">
         <div v-for="evento in storeNotificaciones.actividad" :key="evento.id"
           class="flex items-start justify-between p-3 border border-white/5">

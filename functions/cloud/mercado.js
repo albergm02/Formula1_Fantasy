@@ -1,23 +1,3 @@
-/**
- * Ciclo de vida del mercado diario y precios dinámicos de pilotos.
- *
- * Cada día, a las 06:00 UTC, se genera un mercado por liga: se selecciona una
- * muestra aleatoria del catálogo (con exclusiones de cartas ya fichadas), se
- * cierra el mercado del día anterior resolviendo sus pujas y se aplica el
- * impacto de esas pujas sobre los precios de los pilotos.
- *
- *
- * Esquema Firestore → `mercados/{idLiga}_{YYYY-MM-DD}`:
- * ```
- * {
- *   idLiga: string,
- *   estado: 'abierto' | 'cerrado',
- *   fechaCierre: string (ISO),     // siguiente día a las 06:00 UTC
- *   cartas: [ { id, nombre, tipoCarta, precio, imagen, ... } ]
- * }
- * ```
- */
-
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { FieldValue } = require('firebase-admin/firestore')
@@ -34,40 +14,46 @@ const {
 } = require('../dominio/mercado')
 const { seleccionarPujasGanadoras } = require('../dominio/pujas')
 
-/* ─── Constantes de precios dinámicos ───────────────────────────────────── */
-
-/* Número de muestras que conservo del histórico para promediar el precio.*/
 const HISTORIAL_MAX_MUESTRAS = 5
-
-/* Penalización aplicada a cartas que salen al mercado pero nadie puja. */
 const FACTOR_DESINTERES = 0.95
-
-/* Suelo del precio para que ninguna carta se vuelva gratuita. */
 const PRECIO_MINIMO = 5
 
-/* ─── Identificación temporal del mercado ───────────────────────────────── */
+function construirCartaGanada(cartaCompleta, idCarta, pujaGanadora, cantidad, tipoCarta) {
+  const propiedadesClausula = {
+    clausulaInvertida: 0,
+    fechaAdquisicion: new Date().toISOString(),
+  }
+  const base = cartaCompleta || {
+    id: idCarta,
+    nombre: pujaGanadora.nombreCarta,
+    tipoCarta,
+    precio: pujaGanadora.precioCarta,
+  }
+  return {
+    ...base,
+    tipo: tipoCarta,
+    precioCompra: cantidad,
+    instancia_id: Date.now() + Math.random(),
+    ...propiedadesClausula,
+  }
+}
 
-/**
- * Calcula el ID del mercado para una liga y una fecha concretas.
- *
- * Uso el formato `'{idLiga}_{YYYY-MM-DD}'` porque me da idempotencia natural:
- * si la función se ejecuta dos veces el mismo día, ambas resuelven el mismo
- * ID y el segundo `set` no duplica nada.
- *
- * @param {string} idLiga
- * @param {Date} fecha
- * @returns {string} Ej: `'xi060FGM9iG33KvBuBQv_2026-04-14'`.
- */
+// Si hubo puja ganadora, la muestra es la cantidad pagada; si quedó desierta,
+// se aplica FACTOR_DESINTERES como penalización suave al precio anterior.
+function calcularPrecioMuestra(carta, pujaGanadora) {
+  if (pujaGanadora) return Number(pujaGanadora.cantidad)
+  return Number(carta.precio) * FACTOR_DESINTERES
+}
+
+// Formato "<idLiga>_<YYYY-MM-DD>": da idempotencia natural (dos ejecuciones
+// el mismo día resuelven al mismo ID y el segundo `set` no duplica).
 function calcularIdMercado(idLiga, fecha) {
   const fechaStr = fecha.toISOString().split('T')[0]
   return `${idLiga}_${fechaStr}`
 }
 
-/**
- * Calcula la fecha de cierre del mercado: día siguiente a las 06:00 UTC,
- * que coincide con el momento en el que se generará el mercado del día
- * siguiente.
- */
+// Día siguiente a las 06:00 UTC: el mismo instante en que se generará el
+// mercado del día siguiente.
 function calcularFechaCierre(fechaApertura) {
   const cierre = new Date(fechaApertura)
   cierre.setUTCDate(cierre.getUTCDate() + 1)
@@ -75,28 +61,15 @@ function calcularFechaCierre(fechaApertura) {
   return cierre
 }
 
-/* ─── Resolución de pujas al cerrar el mercado ──────────────────────────── */
-
-/**
- * Resuelve todas las pujas de un mercado cerrado.
- *
- * Por cada carta con pujas, la mayor gana: el ganador la suma a su garaje y
- * se le descuenta el importe del presupuesto. Las pujas perdedoras se
- * descartan silenciosamente (no se reembolsa: el dinero comprometido nunca se
- * dedujo del presupuesto real, solo se "reservaba" a nivel UI).
- *
- * Agrupo las cartas ganadas por participante para no actualizar el mismo
- * documento varias veces dentro del mismo batch (cada `update` sobrescribiría
- * al anterior).
- *
- * @param {string} idMercado
- */
+// Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana.
+// Las perdedoras se descartan sin reembolso: el dinero comprometido nunca se
+// dedujo del presupuesto real, solo se "reservaba" a nivel UI.
 async function resolverPujasMercado(idMercado) {
   const pujasSnapshot = await db.collection('mercados').doc(idMercado).collection('pujas').get()
   if (pujasSnapshot.empty) return
 
-  /* Necesito los datos completos de cada carta (imagen, número, variante…)
-   * para almacenarlos en el garaje del ganador. La puja solo guarda el ID. */
+  // Necesito los datos completos de cada carta (imagen, número, variante…)
+  // para guardarlos en el garaje del ganador. La puja solo conserva el ID.
   const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
   const cartasMercado = mercadoSnap.exists ? mercadoSnap.data().cartas || [] : []
   const mapaCartas = {}
@@ -106,6 +79,8 @@ async function resolverPujasMercado(idMercado) {
 
   const pujasPorCarta = seleccionarPujasGanadoras(pujasSnapshot.docs.map((doc) => doc.data()))
 
+  // Agrupo por participante para no sobreescribir el mismo documento varias
+  // veces dentro del mismo batch (cada update reemplazaría al anterior).
   const cartasPorParticipante = {}
   for (const [idCarta, pujaGanadora] of Object.entries(pujasPorCarta)) {
     const { idParticipante } = pujaGanadora
@@ -131,9 +106,7 @@ async function resolverPujasMercado(idMercado) {
       potenciadores: [],
     }
 
-    /* Migración del formato antiguo (coche singular) al nuevo (coches[]).
-     * Lo mantengo aquí porque sigo viendo participaciones antiguas en
-     * producción. Cuando todas estén migradas se podrá eliminar. */
+    // Migración del formato antiguo (coche singular) al nuevo (coches[]).
     if (garaje.coche !== undefined || !garaje.coches) {
       garaje.coches = garaje.coche ? [garaje.coche] : []
       delete garaje.coche
@@ -145,34 +118,18 @@ async function resolverPujasMercado(idMercado) {
     for (const { idCarta, pujaGanadora } of cartasGanadas) {
       const { cantidad, tipoCarta } = pujaGanadora
 
-      /* Si el presupuesto ya no llega tras la última carta ganada en esta
-       * misma resolución, descarto la siguiente. No "reembolso" porque la
-       * puja original nunca tocó el presupuesto real. */
+      // Si el presupuesto ya no llega tras lo ganado en esta misma resolución,
+      // descarto la siguiente. No reembolso: la puja nunca tocó el presupuesto.
       if (cantidad > presupuestoRestante) continue
 
       const cartaCompleta = mapaCartas[idCarta]
-      const propiedadesClausula = {
-        clausulaInvertida: 0,
-        fechaAdquisicion: new Date().toISOString(),
-      }
-      const cartaGanada = cartaCompleta
-        ? {
-            ...cartaCompleta,
-            tipo: tipoCarta,
-            precioCompra: cantidad,
-            instancia_id: Date.now() + Math.random(),
-            ...propiedadesClausula,
-          }
-        : {
-            id: idCarta,
-            nombre: pujaGanadora.nombreCarta,
-            tipoCarta,
-            tipo: tipoCarta,
-            precio: pujaGanadora.precioCarta,
-            precioCompra: cantidad,
-            instancia_id: Date.now() + Math.random(),
-            ...propiedadesClausula,
-          }
+      const cartaGanada = construirCartaGanada(
+        cartaCompleta,
+        idCarta,
+        pujaGanadora,
+        cantidad,
+        tipoCarta,
+      )
 
       if (tipoCarta === 'coche') {
         garaje.coches.push({ ...cartaGanada, equipado: false })
@@ -205,24 +162,11 @@ async function resolverPujasMercado(idMercado) {
 
   await batch.commit()
 
-  /* Tras resolver las pujas, actualizo el histórico de precios y propago el
-   * delta al resto de garajes y mercados abiertos. */
   await actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta)
 }
 
-/* ─── Generación del mercado del día ────────────────────────────────────── */
-
-/**
- * Recopila las exclusiones del próximo mercado:
- *  - El mismo piloto puede aparecer en otras variantes).
- *  - IDs de coches y potenciadores que ya tiene algún participante.
- *
- * Se debe de evitar ofrecer una carta que nadie podría comprar porque ya tiene dueño
- * en la liga.
- *
- * @param {string} idLiga
- * @returns {Promise<{ clavesPilotoBloqueadas: Set<string>, idsCartas: Set<string> }>}
- */
+// Evita ofrecer una carta que nadie podría comprar porque ya tiene dueño en
+// la liga. El mismo piloto puede aparecer en otras variantes.
 async function recopilarCartasFichadasEnLiga(idLiga) {
   const participacionesSnap = await db
     .collection('participaciones')
@@ -247,15 +191,6 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
   return { clavesPilotoBloqueadas, idsCartas }
 }
 
-/**
- * Genera el mercado diario para UNA liga específica.
- *
- * Es idempotente: si el mercado de hoy ya existe, lo respeta y devuelve un
- * resumen indicando que se omitió.
- *
- * @param {string} idLiga
- * @returns {Promise<Object>} ID del mercado y total de cartas.
- */
 async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   const ahora = new Date()
   const idMercadoHoy = calcularIdMercado(idLiga, ahora)
@@ -269,8 +204,8 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
     }
   }
 
-  /* Si el mercado de ayer sigue abierto, lo resuelvo ANTES de crear el de hoy.
-   * Esto cierra el ciclo: pujas ganadoras → garajes → precios dinámicos. */
+  // Si el mercado de ayer sigue abierto, lo resuelvo ANTES de crear el de hoy
+  // para cerrar el ciclo pujas ganadoras → garajes → precios dinámicos.
   const ayer = new Date(ahora)
   ayer.setUTCDate(ayer.getUTCDate() - 1)
   const idMercadoAyer = calcularIdMercado(idLiga, ayer)
@@ -303,26 +238,15 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   }
 }
 
-/* ─── Precios dinámicos derivados de las pujas ──────────────────────────── */
-
-/**
- * Por cada carta de piloto del mercado recién resuelto, calcula una muestra
- * de precio:
- *  - Si hubo puja ganadora → la cantidad pagada.
- *  - Si quedó desierta → `precio * FACTOR_DESINTERES` (penalización suave).
- *
- * Después delega en `fusionarMuestrasYRecalcularPrecios` para agregar al
- * histórico y propagar los nuevos precios.
- */
+// Si hubo puja ganadora la muestra es la cantidad pagada; si quedó desierta,
+// se aplica FACTOR_DESINTERES como penalización suave al precio anterior.
 async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
   const muestrasPorClave = {}
   for (const carta of cartasMercado) {
     if (carta.tipoCarta !== 'piloto' || carta.numero == null || !carta.variante) continue
     const clave = `${carta.numero}|${carta.variante}`
     const pujaGanadora = pujasPorCarta[carta.id]
-    const precioMuestra = pujaGanadora
-      ? Number(pujaGanadora.cantidad)
-      : Number(carta.precio) * FACTOR_DESINTERES
+    const precioMuestra = calcularPrecioMuestra(carta, pujaGanadora)
     muestrasPorClave[clave] = Math.round(precioMuestra * 10) / 10
   }
 
@@ -331,13 +255,9 @@ async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
   await fusionarMuestrasYRecalcularPrecios(muestrasPorClave)
 }
 
-/**
- * Agrega las muestras nuevas al histórico (recorto a las últimas
- * HISTORIAL_MAX_MUESTRAS), recalculo el precio dinámico como media móvil y
- * persisto ambos documentos. Luego propago los deltas a garajes y mercados.
- *
- * @param {Object<string, number>} muestrasPorClave - `{ "<numero>|<variante>": precioMuestra }`.
- */
+// Media móvil de las últimas HISTORIAL_MAX_MUESTRAS muestras por piloto.
+// Propaga deltas a garajes y mercados abiertos, o el precio absoluto cuando
+// es la primera vez que esa carta tiene precio dinámico.
 async function fusionarMuestrasYRecalcularPrecios(muestrasPorClave) {
   const refHistorial = db.collection('catalogo').doc('historial_pujas')
   const refPrecios = db.collection('catalogo').doc('precios_pilotos')
@@ -362,10 +282,6 @@ async function fusionarMuestrasYRecalcularPrecios(muestrasPorClave) {
     refPrecios.set({ precios: preciosNuevos, fechaActualizacion }),
   ])
 
-  /* Distingo dos tipos de propagación:
-   *  - Delta (precio nuevo - anterior) → cuando ya existía precio previo.
-   *  - Precio absoluto → cuando se establece por primera vez (no hay delta
-   *    con el que mover el precio existente del garaje). */
   const deltasPorClave = calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos)
   const preciosPrimeraVezPorClave = {}
   for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
@@ -387,10 +303,6 @@ async function fusionarMuestrasYRecalcularPrecios(muestrasPorClave) {
   if (propagaciones.length > 0) await Promise.all(propagaciones)
 }
 
-/**
- * Calcula los deltas (precioNuevo - precioAnterior) por clave de piloto.
- * Las claves sin precio previo se omiten (las maneja la propagación absoluta).
- */
 function calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos) {
   const deltas = {}
   for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
@@ -402,12 +314,9 @@ function calcularDeltasPrecioPiloto(preciosAnteriores, preciosNuevos) {
   return deltas
 }
 
-/**
- * Para pilotos con precio dinámico por primera vez, asigna el precio de forma
- * absoluta en todos los garajes que ya tengan esa carta. Sin esto, el primer
- * precio se quedaría solo en el catálogo y los garajes existentes
- * conservarían el precio base.
- */
+// Primera vez que un piloto tiene precio dinámico: lo asigno como absoluto en
+// todos los garajes que ya tengan esa carta (no hay precio previo con el que
+// calcular un delta).
 async function propagarPreciosAbsolutosAGarajes(preciosPorClave) {
   const participacionesSnap = await db.collection('participaciones').get()
   const batch = db.batch()
@@ -436,11 +345,6 @@ async function propagarPreciosAbsolutosAGarajes(preciosPorClave) {
   return garajesActualizados
 }
 
-/**
- * Aplica los deltas de precio a todas las cartas equivalentes (mismo
- * número y variante) en los garajes de cualquier liga. Mantengo PRECIO_MINIMO
- * como suelo para no llegar a precios absurdos.
- */
 async function propagarDeltasAGarajesDePilotos(deltasPorClave) {
   const participacionesSnap = await db.collection('participaciones').get()
   const batch = db.batch()
@@ -473,11 +377,8 @@ async function propagarDeltasAGarajesDePilotos(deltasPorClave) {
   return garajesActualizados
 }
 
-/**
- * Aplica los deltas a los pilotos que están a la venta en mercados aún
- * abiertos. Si no hago esto, dos mercados abiertos a la vez mostrarían
- * precios inconsistentes.
- */
+// Si no se aplica, dos mercados abiertos a la vez mostrarían precios
+// inconsistentes entre sí.
 async function propagarDeltasAMercadosAbiertos(deltasPorClave) {
   const mercadosSnap = await db.collection('mercados').where('estado', '==', 'abierto').get()
   if (mercadosSnap.empty) return 0
@@ -511,16 +412,9 @@ async function propagarDeltasAMercadosAbiertos(deltasPorClave) {
   return mercadosActualizados
 }
 
-/* ─── Triggers ──────────────────────────────────────────────────────────── */
-
-/**
- * Schedule diario — genera el mercado para TODAS las ligas a las 06:00 UTC.
- *
- * Si una liga falla, registro el error y continúo con el resto: prefiero
- * tener "N-1" ligas con mercado nuevo a fallar todas por una. Al final lanzo
- * un error para que Cloud Scheduler reintente la ejecución completa; las
- * ligas ya procesadas son idempotentes y no se duplican.
- */
+// Si una liga falla, registro y sigo: prefiero N-1 ligas con mercado nuevo a
+// fallar todas por una. El throw final hace que Scheduler reintente; las
+// ligas ya procesadas son idempotentes y no se duplican.
 exports.generarMercadoDiario = onSchedule(
   {
     schedule: 'every day 06:00',
@@ -550,13 +444,6 @@ exports.generarMercadoDiario = onSchedule(
   },
 )
 
-/**
- * Callable — genera el primer mercado de una liga recién creada.
- *
- * Lo invoca el cliente justo después de `crearDocumentoLiga`, para que el
- * organizador entre al mercado sin esperar al schedule diario. Valido el
- * permiso comparando el correo del token con `correoOrganizador` de la liga.
- */
 exports.generarMercadoInicialLiga = onCall(OPCIONES, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
@@ -579,21 +466,14 @@ exports.generarMercadoInicialLiga = onCall(OPCIONES, async (request) => {
   return { ok: true, ...resultado }
 })
 
-/* ─── Pujas (callables) ─────────────────────────────────────────────────── */
-
-/* Convierto el correo en una clave segura para usar en el ID del documento.
- * Tiene que coincidir con el saneado del cliente histórico para que las
- * pujas existentes sigan localizables y para que `registrarPuja` y
- * `eliminarPujaPropia` apunten al mismo documento. */
+// Saneado idéntico al histórico del cliente para que las pujas existentes
+// sigan localizables.
 function sanitizarEmailParaIdPuja(email) {
   return email.replace(/[.@]/g, '_')
 }
 
-/**
- * Suma el dinero comprometido por el usuario en el mismo mercado, ignorando
- * la puja sobre `idCartaExcluida` para que actualizar una puja existente no
- * cuente dos veces el importe anterior.
- */
+// Se ignora la puja sobre idCartaExcluida para que actualizar una puja
+// existente no cuente dos veces su importe anterior.
 async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
   const pujasSnap = await db
     .collection('mercados')
@@ -608,14 +488,6 @@ async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
   }, 0)
 }
 
-/**
- * Callable — registra o actualiza una puja del usuario sobre una carta del
- * mercado activo. Recalculo el precio mínimo y el presupuesto disponible
- * desde Firestore para que un cliente manipulado no pueda pujar más que su
- * presupuesto real ni por debajo del precio base actual.
- *
- * @param {{ idLiga: string, idCarta: string, cantidad: number }} datos
- */
 exports.registrarPujaCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta, cantidad } = request.data || {}
@@ -676,11 +548,6 @@ exports.registrarPujaCarta = onCall(OPCIONES, async (request) => {
   return { ok: true, cantidad: cantidadNumerica }
 })
 
-/**
- * Callable — elimina la puja propia del usuario sobre una carta del mercado.
- * Solo permito borrar la puja cuyo documento contiene el correo del invocador
- * para evitar que un usuario malicioso retire pujas ajenas.
- */
 exports.eliminarPujaPropia = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta } = request.data || {}
@@ -702,6 +569,6 @@ exports.eliminarPujaPropia = onCall(OPCIONES, async (request) => {
   return { ok: true, eliminado: true }
 })
 
-/* Exporto `calcularIdMercado` para que el módulo de cláusulas pueda
- * localizar el mercado actual sin duplicar la lógica de fechas. */
+// Exportado para que el módulo de cláusulas pueda localizar el mercado actual
+// sin duplicar la lógica de fechas.
 module.exports.calcularIdMercado = calcularIdMercado
