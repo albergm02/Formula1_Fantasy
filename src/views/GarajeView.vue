@@ -157,7 +157,7 @@ const confirmarInversionClausula = async () => {
   <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-24 px-3 gap-6">
 
     <div v-if="jornadaIniciada"
-      class="px-3 py-2 bg-yellow-900/20 text-[10px] font-black uppercase tracking-widest text-yellow-400 text-center">
+      class="px-3 py-2 bg-[#D4A843]/10 text-[10px] font-black uppercase tracking-widest text-[#D4A843] text-center">
       {{ mensajeBloqueoJornada }}
     </div>
 
@@ -167,7 +167,7 @@ const confirmarInversionClausula = async () => {
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Chásis</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </header>
-      <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
+      <span class="text-[9px] uppercase tracking-widest text-[#D4A843] font-black mb-2 block">
         {{storeGaraje.garaje.coches.filter((c) => c.equipado).length}} titulares
       </span>
       <div v-if="storeGaraje.garaje.coches.length > 0" class="grid grid-cols-1 gap-3">
@@ -183,7 +183,7 @@ const confirmarInversionClausula = async () => {
               </span>
               <span class="text-zinc-400">
                 Cláusula:
-                <span class="font-black text-amber-400">{{ calcularPrecioClausula(coche).toFixed(1) }}M</span>
+                <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(coche).toFixed(1) }}M</span>
               </span>
               <span v-if="estaEnPeriodoDeGracia(coche)"
                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
@@ -199,11 +199,11 @@ const confirmarInversionClausula = async () => {
                   label: { class: ['text-[10px] font-black uppercase tracking-wide', coche.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
                 }" />
               <Button label="Proteger" @click="abrirDialogoProteccion(coche)" size="small"
-                class="!bg-[#1A1A1F] !border-amber-500/40"
-                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-amber-400' } }" />
+                class="!bg-[#1A1A1F] !border-[#D4A843]/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-[#D4A843]' } }" />
               <Button :label="`Vender ${calcularValorReventa(coche.precio).toFixed(2)}M`"
-                @click="confirmarVentaCoche(coche)" size="small" class="!bg-[#1A1A1F] !border-red-500/40"
-                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-red-400' } }" />
+                @click="confirmarVentaCoche(coche)" size="small" class="!bg-[#1A1A1F] !border-[#E10600]/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-[#E10600]' } }" />
             </div>
           </div>
         </article>
@@ -220,7 +220,7 @@ const confirmarInversionClausula = async () => {
         <h2 class="text-xs font-black uppercase tracking-widest text-white">Pilotos</h2>
         <div class="flex-1 h-px bg-zinc-700"></div>
       </header>
-      <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
+      <span class="text-[9px] uppercase tracking-widest text-[#D4A843] font-black mb-2 block">
         {{storeGaraje.garaje.pilotos.filter((p) => p.equipado).length}} titulares
       </span>
       <div v-if="storeGaraje.garaje.pilotos.length > 0" class="grid grid-cols-1 gap-3">
@@ -236,7 +236,7 @@ const confirmarInversionClausula = async () => {
               </span>
               <span class="text-zinc-400">
                 Cláusula de rescisión:
-                <span class="font-black text-amber-400">{{ calcularPrecioClausula(piloto).toFixed(1) }}M</span>
+                <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(piloto).toFixed(1) }}M</span>
               </span>
               <span v-if="estaEnPeriodoDeGracia(piloto)"
                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
@@ -252,11 +252,11 @@ const confirmarInversionClausula = async () => {
                   label: { class: ['text-[10px] font-black uppercase tracking-wide', piloto.equipado ? 'text-emerald-400' : 'text-zinc-300'] },
                 }" />
               <Button label="Proteger" @click="abrirDialogoProteccion(piloto)" size="small"
-                class="!bg-[#1A1A1F] !border-amber-500/40"
-                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-amber-400' } }" />
+                class="!bg-[#1A1A1F] !border-[#D4A843]/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-[#D4A843]' } }" />
               <Button :label="`Despedir ${calcularValorReventa(piloto.precio).toFixed(2)}M`"
-                @click="confirmarVentaPiloto(piloto)" size="small" class="!bg-[#1A1A1F] !border-red-500/40"
-                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-red-400' } }" />
+                @click="confirmarVentaPiloto(piloto)" size="small" class="!bg-[#1A1A1F] !border-[#E10600]/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-[#E10600]' } }" />
             </div>
           </div>
         </article>
@@ -274,7 +274,7 @@ const confirmarInversionClausula = async () => {
         <div class="flex-1 h-px bg-zinc-700"></div>
       </header>
 
-      <span class="text-[9px] uppercase tracking-widest text-amber-400 font-black mb-2 block">
+      <span class="text-[9px] uppercase tracking-widest text-[#D4A843] font-black mb-2 block">
         {{storeGaraje.garaje.potenciadores.filter((p) => p.equipado).length}} instalados
       </span>
 
@@ -327,9 +327,9 @@ const confirmarInversionClausula = async () => {
 
         <Button label="CONFIRMAR INVERSIÓN" icon="pi pi-shield" @click="confirmarInversionClausula"
           :disabled="cantidadInversion <= 0 || cantidadInversion > storeGaraje.presupuesto"
-          class="w-full !bg-amber-900/20 !border-amber-500/50" :pt="{
-            label: { class: 'text-[10px] font-black uppercase tracking-widest text-amber-400' },
-            icon: { class: 'text-amber-400' },
+          class="w-full !bg-[#D4A843]/10 !border-[#D4A843]/50" :pt="{
+            label: { class: 'text-[10px] font-black uppercase tracking-widest text-[#D4A843]' },
+            icon: { class: 'text-[#D4A843]' },
           }" />
       </div>
     </Dialog>

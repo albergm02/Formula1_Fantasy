@@ -59,8 +59,8 @@ onMounted(async () => {
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Actividad del campeonato</h2>
       </div>
 
-      <div v-if="storeNotificaciones.cargando" class="flex flex-col items-center justify-center py-16 gap-3">
-        <p class="text-xs font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando...</p>
+      <div v-if="storeNotificaciones.cargando" class="flex justify-center py-16">
+        <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
       </div>
 
       <div v-else-if="storeNotificaciones.actividad.length" class="flex flex-col gap-2">

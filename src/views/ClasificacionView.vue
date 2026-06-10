@@ -82,22 +82,20 @@ onMounted(async () => {
         <h2 class="text-2xl font-black uppercase text-white">Clasificación general</h2>
       </div>
 
-      <div v-if="cargando" class="flex flex-col items-center justify-center py-10 gap-3">
-        <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843] animate-pulse">Cargando...
-        </p>
+      <div v-if="cargando" class="flex justify-center py-10">
+        <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
       </div>
 
       <div v-else class="flex flex-col gap-3">
         <div v-for="(jugador, indice) in ranking" :key="jugador.id"
           class="flex items-center justify-between p-4 border border-white transition-colors" :class="{
             '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion,
-            'cursor-pointer': jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion,
           }" @click="verEquipoRival(jugador)">
           <div class="flex items-center gap-4">
             <div class="relative -top-4 text-2xl font-black italic" :class="{
-              'text-yellow-400': indice === 0,
+              'text-[#D4A843]': indice === 0,
               'text-gray-200': indice === 1,
-              'text-amber-600': indice === 2,
+              'text-[#CD7F32]': indice === 2,
               'text-[#FFFFFF]': indice > 2
             }">{{ indice + 1 }}º</div>
             <div class="flex flex-col">
@@ -130,8 +128,8 @@ onMounted(async () => {
           <span class="text-sm font-bold uppercase tracking-widest text-zinc-400">Equipo rival</span>
         </template>
 
-        <div v-if="cargandoRival" class="flex flex-col items-center justify-center py-10 gap-3">
-          <p class="text-sm text-zinc-500">Cargando...</p>
+        <div v-if="cargandoRival" class="flex justify-center py-10">
+          <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
         </div>
 
         <VistaEquipoRival v-else-if="participacionRival" :participacion="participacionRival" />

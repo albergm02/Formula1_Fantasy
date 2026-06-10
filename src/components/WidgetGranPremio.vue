@@ -5,6 +5,7 @@ import { obtenerCuentaRegresiva, obtenerSiguienteGranPremio } from '@/services/s
 const siguienteGranPremio = ref(null)
 const cuentaRegresiva = ref('')
 const cargaFallida = ref(false)
+const imagenRota = ref(false)
 let intervaloId = null
 
 const granPremioEnCurso = computed(() => {
@@ -43,7 +44,9 @@ onUnmounted(() => {
     <h3 class="mb-4 text-sm font-bold uppercase tracking-widest text-center">Próximo Gran Premio</h3>
 
     <div v-if="siguienteGranPremio" class="flex flex-col items-center gap-4">
-      <img :src="siguienteGranPremio.imagen" alt="Circuito" class="w-40 h-20 object-contain" />
+      <img v-if="!imagenRota" :src="siguienteGranPremio.imagen" alt="Circuito" class="w-40 h-20 object-contain"
+        @error="imagenRota = true" />
+      <span v-else class="text-2xl text-zinc-500 font-bold">—</span>
       <div class="flex flex-col items-center gap-1 text-center">
         <span class="text-base font-bold text-white">{{ siguienteGranPremio.nombreGranPremio }}</span>
         <span class="text-sm text-zinc-400">{{ siguienteGranPremio.circuito }} - {{ siguienteGranPremio.pais }}</span>
@@ -60,7 +63,7 @@ onUnmounted(() => {
         class="px-3 py-1 text-xs font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/50 bg-emerald-900/20 text-center">
         ¡El Gran Premio ha comenzado!
       </p>
-      <p v-else class="text-[#D4A843] text-sm font-bold uppercase tracking-widest">
+      <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">
         Cargando...
       </p>
     </div>

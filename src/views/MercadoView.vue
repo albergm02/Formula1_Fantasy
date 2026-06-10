@@ -61,8 +61,8 @@ const manejarEliminarPuja = async (carta) => {
 
   <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-20 p-4 gap-6">
 
-    <div v-if="storeMercado.cargandoMercado" class="flex justify-center items-center py-20">
-      <i class="pi pi-spin pi-spinner text-3xl text-zinc-400"></i>
+    <div v-if="storeMercado.cargandoMercado" class="flex justify-center py-20">
+      <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
     </div>
 
     <div v-else-if="!storeMercado.hayMercadoAbierto" class="flex flex-col items-center gap-3 py-20 text-zinc-400">
@@ -75,7 +75,7 @@ const manejarEliminarPuja = async (carta) => {
         <div class="flex items-center gap-2">
           <span class="text-xs uppercase tracking-widest text-zinc-300">Cierre del mercado</span>
         </div>
-        <span class="text-sm text-amber-400">{{ storeMercado.textoCuentaAtras }}</span>
+        <span class="text-sm text-[#D4A843]">{{ storeMercado.textoCuentaAtras }}</span>
       </section>
 
 

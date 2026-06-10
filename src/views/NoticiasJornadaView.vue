@@ -158,21 +158,21 @@ const condicionesTexto = computed(() => {
     const c = jornada.value.condiciones || {}
     const etiquetas = []
     if (c.llovio) etiquetas.push({ texto: 'Lluvia', color: 'text-blue-400' })
-    else etiquetas.push({ texto: 'Seco', color: 'text-amber-300' })
+    else etiquetas.push({ texto: 'Seco', color: 'text-[#D4A843]' })
     if (c.numeroSafetyCarActivos > 0)
         etiquetas.push({
             texto: `${c.numeroSafetyCarActivos} Coche de Seguridad`,
-            color: 'text-amber-400',
+            color: 'text-[#D4A843]',
         })
     if (c.numeroVirtualSafetyCarActivos > 0)
         etiquetas.push({
             texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`,
-            color: 'text-yellow-400',
+            color: 'text-[#D4A843]',
         })
     if (c.numeroDNFs > 0)
         etiquetas.push({
             texto: `${c.numeroDNFs} ABN`,
-            color: 'text-red-400',
+            color: 'text-[#E10600]',
         })
     return etiquetas
 })
@@ -222,7 +222,7 @@ function formatearPorcentaje(valor) {
 
         <main class="flex flex-col w-full max-w-3xl mx-auto mt-2 p-4 gap-4">
             <div v-if="cargando" class="flex justify-center py-16">
-                <span class="ml-4 text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</span>
+                <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
             </div>
 
             <div v-else-if="!hayJornada" class="flex flex-col gap-3">
@@ -256,8 +256,7 @@ function formatearPorcentaje(valor) {
 
             <div v-if="!cargando && historial.length > 1" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
                 <button v-for="item in historial" :key="item.id" type="button" @click="seleccionarJornada(item.id)"
-                    class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 cursor-pointer transition-colors"
-                    :class="item.id === jornada?.id
+                    class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 transition-colors" :class="item.id === jornada?.id
                         ? 'bg-[#E10600]/10 border-[#E10600] text-white'
                         : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400'">
                     <span class="text-[9px] font-black uppercase tracking-widest">
@@ -269,7 +268,7 @@ function formatearPorcentaje(valor) {
 
             <div v-if="!cargando" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
                 <button type="button" @click="alternarGuia"
-                    class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
+                    class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors">
                     <div class="flex-1 flex flex-col">
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                             Guía rápida
@@ -358,9 +357,9 @@ function formatearPorcentaje(valor) {
                     class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
 
                     <button type="button" @click="alternarPiloto(piloto.numero)"
-                        class="w-full flex items-center gap-3 p-3 cursor-pointer bg-transparent border-none text-left transition-colors">
+                        class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors">
                         <span class="w-10 text-center text-2xl font-black"
-                            :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500 text-sm' : 'text-[#D4A843]'">
+                            :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-[#E10600] text-sm' : 'text-[#D4A843]'">
                             {{ obtenerEstadoCarrera(piloto.actuacion) ||
                                 piloto.actuacion.posicionCarrera }}
                         </span>
@@ -393,7 +392,7 @@ function formatearPorcentaje(valor) {
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
                                         carrera</span>
                                     <span class="text-base font-black"
-                                        :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-red-500' : 'text-white'">
+                                        :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-[#E10600]' : 'text-white'">
                                         {{ obtenerEstadoCarrera(piloto.actuacion) ||
                                             piloto.actuacion.posicionCarrera }}
                                     </span>

@@ -68,7 +68,7 @@ const confirmarEjecucionClausula = (elemento) => {
 <template>
     <div class="flex flex-col gap-6 p-4 max-w-lg mx-auto ">
         <div v-if="jornadaIniciada"
-            class="px-3 py-2 bg-yellow-900/20 text-[10px] font-black uppercase tracking-widest text-yellow-400 text-center">
+            class="px-3 py-2 bg-[#D4A843]/10 text-[10px] font-black uppercase tracking-widest text-[#D4A843] text-center">
             {{ mensajeBloqueoJornada }}
         </div>
         <div class="flex items-center justify-between border-b border-zinc-700 pb-3">
@@ -107,8 +107,8 @@ const confirmarEjecucionClausula = (elemento) => {
                     <TarjetaCoche :coche="coche" />
                     <div class="flex items-center justify-between py-1.5">
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-shield text-[10px] text-amber-400"></i>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                            <i class="pi pi-shield text-[10px] text-[#D4A843]"></i>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">
                                 Cláusula: {{ calcularPrecioClausula(coche).toFixed(1) }}M
                             </span>
                         </div>
@@ -121,7 +121,7 @@ const confirmarEjecucionClausula = (elemento) => {
                         @click="confirmarEjecucionClausula(coche)" :disabled="esFichajeDeshabilitado(coche)"
                         class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-                            icon: { class: '!text-amber-400' },
+                            icon: { class: '!text-[#D4A843]' },
                         }" />
                 </div>
             </div>
@@ -134,8 +134,8 @@ const confirmarEjecucionClausula = (elemento) => {
                     <TarjetaPiloto :piloto="piloto" />
                     <div class="flex items-center justify-between py-1.5">
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-shield text-[10px] text-amber-400"></i>
-                            <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">
+                            <i class="pi pi-shield text-[10px] text-[#D4A843]"></i>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">
                                 Cláusula: {{ calcularPrecioClausula(piloto).toFixed(1) }}M
                             </span>
                         </div>
@@ -148,7 +148,7 @@ const confirmarEjecucionClausula = (elemento) => {
                         @click="confirmarEjecucionClausula(piloto)" :disabled="esFichajeDeshabilitado(piloto)"
                         class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors" :pt="{
                             label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-                            icon: { class: '!text-amber-400' },
+                            icon: { class: '!text-[#D4A843]' },
                         }" />
                 </div>
             </div>

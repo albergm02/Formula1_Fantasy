@@ -36,9 +36,9 @@ const condicionesTexto = computed(() => {
   const c = jornada.value.condiciones
   const etiquetas = []
   if (c.llovio) etiquetas.push({ texto: 'Lluvia', icono: 'pi-cloud', color: 'text-blue-400' })
-  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Safety Car`, icono: 'pi-exclamation-triangle', color: 'text-amber-400' })
-  if (c.numeroVirtualSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} VSC`, icono: 'pi-exclamation-circle', color: 'text-yellow-400' })
-  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} ABN`, icono: 'pi-times-circle', color: 'text-red-400' })
+  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Safety Car`, icono: 'pi-exclamation-triangle', color: 'text-[#D4A843]' })
+  if (c.numeroVirtualSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} VSC`, icono: 'pi-exclamation-circle', color: 'text-[#D4A843]' })
+  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} ABN`, icono: 'pi-times-circle', color: 'text-[#E10600]' })
   if (etiquetas.length === 0) etiquetas.push({ texto: 'Sin incidentes', icono: 'pi-check-circle', color: 'text-emerald-400' })
   return etiquetas
 })
@@ -94,7 +94,7 @@ function explicarFactor(piloto) {
 
 <template>
   <div v-if="jornada" class="flex flex-col bg-transparent border-b border-zinc-800">
-    <div class="flex items-center justify-between p-4 cursor-pointer" @click="mostrarDetalle = true">
+    <div class="flex items-center justify-between p-4" @click="mostrarDetalle = true">
       <div class="flex flex-col gap-1">
         <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]">
           Última jornada
@@ -229,9 +229,6 @@ function explicarFactor(piloto) {
   </div>
 
   <div v-else class="p-4 bg-transparent border-b border-zinc-800">
-    <div class="flex items-center gap-2">
-      <i class="pi pi-info-circle text-zinc-600"></i>
-      <span class="text-xs text-zinc-500">Aún no hay resultados de jornada disponibles.</span>
-    </div>
+    <span class="text-xs text-zinc-500">Aún no hay resultados de jornada disponibles.</span>
   </div>
 </template>

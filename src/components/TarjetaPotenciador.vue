@@ -97,21 +97,21 @@ const confirmarEliminarPuja = () => {
 
             <div v-if="modoMercado" class="flex gap-2">
               <button @click="mostrarDetalles = true"
-                class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50 cursor-pointer">
+                class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50">
                 <i class="pi pi-info-circle text-white text-xs"></i>
                 <span class="text-white text-[9px] font-black uppercase">INFO</span>
               </button>
               <button @click="abrirPuja"
-                class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
+                class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50">
                 <span class="text-[10px] font-black uppercase tracking-widest"
-                  :class="miPuja != null ? 'text-amber-400' : 'text-white'">
+                  :class="miPuja != null ? 'text-[#D4A843]' : 'text-white'">
                   {{ miPuja != null ? 'EDITAR PUJA' : 'PUJAR' }}
                 </span>
               </button>
             </div>
 
             <button v-else @click="mostrarDetalles = true"
-              class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50 cursor-pointer">
+              class="w-full py-2.5 flex items-center justify-center bg-black/50 border border-white/50">
               <i class="pi pi-info-circle text-white text-xs mr-2"></i>
               <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
             </button>
