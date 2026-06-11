@@ -14,6 +14,7 @@ exports.generarMercadoDiario = mercado.generarMercadoDiario
 exports.generarMercadoInicialLiga = mercado.generarMercadoInicialLiga
 exports.registrarPujaCarta = mercado.registrarPujaCarta
 exports.eliminarPujaPropia = mercado.eliminarPujaPropia
+exports.eliminarMisPujasDeLiga = mercado.eliminarMisPujasDeLiga
 
 exports.eliminarLigaManual = ligas.eliminarLigaManual
 exports.eliminarLigaComoOrganizador = ligas.eliminarLigaComoOrganizador

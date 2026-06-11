@@ -21,6 +21,7 @@ import {
   cargarGarajeDeParticipante,
 } from '@/services/servicioLigas'
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
+import { eliminarMisPujasDeLiga } from '@/services/servicioMercado'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
 const MAX_LIGAS = 5
@@ -217,6 +218,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         descripcion: `ha abandonado el campeonato ${datosLiga.nombre}`,
       }).catch(() => {})
 
+      await eliminarMisPujasDeLiga(idLiga)
       await eliminarParticipacion(participacionPropia.id)
       await desvincularLigaDelUsuario(storeAutenticacion.usuarioActual.uid, idLiga)
 

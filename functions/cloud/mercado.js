@@ -569,6 +569,41 @@ exports.eliminarPujaPropia = onCall(OPCIONES, async (request) => {
   return { ok: true, eliminado: true }
 })
 
+// Añade al lote el borrado de todas las pujas de un usuario en cualquier
+// mercado de la liga. Evita pujas huérfanas que el planificador intentaría
+// adjudicar a una participación ya inexistente tras abandonar o ser expulsado.
+async function agregarBorradoPujasUsuario(batch, idLiga, email) {
+  const correo = String(email).trim().toLowerCase()
+  const mercadosSnapshot = await db.collection('mercados').where('idLiga', '==', idLiga).get()
+  let pujasEliminadas = 0
+  for (const documentoMercado of mercadosSnapshot.docs) {
+    const pujasSnapshot = await documentoMercado.ref
+      .collection('pujas')
+      .where('emailUsuario', '==', correo)
+      .get()
+    for (const documentoPuja of pujasSnapshot.docs) {
+      batch.delete(documentoPuja.ref)
+      pujasEliminadas += 1
+    }
+  }
+  return pujasEliminadas
+}
+
+exports.eliminarMisPujasDeLiga = onCall(OPCIONES, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const batch = db.batch()
+  const pujasEliminadas = await agregarBorradoPujasUsuario(batch, idLiga, email)
+  await batch.commit()
+
+  return { ok: true, pujasEliminadas }
+})
+
 // Exportado para que el módulo de cláusulas pueda localizar el mercado actual
 // sin duplicar la lógica de fechas.
 module.exports.calcularIdMercado = calcularIdMercado
+module.exports.agregarBorradoPujasUsuario = agregarBorradoPujasUsuario

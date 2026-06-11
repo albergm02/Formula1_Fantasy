@@ -23,6 +23,7 @@ export const cargarMercadoActivo = async (idLiga) => {
 
 const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPujaCarta')
 const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPujaPropia')
+const llamadaEliminarMisPujasDeLiga = httpsCallable(functions, 'eliminarMisPujasDeLiga')
 
 export const registrarPuja = async (idLiga, idCarta, cantidad) => {
   await llamadaRegistrarPuja({ idLiga, idCarta, cantidad })
@@ -30,6 +31,10 @@ export const registrarPuja = async (idLiga, idCarta, cantidad) => {
 
 export const eliminarPuja = async (idLiga, idCarta) => {
   await llamadaEliminarPuja({ idLiga, idCarta })
+}
+
+export const eliminarMisPujasDeLiga = async (idLiga) => {
+  await llamadaEliminarMisPujasDeLiga({ idLiga })
 }
 
 export const cargarMisPujas = async (idMercado, emailUsuario) => {

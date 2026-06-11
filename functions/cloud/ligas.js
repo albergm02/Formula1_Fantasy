@@ -4,6 +4,7 @@ const { FieldValue } = require('firebase-admin/firestore')
 const { db } = require('../comun/firebase')
 const { OPCIONES } = require('../comun/constantes')
 const { exigirAdministrador, exigirEmailAutenticado } = require('../comun/autenticacion')
+const { agregarBorradoPujasUsuario } = require('./mercado')
 
 // Borra la liga y todo lo asociado (participaciones, mercados con pujas,
 // actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
@@ -155,6 +156,8 @@ exports.expulsarParticipanteComoOrganizador = onCall(OPCIONES, async (request) =
     descripcion: `ha sido expulsado del campeonato ${datosLiga.nombre}`,
     fecha: FieldValue.serverTimestamp(),
   })
+
+  await agregarBorradoPujasUsuario(batch, idLiga, correoExpulsado)
 
   await batch.commit()
 
