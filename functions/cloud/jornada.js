@@ -187,11 +187,11 @@ async function ejecutarProcesarJornada() {
 // haya publicado los datos; insistir cada minuto solo consumiría cuota.
 exports.procesarJornadaSemanal = onSchedule(
   {
-    schedule: 'every monday 02:00',
+    schedule: 'every day 17:00',
     timeZone: 'UTC',
     region: REGION,
     retryCount: 3,
-    minBackoffSeconds: 1800,
+    minBackoffSeconds: 3600,
   },
   async () => {
     const resultado = await ejecutarProcesarJornada()

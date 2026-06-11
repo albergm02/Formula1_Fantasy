@@ -417,7 +417,7 @@ async function propagarDeltasAMercadosAbiertos(deltasPorClave) {
 // ligas ya procesadas son idempotentes y no se duplican.
 exports.generarMercadoDiario = onSchedule(
   {
-    schedule: 'every day 06:00',
+    schedule: 'every day 20:00',
     timeZone: 'UTC',
     region: REGION,
     retryCount: 3,

@@ -12,6 +12,7 @@ import { cargarGarajeDeParticipante } from '@/services/servicioLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 import VistaGaraje from '@/components/VistaGaraje.vue'
+import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
 
 import Dialog from 'primevue/dialog'
 
@@ -77,6 +78,8 @@ onMounted(async () => {
     <Cabecera />
 
     <main class="flex flex-col w-full max-w-lg mx-auto mt-4 p-4 gap-4">
+
+      <WidgetDesgloseJornada />
 
       <div class="flex justify-center pb-2 border-b border-[#FFFFFF]/50">
         <h2 class="text-2xl font-black uppercase text-white">Clasificación general</h2>

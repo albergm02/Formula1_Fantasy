@@ -49,6 +49,8 @@ const abrirOpcionesLiga = (liga) => {
 }
 
 const handleCrearLiga = async () => {
+  if (cargandoAccion.value) return
+
   const nombreLigaNormalizado = nombreNuevaLiga.value.trim()
 
   if (nombreLigaNormalizado.length < 3) {
@@ -60,6 +62,7 @@ const handleCrearLiga = async () => {
     return
   }
 
+  cargandoAccion.value = true
   const resultado = await storeLigas.crearLiga(nombreLigaNormalizado)
   if (resultado.success) {
     notificacion.add({ severity: 'success', summary: '¡Liga creada!', detail: resultado.message })
@@ -68,15 +71,19 @@ const handleCrearLiga = async () => {
   } else {
     notificacion.add({ severity: 'error', summary: 'Error', detail: resultado.message })
   }
+  cargandoAccion.value = false
 }
 
 const handleUnirseLiga = async () => {
+  if (cargandoAccion.value) return
+
   const codigoUnionNormalizado = codigoUnion.value.trim().toUpperCase()
 
   if (!codigoUnionNormalizado) {
     return
   }
 
+  cargandoAccion.value = true
   const resultado = await storeLigas.unirseALiga(codigoUnionNormalizado)
   codigoUnion.value = ''
   dialogoUnirseVisible.value = false
@@ -85,6 +92,7 @@ const handleUnirseLiga = async () => {
   } else {
     notificacion.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.message })
   }
+  cargandoAccion.value = false
 }
 
 const abrirLiga = (idLiga) => {
@@ -257,7 +265,8 @@ const handleEliminarLiga = () => {
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoCrearVisible = false"
             class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button label="Crear" @click="handleCrearLiga" class="!px-10 !bg-[#D4A843] !border-none font-bold" />
+          <Button label="Crear" @click="handleCrearLiga" :loading="cargandoAccion" :disabled="cargandoAccion"
+            class="!px-10 !bg-[#D4A843] !border-none font-bold" />
         </div>
       </div>
     </Dialog>
@@ -270,7 +279,7 @@ const handleEliminarLiga = () => {
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" @click="dialogoUnirseVisible = false"
             class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button label="Unirse" @click="handleUnirseLiga"
+          <Button label="Unirse" @click="handleUnirseLiga" :loading="cargandoAccion" :disabled="cargandoAccion"
             class="!px-10 !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]" />
         </div>
       </div>

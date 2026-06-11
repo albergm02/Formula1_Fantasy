@@ -9,7 +9,6 @@ import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import WidgetGranPremio from '@/components/WidgetGranPremio.vue'
 import WidgetEstadisticasUsuario from '@/components/WidgetEstadisticasUsuario.vue'
-import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
 
 const storeGaraje = usarStoreGaraje()
 const storeLigas = usarStoreLigas()
@@ -36,7 +35,6 @@ onMounted(async () => {
     <main class="flex flex-col w-full max-w-lg mx-auto mt-2 p-4 gap-6">
       <WidgetEstadisticasUsuario />
       <WidgetGranPremio />
-      <WidgetDesgloseJornada />
     </main>
     <BarraNavegacion />
   </div>
