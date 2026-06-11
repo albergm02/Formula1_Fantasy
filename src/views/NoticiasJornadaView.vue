@@ -3,7 +3,6 @@ import { onMounted, onUnmounted, ref, computed } from 'vue'
 
 import Card from 'primevue/card'
 import Message from 'primevue/message'
-import ProgressSpinner from 'primevue/progressspinner'
 
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
@@ -130,6 +129,13 @@ onUnmounted(() => {
 
 const hayJornada = computed(() => Boolean(jornada.value && jornada.value.actuacionesPorPiloto))
 
+function obtenerEstadoCarrera(actuacion) {
+    if (actuacion?.dsq) return 'DESC'
+    if (actuacion?.dns) return 'N/S'
+    if (actuacion?.dnf) return 'ABN'
+    return null
+}
+
 const filasPilotos = computed(() => {
     if (!hayJornada.value) return []
 
@@ -147,6 +153,7 @@ const filasPilotos = computed(() => {
             imagen: pilotoBase.imagen,
             atributos: pilotoBase.atributos,
             actuacion,
+            estadoCarrera: obtenerEstadoCarrera(actuacion),
         })
     }
 
@@ -181,6 +188,19 @@ function alternarPiloto(numero) {
     pilotoExpandido.value = pilotoExpandido.value === numero ? null : numero
 }
 
+const CELDAS_OPENF1 = [
+    { etiqueta: 'Posición salida', campo: (a) => a.posicionSalida },
+    { etiqueta: 'Posición carrera', campo: (a) => a.posicionCarrera, esResultado: true },
+    { etiqueta: 'Adelantamientos', campo: (a) => a.numeroAdelantos ?? 0 },
+    { etiqueta: 'Veces adelantado', campo: (a) => a.numeroVecesAdelantado ?? 0 },
+    { etiqueta: 'Paradas en boxes', campo: (a) => a.numeroPitStops ?? 0 },
+    {
+        etiqueta: 'Stint más largo',
+        campo: (a) => formatearPorcentaje(a.porcentajeStintMaximo),
+        titulo: 'Porcentaje de vueltas que el piloto completó sin parar (su tramo más largo sobre el total de vueltas que hizo). 100% → ninguna parada; 50% → dos stints similares.',
+    },
+]
+
 function calcularPuntuacionBaseVariante(atributos, perfil) {
     const pesos = perfilesPuntuacion.value[perfil]?.pesos || {}
     const valor =
@@ -200,14 +220,6 @@ function obtenerSimulacionVariantes(piloto) {
         const puntos = calcularPuntosJornada(puntuacionBase, factor)
         return { ...variante, puntuacionBase, factor, puntos }
     })
-}
-
-
-function obtenerEstadoCarrera(actuacion) {
-    if (actuacion?.dsq) return 'DESC'
-    if (actuacion?.dns) return 'N/S'
-    if (actuacion?.dnf) return 'ABN'
-    return null
 }
 
 function formatearPorcentaje(valor) {
@@ -359,9 +371,8 @@ function formatearPorcentaje(valor) {
                     <button type="button" @click="alternarPiloto(piloto.numero)"
                         class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors">
                         <span class="w-10 text-center text-2xl font-black"
-                            :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-[#E10600] text-sm' : 'text-[#D4A843]'">
-                            {{ obtenerEstadoCarrera(piloto.actuacion) ||
-                                piloto.actuacion.posicionCarrera }}
+                            :class="piloto.estadoCarrera ? 'text-[#E10600] text-sm' : 'text-[#D4A843]'">
+                            {{ piloto.estadoCarrera || piloto.actuacion.posicionCarrera }}
                         </span>
                         <div class="w-20 h-14 bg-black">
                             <img :src="piloto.imagen" :alt="piloto.nombre" class="w-full h-full object-cover" />
@@ -381,49 +392,15 @@ function formatearPorcentaje(valor) {
                                 Datos recogidos por OpenF1
                             </span>
                             <div class="grid grid-cols-2 gap-1">
-                                <div class="flex flex-col p-2 bg-[#121218]">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
-                                        salida</span>
-                                    <span class="text-base font-black text-white">
-                                        {{ piloto.actuacion.posicionSalida }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col p-2 bg-[#121218]">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Posición
-                                        carrera</span>
+                                <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta"
+                                    class="flex flex-col p-2 bg-[#121218]">
+                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta
+                                        }}</span>
                                     <span class="text-base font-black"
-                                        :class="obtenerEstadoCarrera(piloto.actuacion) ? 'text-[#E10600]' : 'text-white'">
-                                        {{ obtenerEstadoCarrera(piloto.actuacion) ||
-                                            piloto.actuacion.posicionCarrera }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col p-2 bg-[#121218]">
-                                    <span
-                                        class="text-[9px] uppercase tracking-wider text-zinc-500">Adelantamientos</span>
-                                    <span class="text-base font-black text-white">
-                                        {{ piloto.actuacion.numeroAdelantos ?? 0 }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col p-2 bg-[#121218]">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Veces
-                                        adelantado</span>
-                                    <span class="text-base font-black text-white">
-                                        {{ piloto.actuacion.numeroVecesAdelantado ?? 0 }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col p-2 bg-[#121218]">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Paradas en
-                                        boxes</span>
-                                    <span class="text-base font-black text-white">
-                                        {{ piloto.actuacion.numeroPitStops ?? 0 }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-col p-2 bg-[#121218]">
-                                    <span class="text-[9px] uppercase tracking-wider text-zinc-500">Stint más
-                                        largo</span>
-                                    <span class="text-base font-black text-white"
-                                        :title="'Porcentaje de vueltas que el piloto completó sin parar (su tramo más largo sobre el total de vueltas que hizo). 100% → ninguna parada; 50% → dos stints similares.'">
-                                        {{ formatearPorcentaje(piloto.actuacion.porcentajeStintMaximo) }}
+                                        :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
+                                        :title="celda.titulo || undefined">
+                                        {{ celda.esResultado ? (piloto.estadoCarrera || celda.campo(piloto.actuacion)) :
+                                        celda.campo(piloto.actuacion) }}
                                     </span>
                                 </div>
                             </div>
