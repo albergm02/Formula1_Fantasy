@@ -31,6 +31,16 @@ export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
   return Math.max(0, Math.round(puntuacionBase * factorJornada))
 }
 
+export function calcularPuntuacionBase(atributos, pesos) {
+  const valor =
+    (pesos.ritmo || 0) * atributos.ritmo +
+    (pesos.consistencia || 0) * atributos.consistencia +
+    (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
+    (pesos.agresividad || 0) * (atributos.agresividad || 0) +
+    (pesos.gestion || 0) * (atributos.gestion || 0)
+  return Math.round(valor * 10) / 10
+}
+
 function acotarFactor(factor) {
   if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
   if (factor > FACTOR_MAXIMO) return FACTOR_MAXIMO

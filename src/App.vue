@@ -70,7 +70,7 @@ onUnmounted(() => {
 
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
     <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>
-    <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Entrando al paddock...</p>
+    <p class="text-[#D4A843] text-sm font-bold uppercase tracking-widest animate-pulse">Cargando...</p>
   </div>
 
   <RouterView v-else />

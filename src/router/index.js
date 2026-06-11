@@ -77,12 +77,6 @@ const rutas = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/verificar-correo',
-    name: 'verificar-correo',
-    component: () => import('../views/VerificacionCorreoView.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
@@ -113,15 +107,6 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !usuario) {
     return { name: 'login', query: { redirect: to.fullPath } }
-  }
-
-  // El correo sin verificar bloquea el acceso salvo a la propia vista de verificación.
-  const rutaVerificacion = to.name === 'verificar-correo'
-  if (usuario && !usuario.emailVerified && !rutaVerificacion) {
-    return { name: 'verificar-correo' }
-  }
-  if (usuario && usuario.emailVerified && rutaVerificacion) {
-    return { name: 'ligas' }
   }
 
   if (to.meta.requiresGuest && usuario) {

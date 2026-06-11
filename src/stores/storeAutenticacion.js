@@ -1,7 +1,8 @@
-﻿import { ref } from 'vue'
+﻿import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { cargarPerfilUsuario, crearPerfilUsuario } from '@/services/servicioAutenticacion'
 import { migrarCorreoUsuario } from '@/services/servicioPerfil'
+import { auth } from '@/services/servicioFirebase'
 
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const usuarioActual = ref({
@@ -91,11 +92,16 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     usuarioActual.value.idsLigas = idsNuevos
   }
 
+  const tieneSesionConContrasena = computed(
+    () => auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false,
+  )
+
   return {
     usuarioActual,
     perfilExiste,
     datosCargados,
     esAdministrador,
+    tieneSesionConContrasena,
     cargarOCrearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,

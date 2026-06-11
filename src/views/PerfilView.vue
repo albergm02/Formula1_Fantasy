@@ -1,8 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { auth } from '@/services/servicioFirebase'
 
 import {
     cargarPerfilUsuario,
@@ -10,6 +9,7 @@ import {
     solicitarRestablecimientoContrasena,
     solicitarCambioCorreo,
     cerrarSesion,
+    mensajeErrorFirebase,
 } from '@/services/servicioAutenticacion'
 import { eliminarMiCuenta } from '@/services/servicioPerfil'
 
@@ -27,10 +27,7 @@ const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
 const toast = useToast()
 
-// `password` puede coexistir con Google u otro proveedor enlazado.
-const puedeUsarContrasena = computed(() => {
-    return auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false
-})
+const puedeUsarContrasena = storeAutenticacion.tieneSesionConContrasena
 
 const DIAS_BLOQUEO_CAMBIO_CORREO = 7
 const MILISEGUNDOS_POR_DIA = 86_400_000
@@ -189,20 +186,7 @@ async function ejecutarBaja() {
 }
 
 function mensajeFirebase(error) {
-    const codigo = error?.code || ''
-    if (codigo === 'auth/wrong-password' || codigo === 'auth/invalid-credential') {
-        return 'Contraseña introducida incorrecta.'
-    }
-    if (codigo === 'auth/email-already-in-use') {
-        return 'Ese correo ya está en uso por otra cuenta.'
-    }
-    if (codigo === 'auth/invalid-email') {
-        return 'El correo introducido no tiene un formato válido.'
-    }
-    if (codigo === 'auth/requires-recent-login') {
-        return 'Por seguridad, vuelve a iniciar sesión antes de hacer este cambio.'
-    }
-    return error?.message || 'Error desconocido.'
+    return mensajeErrorFirebase(error)
 }
 </script>
 

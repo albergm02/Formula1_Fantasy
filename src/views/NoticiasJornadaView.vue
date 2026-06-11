@@ -14,7 +14,7 @@ import {
 } from '@/services/servicioJornada'
 import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
 
-import { calcularFactorJornada, calcularPuntosJornada } from '@/utils/puntuacion'
+import { calcularFactorJornada, calcularPuntosJornada, calcularPuntuacionBase } from '@/utils/puntuacion'
 
 const VARIANTES = [
     { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
@@ -201,21 +201,11 @@ const CELDAS_OPENF1 = [
     },
 ]
 
-function calcularPuntuacionBaseVariante(atributos, perfil) {
-    const pesos = perfilesPuntuacion.value[perfil]?.pesos || {}
-    const valor =
-        (pesos.ritmo || 0) * atributos.ritmo +
-        (pesos.consistencia || 0) * atributos.consistencia +
-        (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
-        (pesos.agresividad || 0) * (atributos.agresividad || 0) +
-        (pesos.gestion || 0) * (atributos.gestion || 0)
-    return Math.round(valor * 10) / 10
-}
-
 function obtenerSimulacionVariantes(piloto) {
     const condiciones = jornada.value.condiciones || {}
     return VARIANTES.map((variante) => {
-        const puntuacionBase = calcularPuntuacionBaseVariante(piloto.atributos, variante.id)
+        const pesos = perfilesPuntuacion.value[variante.id]?.pesos || {}
+        const puntuacionBase = calcularPuntuacionBase(piloto.atributos, pesos)
         const factor = calcularFactorJornada(piloto.actuacion, condiciones, variante.id)
         const puntos = calcularPuntosJornada(puntuacionBase, factor)
         return { ...variante, puntuacionBase, factor, puntos }
@@ -395,12 +385,12 @@ function formatearPorcentaje(valor) {
                                 <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta"
                                     class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta
-                                        }}</span>
+                                    }}</span>
                                     <span class="text-base font-black"
                                         :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
                                         :title="celda.titulo || undefined">
                                         {{ celda.esResultado ? (piloto.estadoCarrera || celda.campo(piloto.actuacion)) :
-                                        celda.campo(piloto.actuacion) }}
+                                            celda.campo(piloto.actuacion) }}
                                     </span>
                                 </div>
                             </div>

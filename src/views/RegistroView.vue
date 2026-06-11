@@ -1,8 +1,9 @@
 ﻿<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
 
-import { registrarse, enviarVerificacionCorreo } from '@/services/servicioAutenticacion'
+import { registrarse, enviarVerificacionCorreo, cerrarSesion, mensajeErrorFirebase } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 import Card from 'primevue/card'
@@ -32,6 +33,7 @@ const esquemaValidacion = zodResolver(
 )
 
 const router = useRouter()
+const notificacion = useToast()
 const storeAutenticacion = usarStoreAutenticacion()
 
 const cargando = ref(false)
@@ -54,17 +56,17 @@ const handleRegistro = async ({ valid, values }) => {
     const credencialUsuario = await registrarse(correoNormalizado, values.password)
     await enviarVerificacionCorreo()
     await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.uid, credencialUsuario.user.email, nombreNormalizado)
-    router.push('/verificar-correo')
+    await cerrarSesion()
+    storeAutenticacion.limpiarSesion()
+    notificacion.add({
+      severity: 'info',
+      summary: 'Cuenta creada',
+      detail: 'Se le ha enviado un mensaje de verificación a su cuenta de correo. Confírmalo antes de iniciar sesión.',
+      life: 8000,
+    })
+    router.push('/')
   } catch (error) {
-    if (error?.code === 'auth/email-already-in-use') {
-      errorAutenticacion.value = 'El correo electrónico ya está registrado.'
-    } else if (error?.code === 'auth/invalid-email') {
-      errorAutenticacion.value = 'El correo electrónico no es válido.'
-    } else if (error?.code === 'auth/weak-password') {
-      errorAutenticacion.value = 'La contraseña es demasiado débil.'
-    } else {
-      errorAutenticacion.value = `Error al registrar: ${error?.message || 'Error desconocido.'}`
-    }
+    errorAutenticacion.value = mensajeErrorFirebase(error)
   } finally {
     cargando.value = false
   }

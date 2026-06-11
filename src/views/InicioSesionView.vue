@@ -9,6 +9,7 @@ import {
   verificarBloqueoAcceso,
   registrarIntentoFallido,
   reiniciarContadorIntentos,
+  cerrarSesion,
 } from '@/services/servicioAutenticacion'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
@@ -52,6 +53,12 @@ const handleInicioSesion = async ({ valid, values }) => {
   try {
     await verificarBloqueoAcceso(values.email.trim())
     const credencialUsuario = await iniciarSesion(values.email, values.password)
+    if (!credencialUsuario.user.emailVerified) {
+      await cerrarSesion()
+      storeAuth.limpiarSesion()
+      errorAuth.value = 'Debes verificar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.'
+      return
+    }
     await reiniciarContadorIntentos()
     await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.uid, credencialUsuario.user.email)
     const destino = storeAuth.esAdministrador ? '/admin' : '/ligas'

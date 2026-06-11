@@ -18,6 +18,7 @@ import {
   desvincularLigaDelUsuario,
   cargarRankingLiga,
   inicializarMercadoLiga,
+  cargarGarajeDeParticipante,
 } from '@/services/servicioLigas'
 import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
 import { usarStoreNotificaciones } from './storeNotificaciones'
@@ -283,6 +284,14 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
+  async function cargarGarajeRival(idParticipacion) {
+    try {
+      return await cargarGarajeDeParticipante(idParticipacion)
+    } catch (error) {
+      throw new Error(`Error al cargar el garaje del rival ${idParticipacion}: ${error.message}`)
+    }
+  }
+
   return {
     detallesLigas,
     idLigaActiva,
@@ -294,5 +303,6 @@ export const usarStoreLigas = defineStore('ligas', () => {
     cargarParticipantesLiga,
     eliminarLiga,
     cargarClasificacion,
+    cargarGarajeRival,
   }
 })

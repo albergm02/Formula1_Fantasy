@@ -7,8 +7,6 @@ import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 
-import { cargarGarajeDeParticipante } from '@/services/servicioLigas'
-
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
 import VistaGaraje from '@/components/VistaGaraje.vue'
@@ -54,7 +52,7 @@ async function verEquipoRival(jugador) {
   dialogoRivalVisible.value = true
 
   try {
-    participacionRival.value = await cargarGarajeDeParticipante(jugador.id)
+    participacionRival.value = await storeLigas.cargarGarajeRival(jugador.id)
   } catch {
     toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el equipo rival.', life: 3000 })
     dialogoRivalVisible.value = false
