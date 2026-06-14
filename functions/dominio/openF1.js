@@ -1,6 +1,15 @@
 const URL_BASE = 'https://api.openf1.org/v1'
 const { pilotosBase } = require('../data/catalogoBase')
 
+// OpenF1 restringe el acceso global durante una sesión en vivo y responde con
+// 401/403 y este texto. Lo señalizamos con un código propio para que el llamador
+// pueda bloquear (fail-closed) en lugar de confundirlo con una caída real.
+const SESION_EN_DIRECTO = 'SESION_EN_DIRECTO'
+
+function esPaywallDeSesionEnDirecto(detalle) {
+  return typeof detalle === 'string' && detalle.includes('Live F1 session in progress')
+}
+
 // Reintenta automáticamente ante 429 (rate limit) con espera progresiva 2s/4s/6s.
 // OpenF1 devuelve 404 con `{ detail: 'No results found.' }` en lugar de [];
 // se trata como ausencia de datos para que el llamador decida.
@@ -18,6 +27,15 @@ async function consultarOpenF1(ruta) {
     }
 
     if (respuesta.status === 404) return []
+
+    if (respuesta.status === 401 || respuesta.status === 403) {
+      const cuerpo = await respuesta.json().catch(() => ({}))
+      if (esPaywallDeSesionEnDirecto(cuerpo?.detail)) {
+        const error = new Error('OpenF1 ha restringido el acceso por sesión en directo.')
+        error.codigo = SESION_EN_DIRECTO
+        throw error
+      }
+    }
 
     if (!respuesta.ok) {
       throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
@@ -315,4 +333,5 @@ module.exports = {
   obtenerGranPremiosFinalizados,
   obtenerMeetingKeyEnJuego,
   recopilarDatosGranPremio,
+  SESION_EN_DIRECTO,
 }

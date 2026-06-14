@@ -17,7 +17,12 @@ import { escucharCambioEstadoAutenticacion } from './services/servicioAutenticac
 const app = createApp(App)
 const gestorPinia = createPinia()
 
-app.use(PrimeVue, { theme: { preset: Aura } })
+app.use(PrimeVue, {
+  theme: {
+    preset: Aura,
+    options: { darkModeSelector: '.modo-oscuro' },
+  },
+})
 app.use(gestorPinia)
 app.use(router)
 app.use(ToastService)

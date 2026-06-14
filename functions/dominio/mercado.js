@@ -39,25 +39,45 @@ async function cargarCatalogo(db) {
   return catalogoEnMemoria
 }
 
-// Mapa { "<numero>|<variante>": precio } calculado a partir del histórico
-// de pujas ganadoras.
-async function cargarPreciosPilotos(db) {
-  const documento = await db.collection('catalogo').doc('precios_pilotos').get()
-  if (!documento.exists) return {}
-  return documento.data().precios || {}
+// Mapas { clave: precio } por tipo de carta, calculados a partir del histórico
+// de pujas ganadoras. La clave de un piloto es `<numero>|<variante>`; para
+// coches y potenciadores se usa el `id` único del catálogo.
+async function cargarPreciosDinamicos(db) {
+  const referencia = db.collection('catalogo')
+  const [docPilotos, docCoches, docPotenciadores] = await Promise.all([
+    referencia.doc('precios_pilotos').get(),
+    referencia.doc('precios_coches').get(),
+    referencia.doc('precios_potenciadores').get(),
+  ])
+  return {
+    pilotos: docPilotos.exists ? docPilotos.data().precios || {} : {},
+    coches: docCoches.exists ? docCoches.data().precios || {} : {},
+    potenciadores: docPotenciadores.exists ? docPotenciadores.data().precios || {} : {},
+  }
 }
 
 // Devuelve una copia del catálogo con precios dinámicos aplicados a cada
-// piloto. Si una carta no tiene precio dinámico, conserva su precio base.
-function aplicarPreciosDinamicosACatalogo(catalogo, preciosPilotos = {}) {
-  const pilotosConPrecio = catalogo.pilotos.map((piloto) => {
-    const clave = construirClavePiloto(piloto)
-    const precioDinamico = preciosPilotos[clave]
-    if (precioDinamico == null) return piloto
-    return { ...piloto, precio: Math.max(0.5, Number(precioDinamico)) }
-  })
+// categoría. Si una carta no tiene precio dinámico, conserva su precio base.
+function aplicarPreciosDinamicosACatalogo(catalogo, preciosDinamicos = {}) {
+  const preciosPilotos = preciosDinamicos.pilotos || {}
+  const preciosCoches = preciosDinamicos.coches || {}
+  const preciosPotenciadores = preciosDinamicos.potenciadores || {}
 
-  return { ...catalogo, pilotos: pilotosConPrecio }
+  return {
+    ...catalogo,
+    pilotos: catalogo.pilotos.map((piloto) =>
+      sustituirPrecioSiExiste(piloto, preciosPilotos[construirClavePiloto(piloto)]),
+    ),
+    coches: catalogo.coches.map((coche) => sustituirPrecioSiExiste(coche, preciosCoches[coche.id])),
+    potenciadores: catalogo.potenciadores.map((potenciador) =>
+      sustituirPrecioSiExiste(potenciador, preciosPotenciadores[potenciador.id]),
+    ),
+  }
+}
+
+function sustituirPrecioSiExiste(carta, precioDinamico) {
+  if (precioDinamico == null) return carta
+  return { ...carta, precio: Math.max(0.5, Number(precioDinamico)) }
 }
 
 // Clave única de una carta de piloto: <numero>|<variante>. Sirve como
@@ -114,7 +134,7 @@ function elegirPilotosDelDia(cartasPiloto, clavesBloqueadas) {
 
 module.exports = {
   cargarCatalogo,
-  cargarPreciosPilotos,
+  cargarPreciosDinamicos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,
   sembrarCatalogoEnFirestore,

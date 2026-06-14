@@ -6,7 +6,6 @@ import { useConfirm } from 'primevue/useconfirm'
 
 import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
-import { usarBloqueoJornada } from '@/composables/usarBloqueoJornada'
 
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -24,8 +23,6 @@ const storeGaraje = usarStoreGaraje()
 const notificacion = useToast()
 const confirmar = useConfirm()
 
-const { jornadaIniciada, mensajeBloqueoJornada } = usarBloqueoJornada()
-
 const coches = computed(() =>
     props.modoRival ? (props.participacion?.garaje?.coches ?? []) : storeGaraje.garaje.coches
 )
@@ -38,22 +35,15 @@ const potenciadores = computed(() =>
 
 // ─── Modo propio ──────────────────────────────────────────────────────────────
 
-const notificarBloqueoJornada = () => {
-    notificacion.add({ severity: 'warn', summary: 'Jornada sin procesar', detail: mensajeBloqueoJornada, life: 4000 })
-}
 
 const dialogoProteccion = ref(false)
 const elementoProtegiendo = ref(null)
 const cantidadInversion = ref(1)
 
 const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
-const formatearPrecioActual = (carta) => Number(carta?.precio ?? 0).toFixed(2)
+const formatearValorMercado = (carta) => storeGaraje.obtenerValorMercado(carta).toFixed(2)
 
 const confirmarVentaCoche = (coche) => {
-    if (jornadaIniciada.value && coche.equipado) {
-        notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: 'No puedes vender un chasis alineado mientras la jornada no se haya procesado.', life: 5000 })
-        return
-    }
     const valorReventa = calcularValorReventa(coche.precio).toFixed(2)
     confirmar.require({
         icon: 'pi pi-exclamation-triangle',
@@ -73,10 +63,6 @@ const confirmarVentaCoche = (coche) => {
 }
 
 const confirmarVentaPiloto = (piloto) => {
-    if (jornadaIniciada.value && piloto.equipado) {
-        notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: 'No puedes despedir a un piloto titular mientras la jornada no se haya procesado.', life: 5000 })
-        return
-    }
     const valorReventa = calcularValorReventa(piloto.precio).toFixed(2)
     confirmar.require({
         icon: 'pi pi-user-minus',
@@ -96,19 +82,16 @@ const confirmarVentaPiloto = (piloto) => {
 }
 
 const alternarInstalacionPotenciador = async (idInstancia) => {
-    if (jornadaIniciada.value) { notificarBloqueoJornada(); return }
     const resultado = await storeGaraje.alternarPotenciador(idInstancia)
     if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
 }
 
 const alternarEquipoCoche = async (instanciaId) => {
-    if (jornadaIniciada.value) { notificarBloqueoJornada(); return }
     const resultado = await storeGaraje.alternarCoche(instanciaId)
     if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
 }
 
 const alternarEquipoPiloto = async (instanciaId) => {
-    if (jornadaIniciada.value) { notificarBloqueoJornada(); return }
     const resultado = await storeGaraje.alternarPiloto(instanciaId)
     if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
 }
@@ -135,16 +118,11 @@ const confirmarInversionClausula = async () => {
 // ─── Modo rival ───────────────────────────────────────────────────────────────
 
 const esFichajeDeshabilitado = (elemento) => {
-    if (jornadaIniciada.value) return true
     if (estaEnPeriodoDeGracia(elemento)) return true
     return calcularPrecioClausula(elemento) > storeGaraje.presupuesto
 }
 
 const confirmarEjecucionClausula = (elemento) => {
-    if (jornadaIniciada.value) {
-        notificacion.add({ severity: 'warn', summary: 'Jornada sin procesar', detail: mensajeBloqueoJornada, life: 4000 })
-        return
-    }
     const precioClausula = calcularPrecioClausula(elemento)
     confirmar.require({
         icon: 'pi pi-shield',
@@ -167,11 +145,6 @@ const confirmarEjecucionClausula = (elemento) => {
 <template>
     <div class="flex flex-col gap-6"
         :class="modoRival ? 'p-4 max-w-lg mx-auto' : 'w-full max-w-lg mx-auto mt-4 mb-24 px-3'">
-
-        <div v-if="jornadaIniciada"
-            class="px-3 py-2 bg-[#D4A843]/10 text-[10px] font-black uppercase tracking-widest text-[#D4A843] text-center">
-            {{ mensajeBloqueoJornada }}
-        </div>
 
         <!-- Cabecera del rival: nombre, puntos y última jornada -->
         <template v-if="modoRival && participacion">
@@ -229,8 +202,8 @@ const confirmarEjecucionClausula = (elemento) => {
                     <div class="flex flex-col gap-2 px-2 py-2 items-center">
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
                             <span v-if="!modoRival" class="text-zinc-400">
-                                Valor actual:
-                                <span class="font-black text-[#D4A843]">{{ formatearPrecioActual(coche) }}M</span>
+                                Valor de mercado:
+                                <span class="font-black text-[#D4A843]">{{ formatearValorMercado(coche) }}M</span>
                             </span>
                             <span class="text-zinc-400">
                                 Cláusula:
@@ -246,7 +219,6 @@ const confirmarEjecucionClausula = (elemento) => {
                         <div v-if="!modoRival" class="grid grid-cols-3 gap-1.5 w-full">
                             <Button :label="coche.equipado ? 'En uso' : 'Usar chasis'"
                                 @click="alternarEquipoCoche(coche.instancia_id)" size="small"
-                                :disabled="jornadaIniciada"
                                 :class="coche.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                                 :pt="{ label: { class: ['text-[10px] font-black uppercase tracking-wide', coche.equipado ? 'text-emerald-400' : 'text-zinc-300'] } }" />
                             <Button label="Proteger" @click="abrirDialogoProteccion(coche)" size="small"
@@ -294,8 +266,8 @@ const confirmarEjecucionClausula = (elemento) => {
                     <div class="flex flex-col gap-2 px-3 py-2 border-t border-zinc-800/70">
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
                             <span v-if="!modoRival" class="text-zinc-400">
-                                Valor actual:
-                                <span class="font-black text-[#D4A843]">{{ formatearPrecioActual(piloto) }}M</span>
+                                Valor de mercado:
+                                <span class="font-black text-[#D4A843]">{{ formatearValorMercado(piloto) }}M</span>
                             </span>
                             <span class="text-zinc-400">
                                 Cláusula de rescisión:
@@ -311,7 +283,6 @@ const confirmarEjecucionClausula = (elemento) => {
                         <div v-if="!modoRival" class="grid grid-cols-3 gap-1.5">
                             <Button :label="piloto.equipado ? 'Titular' : 'Hacer titular'"
                                 @click="alternarEquipoPiloto(piloto.instancia_id)" size="small"
-                                :disabled="jornadaIniciada"
                                 :class="piloto.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                                 :pt="{ label: { class: ['text-[10px] font-black uppercase tracking-wide', piloto.equipado ? 'text-emerald-400' : 'text-zinc-300'] } }" />
                             <Button label="Proteger" @click="abrirDialogoProteccion(piloto)" size="small"
@@ -357,9 +328,13 @@ const confirmarEjecucionClausula = (elemento) => {
                     <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
                     <div v-if="!modoRival"
                         class="flex flex-col gap-2 px-2 py-2 items-center border-t border-zinc-800/70">
+                        <span class="text-[11px] text-zinc-400">
+                            Valor de mercado:
+                            <span class="font-black text-[#D4A843]">{{ formatearValorMercado(potenciador) }}M</span>
+                        </span>
                         <Button :label="potenciador.equipado ? 'Instalado' : 'Instalar'"
                             @click="alternarInstalacionPotenciador(potenciador.instancia_id)" size="small"
-                            class="w-full" :disabled="jornadaIniciada"
+                            class="w-full"
                             :class="potenciador.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                             :pt="{ label: { class: ['text-[10px] font-black uppercase tracking-wide', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-300'] } }" />
                     </div>

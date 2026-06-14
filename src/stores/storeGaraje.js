@@ -8,6 +8,7 @@ import {
   alternarCartaEquipada,
   invertirEnClausulaCarta,
 } from '@/services/servicioGaraje'
+import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
 import { usarStoreNotificaciones } from './storeNotificaciones'
 
 const PRESUPUESTO_INICIAL = 50.0
@@ -46,6 +47,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
   const garaje = ref(crearGarajeVacio())
   const cargandoEquipo = ref(false)
   const ultimaJornada = ref(null)
+  const preciosMercado = ref({ pilotos: {}, coches: {}, potenciadores: {} })
 
   async function cargarEquipo(idLiga) {
     cargandoEquipo.value = true
@@ -53,10 +55,12 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
     try {
       idLigaActiva.value = idLiga
-      const participacion = await cargarParticipacionDeUsuario(
-        idLiga,
-        storeAutenticacion.usuarioActual.correoAutenticacion,
-      )
+      const [participacion, preciosDinamicos] = await Promise.all([
+        cargarParticipacionDeUsuario(idLiga, storeAutenticacion.usuarioActual.correoAutenticacion),
+        cargarPreciosDinamicosMercado(),
+      ])
+
+      preciosMercado.value = preciosDinamicos
 
       if (participacion) {
         idParticipanteActivo.value = participacion.id
@@ -177,6 +181,32 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
+  /**
+   * Devuelve el valor de mercado actualizado de una carta del garaje.
+   * Pilotos: consulta el mapa dinámico por `<numero>|<variante>`.
+   * Coches y potenciadores: consultan el mapa dinámico por `id`. Si la
+   * carta no aparece en el mapa, devuelve el precio almacenado en la propia
+   * carta como respaldo.
+   *
+   * @param {Object} carta Carta del garaje (piloto, coche o potenciador).
+   * @returns {number} Valor de mercado actual en millones.
+   */
+  function obtenerValorMercado(carta) {
+    const precioBase = Number(carta?.precio ?? 0)
+    const tipoCarta = carta?.tipo || carta?.tipoCarta
+    if (tipoCarta === 'piloto') {
+      const precioDinamico = preciosMercado.value.pilotos[`${carta.numero}|${carta.variante}`]
+      return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
+    }
+    const mapaPorTipo = {
+      coche: preciosMercado.value.coches,
+      potenciador: preciosMercado.value.potenciadores,
+    }
+    const mapa = mapaPorTipo[tipoCarta]
+    const precioDinamico = mapa ? mapa[carta.id] : null
+    return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
+  }
+
   function encontrarElementoEnGaraje(instanciaId) {
     const coche = garaje.value.coches.find((c) => c.instancia_id === instanciaId)
     if (coche) return coche
@@ -203,5 +233,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     ejecutarClausulaRival,
     alternarCoche,
     alternarPiloto,
+    obtenerValorMercado,
   }
 })

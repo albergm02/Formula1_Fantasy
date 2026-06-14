@@ -1,7 +1,3 @@
-const RANGO_PRECIO_PILOTOS = { min: 10, max: 26 }
-const RANGO_PRECIO_COCHES = { min: 10, max: 30 }
-const RANGO_PRECIO_POTENCIADORES = { min: 2, max: 5 }
-
 // prettier-ignore
 const pilotosBase = [
   /* ══════════ McLAREN ══════════ */
@@ -172,12 +168,12 @@ const perfilesPuntuacion = {
 
 // prettier-ignore
 const variantesPiloto = [
-  { variante: 'qualy',        perfil: 'qualy',        incrementoPrecio: 0, nombreHabilidad: 'Especialista en Qualy',      color: '#38bdf8', icono: 'pi-stopwatch'  },
-  { variante: 'carrera',      perfil: 'carrera',      incrementoPrecio: 0, nombreHabilidad: 'Especialista en Carrera',    color: '#f97316', icono: 'pi-flag-fill'  },
-  { variante: 'todo_terreno', perfil: 'todo_terreno', incrementoPrecio: 0, nombreHabilidad: 'Especialista Todo Terreno', color: '#a78bfa', icono: 'pi-cloud'      },
-  { variante: 'base',         perfil: 'base',         incrementoPrecio: 0, nombreHabilidad: 'Piloto Base',               color: '#a1a1aa', icono: 'pi-user'       },
-  { variante: 'remontador',   perfil: 'remontador',   incrementoPrecio: 0, nombreHabilidad: 'Remontador',               color: '#ef4444', icono: 'pi-arrow-up'   },
-  { variante: 'estratega',    perfil: 'estratega',    incrementoPrecio: 0, nombreHabilidad: 'Estratega',                color: '#10b981', icono: 'pi-chart-bar'  },
+  { variante: 'qualy',        perfil: 'qualy',        nombreHabilidad: 'Especialista en Qualy',     color: '#38bdf8', icono: 'pi-stopwatch'  },
+  { variante: 'carrera',      perfil: 'carrera',      nombreHabilidad: 'Especialista en Carrera',   color: '#f97316', icono: 'pi-flag-fill'  },
+  { variante: 'todo_terreno', perfil: 'todo_terreno', nombreHabilidad: 'Especialista Todo Terreno', color: '#a78bfa', icono: 'pi-cloud'      },
+  { variante: 'base',         perfil: 'base',         nombreHabilidad: 'Piloto Base',               color: '#a1a1aa', icono: 'pi-user'       },
+  { variante: 'remontador',   perfil: 'remontador',   nombreHabilidad: 'Remontador',                color: '#ef4444', icono: 'pi-arrow-up'   },
+  { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega',                 color: '#10b981', icono: 'pi-chart-bar'  },
 ]
 
 function calcularPuntuacionBase(atributos, pesos) {
@@ -202,14 +198,20 @@ function calcularPuntuacionBasePotenciador(mejoras = {}) {
   return Math.round((ritmo + consistencia + adaptabilidad + agresividad + gestion) * 10) / 10
 }
 
-function calcularPrecioPorPuntuacion(puntuacionBase, puntuacionMinima, puntuacionMaxima, rango) {
-  if (puntuacionMaxima <= puntuacionMinima) {
-    return Number(rango.min.toFixed(1))
-  }
-  const pesoNormalizado =
-    (puntuacionBase - puntuacionMinima) / (puntuacionMaxima - puntuacionMinima)
-  const precio = rango.min + pesoNormalizado * (rango.max - rango.min)
-  return Number(precio.toFixed(1))
+// Precios iniciales: cálculos directos sobre cada carta sin normalizar contra
+// el resto del catálogo. Se usan solo la primera vez que una carta sale al
+// mercado; a partir de ahí los precios dinámicos del documento Firestore
+// `catalogo/precios_*` reemplazan estos valores.
+function calcularPrecioInicialPiloto(puntuacionBase) {
+  return Math.round((puntuacionBase / 5) * 10) / 10
+}
+
+function calcularPrecioInicialCoche(coche) {
+  return Number(coche.puntos || 0)
+}
+
+function calcularPrecioInicialPotenciador(puntuacionBase) {
+  return Math.round((puntuacionBase / 10) * 10) / 10
 }
 
 function crearCartaPiloto(pilotoBase, variante) {
@@ -234,40 +236,35 @@ function crearCartaPiloto(pilotoBase, variante) {
   }
 }
 
-function aplicarPreciosNormalizados(cartas, rango) {
-  const puntuaciones = cartas.map((carta) => carta.puntuacionBase)
-  const minima = Math.min(...puntuaciones)
-  const maxima = Math.max(...puntuaciones)
-  return cartas.map((carta) => ({
-    ...carta,
-    precio: calcularPrecioPorPuntuacion(carta.puntuacionBase, minima, maxima, rango),
-  }))
-}
-
 /**
- * Construye el catálogo completo con precios calculados por puntuación normalizada.
+ * Construye el catálogo completo con precios iniciales derivados
+ * directamente de cada carta. Los precios dinámicos por pujas, almacenados en
+ * `catalogo/precios_*`, sobrescriben estos valores cuando existen.
+ *
  * @returns {{ pilotos: Array, coches: Array, potenciadores: Array }}
  */
 function construirCatalogoCompleto() {
-  const pilotosSinPrecio = pilotosBase.flatMap((pilotoBase) =>
-    variantesPiloto.map((variante) => crearCartaPiloto(pilotoBase, variante)),
+  const pilotos = pilotosBase.flatMap((pilotoBase) =>
+    variantesPiloto.map((variante) => {
+      const carta = crearCartaPiloto(pilotoBase, variante)
+      return { ...carta, precio: calcularPrecioInicialPiloto(carta.puntuacionBase) }
+    }),
   )
-  const pilotos = aplicarPreciosNormalizados(pilotosSinPrecio, RANGO_PRECIO_PILOTOS)
 
-  const cochesSinPrecio = cochesBase.map((coche) => ({
+  const coches = cochesBase.map((coche) => ({
     ...coche,
     puntuacionBase: coche.puntos || 0,
+    precio: calcularPrecioInicialCoche(coche),
   }))
-  const coches = aplicarPreciosNormalizados(cochesSinPrecio, RANGO_PRECIO_COCHES)
 
-  const potenciadoresSinPrecio = potenciadoresBase.map((potenciador) => ({
-    ...potenciador,
-    puntuacionBase: calcularPuntuacionBasePotenciador(potenciador.mejoras),
-  }))
-  const potenciadores = aplicarPreciosNormalizados(
-    potenciadoresSinPrecio,
-    RANGO_PRECIO_POTENCIADORES,
-  )
+  const potenciadores = potenciadoresBase.map((potenciador) => {
+    const puntuacionBase = calcularPuntuacionBasePotenciador(potenciador.mejoras)
+    return {
+      ...potenciador,
+      puntuacionBase,
+      precio: calcularPrecioInicialPotenciador(puntuacionBase),
+    }
+  })
 
   return { pilotos, coches, potenciadores }
 }

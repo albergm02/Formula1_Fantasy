@@ -17,7 +17,13 @@ export async function eliminarUsuarioComoAdministrador(uid) {
 
 export async function cargarListaLigas() {
   const snap = await getDocs(collection(db, 'ligas'))
-  return snap.docs.map((d) => ({ id: d.id, nombre: d.data().nombre || d.id }))
+  return snap.docs.map((d) => ({
+    id: d.id,
+    nombre: d.data().nombre || d.id,
+    organizador: d.data().correoOrganizador || '',
+    participantes: d.data().participantes ?? 0,
+    fechaCreacion: d.data().fecha_creacion?.toDate() ?? null,
+  }))
 }
 
 export async function cargarListaUsuarios() {

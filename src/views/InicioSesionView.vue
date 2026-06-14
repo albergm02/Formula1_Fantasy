@@ -73,7 +73,7 @@ const handleInicioSesion = async ({ valid, values }) => {
     } else if (error?.code === 'auth/too-many-requests') {
       errorAuth.value = 'Demasiados intentos. Inténtalo más tarde.'
     } else {
-      errorAuth.value = `Error al iniciar sesión: ${error?.message || 'Error desconocido.'}`
+      errorAuth.value = 'Correo o contraseña incorrectos.'
     }
   } finally {
     cargando.value = false
@@ -102,7 +102,8 @@ const handleInicioSesionGoogle = async () => {
     router.push('/registro-google')
   } catch (error) {
     if (error?.code !== 'auth/popup-closed-by-user') {
-      errorAuth.value = `Error al iniciar con Google: ${error?.message || 'Error desconocido.'}`
+      console.error('[InicioSesionGoogle] Error inesperado:', error)
+      errorAuth.value = 'No se ha podido iniciar sesión con Google. Inténtalo de nuevo.'
     }
   } finally {
     cargando.value = false

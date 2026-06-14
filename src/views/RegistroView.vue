@@ -58,18 +58,27 @@ const handleRegistro = async ({ valid, values }) => {
     await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.uid, credencialUsuario.user.email, nombreNormalizado)
     await cerrarSesion()
     storeAutenticacion.limpiarSesion()
-    notificacion.add({
-      severity: 'info',
-      summary: 'Cuenta creada',
-      detail: 'Se le ha enviado un mensaje de verificación a su cuenta de correo. Confírmalo antes de iniciar sesión.',
-      life: 8000,
-    })
+    notificarRegistroSolicitado()
     router.push('/')
   } catch (error) {
+    if (error?.code === 'auth/email-already-in-use') {
+      notificarRegistroSolicitado()
+      router.push('/')
+      return
+    }
     errorAutenticacion.value = mensajeErrorFirebase(error)
   } finally {
     cargando.value = false
   }
+}
+
+const notificarRegistroSolicitado = () => {
+  notificacion.add({
+    severity: 'info',
+    summary: 'Solicitud recibida',
+    detail: 'Si el correo no estaba registrado, recibirás un mensaje de verificación. Revisa tu bandeja de entrada antes de iniciar sesión.',
+    life: 8000,
+  })
 }
 </script>
 
