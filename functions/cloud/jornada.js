@@ -183,12 +183,15 @@ async function ejecutarProcesarJornada() {
   }
 }
 
-// Reintentos espaciados 30 min: la causa típica de fallo es que OpenF1 aún no
-// haya publicado los datos; insistir cada minuto solo consumiría cuota.
+// Se procesa el lunes (un día después de la carrera del domingo) para dar
+// tiempo a que OpenF1 consolide los resultados oficiales: posiciones
+// definitivas, abandonos (DNF) y sanciones ya aplicadas. Procesar el mismo
+// domingo capturaba datos provisionales (pilotos aún sin posición asignada o
+// con abandonos temporales que luego se reverían).
 exports.procesarJornadaSemanal = onSchedule(
   {
-    schedule: 'every day 17:00',
-    timeZone: 'UTC',
+    schedule: 'every monday 19:00',
+    timeZone: 'Europe/Madrid',
     region: REGION,
     retryCount: 3,
     minBackoffSeconds: 3600,

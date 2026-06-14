@@ -165,11 +165,38 @@ describe('Variante Estratega', () => {
 })
 
 describe('Variante Base', () => {
-  it('debería ser la media de los factores Qualy, Carrera y Todo Terreno', () => {
+  it('debería aplicar siempre factor 1, al margen de la actuación y las condiciones', () => {
     const actuacion = { posicionQualy: 2, posicionCarrera: 3 }
     const condiciones = { ...sinCondiciones, llovio: true }
-    // (1.5 + 1.3 + 1.0) / 3 = 1.27 (redondeado a 2 decimales)
-    expect(calcularFactorJornada(actuacion, condiciones, 'base')).toBe(1.27)
+    expect(calcularFactorJornada(actuacion, condiciones, 'base')).toBe(1.0)
+  })
+
+  it('debería mantener el factor 1 aunque el piloto haya abandonado o no tenga posición', () => {
+    const actuacion = { posicionQualy: 20, posicionCarrera: 99, dnf: true }
+    expect(calcularFactorJornada(actuacion, sinCondiciones, 'base')).toBe(1.0)
+  })
+})
+
+describe('Piloto No Clasificado (NC)', () => {
+  const pilotoNoClasificado = { posicionCarrera: 99, numeroAdelantos: 8, noClasificado: true }
+
+  it('debería anular Todo Terreno (0.5) aunque la carrera sea caótica', () => {
+    const condicionesCaoticas = { ...sinCondiciones, llovio: true, numeroDNFs: 4 }
+    expect(calcularFactorJornada(pilotoNoClasificado, condicionesCaoticas, 'todo_terreno')).toBe(
+      0.5,
+    )
+  })
+
+  it('debería anular Remontador (0.5) pese a sus adelantamientos', () => {
+    expect(calcularFactorJornada(pilotoNoClasificado, sinCondiciones, 'remontador')).toBe(0.5)
+  })
+
+  it('debería anular Estratega (0.5)', () => {
+    expect(calcularFactorJornada(pilotoNoClasificado, sinCondiciones, 'estratega')).toBe(0.5)
+  })
+
+  it('debería mantener el factor base en 1', () => {
+    expect(calcularFactorJornada(pilotoNoClasificado, sinCondiciones, 'base')).toBe(1.0)
   })
 })
 

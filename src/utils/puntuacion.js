@@ -21,10 +21,9 @@ export function calcularFactorJornada(actuacion, condiciones, variante) {
     return acotarFactor(calcularFactorEstrategia(actuacion))
   }
 
-  const factorQ = calcularFactorQualy(actuacion)
-  const factorC = calcularFactorCarrera(actuacion)
-  const factorT = calcularFactorTodoTerreno(condiciones)
-  return acotarFactor((factorQ + factorC + factorT) / 3)
+  // La carta base es neutra: nunca amplifica ni penaliza la puntuación.
+  // Su factor es siempre 1, al margen de la actuación y de las condiciones.
+  return 1.0
 }
 
 export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
@@ -47,10 +46,11 @@ function acotarFactor(factor) {
   return Math.round(factor * 100) / 100
 }
 
-// DNS/ABN/DSQ anulan Todo Terreno, Remontador y Estratega: ninguna tiene
-// sentido sin haber completado la carrera bajo condiciones reales.
+// DNS/ABN/DSQ y No Clasificado (NC) anulan Todo Terreno, Remontador y
+// Estratega: ninguna tiene sentido sin haber completado la carrera de forma
+// oficial bajo condiciones reales.
 function pilotoSinActuacionValida(actuacion) {
-  return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq)
+  return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq || actuacion?.noClasificado)
 }
 
 function calcularFactorQualy({ posicionQualy }) {

@@ -100,8 +100,7 @@ function formatearFecha(fecha) {
             :globalFilterFields="['nombre', 'email', 'uid']" dataKey="uid" paginator :rows="8" removableSort stripedRows
             class="text-sm">
             <template #header>
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="flex items-center gap-2 font-semibold" />
+                <div class="flex flex-wrap items-left gap-2">
                     <IconField>
                         <InputIcon class="pi pi-search" />
                         <InputText v-model="filtroUsuarios.global.value" placeholder="Buscar usuario..." />
@@ -117,7 +116,7 @@ function formatearFecha(fecha) {
             </Column>
             <Column class="w-12">
                 <template #body="{ data }">
-                    <Button icon="pi pi-trash" severity="danger" text rounded @click="eliminarUsuario(data)" />
+                    <Button icon="pi pi-trash" severity="danger" @click="eliminarUsuario(data)" />
                 </template>
             </Column>
         </DataTable>
@@ -126,10 +125,7 @@ function formatearFecha(fecha) {
             :globalFilterFields="['nombre', 'organizador', 'id']" dataKey="id" paginator :rows="8" removableSort
             stripedRows class="text-sm">
             <template #header>
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="flex items-center gap-2 font-semibold">
-                        <i class="pi pi-trophy text-red-500" /> Ligas
-                    </span>
+                <div class="flex flex-wrap items-left justify-between gap-2">
                     <IconField>
                         <InputIcon class="pi pi-search" />
                         <InputText v-model="filtroLigas.global.value" placeholder="Buscar liga..." />
@@ -146,7 +142,7 @@ function formatearFecha(fecha) {
             </Column>
             <Column class="w-12">
                 <template #body="{ data }">
-                    <Button icon="pi pi-trash" severity="danger" text rounded @click="eliminarLiga(data)" />
+                    <Button icon="pi pi-trash" severity="danger" @click="eliminarLiga(data)" />
                 </template>
             </Column>
         </DataTable>

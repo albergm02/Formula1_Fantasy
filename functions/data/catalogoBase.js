@@ -135,10 +135,9 @@ const perfilesPuntuacion = {
   base: {
     pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 },
     reglasUsuario: [
-      'Media de los factores Qualy, Carrera y Todo Terreno:',
-      'Factor = (factorQualy + factorCarrera + factorTodoTerreno) / 3',
-      'Perfil equilibrado sin especialización.',
-      'Factor acotado al rango 0.50 – 1.50.',
+      'Carta neutra, sin especialización.',
+      'Factor de jornada fijo: ×1.00 pase lo que pase.',
+      'Siempre puntúa su puntuación base, sin bonus ni penalización por la carrera.',
     ],
   },
   remontador: {

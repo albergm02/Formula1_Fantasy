@@ -47,8 +47,8 @@ const EJEMPLOS_VARIANTE = {
         calculo: 'Factor = 0.70 + 0.30 + 0.15 + 0.05 = 1.20 -> 70 × 1.20 = 84 pts. Si no sale (N/S), abandona (ABN) o es descalificado (DESC), el factor cae a 0.50 -> 70 × 0.50 = 35 pts.',
     },
     base: {
-        escenario: 'Piloto con base 66 cuando los factores Qualy/Carrera/Todo Terreno son 1.20, 1.10 y 1.00.',
-        calculo: 'Factor = (1.20 + 1.10 + 1.00) / 3 = 1.10 -> 66 × 1.10 = 72,6 pts (73).',
+        escenario: 'Piloto con base 66, sin importar cómo le vaya en la carrera.',
+        calculo: 'Factor fijo = ×1.00 -> 66 × 1.00 = 66 pts. La carta base nunca amplifica ni penaliza la puntuación.',
     },
 }
 
@@ -133,6 +133,7 @@ function obtenerEstadoCarrera(actuacion) {
     if (actuacion?.dsq) return 'DESC'
     if (actuacion?.dns) return 'N/S'
     if (actuacion?.dnf) return 'ABN'
+    if (actuacion?.noClasificado) return 'NC'
     return null
 }
 

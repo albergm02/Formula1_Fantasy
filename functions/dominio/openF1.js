@@ -263,12 +263,14 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const actuacionesPorPiloto = {}
 
-  // DNFs/DNS/DSQ desde resultados completos (sin posición final).
+  // Pilotos sin posición final en /session_result: abandono (DNF), no salida
+  // (DNS), descalificación (DSQ) o No Clasificado (NC).
   for (const fila of resultadosCompletosCarrera) {
     const numeroPiloto = fila.driver_number
     if (numeroPiloto == null) continue
     if (resultadosCarrera[numeroPiloto] != null) continue
 
+    const noClasificado = fila.dnf !== true && fila.dns !== true && fila.dsq !== true
     const stintsPiloto = datosStints[numeroPiloto] || { porcentajeStintMaximo: 0 }
     actuacionesPorPiloto[numeroPiloto] = {
       posicionQualy: resultadosQualy[numeroPiloto] || 20,
@@ -281,6 +283,7 @@ async function recopilarDatosGranPremio(meetingKey) {
       dnf: fila.dnf === true,
       dns: fila.dns === true,
       dsq: fila.dsq === true,
+      noClasificado,
     }
   }
 
@@ -300,6 +303,7 @@ async function recopilarDatosGranPremio(meetingKey) {
         dnf: false,
         dns: false,
         dsq: false,
+        noClasificado: false,
       }
     }
   }
@@ -319,6 +323,7 @@ async function recopilarDatosGranPremio(meetingKey) {
       dnf: true,
       dns: false,
       dsq: false,
+      noClasificado: false,
     }
   }
 

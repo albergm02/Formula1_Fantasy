@@ -89,6 +89,17 @@ const casosDeJornada = [
     },
     variante: 'todo_terreno',
   },
+  {
+    nombre: 'Piloto No Clasificado (NC) en variante Estratega',
+    actuacion: {
+      posicionCarrera: 99,
+      numeroPitStops: 1,
+      porcentajeStintMaximo: 0.5,
+      noClasificado: true,
+    },
+    condiciones: sinCondiciones,
+    variante: 'estratega',
+  },
 ]
 
 describe('Coherencia entre cliente y servidor', () => {
