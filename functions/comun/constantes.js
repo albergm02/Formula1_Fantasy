@@ -8,7 +8,7 @@ const OPCIONES = { region: REGION, enforceAppCheck: true }
 // pero se mantiene App Check para verificar el origen.
 const OPCIONES_PUBLICAS = { region: REGION, invoker: 'public', enforceAppCheck: true }
 
-// Debe coincidir con servicioClausulas.js del cliente.
+// Debe coincidir con servicioGaraje.js del cliente.
 const HORAS_PERIODO_GRACIA = 48
 
 // Aplicado en servidor para que un cliente manipulado no pueda saltárselo.

@@ -7,9 +7,9 @@ import { usarStoreMercado } from '@/stores/storeMercado'
 import { usarStoreLigas } from '@/stores/storeLigas'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 import Cabecera from '@/components/Cabecera.vue'
-import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
-import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
-import TarjetaCoche from '@/components/TarjetaCoche.vue'
+import CartaPiloto from '@/components/CartaPiloto.vue'
+import CartaPotenciador from '@/components/CartaPotenciador.vue'
+import CartaCoche from '@/components/CartaCoche.vue'
 
 const storeGaraje = usarStoreGaraje()
 const storeMercado = usarStoreMercado()
@@ -81,7 +81,7 @@ const manejarEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <TarjetaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
+          <CartaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
             :miPuja="storeMercado.misPujas[coche.id] || null"
             :totalPujas="storeMercado.resumenPujas[coche.id]?.totalPujas || 0" @pujar="manejarPuja"
             @eliminarPuja="manejarEliminarPuja" />
@@ -93,7 +93,7 @@ const manejarEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <TarjetaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto"
+          <CartaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto"
             :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
             :totalPujas="storeMercado.resumenPujas[piloto.id]?.totalPujas || 0" @pujar="manejarPuja"
             @eliminarPuja="manejarEliminarPuja" />
@@ -104,7 +104,7 @@ const manejarEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <TarjetaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
+          <CartaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
             :potenciador="potenciador" :modoMercado="true" :miPuja="storeMercado.misPujas[potenciador.id] || null"
             :totalPujas="storeMercado.resumenPujas[potenciador.id]?.totalPujas || 0" @pujar="manejarPuja"
             @eliminarPuja="manejarEliminarPuja" />

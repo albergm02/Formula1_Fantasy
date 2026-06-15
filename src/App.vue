@@ -1,17 +1,17 @@
-﻿<script setup>
+<script setup>
 import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
-import GestorPWA from '@/components/GestorPWA.vue'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { usarStoreUsuario } from '@/stores/storeUsuario'
+import { usarStorePerfil } from '@/stores/storePerfil'
 import { usarStoreLigas } from '@/stores/storeLigas'
-import { escucharCambioEstadoAutenticacion, escucharPerfilUsuario } from '@/services/servicioAutenticacion'
+import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
+import { escucharPerfilUsuario } from '@/services/servicioPerfil'
 
 const storeAutenticacion = usarStoreAutenticacion()
-const storeUsuario = usarStoreUsuario()
+const storePerfil = usarStorePerfil()
 const storeLigas = usarStoreLigas()
 const router = useRouter()
 
@@ -33,12 +33,12 @@ onMounted(() => {
         if (!storeAutenticacion.datosCargados) return
 
         const idsNuevos = datosPerfil.ligasIds || []
-        const idsAnteriores = storeUsuario.usuarioActual.idsLigas
+        const idsAnteriores = storePerfil.usuarioActual.idsLigas
         const ligasEliminadas = idsAnteriores.filter((id) => !idsNuevos.includes(id))
 
         if (ligasEliminadas.length === 0) return
 
-        storeUsuario.actualizarIdsLigas(idsNuevos)
+        storePerfil.actualizarIdsLigas(idsNuevos)
         await storeLigas.cargarLigasUsuario()
 
         if (ligasEliminadas.includes(storeLigas.idLigaActiva)) {
@@ -67,8 +67,6 @@ onUnmounted(() => {
     footer: { class: '!bg-transparent gap-2 flex justify-end' },
     icon: { class: '!text-[#E10600]' },
   }" />
-
-  <GestorPWA />
 
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
     <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>

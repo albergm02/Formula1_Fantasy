@@ -1,25 +1,28 @@
-﻿import { ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { cargarPerfilUsuario, crearPerfilUsuario } from '@/services/servicioAutenticacion'
-import { migrarCorreoUsuario } from '@/services/servicioPerfil'
+import {
+  cargarPerfilUsuario,
+  crearPerfilUsuario,
+  migrarCorreoUsuario,
+} from '@/services/servicioPerfil'
 import { auth } from '@/services/servicioFirebase'
-import { usarStoreUsuario } from '@/stores/storeUsuario'
+import { usarStorePerfil } from '@/stores/storePerfil'
 
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const perfilExiste = ref(false)
   const datosCargados = ref(false)
 
   async function cargarOCrearPerfil(uid, correoUsuario, nombreUsuario = '') {
-    const storeUsuario = usarStoreUsuario()
+    const storePerfil = usarStorePerfil()
     datosCargados.value = false
-    storeUsuario.usuarioActual.uid = uid
-    storeUsuario.usuarioActual.correoAutenticacion = correoUsuario
+    storePerfil.usuarioActual.uid = uid
+    storePerfil.usuarioActual.correoAutenticacion = correoUsuario
 
     try {
       const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
-        storeUsuario.establecerDatosUsuario({
+        storePerfil.establecerDatosUsuario({
           uid,
           correo: correoUsuario,
           nombre: datosPerfil.nombre || 'Piloto',
@@ -31,7 +34,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
       }
 
       await crearPerfilUsuario(uid, correoUsuario, nombreUsuario)
-      storeUsuario.establecerDatosUsuario({
+      storePerfil.establecerDatosUsuario({
         uid,
         correo: correoUsuario,
         nombre: nombreUsuario,
@@ -54,17 +57,17 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   }
 
   async function verificarExistenciaPerfil(uid, correoUsuario) {
-    const storeUsuario = usarStoreUsuario()
+    const storePerfil = usarStorePerfil()
     datosCargados.value = false
-    storeUsuario.usuarioActual.uid = uid
-    storeUsuario.usuarioActual.correoAutenticacion = correoUsuario
+    storePerfil.usuarioActual.uid = uid
+    storePerfil.usuarioActual.correoAutenticacion = correoUsuario
 
     try {
       const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
         await reconciliarCorreoMigrado(correoUsuario, datosPerfil.correoAutenticacion)
-        storeUsuario.establecerDatosUsuario({
+        storePerfil.establecerDatosUsuario({
           uid,
           correo: correoUsuario,
           nombre: datosPerfil.nombre || 'Piloto',
@@ -75,7 +78,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
         return true
       }
 
-      storeUsuario.establecerDatosUsuario({
+      storePerfil.establecerDatosUsuario({
         uid,
         correo: correoUsuario,
         nombre: '',
@@ -90,9 +93,9 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   }
 
   function limpiarSesion() {
-    const storeUsuario = usarStoreUsuario()
+    const storePerfil = usarStorePerfil()
     datosCargados.value = false
-    storeUsuario.limpiarDatosUsuario()
+    storePerfil.limpiarDatosUsuario()
     perfilExiste.value = false
     datosCargados.value = true
   }

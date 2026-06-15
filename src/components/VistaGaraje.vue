@@ -10,9 +10,9 @@ import { usarStoreGaraje } from '@/stores/storeGaraje'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
-import TarjetaCoche from '@/components/TarjetaCoche.vue'
-import TarjetaPiloto from '@/components/TarjetaPiloto.vue'
-import TarjetaPotenciador from '@/components/TarjetaPotenciador.vue'
+import CartaCoche from '@/components/CartaCoche.vue'
+import CartaPiloto from '@/components/CartaPiloto.vue'
+import CartaPotenciador from '@/components/CartaPotenciador.vue'
 
 const props = defineProps({
     modoRival: { type: Boolean, default: false },
@@ -168,10 +168,10 @@ const confirmarEjecucionClausula = (elemento) => {
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Última
                             jornada</span>
                         <span class="text-sm font-bold text-white">{{ participacion.ultimaJornada.nombreGranPremio
-                        }}</span>
+                            }}</span>
                     </div>
                     <span class="text-2xl font-black text-[#D4A843]">+{{ participacion.ultimaJornada.puntosJornada
-                    }}</span>
+                        }}</span>
                 </div>
                 <div v-if="participacion.ultimaJornada.sinergias?.length" class="flex flex-wrap gap-1.5">
                     <span v-for="(sinergia, idx) in participacion.ultimaJornada.sinergias" :key="idx"
@@ -197,7 +197,7 @@ const confirmarEjecucionClausula = (elemento) => {
 
             <div v-if="coches.length > 0" class="grid grid-cols-1 gap-3">
                 <article v-for="coche in coches" :key="coche.instancia_id" class="flex flex-col bg-[#121218]">
-                    <TarjetaCoche :coche="coche" :modoMercado="false" />
+                    <CartaCoche :coche="coche" :modoMercado="false" />
 
                     <div class="flex flex-col gap-2 px-2 py-2 items-center">
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
@@ -208,7 +208,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="text-zinc-400">
                                 Cláusula:
                                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(coche).toFixed(1)
-                                }}M</span>
+                                    }}M</span>
                             </span>
                             <span v-if="estaEnPeriodoDeGracia(coche)"
                                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
@@ -261,7 +261,7 @@ const confirmarEjecucionClausula = (elemento) => {
             <div v-if="pilotos.length > 0" class="grid grid-cols-1 gap-3">
                 <article v-for="piloto in pilotos" :key="piloto.instancia_id"
                     class="flex flex-col bg-[#121218] border border-zinc-800">
-                    <TarjetaPiloto :piloto="piloto" :modoMercado="false" />
+                    <CartaPiloto :piloto="piloto" :modoMercado="false" />
 
                     <div class="flex flex-col gap-2 px-3 py-2 border-t border-zinc-800/70">
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
@@ -272,7 +272,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="text-zinc-400">
                                 Cláusula de rescisión:
                                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(piloto).toFixed(1)
-                                }}M</span>
+                                    }}M</span>
                             </span>
                             <span v-if="estaEnPeriodoDeGracia(piloto)"
                                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
@@ -325,7 +325,7 @@ const confirmarEjecucionClausula = (elemento) => {
             <div v-if="potenciadores.length > 0" class="grid grid-cols-1 gap-3">
                 <article v-for="potenciador in potenciadores" :key="potenciador.instancia_id"
                     class="flex flex-col bg-[#121218] border border-zinc-800">
-                    <TarjetaPotenciador :potenciador="potenciador" :modoMercado="false" />
+                    <CartaPotenciador :potenciador="potenciador" :modoMercado="false" />
                     <div v-if="!modoRival"
                         class="flex flex-col gap-2 px-2 py-2 items-center border-t border-zinc-800/70">
                         <span class="text-[11px] text-zinc-400">

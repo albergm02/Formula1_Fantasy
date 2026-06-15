@@ -5,7 +5,7 @@ import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
 import { usarStoreLigas } from '@/stores/storeLigas'
-import { usarStoreUsuario } from '@/stores/storeUsuario'
+import { usarStorePerfil } from '@/stores/storePerfil'
 
 import Cabecera from '@/components/Cabecera.vue'
 
@@ -16,7 +16,7 @@ import Dialog from 'primevue/dialog'
 import DataView from 'primevue/dataview'
 
 const storeLigas = usarStoreLigas()
-const storeUsuario = usarStoreUsuario()
+const storePerfil = usarStorePerfil()
 const router = useRouter()
 const notificacion = useToast()
 const confirmar = useConfirm()
@@ -293,7 +293,7 @@ const handleEliminarLiga = () => {
 
         <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
           @click="handleAbandonarLiga" :loading="cargandoAccion" />
-        <template v-if="ligaSeleccionada.correoOrganizador === storeUsuario.usuarioActual.correoAutenticacion">
+        <template v-if="ligaSeleccionada.correoOrganizador === storePerfil.usuarioActual.correoAutenticacion">
           <Button label="GESTIONAR PARTICIPANTES" class="w-full !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
             @click="abrirGestionParticipantes" :loading="cargandoAccion" />
           <Button label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
@@ -313,7 +313,7 @@ const handleEliminarLiga = () => {
             <span class="font-black text-white uppercase text-sm">{{ participante.nombre_usuario }}</span>
             <span class="text-[10px] text-[#D4A843] uppercase font-bold">{{ participante.rol }}</span>
           </div>
-          <Button v-if="participante.email_usuario !== storeUsuario.usuarioActual.correoAutenticacion"
+          <Button v-if="participante.email_usuario !== storePerfil.usuarioActual.correoAutenticacion"
             icon="pi pi-user-minus" class="!bg-[#E10600] !border-none !text-white" :loading="cargandoAccion"
             @click="handleExpulsarParticipante(participante)" />
         </div>

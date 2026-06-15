@@ -2,17 +2,19 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { usarStoreUsuario } from '@/stores/storeUsuario'
+import { usarStorePerfil } from '@/stores/storePerfil'
 
+import {
+    cerrarSesion,
+    mensajeErrorFirebase,
+} from '@/services/servicioAutenticacion'
 import {
     cargarPerfilUsuario,
     reautenticarUsuario,
     solicitarRestablecimientoContrasena,
     solicitarCambioCorreo,
-    cerrarSesion,
-    mensajeErrorFirebase,
-} from '@/services/servicioAutenticacion'
-import { eliminarMiCuenta } from '@/services/servicioPerfil'
+    eliminarMiCuenta,
+} from '@/services/servicioPerfil'
 
 import Cabecera from '@/components/Cabecera.vue'
 
@@ -26,7 +28,7 @@ import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
-const storeUsuario = usarStoreUsuario()
+const storePerfil = usarStorePerfil()
 const toast = useToast()
 
 const puedeUsarContrasena = storeAutenticacion.tieneSesionConContrasena
@@ -48,7 +50,7 @@ const diasRestantesParaCambiarCorreo = computed(() =>
 )
 
 async function cargarMetadatosPerfil() {
-    const datos = await cargarPerfilUsuario(storeUsuario.usuarioActual.uid)
+    const datos = await cargarPerfilUsuario(storePerfil.usuarioActual.uid)
     fechaUltimoCambioCorreo.value =
         datos.fechaUltimoCambioCorreo ? datos.fechaUltimoCambioCorreo.toDate() : null
 }
@@ -109,7 +111,7 @@ function validarSolicitudCorreo() {
         toast.add({ severity: 'warn', summary: 'Los correos no coinciden', detail: 'Ambos campos deben tener el mismo correo.', life: 4000 })
         return false
     }
-    if (correoLimpio === storeUsuario.usuarioActual.correoAutenticacion.toLowerCase()) {
+    if (correoLimpio === storePerfil.usuarioActual.correoAutenticacion.toLowerCase()) {
         toast.add({ severity: 'warn', summary: 'Mismo correo', detail: 'Introduce un correo distinto al actual.', life: 4000 })
         return false
     }
@@ -209,19 +211,19 @@ function mensajeFirebase(error) {
                         <div>
                             <p class="text-[10px] text-zinc-500 uppercase">Nombre de usuario</p>
                             <p class="font-bold text-white">
-                                {{ storeUsuario.usuarioActual.nombreVisible }}
+                                {{ storePerfil.usuarioActual.nombreVisible }}
                             </p>
                         </div>
                         <div>
                             <p class="text-[10px] text-zinc-500 uppercase">Correo asociado</p>
                             <p class="font-bold text-white break-all">
-                                {{ storeUsuario.usuarioActual.correoAutenticacion }}
+                                {{ storePerfil.usuarioActual.correoAutenticacion }}
                             </p>
                         </div>
                         <div>
                             <p class="text-[10px] text-zinc-500 uppercase">Ligas activas</p>
                             <p class="font-bold text-white">
-                                {{ storeUsuario.usuarioActual.idsLigas.length }}
+                                {{ storePerfil.usuarioActual.idsLigas.length }}
                             </p>
                         </div>
                         <div v-if="puedeUsarContrasena">
@@ -269,7 +271,7 @@ function mensajeFirebase(error) {
                 <div>
                     <p class="text-[10px] text-zinc-500 uppercase">Correo de la cuenta</p>
                     <p class="font-bold text-white break-all">
-                        {{ storeUsuario.usuarioActual.correoAutenticacion }}
+                        {{ storePerfil.usuarioActual.correoAutenticacion }}
                     </p>
                 </div>
                 <div class="flex justify-end gap-2 mt-2">

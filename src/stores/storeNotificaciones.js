@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { usarStoreUsuario } from './storeUsuario'
+import { usarStorePerfil } from './storePerfil'
 import { usarStoreLigas } from './storeLigas'
 import {
   cargarActividadLiga,
@@ -9,7 +9,7 @@ import {
 } from '@/services/servicioNotificaciones'
 
 export const usarStoreNotificaciones = defineStore('notificaciones', () => {
-  const storeUsuario = usarStoreUsuario()
+  const storePerfil = usarStorePerfil()
   const storeLigas = usarStoreLigas()
 
   const actividad = ref([])
@@ -37,7 +37,7 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
 
   async function registrarFichaje(nombreElemento, tipoElemento, precioElemento) {
     const idLiga = storeLigas.idLigaActiva
-    const nombreUsuario = storeUsuario.usuarioActual.nombreVisible
+    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
       nombreUsuario,
@@ -50,7 +50,7 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
 
   async function registrarVenta(nombreElemento, tipoElemento) {
     const idLiga = storeLigas.idLigaActiva
-    const nombreUsuario = storeUsuario.usuarioActual.nombreVisible
+    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
       nombreUsuario,
@@ -63,7 +63,7 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
 
   async function registrarIncorporacion(nombreLiga) {
     const idLiga = storeLigas.idLigaActiva
-    const nombreUsuario = storeUsuario.usuarioActual.nombreVisible
+    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
       nombreUsuario,
@@ -75,7 +75,7 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
   }
 
   async function registrarAbandono(idLiga, nombreLiga) {
-    const nombreUsuario = storeUsuario.usuarioActual.nombreVisible
+    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
       nombreUsuario,
@@ -85,7 +85,7 @@ export const usarStoreNotificaciones = defineStore('notificaciones', () => {
   }
 
   async function registrarCreacionLiga(idLiga, nombreLiga) {
-    const nombreUsuario = storeUsuario.usuarioActual.nombreVisible
+    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
       nombreUsuario,
