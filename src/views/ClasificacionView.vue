@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
 import { usarStoreLigas } from '@/stores/storeLigas'
-import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
@@ -15,7 +15,7 @@ import WidgetDesgloseJornada from '@/components/WidgetDesgloseJornada.vue'
 import Dialog from 'primevue/dialog'
 
 const storeLigas = usarStoreLigas()
-const storeAutenticacion = usarStoreAutenticacion()
+const storeUsuario = usarStoreUsuario()
 const storeGaraje = usarStoreGaraje()
 const ruta = useRoute()
 const toast = useToast()
@@ -45,7 +45,7 @@ async function cargarClasificacion() {
 }
 
 async function verEquipoRival(jugador) {
-  const esUsuarioActual = jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion
+  const esUsuarioActual = jugador.correo === storeUsuario.usuarioActual.correoAutenticacion
   if (esUsuarioActual) return
 
   cargandoRival.value = true
@@ -90,7 +90,7 @@ onMounted(async () => {
       <div v-else class="flex flex-col gap-3">
         <div v-for="(jugador, indice) in ranking" :key="jugador.id"
           class="flex items-center justify-between p-4 border border-white transition-colors" :class="{
-            '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion,
+            '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storeUsuario.usuarioActual.correoAutenticacion,
           }" @click="verEquipoRival(jugador)">
           <div class="flex items-center gap-4">
             <div class="relative -top-4 text-2xl font-black italic" :class="{
@@ -101,7 +101,7 @@ onMounted(async () => {
             }">{{ indice + 1 }}º</div>
             <div class="flex flex-col">
               <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
-              <span v-if="jugador.correo === storeAutenticacion.usuarioActual.correoAutenticacion"
+              <span v-if="jugador.correo === storeUsuario.usuarioActual.correoAutenticacion"
                 class="mt-1 text-xs text-[#F0ECEC]">
                 Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2)
                 }}M</span>
@@ -117,7 +117,7 @@ onMounted(async () => {
               <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
               <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
             </div>
-            <i v-if="jugador.correo !== storeAutenticacion.usuarioActual.correoAutenticacion"
+            <i v-if="jugador.correo !== storeUsuario.usuarioActual.correoAutenticacion"
               class="pi pi-eye text-zinc-500 text-sm"></i>
           </div>
         </div>

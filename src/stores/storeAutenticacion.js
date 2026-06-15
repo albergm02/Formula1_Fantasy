@@ -3,37 +3,41 @@ import { defineStore } from 'pinia'
 import { cargarPerfilUsuario, crearPerfilUsuario } from '@/services/servicioAutenticacion'
 import { migrarCorreoUsuario } from '@/services/servicioPerfil'
 import { auth } from '@/services/servicioFirebase'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
-  const usuarioActual = ref({
-    uid: '',
-    correoAutenticacion: '',
-    nombreVisible: '',
-    idsLigas: [],
-  })
   const perfilExiste = ref(false)
   const datosCargados = ref(false)
-  const esAdministrador = ref(false)
 
   async function cargarOCrearPerfil(uid, correoUsuario, nombreUsuario = '') {
+    const storeUsuario = usarStoreUsuario()
     datosCargados.value = false
-    usuarioActual.value.uid = uid
-    usuarioActual.value.correoAutenticacion = correoUsuario
+    storeUsuario.usuarioActual.uid = uid
+    storeUsuario.usuarioActual.correoAutenticacion = correoUsuario
 
     try {
       const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
-        usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
-        usuarioActual.value.idsLigas = datosPerfil.ligasIds || []
-        esAdministrador.value = datosPerfil.esAdministrador === true
+        storeUsuario.establecerDatosUsuario({
+          uid,
+          correo: correoUsuario,
+          nombre: datosPerfil.nombre || 'Piloto',
+          idsLigas: datosPerfil.ligasIds || [],
+          esAdmin: datosPerfil.esAdministrador === true,
+        })
         perfilExiste.value = true
         return
       }
 
       await crearPerfilUsuario(uid, correoUsuario, nombreUsuario)
-      usuarioActual.value.nombreVisible = nombreUsuario
-      usuarioActual.value.idsLigas = []
+      storeUsuario.establecerDatosUsuario({
+        uid,
+        correo: correoUsuario,
+        nombre: nombreUsuario,
+        idsLigas: [],
+        esAdmin: false,
+      })
       perfilExiste.value = true
     } finally {
       datosCargados.value = true
@@ -50,24 +54,34 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   }
 
   async function verificarExistenciaPerfil(uid, correoUsuario) {
+    const storeUsuario = usarStoreUsuario()
     datosCargados.value = false
-    usuarioActual.value.uid = uid
-    usuarioActual.value.correoAutenticacion = correoUsuario
+    storeUsuario.usuarioActual.uid = uid
+    storeUsuario.usuarioActual.correoAutenticacion = correoUsuario
 
     try {
       const datosPerfil = await cargarPerfilUsuario(uid)
 
       if (datosPerfil.correoAutenticacion) {
         await reconciliarCorreoMigrado(correoUsuario, datosPerfil.correoAutenticacion)
-        usuarioActual.value.nombreVisible = datosPerfil.nombre || 'Piloto'
-        usuarioActual.value.idsLigas = datosPerfil.ligasIds || []
-        esAdministrador.value = datosPerfil.esAdministrador === true
+        storeUsuario.establecerDatosUsuario({
+          uid,
+          correo: correoUsuario,
+          nombre: datosPerfil.nombre || 'Piloto',
+          idsLigas: datosPerfil.ligasIds || [],
+          esAdmin: datosPerfil.esAdministrador === true,
+        })
         perfilExiste.value = true
         return true
       }
 
-      usuarioActual.value.nombreVisible = ''
-      usuarioActual.value.idsLigas = []
+      storeUsuario.establecerDatosUsuario({
+        uid,
+        correo: correoUsuario,
+        nombre: '',
+        idsLigas: [],
+        esAdmin: false,
+      })
       perfilExiste.value = false
       return false
     } finally {
@@ -76,20 +90,11 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   }
 
   function limpiarSesion() {
+    const storeUsuario = usarStoreUsuario()
     datosCargados.value = false
-    usuarioActual.value = {
-      uid: '',
-      correoAutenticacion: '',
-      nombreVisible: '',
-      idsLigas: [],
-    }
+    storeUsuario.limpiarDatosUsuario()
     perfilExiste.value = false
-    esAdministrador.value = false
     datosCargados.value = true
-  }
-
-  function actualizarIdsLigas(idsNuevos) {
-    usuarioActual.value.idsLigas = idsNuevos
   }
 
   const tieneSesionConContrasena = computed(
@@ -97,14 +102,11 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   )
 
   return {
-    usuarioActual,
     perfilExiste,
     datosCargados,
-    esAdministrador,
     tieneSesionConContrasena,
     cargarOCrearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,
-    actualizarIdsLigas,
   }
 })

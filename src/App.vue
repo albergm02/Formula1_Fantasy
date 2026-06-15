@@ -6,10 +6,12 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import GestorPWA from '@/components/GestorPWA.vue'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { escucharCambioEstadoAutenticacion, escucharPerfilUsuario } from '@/services/servicioAutenticacion'
 
 const storeAutenticacion = usarStoreAutenticacion()
+const storeUsuario = usarStoreUsuario()
 const storeLigas = usarStoreLigas()
 const router = useRouter()
 
@@ -31,12 +33,12 @@ onMounted(() => {
         if (!storeAutenticacion.datosCargados) return
 
         const idsNuevos = datosPerfil.ligasIds || []
-        const idsAnteriores = storeAutenticacion.usuarioActual.idsLigas
+        const idsAnteriores = storeUsuario.usuarioActual.idsLigas
         const ligasEliminadas = idsAnteriores.filter((id) => !idsNuevos.includes(id))
 
         if (ligasEliminadas.length === 0) return
 
-        storeAutenticacion.actualizarIdsLigas(idsNuevos)
+        storeUsuario.actualizarIdsLigas(idsNuevos)
         await storeLigas.cargarLigasUsuario()
 
         if (ligasEliminadas.includes(storeLigas.idLigaActiva)) {

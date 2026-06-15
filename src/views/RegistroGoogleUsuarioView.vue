@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 
 import { cerrarSesion } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
@@ -22,6 +23,7 @@ const esquemaValidacion = zodResolver(
 
 const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
+const storeUsuario = usarStoreUsuario()
 
 const cargando = ref(false)
 const errorAutenticacion = ref('')
@@ -36,13 +38,13 @@ const handleCompletarPerfil = async ({ valid, values }) => {
   errorAutenticacion.value = ''
 
   try {
-    if (!storeAutenticacion.usuarioActual.correoAutenticacion) {
+    if (!storeUsuario.usuarioActual.correoAutenticacion) {
       throw new Error('No se encontró una sesión válida de Google.')
     }
 
     await storeAutenticacion.cargarOCrearPerfil(
-      storeAutenticacion.usuarioActual.uid,
-      storeAutenticacion.usuarioActual.correoAutenticacion,
+      storeUsuario.usuarioActual.uid,
+      storeUsuario.usuarioActual.correoAutenticacion,
       nombreNormalizado
     )
     router.push('/ligas')

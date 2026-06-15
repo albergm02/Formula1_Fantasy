@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreMercado } from '@/stores/storeMercado'
 import { cerrarSesion } from '@/services/servicioAutenticacion'
@@ -9,7 +9,7 @@ import Button from 'primevue/button'
 
 const router = useRouter()
 const ruta = useRoute()
-const storeAutenticacion = usarStoreAutenticacion()
+const storeUsuario = usarStoreUsuario()
 const storeGaraje = usarStoreGaraje()
 const storeMercado = usarStoreMercado()
 
@@ -37,7 +37,7 @@ const ocultarResumenEquipo = computed(() => {
         <div class="flex items-center gap-2">
             <img src="/logo.png" class="h-8 w-8 object-contain" @click="irADashboard" />
             <div class="text-left">
-                <p class="text-white font-bold uppercase text">{{ storeAutenticacion.usuarioActual.nombreVisible }}</p>
+                <p class="text-white font-bold uppercase text">{{ storeUsuario.usuarioActual.nombreVisible }}</p>
                 <p v-if="!ocultarResumenEquipo" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ storeGaraje.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ Number(storeGaraje.presupuesto || 0).toFixed(2)

@@ -7,7 +7,7 @@ import {
   cargarMisPujas,
   cargarResumenPujas,
 } from '@/services/servicioMercado'
-import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 export const usarStoreMercado = defineStore('mercado', () => {
@@ -86,8 +86,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
       if (mercadoActivo.value) {
         iniciarCuentaAtras()
 
-        const storeAuth = usarStoreAutenticacion()
-        const email = storeAuth.usuarioActual?.correoAutenticacion
+        const storeUsuario = usarStoreUsuario()
+        const email = storeUsuario.usuarioActual.correoAutenticacion
         if (email) {
           misPujas.value = await cargarMisPujas(mercadoActivo.value.id, email)
         }

@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 
 import {
     cargarPerfilUsuario,
@@ -25,6 +26,7 @@ import { useToast } from 'primevue/usetoast'
 
 const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
+const storeUsuario = usarStoreUsuario()
 const toast = useToast()
 
 const puedeUsarContrasena = storeAutenticacion.tieneSesionConContrasena
@@ -46,7 +48,7 @@ const diasRestantesParaCambiarCorreo = computed(() =>
 )
 
 async function cargarMetadatosPerfil() {
-    const datos = await cargarPerfilUsuario(storeAutenticacion.usuarioActual.uid)
+    const datos = await cargarPerfilUsuario(storeUsuario.usuarioActual.uid)
     fechaUltimoCambioCorreo.value =
         datos.fechaUltimoCambioCorreo ? datos.fechaUltimoCambioCorreo.toDate() : null
 }
@@ -107,7 +109,7 @@ function validarSolicitudCorreo() {
         toast.add({ severity: 'warn', summary: 'Los correos no coinciden', detail: 'Ambos campos deben tener el mismo correo.', life: 4000 })
         return false
     }
-    if (correoLimpio === storeAutenticacion.usuarioActual.correoAutenticacion.toLowerCase()) {
+    if (correoLimpio === storeUsuario.usuarioActual.correoAutenticacion.toLowerCase()) {
         toast.add({ severity: 'warn', summary: 'Mismo correo', detail: 'Introduce un correo distinto al actual.', life: 4000 })
         return false
     }
@@ -207,19 +209,19 @@ function mensajeFirebase(error) {
                         <div>
                             <p class="text-[10px] text-zinc-500 uppercase">Nombre de usuario</p>
                             <p class="font-bold text-white">
-                                {{ storeAutenticacion.usuarioActual.nombreVisible }}
+                                {{ storeUsuario.usuarioActual.nombreVisible }}
                             </p>
                         </div>
                         <div>
                             <p class="text-[10px] text-zinc-500 uppercase">Correo asociado</p>
                             <p class="font-bold text-white break-all">
-                                {{ storeAutenticacion.usuarioActual.correoAutenticacion }}
+                                {{ storeUsuario.usuarioActual.correoAutenticacion }}
                             </p>
                         </div>
                         <div>
                             <p class="text-[10px] text-zinc-500 uppercase">Ligas activas</p>
                             <p class="font-bold text-white">
-                                {{ storeAutenticacion.usuarioActual.idsLigas.length }}
+                                {{ storeUsuario.usuarioActual.idsLigas.length }}
                             </p>
                         </div>
                         <div v-if="puedeUsarContrasena">
@@ -267,7 +269,7 @@ function mensajeFirebase(error) {
                 <div>
                     <p class="text-[10px] text-zinc-500 uppercase">Correo de la cuenta</p>
                     <p class="font-bold text-white break-all">
-                        {{ storeAutenticacion.usuarioActual.correoAutenticacion }}
+                        {{ storeUsuario.usuarioActual.correoAutenticacion }}
                     </p>
                 </div>
                 <div class="flex justify-end gap-2 mt-2">

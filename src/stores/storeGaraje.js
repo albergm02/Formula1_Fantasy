@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { usarStoreAutenticacion } from './storeAutenticacion'
+import { usarStoreUsuario } from './storeUsuario'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import { calcularPrecioClausula, ejecutarClausulazo } from '@/services/servicioClausulas'
 import {
@@ -51,12 +51,12 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   async function cargarEquipo(idLiga) {
     cargandoEquipo.value = true
-    const storeAutenticacion = usarStoreAutenticacion()
+    const storeUsuario = usarStoreUsuario()
 
     try {
       idLigaActiva.value = idLiga
       const [participacion, preciosDinamicos] = await Promise.all([
-        cargarParticipacionDeUsuario(idLiga, storeAutenticacion.usuarioActual.correoAutenticacion),
+        cargarParticipacionDeUsuario(idLiga, storeUsuario.usuarioActual.correoAutenticacion),
         cargarPreciosDinamicosMercado(),
       ])
 
@@ -71,7 +71,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
         if (!participacion.nombre_usuario) {
           actualizarParticipacion(participacion.id, {
-            nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
+            nombre_usuario: storeUsuario.usuarioActual.nombreVisible,
           }).catch(() => {})
         }
       } else {

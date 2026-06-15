@@ -1,6 +1,6 @@
-ï»¿import { ref } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { usarStoreAutenticacion } from './storeAutenticacion'
+import { usarStoreUsuario } from './storeUsuario'
 import {
   cargarLigasPorIds,
   cargarLiga,
@@ -30,7 +30,7 @@ const alcanzoLimiteLigas = (idsLigas = []) =>
 const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 10).toUpperCase()
 const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [] })
 
-// Hereda el rol el miembro con mayor antigÃ¼edad (fecha_union mÃ¡s antigua).
+// Hereda el rol el miembro con mayor antigüedad (fecha_union más antigua).
 const elegirSiguienteAdministrador = (participaciones) =>
   [...participaciones].sort((a, b) => a.fecha_union.toMillis() - b.fecha_union.toMillis())[0]
 
@@ -39,8 +39,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
   const idLigaActiva = ref(null)
 
   async function cargarLigasUsuario() {
-    const storeAutenticacion = usarStoreAutenticacion()
-    const idsAlmacenados = storeAutenticacion.usuarioActual.idsLigas
+    const storeUsuario = usarStoreUsuario()
+    const idsAlmacenados = storeUsuario.usuarioActual.idsLigas
 
     if (!idsAlmacenados.length) {
       detallesLigas.value = []
@@ -55,11 +55,11 @@ export const usarStoreLigas = defineStore('ligas', () => {
       const idsHuerfanos = idsAlmacenados.filter((id) => !idsValidos.includes(id))
 
       if (idsHuerfanos.length > 0) {
-        const uid = storeAutenticacion.usuarioActual.uid
+        const uid = storeUsuario.usuarioActual.uid
         for (const idHuerfano of idsHuerfanos) {
           await desvincularLigaDelUsuario(uid, idHuerfano)
         }
-        storeAutenticacion.usuarioActual.idsLigas = idsValidos
+        storeUsuario.usuarioActual.idsLigas = idsValidos
       }
     } catch (error) {
       detallesLigas.value = []
@@ -68,12 +68,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
   }
 
   async function crearLiga(nombreLiga) {
-    const storeAutenticacion = usarStoreAutenticacion()
-    const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
-    const uid = storeAutenticacion.usuarioActual.uid
+    const storeUsuario = usarStoreUsuario()
+    const correoUsuario = storeUsuario.usuarioActual.correoAutenticacion
+    const uid = storeUsuario.usuarioActual.uid
 
-    if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
-      return { success: false, message: 'Solo puedes pertenecer a un mÃ¡ximo de 5 ligas.' }
+    if (alcanzoLimiteLigas(storeUsuario.usuarioActual.idsLigas)) {
+      return { success: false, message: 'Solo puedes pertenecer a un máximo de 5 ligas.' }
     }
 
     try {
@@ -81,7 +81,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       if (ligasAdministradas >= 2) {
         return {
           success: false,
-          message: 'Has alcanzado el lÃ­mite mÃ¡ximo de 2 ligas creadas.',
+          message: 'Has alcanzado el límite máximo de 2 ligas creadas.',
         }
       }
 
@@ -98,7 +98,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         id_liga: idLiga,
         uid_usuario: uid,
         email_usuario: correoUsuario,
-        nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
+        nombre_usuario: storeUsuario.usuarioActual.nombreVisible,
         rol: 'organizador',
         presupuesto: 50.0,
         puntos: 0,
@@ -107,7 +107,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       })
 
       await vincularLigaAlUsuario(uid, idLiga)
-      storeAutenticacion.usuarioActual.idsLigas.push(idLiga)
+      storeUsuario.usuarioActual.idsLigas.push(idLiga)
 
       inicializarMercadoLiga(idLiga).catch(() => {})
 
@@ -115,28 +115,28 @@ export const usarStoreLigas = defineStore('ligas', () => {
       storeNotificaciones.registrarCreacionLiga(idLiga, nombreLiga).catch(() => {})
 
       await cargarLigasUsuario()
-      return { success: true, message: `Liga creada. CÃ³digo: ${codigoInvitacion}` }
+      return { success: true, message: `Liga creada. Código: ${codigoInvitacion}` }
     } catch (error) {
-      return { success: false, message: 'Error al crear la liga. IntÃ©ntalo de nuevo.' }
+      return { success: false, message: 'Error al crear la liga. Inténtalo de nuevo.' }
     }
   }
 
   async function unirseALiga(codigoInvitacion) {
-    const storeAutenticacion = usarStoreAutenticacion()
-    const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
-    const uid = storeAutenticacion.usuarioActual.uid
+    const storeUsuario = usarStoreUsuario()
+    const correoUsuario = storeUsuario.usuarioActual.correoAutenticacion
+    const uid = storeUsuario.usuarioActual.uid
 
-    if (alcanzoLimiteLigas(storeAutenticacion.usuarioActual.idsLigas)) {
-      return { success: false, message: 'Solo puedes pertenecer a un mÃ¡ximo de 5 ligas.' }
+    if (alcanzoLimiteLigas(storeUsuario.usuarioActual.idsLigas)) {
+      return { success: false, message: 'Solo puedes pertenecer a un máximo de 5 ligas.' }
     }
 
     try {
       const liga = await buscarLigaPorCodigo(codigoInvitacion)
       if (!liga) {
-        return { success: false, message: 'CÃ³digo de invitaciÃ³n no vÃ¡lido.' }
+        return { success: false, message: 'Código de invitación no válido.' }
       }
 
-      if (storeAutenticacion.usuarioActual.idsLigas.includes(liga.id)) {
+      if (storeUsuario.usuarioActual.idsLigas.includes(liga.id)) {
         return { success: false, message: 'Ya perteneces a esta liga.' }
       }
 
@@ -152,7 +152,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
         id_liga: liga.id,
         uid_usuario: uid,
         email_usuario: correoUsuario,
-        nombre_usuario: storeAutenticacion.usuarioActual.nombreVisible,
+        nombre_usuario: storeUsuario.usuarioActual.nombreVisible,
         rol: 'miembro',
         presupuesto: 50.0,
         puntos: 0,
@@ -162,10 +162,10 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       await actualizarLiga(liga.id, { participantes: liga.participantes + 1 })
       await vincularLigaAlUsuario(uid, liga.id)
-      storeAutenticacion.usuarioActual.idsLigas.push(liga.id)
+      storeUsuario.usuarioActual.idsLigas.push(liga.id)
 
       registrarActividad(liga.id, {
-        nombreUsuario: storeAutenticacion.usuarioActual.nombreVisible,
+        nombreUsuario: storeUsuario.usuarioActual.nombreVisible,
         tipo: TIPOS_ACTIVIDAD.INCORPORACION,
         descripcion: `se ha unido al campeonato ${liga.nombre}`,
       }).catch(() => {})
@@ -173,13 +173,13 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: 'Te has unido a la liga.' }
     } catch (error) {
-      return { success: false, message: 'Error al unirse a la liga. IntÃ©ntalo de nuevo.' }
+      return { success: false, message: 'Error al unirse a la liga. Inténtalo de nuevo.' }
     }
   }
 
   async function abandonarLiga(idLiga) {
-    const storeAutenticacion = usarStoreAutenticacion()
-    const correoUsuario = storeAutenticacion.usuarioActual.correoAutenticacion
+    const storeUsuario = usarStoreUsuario()
+    const correoUsuario = storeUsuario.usuarioActual.correoAutenticacion
 
     try {
       const datosLiga = await cargarLiga(idLiga)
@@ -194,7 +194,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       )
 
       if (!participacionPropia) {
-        return { success: false, message: 'No estÃ¡s en esta liga.' }
+        return { success: false, message: 'No estás en esta liga.' }
       }
 
       if (participacionesRestantes.length === 0) {
@@ -213,16 +213,16 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }
 
       registrarActividad(idLiga, {
-        nombreUsuario: storeAutenticacion.usuarioActual.nombreVisible,
+        nombreUsuario: storeUsuario.usuarioActual.nombreVisible,
         tipo: TIPOS_ACTIVIDAD.ABANDONO,
         descripcion: `ha abandonado el campeonato ${datosLiga.nombre}`,
       }).catch(() => {})
 
       await eliminarMisPujasDeLiga(idLiga)
       await eliminarParticipacion(participacionPropia.id)
-      await desvincularLigaDelUsuario(storeAutenticacion.usuarioActual.uid, idLiga)
+      await desvincularLigaDelUsuario(storeUsuario.usuarioActual.uid, idLiga)
 
-      storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
+      storeUsuario.usuarioActual.idsLigas = storeUsuario.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,
       )
 
@@ -258,12 +258,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
   }
 
   async function eliminarLiga(idLiga) {
-    const storeAutenticacion = usarStoreAutenticacion()
+    const storeUsuario = usarStoreUsuario()
 
     try {
       await eliminarLigaComoOrganizador(idLiga)
 
-      storeAutenticacion.usuarioActual.idsLigas = storeAutenticacion.usuarioActual.idsLigas.filter(
+      storeUsuario.usuarioActual.idsLigas = storeUsuario.usuarioActual.idsLigas.filter(
         (id) => id !== idLiga,
       )
 
@@ -282,7 +282,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     try {
       return await cargarRankingLiga(idLiga)
     } catch (error) {
-      throw new Error(`Error al cargar la clasificaciÃ³n de la liga ${idLiga}: ${error.message}`)
+      throw new Error(`Error al cargar la clasificación de la liga ${idLiga}: ${error.message}`)
     }
   }
 

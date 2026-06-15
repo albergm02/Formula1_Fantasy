@@ -1,6 +1,7 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router'
 import { obtenerUsuarioActual } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { usarStoreUsuario } from '@/stores/storeUsuario'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
 const rutas = [
@@ -90,6 +91,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const usuario = await obtenerUsuarioActual()
   const storeAutenticacion = usarStoreAutenticacion()
+  const storeUsuario = usarStoreUsuario()
   const storeLigas = usarStoreLigas()
 
   if (usuario && !storeAutenticacion.datosCargados) {
@@ -113,7 +115,7 @@ router.beforeEach(async (to) => {
     if (!storeAutenticacion.perfilExiste) {
       return { name: 'registro-google' }
     }
-    if (storeAutenticacion.esAdministrador) {
+    if (storeUsuario.esAdministrador) {
       return { name: 'administracion' }
     }
     return { name: 'ligas' }
@@ -127,23 +129,20 @@ router.beforeEach(async (to) => {
     return { name: 'ligas' }
   }
 
-  if (to.meta.requiresAdmin && !storeAutenticacion.esAdministrador) {
+  if (to.meta.requiresAdmin && !storeUsuario.esAdministrador) {
     return { name: 'login' }
   }
 
   // Las rutas con `requiresLiga` necesitan al menos una liga cargada.
   if (to.meta.requiresLiga) {
-    if (
-      storeAutenticacion.usuarioActual.idsLigas.length > 0 &&
-      storeLigas.detallesLigas.length === 0
-    ) {
+    if (storeUsuario.usuarioActual.idsLigas.length > 0 && storeLigas.detallesLigas.length === 0) {
       await storeLigas.cargarLigasUsuario()
     }
 
     if (
-      !storeAutenticacion.usuarioActual ||
-      !storeAutenticacion.usuarioActual.idsLigas ||
-      storeAutenticacion.usuarioActual.idsLigas.length === 0
+      !storeUsuario.usuarioActual ||
+      !storeUsuario.usuarioActual.idsLigas ||
+      storeUsuario.usuarioActual.idsLigas.length === 0
     ) {
       return { name: 'ligas' }
     }
