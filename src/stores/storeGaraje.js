@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreUsuario } from './storeUsuario'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
-import { calcularPrecioClausula, ejecutarClausulazo } from '@/services/servicioClausulas'
+import { calcularPrecioClausula, ejecutarClausulazo } from '@/services/servicioGaraje'
 import {
   venderCartaParticipante,
   alternarCartaEquipada,

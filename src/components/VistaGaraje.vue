@@ -4,7 +4,7 @@ import { ref, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioClausulas'
+import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioGaraje'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 import Button from 'primevue/button'
