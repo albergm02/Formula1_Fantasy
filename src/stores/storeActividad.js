@@ -6,9 +6,9 @@ import {
   cargarActividadLiga,
   registrarActividad,
   TIPOS_ACTIVIDAD,
-} from '@/services/servicioNotificaciones'
+} from '@/services/servicioActividad'
 
-export const usarStoreNotificaciones = defineStore('notificaciones', () => {
+export const usarStoreActividad = defineStore('actividad', () => {
   const storePerfil = usarStorePerfil()
   const storeLigas = usarStoreLigas()
 

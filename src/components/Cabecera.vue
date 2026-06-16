@@ -13,7 +13,7 @@ const storePerfil = usarStorePerfil()
 const storeGaraje = usarStoreGaraje()
 const storeMercado = usarStoreMercado()
 
-const manejarCerrarSesion = async () => {
+const handleCerrarSesion = async () => {
     await cerrarSesion()
     router.push({ name: 'login' })
 }
@@ -52,7 +52,7 @@ const ocultarResumenEquipo = computed(() => {
         <div class="flex items-center gap-2">
             <Button @click="router.push({ name: 'ligas' })" icon="pi pi-trophy" text class="!text-zinc-400" />
             <Button @click="router.push({ name: 'perfil' })" icon="pi pi-user" text class="!text-zinc-400" />
-            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400" />
+            <Button @click="handleCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400" />
         </div>
     </header>
 </template>

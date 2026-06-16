@@ -1,13 +1,13 @@
 ﻿<script setup>
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { usarStoreNotificaciones } from '@/stores/storeNotificaciones'
+import { usarStoreActividad } from '@/stores/storeActividad'
 import { usarStoreLigas } from '@/stores/storeLigas'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
-const storeNotificaciones = usarStoreNotificaciones()
+const storeActividad = usarStoreActividad()
 const storeLigas = usarStoreLigas()
 const storeGaraje = usarStoreGaraje()
 const ruta = useRoute()
@@ -44,7 +44,7 @@ onMounted(async () => {
     await storeGaraje.cargarEquipo(idLiga)
   }
 
-  await storeNotificaciones.cargarActividad()
+  await storeActividad.cargarActividad()
 })
 </script>
 
@@ -59,12 +59,12 @@ onMounted(async () => {
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Actividad del campeonato</h2>
       </div>
 
-      <div v-if="storeNotificaciones.cargando" class="flex justify-center py-16">
+      <div v-if="storeActividad.cargando" class="flex justify-center py-16">
         <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
       </div>
 
-      <div v-else-if="storeNotificaciones.actividad.length" class="flex flex-col gap-2">
-        <div v-for="evento in storeNotificaciones.actividad" :key="evento.id"
+      <div v-else-if="storeActividad.actividad.length" class="flex flex-col gap-2">
+        <div v-for="evento in storeActividad.actividad" :key="evento.id"
           class="flex items-start justify-between p-3 border border-white/5">
           <p class="text-sm text-[#F0ECEC]">
             {{ evento.nombreUsuario }} {{ evento.descripcion }}

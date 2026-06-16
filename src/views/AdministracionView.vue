@@ -30,7 +30,7 @@ const filtroLigas = ref({ global: { value: null, matchMode: FilterMatchMode.CONT
 
 onMounted(cargarListas)
 
-async function manejarCerrarSesion() {
+async function handleCerrarSesion() {
     await cerrarSesion()
     router.push({ name: 'login' })
 }
@@ -109,7 +109,7 @@ function formatearFecha(fecha) {
                 <img src="/logo.png" class="h-8 w-8 object-contain" />
                 <span class="font-black text-[#E10600] text-lg">ADMINISTRADOR</span>
             </div>
-            <Button @click="manejarCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400" />
+            <Button @click="handleCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400" />
         </header>
 
         <main class="flex-1 p-10 max-w-6xl mx-auto w-full space-y-4">

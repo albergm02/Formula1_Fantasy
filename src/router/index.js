@@ -20,13 +20,13 @@ const rutas = [
   {
     path: '/registro-google',
     name: 'registro-google',
-    component: () => import('../views/RegistroGoogleUsuarioView.vue'),
+    component: () => import('../views/CompletarPerfilView.vue'),
     meta: { requiresAuth: true, requiresIncompleteProfile: true },
   },
   {
     path: '/ligas',
     name: 'ligas',
-    component: () => import('../views/MisLigasView.vue'),
+    component: () => import('../views/LigasView.vue'),
     meta: { requiresAuth: true },
   },
   {
@@ -54,15 +54,15 @@ const rutas = [
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
-    path: '/notificaciones',
-    name: 'notificaciones',
-    component: () => import('../views/NotificacionesView.vue'),
+    path: '/actividad',
+    name: 'actividad',
+    component: () => import('../views/ActividadView.vue'),
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {
     path: '/jornada',
     name: 'jornada',
-    component: () => import('../views/NoticiasJornadaView.vue'),
+    component: () => import('../views/JornadasView.vue'),
     meta: { requiresAuth: true, requiresLiga: true },
   },
   {

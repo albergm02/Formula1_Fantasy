@@ -20,9 +20,9 @@ import {
   inicializarMercadoLiga,
   cargarGarajeDeParticipante,
 } from '@/services/servicioLigas'
-import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioNotificaciones'
+import { registrarActividad, TIPOS_ACTIVIDAD } from '@/services/servicioActividad'
 import { eliminarMisPujasDeLiga } from '@/services/servicioMercado'
-import { usarStoreNotificaciones } from './storeNotificaciones'
+import { usarStoreActividad } from './storeActividad'
 
 const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) =>
@@ -111,8 +111,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
       inicializarMercadoLiga(idLiga).catch(() => {})
 
-      const storeNotificaciones = usarStoreNotificaciones()
-      storeNotificaciones.registrarCreacionLiga(idLiga, nombreLiga).catch(() => {})
+      const storeActividad = usarStoreActividad()
+      storeActividad.registrarCreacionLiga(idLiga, nombreLiga).catch(() => {})
 
       await cargarLigasUsuario()
       return { success: true, message: `Liga creada. C�digo: ${codigoInvitacion}` }

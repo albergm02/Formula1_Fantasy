@@ -9,7 +9,7 @@ import {
   invertirEnClausulaCarta,
 } from '@/services/servicioGaraje'
 import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
-import { usarStoreNotificaciones } from './storeNotificaciones'
+import { usarStoreActividad } from './storeActividad'
 
 const PRESUPUESTO_INICIAL = 50.0
 
@@ -107,7 +107,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
       )
       await cargarEquipo(idLigaActiva.value)
       const tipoElemento = elemento.tipo || elemento.tipoCarta
-      usarStoreNotificaciones()
+      usarStoreActividad()
         .registrarVenta(resultado.nombre, tipoElemento)
         .catch(() => {})
       return {

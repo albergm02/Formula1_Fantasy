@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -35,7 +35,7 @@ onUnmounted(() => {
   storeMercado.detenerCuentaAtras()
 })
 
-const manejarPuja = async ({ carta, cantidad }) => {
+const handlePuja = async ({ carta, cantidad }) => {
   const resultado = await storeMercado.pujarPorCarta(carta, cantidad)
 
   if (resultado.success) {
@@ -45,7 +45,7 @@ const manejarPuja = async ({ carta, cantidad }) => {
   }
 }
 
-const manejarEliminarPuja = async (carta) => {
+const handleEliminarPuja = async (carta) => {
   const resultado = await storeMercado.eliminarPujaCarta(carta)
 
   if (resultado.success) {
@@ -83,8 +83,8 @@ const manejarEliminarPuja = async (carta) => {
         <div class="grid grid-cols-1 gap-4">
           <CartaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
             :miPuja="storeMercado.misPujas[coche.id] || null"
-            :totalPujas="storeMercado.resumenPujas[coche.id]?.totalPujas || 0" @pujar="manejarPuja"
-            @eliminarPuja="manejarEliminarPuja" />
+            :totalPujas="storeMercado.resumenPujas[coche.id]?.totalPujas || 0" @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja" />
         </div>
       </section>
 
@@ -95,8 +95,8 @@ const manejarEliminarPuja = async (carta) => {
         <div class="grid grid-cols-1 gap-4">
           <CartaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto"
             :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
-            :totalPujas="storeMercado.resumenPujas[piloto.id]?.totalPujas || 0" @pujar="manejarPuja"
-            @eliminarPuja="manejarEliminarPuja" />
+            :totalPujas="storeMercado.resumenPujas[piloto.id]?.totalPujas || 0" @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja" />
         </div>
       </section>
 
@@ -106,8 +106,8 @@ const manejarEliminarPuja = async (carta) => {
         <div class="grid grid-cols-1 gap-4">
           <CartaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
             :potenciador="potenciador" :modoMercado="true" :miPuja="storeMercado.misPujas[potenciador.id] || null"
-            :totalPujas="storeMercado.resumenPujas[potenciador.id]?.totalPujas || 0" @pujar="manejarPuja"
-            @eliminarPuja="manejarEliminarPuja" />
+            :totalPujas="storeMercado.resumenPujas[potenciador.id]?.totalPujas || 0" @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja" />
         </div>
       </section>
 
