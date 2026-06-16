@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { cerrarSesion } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStorePerfil } from '@/stores/storePerfil'
 
@@ -58,7 +57,7 @@ const handleCompletarPerfil = async ({ valid, values }) => {
 const cancelarRegistroConGoogle = async () => {
   if (cargando.value) return
 
-  await cerrarSesion()
+  await storeAutenticacion.cerrarSesion()
   router.push('/')
 }
 </script>

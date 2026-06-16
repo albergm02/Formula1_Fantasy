@@ -55,21 +55,7 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
   }
 }
 
-exports.eliminarLigaManual = onCall(OPCIONES, async (request) => {
-  await exigirAdministrador(request)
-  const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
-
-  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
-
-  const resumen = await borrarLigaEnCascada(idLiga, ligaSnap)
-  return { ok: true, idLiga, ...resumen }
-})
+exports.borrarLigaEnCascada = borrarLigaEnCascada
 
 exports.eliminarLigaComoOrganizador = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)

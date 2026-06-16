@@ -2,16 +2,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import {
-  iniciarSesion,
-  iniciarSesionConGoogle,
-  restablecerContraseña,
-  verificarBloqueoAcceso,
-  registrarIntentoFallido,
-  reiniciarContadorIntentos,
-  cerrarSesion,
-} from '@/services/servicioAutenticacion'
-
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 
 import Card from 'primevue/card'
@@ -51,33 +41,21 @@ const handleInicioSesion = async ({ valid, values }) => {
   errorAuth.value = ''
 
   try {
-    await verificarBloqueoAcceso(values.email.trim())
-    const credencialUsuario = await iniciarSesion(values.email, values.password)
-    if (!credencialUsuario.user.emailVerified) {
-      await cerrarSesion()
-      storeAuth.limpiarSesion()
-      errorAuth.value = 'Debes verificar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.'
-      return
-    }
-    await reiniciarContadorIntentos()
-    await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.uid, credencialUsuario.user.email)
-    const destino = storeAuth.esAdministrador ? '/admin' : '/ligas'
-    router.push(destino)
+    const { esAdministrador } = await storeAuth.iniciarSesionConCorreo(values.email, values.password)
+    router.push(esAdministrador ? '/admin' : '/ligas')
   } catch (error) {
-    const codigosCredencialesInvalidas = ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password']
-    if (error.message?.startsWith('Acceso bloqueado')) {
-      errorAuth.value = error.message
-    } else if (codigosCredencialesInvalidas.includes(error?.code)) {
-      await registrarIntentoFallido(values.email.trim())
-      errorAuth.value = 'Correo o contraseña incorrectos.'
-    } else if (error?.code === 'auth/too-many-requests') {
-      errorAuth.value = 'Demasiados intentos. Inténtalo más tarde.'
-    } else {
-      errorAuth.value = 'Correo o contraseña incorrectos.'
-    }
+    errorAuth.value = traducirErrorInicioSesion(error)
   } finally {
     cargando.value = false
   }
+}
+
+const traducirErrorInicioSesion = (error) => {
+  if (error.message === 'CORREO_NO_VERIFICADO')
+    return 'Debes verificar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.'
+  if (error.message?.startsWith('Acceso bloqueado')) return error.message
+  if (error?.code === 'auth/too-many-requests') return 'Demasiados intentos. Inténtalo más tarde.'
+  return 'Correo o contraseña incorrectos.'
 }
 
 const handleInicioSesionGoogle = async () => {
@@ -85,24 +63,14 @@ const handleInicioSesionGoogle = async () => {
   cargando.value = true
 
   try {
-    const credencialUsuario = await iniciarSesionConGoogle()
-    const correoGoogle = credencialUsuario.user.email.trim()
-
-    if (!correoGoogle) {
-      throw new Error('No se pudo obtener el correo de Google.')
-    }
-
-    const perfilEncontrado = await storeAuth.verificarExistenciaPerfil(credencialUsuario.user.uid, correoGoogle)
-
-    if (perfilEncontrado) {
-      const destino = storeAuth.esAdministrador ? '/admin' : '/ligas'
-      router.push(destino)
+    const { perfilEncontrado, esAdministrador } = await storeAuth.iniciarSesionConGoogle()
+    if (!perfilEncontrado) {
+      router.push('/registro-google')
       return
     }
-    router.push('/registro-google')
+    router.push(esAdministrador ? '/admin' : '/ligas')
   } catch (error) {
     if (error?.code !== 'auth/popup-closed-by-user') {
-      console.error('[InicioSesionGoogle] Error inesperado:', error)
       errorAuth.value = 'No se ha podido iniciar sesión con Google. Inténtalo de nuevo.'
     }
   } finally {
@@ -122,7 +90,7 @@ const handleRecuperarContraseña = async () => {
 
   cargandoRecuperacion.value = true
   try {
-    await restablecerContraseña(correoAEnviar)
+    await storeAuth.restablecerContrasena(correoAEnviar)
     notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
     modalRecuperacionVisible.value = false
     correoRecuperacion.value = ''

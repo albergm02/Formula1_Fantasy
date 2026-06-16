@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
-import { registrarse, enviarVerificacionCorreo, cerrarSesion, mensajeErrorFirebase } from '@/services/servicioAutenticacion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+import { mensajeErrorFirebase } from '@/utils/erroresFirebase'
 
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
@@ -53,11 +53,7 @@ const handleRegistro = async ({ valid, values }) => {
   cargando.value = true
   errorAutenticacion.value = ''
   try {
-    const credencialUsuario = await registrarse(correoNormalizado, values.password)
-    await enviarVerificacionCorreo()
-    await storeAutenticacion.cargarOCrearPerfil(credencialUsuario.user.uid, credencialUsuario.user.email, nombreNormalizado)
-    await cerrarSesion()
-    storeAutenticacion.limpiarSesion()
+    await storeAutenticacion.procesarRegistro(correoNormalizado, values.password, nombreNormalizado)
     notificarRegistroSolicitado()
     router.push('/')
   } catch (error) {

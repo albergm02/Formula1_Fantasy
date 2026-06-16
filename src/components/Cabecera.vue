@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { usarStorePerfil } from '@/stores/storePerfil'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreMercado } from '@/stores/storeMercado'
-import { cerrarSesion } from '@/services/servicioAutenticacion'
+import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import Button from 'primevue/button'
 
 const router = useRouter()
@@ -12,9 +12,10 @@ const ruta = useRoute()
 const storePerfil = usarStorePerfil()
 const storeGaraje = usarStoreGaraje()
 const storeMercado = usarStoreMercado()
+const storeAutenticacion = usarStoreAutenticacion()
 
 const handleCerrarSesion = async () => {
-    await cerrarSesion()
+    await storeAutenticacion.cerrarSesion()
     router.push({ name: 'login' })
 }
 
@@ -33,11 +34,11 @@ const ocultarResumenEquipo = computed(() => {
 </script>
 
 <template>
-    <header class="w-full p-3 flex justify-between sticky top-0 z-40 bg-[#1A1A1F] border-b border-[#E10600]">
-        <div class="flex items-center gap-2">
-            <img src="/logo.png" class="h-8 w-8 object-contain" @click="irADashboard" />
+    <header class="w-full px-4 py-4 flex justify-between sticky top-0 z-40 bg-[#1A1A1F] border-b border-[#E10600]">
+        <div class="flex items-center gap-3">
+            <img src="/logo.png" class="h-11 w-11 object-contain cursor-pointer" @click="irADashboard" />
             <div class="text-left">
-                <p class="text-white font-bold uppercase text">{{ storePerfil.usuarioActual.nombreVisible }}</p>
+                <p class="text-white font-bold uppercase text-base">{{ storePerfil.usuarioActual.nombreVisible }}</p>
                 <p v-if="!ocultarResumenEquipo" class="mt-0.5 text-xs text-white">
                     Pts: <strong class="text-[#D4A843]">{{ storeGaraje.puntos }}</strong>
                     | <span class="text-emerald-500 font-bold">{{ Number(storeGaraje.presupuesto || 0).toFixed(2)
@@ -49,10 +50,10 @@ const ocultarResumenEquipo = computed(() => {
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
-            <Button @click="router.push({ name: 'ligas' })" icon="pi pi-trophy" text class="!text-zinc-400" />
-            <Button @click="router.push({ name: 'perfil' })" icon="pi pi-user" text class="!text-zinc-400" />
-            <Button @click="handleCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400" />
+        <div class="flex items-center gap-1">
+            <Button @click="router.push({ name: 'ligas' })" icon="pi pi-trophy" text class="!text-zinc-400 !text-xl" />
+            <Button @click="router.push({ name: 'perfil' })" icon="pi pi-user" text class="!text-zinc-400 !text-xl" />
+            <Button @click="handleCerrarSesion" icon="pi pi-sign-out" text class="!text-zinc-400 !text-xl" />
         </div>
     </header>
 </template>

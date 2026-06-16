@@ -4,17 +4,7 @@ import { useRouter } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStorePerfil } from '@/stores/storePerfil'
 
-import {
-    cerrarSesion,
-    mensajeErrorFirebase,
-} from '@/services/servicioAutenticacion'
-import {
-    cargarPerfilUsuario,
-    reautenticarUsuario,
-    solicitarRestablecimientoContrasena,
-    solicitarCambioCorreo,
-    eliminarMiCuenta,
-} from '@/services/servicioPerfil'
+import { mensajeErrorFirebase } from '@/utils/erroresFirebase'
 
 import Cabecera from '@/components/Cabecera.vue'
 
@@ -50,9 +40,9 @@ const diasRestantesParaCambiarCorreo = computed(() =>
 )
 
 async function cargarMetadatosPerfil() {
-    const datos = await cargarPerfilUsuario(storePerfil.usuarioActual.uid)
-    fechaUltimoCambioCorreo.value =
-        datos.fechaUltimoCambioCorreo ? datos.fechaUltimoCambioCorreo.toDate() : null
+    fechaUltimoCambioCorreo.value = await storePerfil.cargarFechaCambioCorreo(
+        storePerfil.usuarioActual.uid,
+    )
 }
 
 onMounted(cargarMetadatosPerfil)
@@ -67,7 +57,7 @@ function abrirDialogoContrasena() {
 async function confirmarCambioContrasena() {
     enviandoEnlaceContrasena.value = true
     try {
-        await solicitarRestablecimientoContrasena()
+        await storePerfil.cambiarContrasena()
         dialogoContrasenaAbierto.value = false
         toast.add({
             severity: 'success',
@@ -131,8 +121,7 @@ async function confirmarCambioCorreo() {
     if (!validarSolicitudCorreo()) return
     enviandoCorreo.value = true
     try {
-        await reautenticarUsuario(contrasenaParaCorreo.value)
-        await solicitarCambioCorreo(correoNuevo.value)
+        await storePerfil.cambiarCorreo(correoNuevo.value, contrasenaParaCorreo.value)
         fechaUltimoCambioCorreo.value = new Date()
         dialogoCorreoAbierto.value = false
         toast.add({
@@ -165,16 +154,14 @@ function abrirDialogoBaja() {
 async function ejecutarBaja() {
     eliminandoCuenta.value = true
     try {
-        await reautenticarUsuario(contrasenaParaBaja.value)
-        await eliminarMiCuenta()
-        await cerrarSesion()
+        await storePerfil.eliminarCuenta(contrasenaParaBaja.value)
+        await storeAutenticacion.cerrarSesion()
         toast.add({
             severity: 'success',
             summary: 'Cuenta eliminada correctamente.',
             detail: '¡Hasta pronto!',
             life: 5000,
         })
-        storeAutenticacion.limpiarSesion()
         router.push({ name: 'login' })
     } catch (error) {
         toast.add({

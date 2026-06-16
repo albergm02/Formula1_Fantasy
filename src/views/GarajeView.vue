@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioGaraje'
+import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/utils/clausulas'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreLigas } from '@/stores/storeLigas'
 

@@ -1,8 +1,12 @@
 ﻿<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { obtenerCuentaRegresiva, obtenerSiguienteGranPremio } from '@/services/servicioOpenF1'
+import { storeToRefs } from 'pinia'
+import { usarStoreJornada } from '@/stores/storeJornada'
+import { obtenerCuentaRegresiva } from '@/utils/granPremio'
 
-const siguienteGranPremio = ref(null)
+const storeJornada = usarStoreJornada()
+const { siguienteGranPremio } = storeToRefs(storeJornada)
+
 const cuentaRegresiva = ref('')
 const cargaFallida = ref(false)
 const imagenRota = ref(false)
@@ -23,7 +27,7 @@ function actualizarCuentaRegresiva() {
 
 onMounted(async () => {
   try {
-    siguienteGranPremio.value = await obtenerSiguienteGranPremio()
+    await storeJornada.cargarSiguienteGranPremio()
   } catch {
     cargaFallida.value = true
   }

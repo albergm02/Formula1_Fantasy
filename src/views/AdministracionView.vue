@@ -1,13 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import {
-    cargarListaLigas,
-    cargarListaUsuarios,
-    eliminarLigaComoAdministrador,
-    eliminarUsuarioComoAdministrador,
-} from '@/services/servicioAdministracion'
-import { cerrarSesion } from '@/services/servicioAutenticacion'
+import { usarStoreAdministracion } from '@/stores/storeAdministracion'
+import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -22,28 +18,25 @@ const router = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
 
-const ligas = ref([])
-const usuarios = ref([])
+const storeAdministracion = usarStoreAdministracion()
+const storeAutenticacion = usarStoreAutenticacion()
+const { ligas, usuarios } = storeToRefs(storeAdministracion)
+
 const cargando = ref(false)
 const filtroUsuarios = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } })
 const filtroLigas = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } })
 
-onMounted(cargarListas)
+onMounted(cargarPanel)
 
 async function handleCerrarSesion() {
-    await cerrarSesion()
+    await storeAutenticacion.cerrarSesion()
     router.push({ name: 'login' })
 }
 
-async function cargarListas() {
+async function cargarPanel() {
     cargando.value = true
     try {
-        const [listaLigas, listaUsuarios] = await Promise.all([
-            cargarListaLigas(),
-            cargarListaUsuarios(),
-        ])
-        ligas.value = listaLigas
-        usuarios.value = listaUsuarios
+        await storeAdministracion.cargarListas()
     } catch (error) {
         notificarError('No se pudieron cargar los datos', error)
     } finally {
@@ -55,7 +48,7 @@ function eliminarUsuario(usuario) {
     confirmarEliminacion({
         header: 'Confirmar eliminación de usuario',
         mensaje: `Vas a eliminar PERMANENTEMENTE al usuario ${usuario.etiqueta}: se borrarán su perfil, sus participaciones, pujas activas y su cuenta de autenticación. Si era el único participante de alguna liga, esa liga también se borrará. Esta acción NO se puede deshacer.`,
-        accion: () => eliminarUsuarioComoAdministrador(usuario.uid),
+        accion: () => storeAdministracion.eliminarUsuario(usuario.uid),
         exito: 'Usuario eliminado correctamente.',
     })
 }
@@ -64,7 +57,7 @@ function eliminarLiga(liga) {
     confirmarEliminacion({
         header: 'Confirmar eliminación de liga',
         mensaje: `Vas a eliminar PERMANENTEMENTE la liga "${liga.nombre}": se borrarán sus participaciones, mercados, pujas y actividad, y se desvinculará de todos sus usuarios. Esta acción NO se puede deshacer.`,
-        accion: () => eliminarLigaComoAdministrador(liga.id),
+        accion: () => storeAdministracion.eliminarLiga(liga.id),
         exito: 'Liga eliminada correctamente.',
     })
 }
@@ -88,8 +81,9 @@ async function ejecutarEliminacion(accion, mensajeExito) {
         toast.add({ severity: 'success', summary: 'Eliminado', detail: mensajeExito, life: 6000 })
     } catch (error) {
         notificarError('No se pudo completar la eliminación', error)
+    } finally {
+        cargando.value = false
     }
-    await cargarListas()
 }
 
 function notificarError(resumen, error) {

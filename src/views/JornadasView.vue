@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref, computed } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import Card from 'primevue/card'
 import Message from 'primevue/message'
@@ -7,12 +8,7 @@ import Message from 'primevue/message'
 import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
-import {
-    suscribirseHistorialJornadas,
-    cargarCatalogoPilotos,
-    cargarPerfilesPuntuacion,
-} from '@/services/servicioJornada'
-import { obtenerUltimoGranPremioFinalizado } from '@/services/servicioOpenF1'
+import { usarStoreJornada } from '@/stores/storeJornada'
 
 import { calcularFactorJornada, calcularPuntosJornada, calcularPuntuacionBase } from '@/utils/puntuacion'
 
@@ -52,15 +48,15 @@ const EJEMPLOS_VARIANTE = {
     },
 }
 
-const historial = ref([])
-const catalogoPilotos = ref([])
-const perfilesPuntuacion = ref({})
+const storeJornada = usarStoreJornada()
+const { historial, catalogoPilotos, perfilesPuntuacion, ultimoGranPremioPendiente } =
+    storeToRefs(storeJornada)
+
 const idJornadaSeleccionada = ref(null)
 const cargando = ref(true)
 const pilotoExpandido = ref(null)
 const guiaAbierta = ref(false)
 const varianteGuiaExpandida = ref(null)
-const ultimoGranPremioPendiente = ref(null)
 
 let cancelarSuscripcion = () => { }
 
@@ -92,34 +88,13 @@ function alternarVarianteGuia(id) {
 
 
 onMounted(async () => {
-    try {
-        catalogoPilotos.value = await cargarCatalogoPilotos()
-    } catch {
-        catalogoPilotos.value = []
-    }
+    await storeJornada.cargarCatalogo()
 
-    try {
-        perfilesPuntuacion.value = await cargarPerfilesPuntuacion()
-    } catch {
-        perfilesPuntuacion.value = {}
-    }
-
-    cancelarSuscripcion = suscribirseHistorialJornadas(async (jornadas) => {
-        historial.value = jornadas
+    cancelarSuscripcion = storeJornada.escucharHistorial((jornadas) => {
         if (!idJornadaSeleccionada.value && jornadas.length > 0) {
             idJornadaSeleccionada.value = jornadas[0].id
         }
         cargando.value = false
-
-        // Si Firestore aún no tiene jornada, consulto OpenF1 directamente
-        // para evitar una pantalla vacía mostrando el último GP corrido.
-        if (jornadas.length === 0 && !ultimoGranPremioPendiente.value) {
-            try {
-                ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
-            } catch {
-                ultimoGranPremioPendiente.value = null
-            }
-        }
     })
 })
 
@@ -386,7 +361,7 @@ function formatearPorcentaje(valor) {
                                 <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta"
                                     class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-base font-black"
                                         :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
                                         :title="celda.titulo || undefined">

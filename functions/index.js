@@ -6,6 +6,7 @@ const ligas = require('./cloud/ligas')
 const garaje = require('./cloud/garaje')
 const perfil = require('./cloud/perfil')
 const autenticacion = require('./cloud/autenticacion')
+const administracion = require('./cloud/administracion')
 
 exports.procesarJornadaSemanal = jornada.procesarJornadaSemanal
 exports.generarMercadoDiario = mercado.generarMercadoDiario
@@ -15,7 +16,7 @@ exports.registrarPujaCarta = mercado.registrarPujaCarta
 exports.eliminarPujaPropia = mercado.eliminarPujaPropia
 exports.eliminarMisPujasDeLiga = mercado.eliminarMisPujasDeLiga
 
-exports.eliminarLigaManual = ligas.eliminarLigaManual
+exports.eliminarLigaManual = administracion.eliminarLigaManual
 exports.eliminarLigaComoOrganizador = ligas.eliminarLigaComoOrganizador
 exports.expulsarParticipanteComoOrganizador = ligas.expulsarParticipanteComoOrganizador
 
@@ -27,7 +28,7 @@ exports.ejecutarClausulazo = garaje.ejecutarClausulazo
 exports.autorizarCambioCorreo = perfil.autorizarCambioCorreo
 exports.migrarCorreoUsuario = perfil.migrarCorreoUsuario
 exports.eliminarMiCuenta = perfil.eliminarMiCuenta
-exports.eliminarUsuarioManual = perfil.eliminarUsuarioManual
+exports.eliminarUsuarioManual = administracion.eliminarUsuarioManual
 
 exports.verificarBloqueoAcceso = autenticacion.verificarBloqueoAcceso
 exports.registrarIntentoFallido = autenticacion.registrarIntentoFallido

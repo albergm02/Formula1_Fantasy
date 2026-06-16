@@ -7,8 +7,6 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStorePerfil } from '@/stores/storePerfil'
 import { usarStoreLigas } from '@/stores/storeLigas'
-import { escucharCambioEstadoAutenticacion } from '@/services/servicioAutenticacion'
-import { escucharPerfilUsuario } from '@/services/servicioPerfil'
 
 const storeAutenticacion = usarStoreAutenticacion()
 const storePerfil = usarStorePerfil()
@@ -19,7 +17,7 @@ let cancelarObservadorAutenticacion = () => { }
 let cancelarEscuchaPerfil = () => { }
 
 onMounted(() => {
-  cancelarObservadorAutenticacion = escucharCambioEstadoAutenticacion((usuario) => {
+  cancelarObservadorAutenticacion = storeAutenticacion.observarEstadoSesion((usuario) => {
     if (!usuario) {
       cancelarEscuchaPerfil()
       cancelarEscuchaPerfil = () => { }
@@ -29,7 +27,7 @@ onMounted(() => {
       if (!estaEnRutaPublica) router.push('/')
     } else {
       cancelarEscuchaPerfil()
-      cancelarEscuchaPerfil = escucharPerfilUsuario(usuario.uid, async (datosPerfil) => {
+      cancelarEscuchaPerfil = storePerfil.observarPerfil(usuario.uid, async (datosPerfil) => {
         if (!storeAutenticacion.datosCargados) return
 
         const idsNuevos = datosPerfil.ligasIds || []

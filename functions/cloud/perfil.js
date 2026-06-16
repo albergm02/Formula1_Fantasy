@@ -3,11 +3,7 @@ const { FieldValue } = require('firebase-admin/firestore')
 
 const { db, adminAuth } = require('../comun/firebase')
 const { OPCIONES, DIAS_BLOQUEO_CAMBIO_CORREO } = require('../comun/constantes')
-const {
-  exigirAdministrador,
-  exigirEmailAutenticado,
-  exigirReautenticacionReciente,
-} = require('../comun/autenticacion')
+const { exigirEmailAutenticado, exigirReautenticacionReciente } = require('../comun/autenticacion')
 
 function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
   const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)
@@ -211,6 +207,8 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
   return { participacionesBorradas: participacionesSnap.size, ligasBorradas }
 }
 
+exports.eliminarCuentaUsuarioEnCascada = eliminarCuentaUsuarioEnCascada
+
 exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   exigirReautenticacionReciente(request)
@@ -218,29 +216,4 @@ exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   const email = request.auth.token.email || ''
   const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
   return { ok: true, email, ...resultado }
-})
-
-// Bloqueo expresamente la eliminación de otros administradores desde el panel
-// para evitar "tiroteos" entre admins.
-exports.eliminarUsuarioManual = onCall(OPCIONES, async (request) => {
-  await exigirAdministrador(request)
-  const { uid } = request.data || {}
-  if (!uid) {
-    throw new HttpsError('invalid-argument', 'Falta uid.')
-  }
-
-  const usuarioSnap = await db.collection('usuarios').doc(uid).get()
-  if (!usuarioSnap.exists) {
-    throw new HttpsError('not-found', `Usuario ${uid} no encontrado.`)
-  }
-  if (usuarioSnap.data().esAdministrador === true) {
-    throw new HttpsError(
-      'failed-precondition',
-      'No se puede eliminar a otro administrador desde el panel.',
-    )
-  }
-
-  const email = usuarioSnap.data().correoAutenticacion || ''
-  const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
-  return { ok: true, uid, email, ...resultado }
 })

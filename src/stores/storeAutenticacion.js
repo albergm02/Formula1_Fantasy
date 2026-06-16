@@ -1,12 +1,27 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { cargarPerfilUsuario, migrarCorreoUsuario } from '@/services/servicioPerfil'
 import {
-  cargarPerfilUsuario,
-  crearPerfilUsuario,
-  migrarCorreoUsuario,
-} from '@/services/servicioPerfil'
+  guardarNuevoUsuario,
+  registrarse,
+  enviarVerificacionCorreo,
+  iniciarSesion,
+  iniciarSesionConGoogle as iniciarSesionConGoogleProveedor,
+  restablecerContraseña,
+  verificarBloqueoAcceso,
+  registrarIntentoFallido,
+  reiniciarContadorIntentos,
+  cerrarSesion as cerrarSesionProveedor,
+  escucharCambioEstadoAutenticacion,
+} from '@/services/servicioAutenticacion'
 import { auth } from '@/services/servicioFirebase'
 import { usarStorePerfil } from '@/stores/storePerfil'
+
+const CODIGOS_CREDENCIAL_INVALIDA = [
+  'auth/invalid-credential',
+  'auth/user-not-found',
+  'auth/wrong-password',
+]
 
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const perfilExiste = ref(false)
@@ -33,7 +48,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
         return
       }
 
-      await crearPerfilUsuario(uid, correoUsuario, nombreUsuario)
+      await guardarNuevoUsuario(uid, correoUsuario, nombreUsuario)
       storePerfil.establecerDatosUsuario({
         uid,
         correo: correoUsuario,
@@ -100,6 +115,62 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     datosCargados.value = true
   }
 
+  function obtenerEstadoSesion() {
+    const storePerfil = usarStorePerfil()
+    return { esAdministrador: storePerfil.esAdministrador }
+  }
+
+  async function procesarRegistro(correo, contrasena, nombreUsuario) {
+    const credencial = await registrarse(correo, contrasena)
+    await enviarVerificacionCorreo()
+    await cargarOCrearPerfil(credencial.user.uid, credencial.user.email, nombreUsuario)
+    await cerrarSesion()
+  }
+
+  async function autenticarConCorreo(correo, contrasena) {
+    try {
+      return await iniciarSesion(correo, contrasena)
+    } catch (error) {
+      if (CODIGOS_CREDENCIAL_INVALIDA.includes(error?.code)) {
+        await registrarIntentoFallido(correo.trim())
+      }
+      throw error
+    }
+  }
+
+  async function iniciarSesionConCorreo(correo, contrasena) {
+    await verificarBloqueoAcceso(correo.trim())
+    const credencial = await autenticarConCorreo(correo, contrasena)
+    if (!credencial.user.emailVerified) {
+      await cerrarSesion()
+      throw new Error('CORREO_NO_VERIFICADO')
+    }
+    await reiniciarContadorIntentos()
+    await verificarExistenciaPerfil(credencial.user.uid, credencial.user.email)
+    return obtenerEstadoSesion()
+  }
+
+  async function iniciarSesionConGoogle() {
+    const credencial = await iniciarSesionConGoogleProveedor()
+    const correoGoogle = credencial.user.email?.trim()
+    if (!correoGoogle) throw new Error('SIN_CORREO_GOOGLE')
+    const perfilEncontrado = await verificarExistenciaPerfil(credencial.user.uid, correoGoogle)
+    return { perfilEncontrado, ...obtenerEstadoSesion() }
+  }
+
+  async function restablecerContrasena(correo) {
+    await restablecerContraseña(correo)
+  }
+
+  async function cerrarSesion() {
+    await cerrarSesionProveedor()
+    limpiarSesion()
+  }
+
+  function observarEstadoSesion(alCambiarUsuario) {
+    return escucharCambioEstadoAutenticacion(alCambiarUsuario)
+  }
+
   const tieneSesionConContrasena = computed(
     () => auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false,
   )
@@ -111,5 +182,11 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     cargarOCrearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,
+    procesarRegistro,
+    iniciarSesionConCorreo,
+    iniciarSesionConGoogle,
+    restablecerContrasena,
+    cerrarSesion,
+    observarEstadoSesion,
   }
 })

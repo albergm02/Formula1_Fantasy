@@ -6,7 +6,7 @@ import {
   sendPasswordResetEmail,
   verifyBeforeUpdateEmail,
 } from 'firebase/auth'
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore'
+import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 
 import { auth, db, functions } from '@/services/servicioFirebase'
@@ -30,17 +30,6 @@ export const eliminarMiCuenta = async () => {
 export const cargarPerfilUsuario = async (uid) => {
   const docSnap = await getDoc(doc(db, 'usuarios', uid))
   return docSnap.exists() ? docSnap.data() : {}
-}
-
-export const crearPerfilUsuario = async (uid, correoUsuario, nombreUsuario) => {
-  await setDoc(doc(db, 'usuarios', uid), {
-    correoAutenticacion: correoUsuario,
-    nombre: nombreUsuario,
-    ligasIds: [],
-    fechaRegistro: serverTimestamp(),
-    contadorIntentosFallidos: 0,
-    fechaBloqueoDeSesion: null,
-  })
 }
 
 /** Observador en tiempo real del perfil del usuario (detecta expulsiones, etc.). */
