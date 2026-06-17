@@ -191,7 +191,7 @@ async function ejecutarProcesarJornada() {
 // definitivas, abandonos (DNF) y sanciones ya aplicadas. Procesar el mismo
 // domingo capturaba datos provisionales (pilotos aún sin posición asignada o
 // con abandonos temporales que luego se reverían).
-exports.procesarJornadaSemanal = onSchedule(
+exports.procesarJornada = onSchedule(
   {
     schedule: 'every monday 19:00',
     timeZone: 'Europe/Madrid',

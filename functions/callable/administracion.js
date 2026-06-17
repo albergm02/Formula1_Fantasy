@@ -6,7 +6,7 @@ const { exigirAdministrador } = require('../middleware/autenticacion')
 const { borrarLigaEnCascada } = require('./ligas')
 const { eliminarCuentaUsuarioEnCascada } = require('./perfil')
 
-exports.eliminarLigaManual = onCall(OPCIONES, async (request) => {
+exports.eliminarLigaAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { idLiga } = request.data || {}
   if (!idLiga) {
@@ -24,7 +24,7 @@ exports.eliminarLigaManual = onCall(OPCIONES, async (request) => {
 
 // Bloqueo expresamente la eliminación de otros administradores desde el panel
 // para evitar "tiroteos" entre admins.
-exports.eliminarUsuarioManual = onCall(OPCIONES, async (request) => {
+exports.eliminarUsuarioAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { uid } = request.data || {}
   if (!uid) {

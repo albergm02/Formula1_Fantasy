@@ -2,14 +2,17 @@
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
+
 import { usarStoreAdministracion } from '@/stores/storeAdministracion'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
+
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
+
 import { FilterMatchMode } from '@primevue/core/api'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -47,7 +50,7 @@ async function cargarPanel() {
 function eliminarUsuario(usuario) {
     confirmarEliminacion({
         header: 'Confirmar eliminación de usuario',
-        mensaje: `Vas a eliminar PERMANENTEMENTE al usuario ${usuario.etiqueta}: se borrarán su perfil, sus participaciones, pujas activas y su cuenta de autenticación. Si era el único participante de alguna liga, esa liga también se borrará. Esta acción NO se puede deshacer.`,
+        mensaje: `Vas a eliminar permanentemente al usuario ${usuario.etiqueta}: se borrarán su perfil, sus participaciones, pujas activas y su cuenta de autenticación. Esta acción no se puede deshacer.`,
         accion: () => storeAdministracion.eliminarUsuario(usuario.uid),
         exito: 'Usuario eliminado correctamente.',
     })
@@ -56,7 +59,7 @@ function eliminarUsuario(usuario) {
 function eliminarLiga(liga) {
     confirmarEliminacion({
         header: 'Confirmar eliminación de liga',
-        mensaje: `Vas a eliminar PERMANENTEMENTE la liga "${liga.nombre}": se borrarán sus participaciones, mercados, pujas y actividad, y se desvinculará de todos sus usuarios. Esta acción NO se puede deshacer.`,
+        mensaje: `Vas a eliminar permanentemente la liga "${liga.nombre}": se borrarán sus participaciones, mercados, pujas y actividad. Esta acción NO se puede deshacer.`,
         accion: () => storeAdministracion.eliminarLiga(liga.id),
         exito: 'Liga eliminada correctamente.',
     })

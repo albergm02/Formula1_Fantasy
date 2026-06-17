@@ -4,10 +4,10 @@ import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
 import { calcularPrecioClausula } from '@/utils/clausulas'
 import {
-  venderCartaParticipante,
-  alternarCartaEquipada,
-  invertirEnClausulaCarta,
-  ejecutarClausulazo,
+  venderCarta,
+  alternarAlineacion,
+  gestionarClausula,
+  ejecutarClausula,
 } from '@/services/servicioGaraje'
 import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
 import { usarStoreActividad } from './storeActividad'
@@ -102,10 +102,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
       return { success: false, message: 'Elemento no encontrado para vender.' }
     }
     try {
-      const resultado = await venderCartaParticipante(
-        idParticipanteActivo.value,
-        elemento.instancia_id,
-      )
+      const resultado = await venderCarta(idParticipanteActivo.value, elemento.instancia_id)
       await cargarEquipo(idLigaActiva.value)
       const tipoElemento = elemento.tipo || elemento.tipoCarta
       usarStoreActividad()
@@ -122,7 +119,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   async function alternarEquipado(instanciaId) {
     try {
-      const resultado = await alternarCartaEquipada(idParticipanteActivo.value, instanciaId)
+      const resultado = await alternarAlineacion(idParticipanteActivo.value, instanciaId)
       await cargarEquipo(idLigaActiva.value)
       return {
         success: true,
@@ -152,7 +149,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
       return { success: false, message: 'Elemento no encontrado en tu garaje.' }
     }
     try {
-      await invertirEnClausulaCarta(idParticipanteActivo.value, instanciaId, Number(cantidad))
+      await gestionarClausula(idParticipanteActivo.value, instanciaId, Number(cantidad))
       await cargarEquipo(idLigaActiva.value)
       const elementoActualizado = encontrarElementoEnGaraje(instanciaId) || elemento
       const precioTotal = calcularPrecioClausula(elementoActualizado)
@@ -167,7 +164,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   async function ejecutarClausulaRival(idParticipanteRival, elemento) {
     try {
-      const resultado = await ejecutarClausulazo(
+      const resultado = await ejecutarClausula(
         idParticipanteRival,
         idParticipanteActivo.value,
         elemento.instancia_id,

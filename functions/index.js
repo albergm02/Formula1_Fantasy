@@ -8,28 +8,29 @@ const perfil = require('./callable/perfil')
 const autenticacion = require('./callable/autenticacion')
 const administracion = require('./callable/administracion')
 
-exports.procesarJornadaSemanal = jornada.procesarJornadaSemanal
-exports.generarMercadoDiario = mercado.generarMercadoDiario
+exports.procesarJornada = jornada.procesarJornada
 
-exports.generarMercadoInicialLiga = mercado.generarMercadoInicialLiga
-exports.registrarPujaCarta = mercado.registrarPujaCarta
-exports.eliminarPujaPropia = mercado.eliminarPujaPropia
-exports.eliminarMisPujasDeLiga = mercado.eliminarMisPujasDeLiga
+exports.registrarPuja = mercado.registrarPuja
+exports.eliminarPuja = mercado.eliminarPuja
+exports.generarMercado = mercado.generarMercado
 
-exports.eliminarLigaManual = administracion.eliminarLigaManual
-exports.eliminarLigaComoOrganizador = ligas.eliminarLigaComoOrganizador
-exports.expulsarParticipanteComoOrganizador = ligas.expulsarParticipanteComoOrganizador
+exports.eliminarLiga = ligas.eliminarLiga
+exports.eliminarPujas = ligas.eliminarPujas
+exports.expulsarParticipante = ligas.expulsarParticipante
+exports.inicializarMercado = ligas.inicializarMercado
 
-exports.venderCartaParticipante = garaje.venderCartaParticipante
-exports.alternarCartaEquipada = garaje.alternarCartaEquipada
-exports.invertirEnClausulaCarta = garaje.invertirEnClausulaCarta
-exports.ejecutarClausulazo = garaje.ejecutarClausulazo
+exports.venderCarta = garaje.venderCarta
+exports.alternarAlineacion = garaje.alternarAlineacion
+exports.gestionarClausula = garaje.gestionarClausula
+exports.ejecutarClausula = garaje.ejecutarClausula
 
 exports.autorizarCambioCorreo = perfil.autorizarCambioCorreo
-exports.migrarCorreoUsuario = perfil.migrarCorreoUsuario
+exports.migrarCorreo = perfil.migrarCorreo
 exports.eliminarMiCuenta = perfil.eliminarMiCuenta
-exports.eliminarUsuarioManual = administracion.eliminarUsuarioManual
 
-exports.verificarBloqueoAcceso = autenticacion.verificarBloqueoAcceso
-exports.registrarIntentoFallido = autenticacion.registrarIntentoFallido
-exports.reiniciarContadorIntentos = autenticacion.reiniciarContadorIntentos
+exports.verificarBloqueo = autenticacion.verificarBloqueo
+exports.registrarFallo = autenticacion.registrarFallo
+exports.reiniciarFallos = autenticacion.reiniciarFallos
+
+exports.eliminarLigaAdmin = administracion.eliminarLigaAdmin
+exports.eliminarUsuarioAdmin = administracion.eliminarUsuarioAdmin

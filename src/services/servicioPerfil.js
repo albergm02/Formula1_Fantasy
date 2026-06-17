@@ -13,11 +13,11 @@ import { auth, db, functions } from '@/services/servicioFirebase'
 
 const googleProvider = new GoogleAuthProvider()
 
-const llamadaMigrarCorreo = httpsCallable(functions, 'migrarCorreoUsuario')
+const llamadaMigrarCorreo = httpsCallable(functions, 'migrarCorreo')
 const llamadaEliminarCuenta = httpsCallable(functions, 'eliminarMiCuenta')
 const llamadaAutorizarCambioCorreo = httpsCallable(functions, 'autorizarCambioCorreo')
 
-export const migrarCorreoUsuario = async (correoAnterior, correoNuevo) => {
+export const migrarCorreo = async (correoAnterior, correoNuevo) => {
   const respuesta = await llamadaMigrarCorreo({ correoAnterior, correoNuevo })
   return respuesta.data
 }

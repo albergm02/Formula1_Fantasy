@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { cargarPerfilUsuario, migrarCorreoUsuario } from '@/services/servicioPerfil'
+import { cargarPerfilUsuario, migrarCorreo } from '@/services/servicioPerfil'
 import {
   guardarNuevoUsuario,
   registrarse,
@@ -8,9 +8,9 @@ import {
   iniciarSesion,
   iniciarSesionConGoogle as iniciarSesionConGoogleProveedor,
   restablecerContraseña,
-  verificarBloqueoAcceso,
-  registrarIntentoFallido,
-  reiniciarContadorIntentos,
+  verificarBloqueo,
+  registrarFallo,
+  reiniciarFallos,
   cerrarSesion as cerrarSesionProveedor,
   escucharCambioEstadoAutenticacion,
 } from '@/services/servicioAutenticacion'
@@ -68,7 +68,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     const correoNuevo = correoToken.trim().toLowerCase()
     const correoAnterior = correoPerfil.trim().toLowerCase()
     if (!correoAnterior || correoAnterior === correoNuevo) return
-    await migrarCorreoUsuario(correoAnterior, correoNuevo).catch(() => {})
+    await migrarCorreo(correoAnterior, correoNuevo).catch(() => {})
   }
 
   async function verificarExistenciaPerfil(uid, correoUsuario) {
@@ -132,20 +132,20 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
       return await iniciarSesion(correo, contrasena)
     } catch (error) {
       if (CODIGOS_CREDENCIAL_INVALIDA.includes(error?.code)) {
-        await registrarIntentoFallido(correo.trim())
+        await registrarFallo(correo.trim())
       }
       throw error
     }
   }
 
   async function iniciarSesionConCorreo(correo, contrasena) {
-    await verificarBloqueoAcceso(correo.trim())
+    await verificarBloqueo(correo.trim())
     const credencial = await autenticarConCorreo(correo, contrasena)
     if (!credencial.user.emailVerified) {
       await cerrarSesion()
       throw new Error('CORREO_NO_VERIFICADO')
     }
-    await reiniciarContadorIntentos()
+    await reiniciarFallos()
     await verificarExistenciaPerfil(credencial.user.uid, credencial.user.email)
     return obtenerEstadoSesion()
   }

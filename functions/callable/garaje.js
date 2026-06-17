@@ -42,7 +42,7 @@ function calcularValorReventa(precio) {
   return Math.round(Number(precio || 0) * PORCENTAJE_REVENTA * 100) / 100
 }
 
-exports.venderCartaParticipante = onCall(OPCIONES, async (request) => {
+exports.venderCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idParticipante, instanciaId } = request.data || {}
   if (instanciaId === undefined) {
@@ -113,7 +113,7 @@ function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
   return { ...garaje, [coleccion]: lista }
 }
 
-exports.alternarCartaEquipada = onCall(OPCIONES, async (request) => {
+exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
   const { idParticipante, instanciaId } = request.data || {}
@@ -137,7 +137,7 @@ exports.alternarCartaEquipada = onCall(OPCIONES, async (request) => {
 
 // Cada €1 invertido sube la cláusula en €2 (precio efectivo = precioCompra
 // + 2 × clausulaInvertida). Bloqueado durante la jornada activa.
-exports.invertirEnClausulaCarta = onCall(OPCIONES, async (request) => {
+exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
   const { idParticipante, instanciaId, cantidad } = request.data || {}
@@ -237,7 +237,7 @@ async function calcularComprometidoEnPujas(idLiga, email) {
   return pujasSnap.docs.reduce((suma, documento) => suma + (documento.data().cantidad || 0), 0)
 }
 
-exports.ejecutarClausulazo = onCall(OPCIONES, async (request) => {
+exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   const emailAtacante = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
   const { idParticipanteRival, idParticipantePropio, instanciaId } = request.data || {}

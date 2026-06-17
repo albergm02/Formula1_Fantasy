@@ -9,7 +9,7 @@ const DURACION_BLOQUEO_MINUTOS = 5
 // Callable previa al login: avisa si la cuenta está temporalmente bloqueada.
 // Si el correo no existe, devuelve { bloqueado: false } sin revelar nada
 // más, para evitar enumeración de usuarios.
-exports.verificarBloqueoAcceso = onCall(OPCIONES_PUBLICAS, async (request) => {
+exports.verificarBloqueo = onCall(OPCIONES_PUBLICAS, async (request) => {
   const correo = String(request.data?.correo || '')
     .trim()
     .toLowerCase()
@@ -40,7 +40,7 @@ exports.verificarBloqueoAcceso = onCall(OPCIONES_PUBLICAS, async (request) => {
 
 // Si el correo no existe, ignoro silenciosamente el intento para no
 // convertir esta callable en un oráculo de existencia de cuentas.
-exports.registrarIntentoFallido = onCall(OPCIONES_PUBLICAS, async (request) => {
+exports.registrarFallo = onCall(OPCIONES_PUBLICAS, async (request) => {
   const correo = String(request.data?.correo || '')
     .trim()
     .toLowerCase()
@@ -69,7 +69,7 @@ exports.registrarIntentoFallido = onCall(OPCIONES_PUBLICAS, async (request) => {
 
 // Uso el UID del token (no un email del payload) para evitar que un atacante
 // reinicie el contador de otro correo.
-exports.reiniciarContadorIntentos = onCall(OPCIONES, async (request) => {
+exports.reiniciarFallos = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid
 

@@ -42,7 +42,7 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
 // El usuario se indexa por UID (no por email), así que no hay que copiar/borrar
 // nada: solo actualizo correoAutenticacion y propago el cambio a
 // participaciones y a las ligas que el usuario organice.
-exports.migrarCorreoUsuario = onCall(OPCIONES, async (request) => {
+exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
   exigirReautenticacionReciente(request)
   const uid = request.auth.uid
@@ -93,7 +93,7 @@ exports.migrarCorreoUsuario = onCall(OPCIONES, async (request) => {
   }
 })
 
-function elegirSiguienteAdministrador(participacionesRestantes) {
+function elegirSiguienteOrganizador(participacionesRestantes) {
   if (participacionesRestantes.length === 0) return null
   const ordenadas = [...participacionesRestantes].sort((a, b) => {
     const fechaA = a.fecha_union?.toMillis ? a.fecha_union.toMillis() : 0
@@ -160,7 +160,7 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
     }
 
     if (datosPropios.rol === 'organizador') {
-      const siguiente = elegirSiguienteAdministrador(restantes)
+      const siguiente = elegirSiguienteOrganizador(restantes)
       await db.collection('participaciones').doc(siguiente.id).update({ rol: 'organizador' })
       await db
         .collection('ligas')

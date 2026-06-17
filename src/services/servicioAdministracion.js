@@ -2,8 +2,8 @@ import { httpsCallable } from 'firebase/functions'
 import { collection, getDocs } from 'firebase/firestore'
 import { db, functions } from '@/services/servicioFirebase'
 
-const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLigaManual')
-const llamadaEliminarUsuario = httpsCallable(functions, 'eliminarUsuarioManual')
+const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLigaAdmin')
+const llamadaEliminarUsuario = httpsCallable(functions, 'eliminarUsuarioAdmin')
 
 export async function eliminarLigaComoAdministrador(idLiga) {
   const respuesta = await llamadaEliminarLiga({ idLiga })

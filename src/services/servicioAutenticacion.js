@@ -13,9 +13,9 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { auth, db, functions } from './servicioFirebase'
 
-const llamadaVerificarBloqueo = httpsCallable(functions, 'verificarBloqueoAcceso')
-const llamadaRegistrarIntentoFallido = httpsCallable(functions, 'registrarIntentoFallido')
-const llamadaReiniciarContador = httpsCallable(functions, 'reiniciarContadorIntentos')
+const llamadaVerificarBloqueo = httpsCallable(functions, 'verificarBloqueo')
+const llamadaRegistrarFallo = httpsCallable(functions, 'registrarFallo')
+const llamadaReiniciarFallos = httpsCallable(functions, 'reiniciarFallos')
 
 const googleProvider = new GoogleAuthProvider()
 
@@ -59,7 +59,7 @@ export const obtenerUsuarioActual = () =>
     )
   })
 
-export const verificarBloqueoAcceso = async (correo) => {
+export const verificarBloqueo = async (correo) => {
   try {
     await llamadaVerificarBloqueo({ correo: correo.trim().toLowerCase() })
   } catch (error) {
@@ -67,10 +67,10 @@ export const verificarBloqueoAcceso = async (correo) => {
   }
 }
 
-export const registrarIntentoFallido = async (correo) => {
-  await llamadaRegistrarIntentoFallido({ correo: correo.trim().toLowerCase() }).catch(() => {})
+export const registrarFallo = async (correo) => {
+  await llamadaRegistrarFallo({ correo: correo.trim().toLowerCase() }).catch(() => {})
 }
 
-export const reiniciarContadorIntentos = async () => {
-  await llamadaReiniciarContador({}).catch(() => {})
+export const reiniciarFallos = async () => {
+  await llamadaReiniciarFallos({}).catch(() => {})
 }

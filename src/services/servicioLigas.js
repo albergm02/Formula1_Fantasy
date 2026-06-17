@@ -18,28 +18,28 @@ import {
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 
-const llamadaInicializarMercado = httpsCallable(functions, 'generarMercadoInicialLiga')
-const llamadaEliminarLigaOrganizador = httpsCallable(functions, 'eliminarLigaComoOrganizador')
-const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipanteComoOrganizador')
+const llamadaInicializarMercado = httpsCallable(functions, 'inicializarMercado')
+const llamadaEliminarLigaOrganizador = httpsCallable(functions, 'eliminarLiga')
+const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipante')
 
-export const inicializarMercadoLiga = async (idLiga) => {
+export const inicializarMercado = async (idLiga) => {
   const respuesta = await llamadaInicializarMercado({ idLiga })
   return respuesta.data
 }
 
-export const eliminarLigaComoOrganizador = async (idLiga) => {
+export const eliminarLiga = async (idLiga) => {
   const respuesta = await llamadaEliminarLigaOrganizador({ idLiga })
   return respuesta.data
 }
 
-export const expulsarParticipanteComoOrganizador = async (idLiga, emailExpulsado) => {
+export const expulsarParticipante = async (idLiga, emailExpulsado) => {
   const respuesta = await llamadaExpulsarParticipante({ idLiga, emailExpulsado })
   return respuesta.data
 }
 
 /* ─── Ligas ──────────────────────────────────────────────────────────────── */
 
-export const cargarLigasPorIds = async (idsLigas) => {
+export const cargarLigas = async (idsLigas) => {
   const instantanea = await getDocs(collection(db, 'ligas'))
   return instantanea.docs
     .map((documento) => ({ id: documento.id, ...documento.data() }))
@@ -62,7 +62,7 @@ export const buscarLigaPorCodigo = async (codigoInvitacion) => {
   return { id: documento.id, ...documento.data() }
 }
 
-export const crearDocumentoLiga = async (datosLiga) => {
+export const crearLiga = async (datosLiga) => {
   const referencia = await addDoc(collection(db, 'ligas'), datosLiga)
   return referencia.id
 }
@@ -86,7 +86,7 @@ export const crearParticipacion = async (datosParticipacion) => {
   return referencia.id
 }
 
-export const cargarParticipacionesLiga = async (idLiga) => {
+export const cargarParticipantes = async (idLiga) => {
   const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga))
   const instantanea = await getDocs(consulta)
   return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
@@ -101,7 +101,7 @@ export const eliminarParticipacion = async (idParticipacion) => {
 }
 
 /** Cuenta cuántas ligas administra un usuario (límite 2 por usuario). */
-export const contarLigasAdministradas = async (correoUsuario) => {
+export const contarLigasOrganizadas = async (correoUsuario) => {
   const consulta = query(
     collection(db, 'participaciones'),
     where('email_usuario', '==', correoUsuario),
@@ -136,7 +136,7 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
 /* ─── Garaje de participante ─────────────────────────────────────────────── */
 
 /** Garaje público de un rival (nunca expone el presupuesto). */
-export const cargarGarajeDeParticipante = async (idParticipacion) => {
+export const cargarGarajeRival = async (idParticipacion) => {
   const documento = await getDoc(doc(db, 'participaciones', idParticipacion))
   if (!documento.exists()) return null
 
@@ -168,7 +168,7 @@ export const cargarGarajeDeParticipante = async (idParticipacion) => {
 }
 
 /** Ranking ordenado por puntos desc, desempate por presupuesto desc. */
-export const cargarRankingLiga = async (idLiga) => {
+export const cargarClasificacion = async (idLiga) => {
   const participaciones = await cargarParticipacionesLiga(idLiga)
 
   const filasRanking = participaciones.map((participacion) => ({

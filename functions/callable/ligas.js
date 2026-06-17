@@ -3,8 +3,8 @@ const { FieldValue } = require('firebase-admin/firestore')
 
 const { db } = require('../middleware/firebase')
 const { OPCIONES } = require('../middleware/constantes')
-const { exigirAdministrador, exigirEmailAutenticado } = require('../middleware/autenticacion')
-const { agregarBorradoPujasUsuario } = require('./mercado')
+const { exigirEmailAutenticado } = require('../middleware/autenticacion')
+const { agregarBorradoPujasUsuario, ejecutarGeneracionMercadoParaLiga } = require('./mercado')
 
 // Borra la liga y todo lo asociado (participaciones, mercados con pujas,
 // actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
@@ -57,7 +57,40 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
 
 exports.borrarLigaEnCascada = borrarLigaEnCascada
 
-exports.eliminarLigaComoOrganizador = onCall(OPCIONES, async (request) => {
+exports.inicializarMercado = onCall(OPCIONES, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+  if (!ligaSnap.exists) {
+    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
+  }
+  if (ligaSnap.data().correoOrganizador !== email) {
+    throw new HttpsError('permission-denied', 'Solo el organizador de la liga puede inicializarla.')
+  }
+
+  const resultado = await ejecutarGeneracionMercadoParaLiga(idLiga)
+  return { ok: true, ...resultado }
+})
+
+exports.eliminarPujas = onCall(OPCIONES, async (request) => {
+  const email = exigirEmailAutenticado(request)
+  const { idLiga } = request.data || {}
+  if (!idLiga) {
+    throw new HttpsError('invalid-argument', 'Falta idLiga.')
+  }
+
+  const batch = db.batch()
+  const pujasEliminadas = await agregarBorradoPujasUsuario(batch, idLiga, email)
+  await batch.commit()
+
+  return { ok: true, pujasEliminadas }
+})
+
+exports.eliminarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
   if (!idLiga) {
@@ -79,7 +112,7 @@ exports.eliminarLigaComoOrganizador = onCall(OPCIONES, async (request) => {
 // Uso FieldValue.increment(-1) para el contador `participantes`: dos
 // expulsiones simultáneas se sumarían correctamente, cosa que un
 // `participantes - 1` calculado en cliente no garantiza.
-exports.expulsarParticipanteComoOrganizador = onCall(OPCIONES, async (request) => {
+exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   const emailOrganizador = exigirEmailAutenticado(request)
   const { idLiga, emailExpulsado } = request.data || {}
   if (!idLiga || !emailExpulsado) {

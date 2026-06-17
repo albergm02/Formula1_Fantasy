@@ -21,9 +21,9 @@ export const cargarMercadoActivo = async (idLiga) => {
   return { id: documento.id, ...datos }
 }
 
-const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPujaCarta')
-const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPujaPropia')
-const llamadaEliminarMisPujasDeLiga = httpsCallable(functions, 'eliminarMisPujasDeLiga')
+const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPuja')
+const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
+const llamadaEliminarPujas = httpsCallable(functions, 'eliminarPujas')
 
 export const registrarPuja = async (idLiga, idCarta, cantidad) => {
   await llamadaRegistrarPuja({ idLiga, idCarta, cantidad })
@@ -33,8 +33,8 @@ export const eliminarPuja = async (idLiga, idCarta) => {
   await llamadaEliminarPuja({ idLiga, idCarta })
 }
 
-export const eliminarMisPujasDeLiga = async (idLiga) => {
-  await llamadaEliminarMisPujasDeLiga({ idLiga })
+export const eliminarPujas = async (idLiga) => {
+  await llamadaEliminarPujas({ idLiga })
 }
 
 export const cargarMisPujas = async (idMercado, emailUsuario) => {

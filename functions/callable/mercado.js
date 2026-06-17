@@ -191,6 +191,8 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
 }
 
 async function ejecutarGeneracionMercadoParaLiga(idLiga) {
+  // Exportado para que callable/ligas.js pueda reutilizarlo al inicializar
+  // una liga recién creada sin duplicar la lógica de generación.
   const ahora = new Date()
   const idMercadoHoy = calcularIdMercado(idLiga, ahora)
 
@@ -445,7 +447,7 @@ async function propagarDeltasAMercadosAbiertos(tipoCarta, configuracion, deltasP
 // Si una liga falla, registro y sigo: prefiero N-1 ligas con mercado nuevo a
 // fallar todas por una. El throw final hace que Scheduler reintente; las
 // ligas ya procesadas son idempotentes y no se duplican.
-exports.generarMercadoDiario = onSchedule(
+exports.generarMercado = onSchedule(
   {
     schedule: 'every day 12:05',
     timeZone: 'UTC',
@@ -474,28 +476,6 @@ exports.generarMercadoDiario = onSchedule(
   },
 )
 
-exports.generarMercadoInicialLiga = onCall(OPCIONES, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
-  }
-  const email = request.auth.token.email
-  const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
-
-  const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
-  if (ligaSnap.data().correoOrganizador !== email) {
-    throw new HttpsError('permission-denied', 'Solo el organizador de la liga puede inicializarla.')
-  }
-
-  const resultado = await ejecutarGeneracionMercadoParaLiga(idLiga)
-  return { ok: true, ...resultado }
-})
-
 // Saneado idéntico al histórico del cliente para que las pujas existentes
 // sigan localizables.
 function sanitizarEmailParaIdPuja(email) {
@@ -518,7 +498,7 @@ async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
   }, 0)
 }
 
-exports.registrarPujaCarta = onCall(OPCIONES, async (request) => {
+exports.registrarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta, cantidad } = request.data || {}
   if (!idLiga || !idCarta) {
@@ -578,7 +558,7 @@ exports.registrarPujaCarta = onCall(OPCIONES, async (request) => {
   return { ok: true, cantidad: cantidadNumerica }
 })
 
-exports.eliminarPujaPropia = onCall(OPCIONES, async (request) => {
+exports.eliminarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta } = request.data || {}
   if (!idLiga || !idCarta) {
@@ -619,21 +599,7 @@ async function agregarBorradoPujasUsuario(batch, idLiga, email) {
   return pujasEliminadas
 }
 
-exports.eliminarMisPujasDeLiga = onCall(OPCIONES, async (request) => {
-  const email = exigirEmailAutenticado(request)
-  const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
-
-  const batch = db.batch()
-  const pujasEliminadas = await agregarBorradoPujasUsuario(batch, idLiga, email)
-  await batch.commit()
-
-  return { ok: true, pujasEliminadas }
-})
-
-// Exportado para que el módulo de cláusulas pueda localizar el mercado actual
-// sin duplicar la lógica de fechas.
+// Exportados para reutilización en callable/ligas.js y callable/garaje.js.
 module.exports.calcularIdMercado = calcularIdMercado
 module.exports.agregarBorradoPujasUsuario = agregarBorradoPujasUsuario
+module.exports.ejecutarGeneracionMercadoParaLiga = ejecutarGeneracionMercadoParaLiga
