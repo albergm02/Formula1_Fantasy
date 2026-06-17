@@ -169,15 +169,26 @@ export const cargarGarajeRival = async (idParticipacion) => {
 
 /** Ranking ordenado por puntos desc, desempate por presupuesto desc. */
 export const cargarClasificacion = async (idLiga) => {
-  const participaciones = await cargarParticipacionesLiga(idLiga)
+  const participaciones = await cargarParticipantes(idLiga)
 
-  const filasRanking = participaciones.map((participacion) => ({
-    id: participacion.id,
-    correo: participacion.email_usuario,
-    nombre: participacion.nombre_usuario || 'Desconocido',
-    puntos: participacion.puntos || 0,
-    presupuesto: participacion.presupuesto || 0,
-  }))
+  const filasRanking = participaciones.map((participacion) => {
+    const garaje = participacion.garaje || {}
+    const todasLasCartas = [
+      ...(garaje.coches || []),
+      ...(garaje.pilotos || []),
+      ...(garaje.potenciadores || []),
+    ]
+    const valorGaraje = todasLasCartas.reduce((suma, carta) => suma + Number(carta?.precio || 0), 0)
+
+    return {
+      id: participacion.id,
+      correo: participacion.email_usuario,
+      nombre: participacion.nombre_usuario || 'Desconocido',
+      puntos: participacion.puntos || 0,
+      presupuesto: participacion.presupuesto || 0,
+      valorGaraje: Math.round(valorGaraje * 10) / 10,
+    }
+  })
 
   return filasRanking.sort(
     (primero, segundo) =>

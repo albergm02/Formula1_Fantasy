@@ -106,7 +106,11 @@ onMounted(async () => {
                 Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2)
                 }}M</span>
               </span>
-              <span v-else class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+              <span class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+                Garaje: <span class="font-bold text-[#D4A843]">{{ jugador.valorGaraje }}M</span>
+              </span>
+              <span v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
+                class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
                 Toca para ver su equipo y hacer clausulas.
               </span>
             </div>

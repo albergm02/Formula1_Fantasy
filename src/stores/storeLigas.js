@@ -77,6 +77,11 @@ export const usarStoreLigas = defineStore('ligas', () => {
       })
 
       await servicioLigas.crearParticipacion({
+        id_liga: idLiga,
+        uid_usuario: uid,
+        email_usuario: correoUsuario,
+        nombre_usuario: storePerfil.usuarioActual.nombreVisible,
+        rol: 'organizador',
         presupuesto: 50.0,
         puntos: 0,
         garaje: crearGarajeVacio(),

@@ -7,6 +7,7 @@ const {
   exigirEmailAutenticado,
   exigirReautenticacionReciente,
 } = require('../middleware/autenticacion')
+const { agregarBorradoPujasUsuario } = require('./mercado')
 
 function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
   const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)
@@ -123,8 +124,9 @@ async function borrarLigaCompleta(idLiga) {
   await db.collection('ligas').doc(idLiga).delete()
 }
 
-// Tres casos por liga: (1) único miembro → borrar la liga; (2) organizador con
-// más miembros → ceder rol al siguiente; (3) miembro normal → solo decrementar.
+// Tres casos por liga: (1) único miembro → borrar la liga;
+// (2) organizador con más miembros → ceder rol al siguiente;
+// (3) miembro normal → solo decrementar.
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db
     .collection('participaciones')
@@ -159,6 +161,10 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
       continue
     }
 
+    const batchPujas = db.batch()
+    await agregarBorradoPujasUsuario(batchPujas, idLiga, email)
+    await batchPujas.commit()
+
     if (datosPropios.rol === 'organizador') {
       const siguiente = elegirSiguienteOrganizador(restantes)
       await db.collection('participaciones').doc(siguiente.id).update({ rol: 'organizador' })
@@ -179,20 +185,6 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
     }
 
     await documentoPropio.ref.delete()
-  }
-
-  const mercadosAbiertosSnap = await db
-    .collection('mercados')
-    .where('estado', '==', 'abierto')
-    .get()
-  for (const docMercado of mercadosAbiertosSnap.docs) {
-    const pujasSnap = await docMercado.ref
-      .collection('pujas')
-      .where('emailUsuario', '==', email)
-      .get()
-    const batchPujas = db.batch()
-    for (const pujaDoc of pujasSnap.docs) batchPujas.delete(pujaDoc.ref)
-    if (!pujasSnap.empty) await batchPujas.commit()
   }
 
   await db.collection('usuarios').doc(uid).delete()

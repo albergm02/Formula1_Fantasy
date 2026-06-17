@@ -28,6 +28,16 @@ const coches = computed(() => storeGaraje.garaje.coches)
 const pilotos = computed(() => storeGaraje.garaje.pilotos)
 const potenciadores = computed(() => storeGaraje.garaje.potenciadores)
 
+const valorTotalGaraje = computed(() => {
+  const todasLasCartas = [
+    ...storeGaraje.garaje.coches,
+    ...storeGaraje.garaje.pilotos,
+    ...storeGaraje.garaje.potenciadores,
+  ]
+  const total = todasLasCartas.reduce((suma, carta) => suma + storeGaraje.obtenerValorMercado(carta), 0)
+  return total.toFixed(1)
+})
+
 const dialogoProteccion = ref(false)
 const elementoProtegiendo = ref(null)
 const cantidadInversion = ref(1)
@@ -122,6 +132,12 @@ const confirmarInversionClausula = async () => {
   <Cabecera />
   <main>
     <div class="flex flex-col gap-6 w-full max-w-lg mx-auto mt-4 mb-24 px-3">
+
+      <!-- ─── Valor total del garaje ─── -->
+      <div class="flex items-center justify-between bg-[#121218] rounded-lg px-4 py-3">
+        <span class="text-xs uppercase tracking-widest text-zinc-400 font-black">Valor de mercado del garaje</span>
+        <span class="text-lg font-black text-[#D4A843]">{{ valorTotalGaraje }}M</span>
+      </div>
 
       <!-- ─── Chásis ─── -->
       <section>
