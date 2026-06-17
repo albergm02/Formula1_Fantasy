@@ -1,7 +1,7 @@
 const { HttpsError } = require('firebase-functions/v2/https')
 const { db } = require('./firebase')
 const { TEMPORADA_ACTUAL } = require('./constantes')
-const { obtenerMeetingKeyEnJuego, SESION_EN_DIRECTO } = require('../dominio/openF1')
+const { obtenerMeetingKeyEnJuego, SESION_EN_DIRECTO } = require('../infraestructura/openF1')
 
 // Cacheo del meeting_key durante un minuto en memoria de la instancia para no
 // machacar a OpenF1: un GP arranca y termina en horas, un pequeño desfase es

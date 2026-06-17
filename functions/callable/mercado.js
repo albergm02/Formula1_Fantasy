@@ -2,17 +2,17 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { FieldValue } = require('firebase-admin/firestore')
 
-const { db } = require('../comun/firebase')
-const { OPCIONES, REGION } = require('../comun/constantes')
-const { exigirEmailAutenticado } = require('../comun/autenticacion')
+const { db } = require('../middleware/firebase')
+const { OPCIONES, REGION } = require('../middleware/constantes')
+const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 
 const {
   cargarCatalogo,
   cargarPreciosDinamicos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,
-} = require('../dominio/mercado')
-const { seleccionarPujasGanadoras } = require('../dominio/pujas')
+} = require('../logica/mercado')
+const { seleccionarPujasGanadoras } = require('../logica/pujas')
 
 const HISTORIAL_MAX_MUESTRAS = 5
 const FACTOR_DESINTERES = 0.95

@@ -1,10 +1,10 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
-const { db } = require('../comun/firebase')
-const { OPCIONES, HORAS_PERIODO_GRACIA } = require('../comun/constantes')
-const { exigirEmailAutenticado } = require('../comun/autenticacion')
-const { exigirJornadaProcesada } = require('../comun/jornada')
+const { db } = require('../middleware/firebase')
+const { OPCIONES, HORAS_PERIODO_GRACIA } = require('../middleware/constantes')
+const { exigirEmailAutenticado } = require('../middleware/autenticacion')
+const { exigirJornadaProcesada } = require('../middleware/jornada')
 const { calcularIdMercado } = require('./mercado')
 
 const PORCENTAJE_REVENTA = 0.9

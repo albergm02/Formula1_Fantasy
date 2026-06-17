@@ -1,11 +1,14 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 
-const { db } = require('../comun/firebase')
-const { REGION, TEMPORADA_ACTUAL } = require('../comun/constantes')
+const { db } = require('../middleware/firebase')
+const { REGION, TEMPORADA_ACTUAL } = require('../middleware/constantes')
 
-const { recopilarDatosGranPremio, obtenerGranPremiosFinalizados } = require('../dominio/openF1')
-const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../dominio/puntuacion')
-const { calcularSinergias, aplicarSinergia } = require('../dominio/sinergia')
+const {
+  recopilarDatosGranPremio,
+  obtenerGranPremiosFinalizados,
+} = require('../infraestructura/openF1')
+const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../logica/puntuacion')
+const { calcularSinergias, aplicarSinergia } = require('../logica/sinergia')
 
 // Conversión 10:1 (108 puntos → 10.8 M) para mantener los premios en un
 // rango manejable comparado con los precios del catálogo.

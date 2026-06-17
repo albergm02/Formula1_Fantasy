@@ -1,12 +1,12 @@
-require('./comun/firebase')
+require('./middleware/firebase')
 
-const jornada = require('./cloud/jornada')
-const mercado = require('./cloud/mercado')
-const ligas = require('./cloud/ligas')
-const garaje = require('./cloud/garaje')
-const perfil = require('./cloud/perfil')
-const autenticacion = require('./cloud/autenticacion')
-const administracion = require('./cloud/administracion')
+const jornada = require('./callable/jornada')
+const mercado = require('./callable/mercado')
+const ligas = require('./callable/ligas')
+const garaje = require('./callable/garaje')
+const perfil = require('./callable/perfil')
+const autenticacion = require('./callable/autenticacion')
+const administracion = require('./callable/administracion')
 
 exports.procesarJornadaSemanal = jornada.procesarJornadaSemanal
 exports.generarMercadoDiario = mercado.generarMercadoDiario

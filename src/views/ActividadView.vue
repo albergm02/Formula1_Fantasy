@@ -12,18 +12,6 @@ const storeLigas = usarStoreLigas()
 const storeGaraje = usarStoreGaraje()
 const ruta = useRoute()
 
-const etiquetaPorTipo = (tipo) => {
-  const etiquetas = {
-    compra: 'Fichaje',
-    venta: 'Venta',
-    incorporacion: 'Incorporación',
-    abandono: 'Abandono',
-    clausula: 'Cláusula',
-    creacion: 'Nueva liga',
-  }
-  return etiquetas[tipo] ?? tipo
-}
-
 const formatearFecha = (fecha) => {
   const ahora = new Date()
   const diferencia = Math.floor((ahora - fecha) / 1000)

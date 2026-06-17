@@ -1,8 +1,8 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 
-const { db } = require('../comun/firebase')
-const { OPCIONES } = require('../comun/constantes')
-const { exigirAdministrador } = require('../comun/autenticacion')
+const { db } = require('../middleware/firebase')
+const { OPCIONES } = require('../middleware/constantes')
+const { exigirAdministrador } = require('../middleware/autenticacion')
 const { borrarLigaEnCascada } = require('./ligas')
 const { eliminarCuentaUsuarioEnCascada } = require('./perfil')
 

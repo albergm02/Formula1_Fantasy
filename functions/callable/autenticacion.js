@@ -1,7 +1,7 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 
-const { db } = require('../comun/firebase')
-const { OPCIONES, OPCIONES_PUBLICAS } = require('../comun/constantes')
+const { db } = require('../middleware/firebase')
+const { OPCIONES, OPCIONES_PUBLICAS } = require('../middleware/constantes')
 
 const MAXIMO_INTENTOS_FALLIDOS = 5
 const DURACION_BLOQUEO_MINUTOS = 5

@@ -1,5 +1,5 @@
 const URL_BASE = 'https://api.openf1.org/v1'
-const { pilotosBase } = require('../data/catalogoBase')
+const { pilotosBase } = require('./catalogoBase')
 
 // OpenF1 restringe el acceso global durante una sesión en vivo y responde con
 // 401/403 y este texto. Lo señalizamos con un código propio para que el llamador

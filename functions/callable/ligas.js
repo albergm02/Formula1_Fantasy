@@ -1,9 +1,9 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
-const { db } = require('../comun/firebase')
-const { OPCIONES } = require('../comun/constantes')
-const { exigirAdministrador, exigirEmailAutenticado } = require('../comun/autenticacion')
+const { db } = require('../middleware/firebase')
+const { OPCIONES } = require('../middleware/constantes')
+const { exigirAdministrador, exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { agregarBorradoPujasUsuario } = require('./mercado')
 
 // Borra la liga y todo lo asociado (participaciones, mercados con pujas,
