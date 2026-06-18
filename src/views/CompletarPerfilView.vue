@@ -41,7 +41,7 @@ const handleCompletarPerfil = async ({ valid, values }) => {
       throw new Error('No se encontró una sesión válida de Google.')
     }
 
-    await storeAutenticacion.cargarOCrearPerfil(
+    await storeAutenticacion.crearPerfil(
       storePerfil.usuarioActual.uid,
       storePerfil.usuarioActual.correoAutenticacion,
       nombreNormalizado

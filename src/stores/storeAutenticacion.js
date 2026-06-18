@@ -27,39 +27,29 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const perfilExiste = ref(false)
   const datosCargados = ref(false)
 
-  async function cargarOCrearPerfil(uid, correoUsuario, nombreUsuario = '') {
+  async function cargarPerfil(uid, correoUsuario, datosPerfil) {
     const storePerfil = usarStorePerfil()
-    datosCargados.value = false
-    storePerfil.usuarioActual.uid = uid
-    storePerfil.usuarioActual.correoAutenticacion = correoUsuario
+    storePerfil.establecerDatosUsuario({
+      uid,
+      correo: correoUsuario,
+      nombre: datosPerfil.nombre || 'Piloto',
+      idsLigas: datosPerfil.ligasIds || [],
+      esAdmin: datosPerfil.esAdministrador === true,
+    })
+    perfilExiste.value = true
+  }
 
-    try {
-      const datosPerfil = await cargarPerfilUsuario(uid)
-
-      if (datosPerfil.correoAutenticacion) {
-        storePerfil.establecerDatosUsuario({
-          uid,
-          correo: correoUsuario,
-          nombre: datosPerfil.nombre || 'Piloto',
-          idsLigas: datosPerfil.ligasIds || [],
-          esAdmin: datosPerfil.esAdministrador === true,
-        })
-        perfilExiste.value = true
-        return
-      }
-
-      await guardarNuevoUsuario(uid, correoUsuario, nombreUsuario)
-      storePerfil.establecerDatosUsuario({
-        uid,
-        correo: correoUsuario,
-        nombre: nombreUsuario,
-        idsLigas: [],
-        esAdmin: false,
-      })
-      perfilExiste.value = true
-    } finally {
-      datosCargados.value = true
-    }
+  async function crearPerfil(uid, correoUsuario, nombreUsuario) {
+    const storePerfil = usarStorePerfil()
+    await guardarNuevoUsuario(uid, correoUsuario, nombreUsuario)
+    storePerfil.establecerDatosUsuario({
+      uid,
+      correo: correoUsuario,
+      nombre: nombreUsuario,
+      idsLigas: [],
+      esAdmin: false,
+    })
+    perfilExiste.value = true
   }
 
   // Tras verificar el correo nuevo en Auth, el token lo refleja pero Firestore
@@ -82,14 +72,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
       if (datosPerfil.correoAutenticacion) {
         await reconciliarCorreoMigrado(correoUsuario, datosPerfil.correoAutenticacion)
-        storePerfil.establecerDatosUsuario({
-          uid,
-          correo: correoUsuario,
-          nombre: datosPerfil.nombre || 'Piloto',
-          idsLigas: datosPerfil.ligasIds || [],
-          esAdmin: datosPerfil.esAdministrador === true,
-        })
-        perfilExiste.value = true
+        await cargarPerfil(uid, correoUsuario, datosPerfil)
         return true
       }
 
@@ -123,7 +106,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   async function procesarRegistro(correo, contrasena, nombreUsuario) {
     const credencial = await registrarse(correo, contrasena)
     await enviarVerificacionCorreo()
-    await cargarOCrearPerfil(credencial.user.uid, credencial.user.email, nombreUsuario)
+    await crearPerfil(credencial.user.uid, credencial.user.email, nombreUsuario)
     await cerrarSesion()
   }
 
@@ -179,7 +162,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     perfilExiste,
     datosCargados,
     tieneSesionConContrasena,
-    cargarOCrearPerfil,
+    cargarPerfil,
+    crearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,
     procesarRegistro,
