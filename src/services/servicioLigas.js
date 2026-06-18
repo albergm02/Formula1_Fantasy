@@ -71,14 +71,6 @@ export const actualizarLiga = async (idLiga, datos) => {
   await updateDoc(doc(db, 'ligas', idLiga), datos)
 }
 
-export const añadirEmailExpulsado = async (idLiga, correoExpulsado) => {
-  await updateDoc(doc(db, 'ligas', idLiga), { expulsados: arrayUnion(correoExpulsado) })
-}
-
-export const eliminarDocumentoLiga = async (idLiga) => {
-  await deleteDoc(doc(db, 'ligas', idLiga))
-}
-
 /* ─── Participaciones ────────────────────────────────────────────────────── */
 
 export const crearParticipacion = async (datosParticipacion) => {
