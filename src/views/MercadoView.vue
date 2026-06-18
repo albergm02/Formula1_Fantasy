@@ -32,7 +32,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  storeMercado.detenerCuentaAtras()
+  storeMercado.detenerMercado()
 })
 
 const handlePuja = async ({ carta, cantidad }) => {
@@ -71,13 +71,11 @@ const handleEliminarPuja = async (carta) => {
 
     <template v-else>
 
-      <section class="flex items-center justify-between bg-zinc-900 border border-zinc-700 px-4 py-3">
-        <div class="flex items-center gap-2">
-          <span class="text-xs uppercase tracking-widest text-zinc-300">Cierre del mercado</span>
-        </div>
-        <span class="text-sm text-[#D4A843]">{{ storeMercado.textoCuentaAtras }}</span>
-      </section>
-
+      <!-- ─── Cuenta atrás del cierre ─── -->
+      <div class="flex items-center justify-between bg-[#121218] rounded-lg px-4 py-3">
+        <span class="text-xs uppercase tracking-widest text-zinc-400 font-black">Cierre del mercado</span>
+        <span class="text-lg font-black text-[#D4A843]">{{ storeMercado.textoCuentaAtras }}</span>
+      </div>
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">

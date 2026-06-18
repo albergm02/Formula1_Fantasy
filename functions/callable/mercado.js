@@ -52,7 +52,9 @@ function calcularIdMercado(idLiga, fecha) {
   return `${idLiga}_${fechaStr}`
 }
 
-// Día siguiente a las 12:00 UTC (= 14:00 hora España).
+// Día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que el
+// scheduler lanza la generación). Cierre y apertura del nuevo mercado
+// ocurren en la misma ejecución del scheduler, sin ventana muerta.
 function calcularFechaCierre(fechaApertura) {
   const cierre = new Date(fechaApertura)
   cierre.setUTCDate(cierre.getUTCDate() + 1)
@@ -449,7 +451,7 @@ async function propagarDeltasAMercadosAbiertos(tipoCarta, configuracion, deltasP
 // ligas ya procesadas son idempotentes y no se duplican.
 exports.generarMercado = onSchedule(
   {
-    schedule: 'every day 12:05',
+    schedule: 'every day 12:00',
     timeZone: 'UTC',
     region: REGION,
     retryCount: 3,

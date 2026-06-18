@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import {
-  cargarMercadoActivo,
+  suscribirMercadoActivo,
   registrarPuja,
   eliminarPuja,
   cargarMisPujas,
@@ -18,6 +18,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
   const resumenPujas = ref({})
 
   let intervaloId = null
+  let cancelarListenerMercado = null
 
   const hayMercadoAbierto = computed(
     () => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto',
@@ -60,11 +61,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
     const actualizarRestante = () => {
       const cierre = new Date(mercadoActivo.value.fechaCierre).getTime()
       milisegundosRestantes.value = Math.max(0, cierre - Date.now())
-
-      if (milisegundosRestantes.value <= 0) {
-        detenerCuentaAtras()
-        mercadoActivo.value.estado = 'cerrado'
-      }
     }
 
     actualizarRestante()
@@ -80,21 +76,32 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   async function inicializarMercado(idLiga) {
     cargandoMercado.value = true
-    try {
-      mercadoActivo.value = await cargarMercadoActivo(idLiga)
 
-      if (mercadoActivo.value) {
+    if (cancelarListenerMercado) cancelarListenerMercado()
+
+    cancelarListenerMercado = suscribirMercadoActivo(idLiga, async (mercado) => {
+      detenerCuentaAtras()
+      mercadoActivo.value = mercado
+      misPujas.value = {}
+      resumenPujas.value = {}
+
+      if (mercado) {
         iniciarCuentaAtras()
-
         const storePerfil = usarStorePerfil()
         const email = storePerfil.usuarioActual.correoAutenticacion
-        if (email) {
-          misPujas.value = await cargarMisPujas(mercadoActivo.value.id, email)
-        }
-        resumenPujas.value = await cargarResumenPujas(mercadoActivo.value.id)
+        if (email) misPujas.value = await cargarMisPujas(mercado.id, email)
+        resumenPujas.value = await cargarResumenPujas(mercado.id)
       }
-    } finally {
+
       cargandoMercado.value = false
+    })
+  }
+
+  function detenerMercado() {
+    detenerCuentaAtras()
+    if (cancelarListenerMercado) {
+      cancelarListenerMercado()
+      cancelarListenerMercado = null
     }
   }
 
@@ -165,6 +172,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
     inicializarMercado,
     pujarPorCarta,
     eliminarPujaCarta,
-    detenerCuentaAtras,
+    detenerMercado,
   }
 })

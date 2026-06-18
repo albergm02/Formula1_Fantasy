@@ -2,23 +2,53 @@
  * Servicio del mercado diario. Las mutaciones (pujar/retirar) van por Cloud
  * Functions; las lecturas se hacen directas a Firestore.
  */
-import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, getDocs, onSnapshot, query, where, limit } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 
-export const calcularIdMercado = (idLiga, fecha = new Date()) => {
-  const fechaStr = fecha.toISOString().split('T')[0]
-  return `${idLiga}_${fechaStr}`
+/**
+ * Carga puntualmente el mercado abierto de una liga.
+ *
+ * @param {string} idLiga
+ * @returns {Promise<Object|null>}
+ */
+export const cargarMercadoActivo = async (idLiga) => {
+  const consulta = query(
+    collection(db, 'mercados'),
+    where('idLiga', '==', idLiga),
+    where('estado', '==', 'abierto'),
+    limit(1),
+  )
+  const resultado = await getDocs(consulta)
+  if (resultado.empty) return null
+  const documento = resultado.docs[0]
+  return { id: documento.id, ...documento.data() }
 }
 
-export const cargarMercadoActivo = async (idLiga) => {
-  const idMercado = calcularIdMercado(idLiga)
-  const documento = await getDoc(doc(db, 'mercados', idMercado))
-  if (!documento.exists()) return null
-
-  const datos = documento.data()
-  if (datos.estado !== 'abierto') return null
-  return { id: documento.id, ...datos }
+/**
+ * Escucha en tiempo real el mercado abierto de una liga. Cuando el scheduler
+ * crea el nuevo mercado, Firestore empuja el cambio al cliente sin necesidad
+ * de polling ni refresco manual.
+ *
+ * @param {string} idLiga
+ * @param {(mercado: Object|null) => void} alCambiar - callback con el mercado o null si no hay ninguno abierto
+ * @returns {() => void} función para cancelar el listener
+ */
+export const suscribirMercadoActivo = (idLiga, alCambiar) => {
+  const consulta = query(
+    collection(db, 'mercados'),
+    where('idLiga', '==', idLiga),
+    where('estado', '==', 'abierto'),
+    limit(1),
+  )
+  return onSnapshot(consulta, (snapshot) => {
+    if (snapshot.empty) {
+      alCambiar(null)
+    } else {
+      const documento = snapshot.docs[0]
+      alCambiar({ id: documento.id, ...documento.data() })
+    }
+  })
 }
 
 const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPuja')
