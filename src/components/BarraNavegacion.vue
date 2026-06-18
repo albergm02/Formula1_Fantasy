@@ -14,7 +14,7 @@ const elementos = [
   { ruta: '/garaje', icono: 'pi-warehouse', etiqueta: 'Garaje' },
   { ruta: '/mercado', icono: 'pi-shopping-cart', etiqueta: 'Mercado' },
   { ruta: '/actividad', icono: 'pi-bell', etiqueta: 'Actividad' },
-  { ruta: '/jornada', icono: 'pi-question-circle', etiqueta: 'Guía' },
+  { ruta: '/jornada', icono: 'pi-flag-fill', etiqueta: 'Jornada' },
 ]
 </script>
 

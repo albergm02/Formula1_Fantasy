@@ -33,6 +33,15 @@ const potenciadores = computed(() =>
     props.modoRival ? (props.participacion?.garaje?.potenciadores ?? []) : storeGaraje.garaje.potenciadores
 )
 
+const valorTotalGaraje = computed(() => {
+    const todasLasCartas = [...coches.value, ...pilotos.value, ...potenciadores.value]
+    const total = todasLasCartas.reduce(
+        (suma, carta) => suma + storeGaraje.obtenerValorMercado(carta),
+        0,
+    )
+    return total.toFixed(1)
+})
+
 // ─── Modo propio ──────────────────────────────────────────────────────────────
 
 
@@ -168,10 +177,10 @@ const confirmarEjecucionClausula = (elemento) => {
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Última
                             jornada</span>
                         <span class="text-sm font-bold text-white">{{ participacion.ultimaJornada.nombreGranPremio
-                        }}</span>
+                            }}</span>
                     </div>
                     <span class="text-2xl font-black text-[#D4A843]">+{{ participacion.ultimaJornada.puntosJornada
-                    }}</span>
+                        }}</span>
                 </div>
                 <div v-if="participacion.ultimaJornada.sinergias?.length" class="flex flex-wrap gap-1.5">
                     <span v-for="(sinergia, idx) in participacion.ultimaJornada.sinergias" :key="idx"
@@ -181,6 +190,11 @@ const confirmarEjecucionClausula = (elemento) => {
                 </div>
             </section>
         </template>
+
+        <div v-if="!modoRival" class="flex items-center justify-between bg-[#121218] rounded-lg px-4 py-3">
+            <span class="text-xs uppercase tracking-widest text-zinc-400 font-black">Valor de mercado del garaje</span>
+            <span class="text-lg font-black text-[#D4A843]">{{ valorTotalGaraje }}M</span>
+        </div>
 
         <!-- ─── Chásis ─── -->
         <section>
@@ -208,7 +222,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="text-zinc-400">
                                 Cláusula:
                                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(coche).toFixed(1)
-                                }}M</span>
+                                    }}M</span>
                             </span>
                             <span v-if="estaEnPeriodoDeGracia(coche)"
                                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
@@ -272,7 +286,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="text-zinc-400">
                                 Cláusula de rescisión:
                                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(piloto).toFixed(1)
-                                }}M</span>
+                                    }}M</span>
                             </span>
                             <span v-if="estaEnPeriodoDeGracia(piloto)"
                                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">

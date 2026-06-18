@@ -8,7 +8,6 @@ import {
   cargarResumenPujas,
 } from '@/services/servicioMercado'
 import { usarStorePerfil } from '@/stores/storePerfil'
-import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 export const usarStoreMercado = defineStore('mercado', () => {
   const mercadoActivo = ref(null)
@@ -19,6 +18,11 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   let intervaloId = null
   let cancelarListenerMercado = null
+  // Incremento este token cada vez que cambio de mercado o lo detengo.
+  // Cualquier callback de Firestore en vuelo compara contra el valor con
+  // el que arrancó y se descarta si ya no coincide: evita que un snapshot
+  // tardío de la liga anterior pise el estado de la nueva.
+  let tokenSuscripcion = 0
 
   const hayMercadoAbierto = computed(
     () => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto',
@@ -78,8 +82,14 @@ export const usarStoreMercado = defineStore('mercado', () => {
     cargandoMercado.value = true
 
     if (cancelarListenerMercado) cancelarListenerMercado()
+    const tokenLocal = ++tokenSuscripcion
+    mercadoActivo.value = null
+    misPujas.value = {}
+    resumenPujas.value = {}
+    milisegundosRestantes.value = 0
 
     cancelarListenerMercado = suscribirMercadoActivo(idLiga, async (mercado) => {
+      if (tokenLocal !== tokenSuscripcion) return
       detenerCuentaAtras()
       mercadoActivo.value = mercado
       misPujas.value = {}
@@ -89,8 +99,13 @@ export const usarStoreMercado = defineStore('mercado', () => {
         iniciarCuentaAtras()
         const storePerfil = usarStorePerfil()
         const email = storePerfil.usuarioActual.correoAutenticacion
-        if (email) misPujas.value = await cargarMisPujas(mercado.id, email)
-        resumenPujas.value = await cargarResumenPujas(mercado.id)
+        const [pujasUsuario, resumen] = await Promise.all([
+          email ? cargarMisPujas(mercado.id, email) : Promise.resolve({}),
+          cargarResumenPujas(mercado.id),
+        ])
+        if (tokenLocal !== tokenSuscripcion) return
+        misPujas.value = pujasUsuario
+        resumenPujas.value = resumen
       }
 
       cargandoMercado.value = false
@@ -103,28 +118,28 @@ export const usarStoreMercado = defineStore('mercado', () => {
       cancelarListenerMercado()
       cancelarListenerMercado = null
     }
+    tokenSuscripcion++
+    mercadoActivo.value = null
+    misPujas.value = {}
+    resumenPujas.value = {}
+    milisegundosRestantes.value = 0
   }
 
   async function pujarPorCarta(carta, cantidad) {
-    const storeGaraje = usarStoreGaraje()
     const cantidadNum = Number(cantidad)
     const esPujaExistente = misPujas.value[carta.id] !== undefined
 
     try {
-      await registrarPuja(storeGaraje.idLigaActiva, carta.id, cantidadNum)
+      await registrarPuja(mercadoActivo.value.idLiga, carta.id, cantidadNum)
     } catch (error) {
       return { success: false, message: error?.message || 'No se pudo registrar la puja.' }
     }
 
     misPujas.value = { ...misPujas.value, [carta.id]: cantidadNum }
 
-    const resumenActual = resumenPujas.value[carta.id] || { mejorPuja: 0, totalPujas: 0 }
-    resumenPujas.value = {
-      ...resumenPujas.value,
-      [carta.id]: {
-        mejorPuja: Math.max(resumenActual.mejorPuja, cantidadNum),
-        totalPujas: resumenActual.totalPujas + (esPujaExistente ? 0 : 1),
-      },
+    if (!esPujaExistente) {
+      const totalActual = resumenPujas.value[carta.id] || 0
+      resumenPujas.value = { ...resumenPujas.value, [carta.id]: totalActual + 1 }
     }
 
     return {
@@ -134,10 +149,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
   }
 
   async function eliminarPujaCarta(carta) {
-    const storeGaraje = usarStoreGaraje()
-
     try {
-      await eliminarPuja(storeGaraje.idLigaActiva, carta.id)
+      await eliminarPuja(mercadoActivo.value.idLiga, carta.id)
     } catch (error) {
       return { success: false, message: error?.message || 'No se pudo eliminar la puja.' }
     }
@@ -145,22 +158,17 @@ export const usarStoreMercado = defineStore('mercado', () => {
     const { [carta.id]: _, ...restoPujas } = misPujas.value
     misPujas.value = restoPujas
 
-    if (resumenPujas.value[carta.id]) {
-      resumenPujas.value = {
-        ...resumenPujas.value,
-        [carta.id]: {
-          totalPujas: Math.max(0, resumenPujas.value[carta.id].totalPujas - 1),
-        },
-      }
+    const totalActual = resumenPujas.value[carta.id] || 0
+    resumenPujas.value = {
+      ...resumenPujas.value,
+      [carta.id]: Math.max(0, totalActual - 1),
     }
 
     return { success: true, message: `Puja eliminada sobre ${carta.nombre}.` }
   }
 
   return {
-    mercadoActivo,
     cargandoMercado,
-    milisegundosRestantes,
     misPujas,
     resumenPujas,
     hayMercadoAbierto,

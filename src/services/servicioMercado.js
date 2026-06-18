@@ -2,7 +2,16 @@
  * Servicio del mercado diario. Las mutaciones (pujar/retirar) van por Cloud
  * Functions; las lecturas se hacen directas a Firestore.
  */
-import { collection, onSnapshot, getDocs, query, where, limit } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  getDocs,
+  query,
+  where,
+  limit,
+} from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 
@@ -85,14 +94,8 @@ export const cargarResumenPujas = async (idMercado) => {
 
   const resumen = {}
   resultado.forEach((documento) => {
-    const datos = documento.data()
-    if (!resumen[datos.idCarta]) {
-      resumen[datos.idCarta] = { mejorPuja: 0, totalPujas: 0 }
-    }
-    resumen[datos.idCarta].totalPujas++
-    if (datos.cantidad > resumen[datos.idCarta].mejorPuja) {
-      resumen[datos.idCarta].mejorPuja = datos.cantidad
-    }
+    const { idCarta } = documento.data()
+    resumen[idCarta] = (resumen[idCarta] || 0) + 1
   })
   return resumen
 }

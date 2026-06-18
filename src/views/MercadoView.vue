@@ -18,17 +18,17 @@ const notificacion = useToast()
 const ruta = useRoute()
 
 onMounted(async () => {
-  const idLiga = storeGaraje.idLigaActiva || ruta.query.liga
-  if (idLiga && !storeLigas.idLigaActiva) {
+  const idLiga = ruta.query.liga || storeGaraje.idLigaActiva
+  if (!idLiga) return
+
+  if (storeGaraje.idLigaActiva !== idLiga) {
+    await storeGaraje.cargarEquipo(idLiga)
+  }
+  if (storeLigas.idLigaActiva !== idLiga) {
     storeLigas.idLigaActiva = idLiga
   }
-  if (!storeGaraje.idLigaActiva && ruta.query.liga) {
-    await storeGaraje.cargarEquipo(ruta.query.liga)
-  }
 
-  if (idLiga) {
-    await storeMercado.inicializarMercado(idLiga)
-  }
+  await storeMercado.inicializarMercado(idLiga)
 })
 
 onUnmounted(() => {
@@ -80,9 +80,8 @@ const handleEliminarPuja = async (carta) => {
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
           <CartaCoche v-for="coche in storeMercado.cochesMercado" :key="coche.id" :coche="coche" :modoMercado="true"
-            :miPuja="storeMercado.misPujas[coche.id] || null"
-            :totalPujas="storeMercado.resumenPujas[coche.id]?.totalPujas || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+            :miPuja="storeMercado.misPujas[coche.id] || null" :totalPujas="storeMercado.resumenPujas[coche.id] || 0"
+            @pujar="handlePuja" @eliminarPuja="handleEliminarPuja" />
         </div>
       </section>
 
@@ -93,7 +92,7 @@ const handleEliminarPuja = async (carta) => {
         <div class="grid grid-cols-1 gap-4">
           <CartaPiloto v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :piloto="piloto"
             :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
-            :totalPujas="storeMercado.resumenPujas[piloto.id]?.totalPujas || 0" @pujar="handlePuja"
+            :totalPujas="storeMercado.resumenPujas[piloto.id] || 0" @pujar="handlePuja"
             @eliminarPuja="handleEliminarPuja" />
         </div>
       </section>
@@ -104,7 +103,7 @@ const handleEliminarPuja = async (carta) => {
         <div class="grid grid-cols-1 gap-4">
           <CartaPotenciador v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
             :potenciador="potenciador" :modoMercado="true" :miPuja="storeMercado.misPujas[potenciador.id] || null"
-            :totalPujas="storeMercado.resumenPujas[potenciador.id]?.totalPujas || 0" @pujar="handlePuja"
+            :totalPujas="storeMercado.resumenPujas[potenciador.id] || 0" @pujar="handlePuja"
             @eliminarPuja="handleEliminarPuja" />
         </div>
       </section>
