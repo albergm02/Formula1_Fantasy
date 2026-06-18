@@ -2,37 +2,18 @@
  * Servicio del mercado diario. Las mutaciones (pujar/retirar) van por Cloud
  * Functions; las lecturas se hacen directas a Firestore.
  */
-import { collection, getDocs, onSnapshot, query, where, limit } from 'firebase/firestore'
+import { collection, onSnapshot, getDocs, query, where, limit } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 
-/**
- * Carga puntualmente el mercado abierto de una liga.
- *
- * @param {string} idLiga
- * @returns {Promise<Object|null>}
- */
-export const cargarMercadoActivo = async (idLiga) => {
-  const consulta = query(
-    collection(db, 'mercados'),
-    where('idLiga', '==', idLiga),
-    where('estado', '==', 'abierto'),
-    limit(1),
-  )
-  const resultado = await getDocs(consulta)
-  if (resultado.empty) return null
-  const documento = resultado.docs[0]
-  return { id: documento.id, ...documento.data() }
-}
+const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPuja')
+const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
+const llamadaEliminarPujas = httpsCallable(functions, 'eliminarPujas')
 
 /**
  * Escucha en tiempo real el mercado abierto de una liga. Cuando el scheduler
  * crea el nuevo mercado, Firestore empuja el cambio al cliente sin necesidad
  * de polling ni refresco manual.
- *
- * @param {string} idLiga
- * @param {(mercado: Object|null) => void} alCambiar - callback con el mercado o null si no hay ninguno abierto
- * @returns {() => void} función para cancelar el listener
  */
 export const suscribirMercadoActivo = (idLiga, alCambiar) => {
   const consulta = query(
@@ -50,10 +31,6 @@ export const suscribirMercadoActivo = (idLiga, alCambiar) => {
     }
   })
 }
-
-const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPuja')
-const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
-const llamadaEliminarPujas = httpsCallable(functions, 'eliminarPujas')
 
 export const registrarPuja = async (idLiga, idCarta, cantidad) => {
   await llamadaRegistrarPuja({ idLiga, idCarta, cantidad })

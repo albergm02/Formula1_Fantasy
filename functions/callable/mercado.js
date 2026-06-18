@@ -500,6 +500,16 @@ async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
   }, 0)
 }
 
+async function cargarMercadoAbiertoDeLiga(idLiga) {
+  const snap = await db
+    .collection('mercados')
+    .where('idLiga', '==', idLiga)
+    .where('estado', '==', 'abierto')
+    .limit(1)
+    .get()
+  return snap.empty ? null : snap.docs[0]
+}
+
 exports.registrarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta, cantidad } = request.data || {}
@@ -511,13 +521,12 @@ exports.registrarPuja = onCall(OPCIONES, async (request) => {
     throw new HttpsError('invalid-argument', 'La cantidad de la puja debe ser positiva.')
   }
 
-  const idMercado = calcularIdMercado(idLiga, new Date())
-  const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
-  if (!mercadoSnap.exists || mercadoSnap.data().estado !== 'abierto') {
-    throw new HttpsError('failed-precondition', 'El mercado de hoy no está abierto.')
+  const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
+  if (!mercadoDoc) {
+    throw new HttpsError('failed-precondition', 'No hay mercado abierto para esta liga.')
   }
-
-  const cartas = mercadoSnap.data().cartas || []
+  const idMercado = mercadoDoc.id
+  const cartas = mercadoDoc.data().cartas || []
   const cartaObjetivo = cartas.find((carta) => carta.id === idCarta)
   if (!cartaObjetivo) {
     throw new HttpsError('not-found', 'La carta no está en el mercado de hoy.')
@@ -567,7 +576,10 @@ exports.eliminarPuja = onCall(OPCIONES, async (request) => {
     throw new HttpsError('invalid-argument', 'Faltan idLiga o idCarta.')
   }
 
-  const idMercado = calcularIdMercado(idLiga, new Date())
+  const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
+  if (!mercadoDoc) return { ok: true, eliminado: false }
+
+  const idMercado = mercadoDoc.id
   const idPuja = `${sanitizarEmailParaIdPuja(email)}_${idCarta}`
   const refPuja = db.collection('mercados').doc(idMercado).collection('pujas').doc(idPuja)
   const pujaSnap = await refPuja.get()
