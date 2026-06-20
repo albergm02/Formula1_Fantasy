@@ -12,7 +12,6 @@ const alcanzoLimiteLigas = (idsLigas = []) =>
 const generarCodigoInvitacionLiga = () => Math.random().toString(36).substring(2, 10).toUpperCase()
 const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [] })
 
-// Hereda el rol el miembro con mayor antig�edad (fecha_union m�s antigua).
 const elegirSiguienteOrganizador = (participaciones) =>
   [...participaciones].sort((a, b) => a.fecha_union.toMillis() - b.fecha_union.toMillis())[0]
 
@@ -146,11 +145,9 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await servicioLigas.vincularLigaAlUsuario(uid, liga.id)
       storePerfil.usuarioActual.idsLigas.push(liga.id)
 
-      registrarActividad(liga.id, {
-        nombreUsuario: storePerfil.usuarioActual.nombreVisible,
-        tipo: TIPOS_ACTIVIDAD.INCORPORACION,
-        descripcion: `se ha unido al campeonato ${liga.nombre}`,
-      }).catch(() => {})
+      usarStoreActividad()
+        .registrarIncorporacion(liga.id, liga.nombre)
+        .catch(() => {})
 
       await cargarLigasUsuario()
       return { success: true, message: 'Te has unido a la liga.' }
@@ -194,11 +191,9 @@ export const usarStoreLigas = defineStore('ligas', () => {
         await servicioLigas.actualizarLiga(idLiga, { participantes: datosLiga.participantes - 1 })
       }
 
-      registrarActividad(idLiga, {
-        nombreUsuario: storePerfil.usuarioActual.nombreVisible,
-        tipo: TIPOS_ACTIVIDAD.ABANDONO,
-        descripcion: `ha abandonado el campeonato ${datosLiga.nombre}`,
-      }).catch(() => {})
+      usarStoreActividad()
+        .registrarAbandono(idLiga, datosLiga.nombre)
+        .catch(() => {})
 
       await servicioMercado.eliminarPujas(idLiga)
       await servicioLigas.eliminarParticipacion(participacionPropia.id)

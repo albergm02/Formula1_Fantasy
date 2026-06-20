@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
 import { usarStoreLigas } from './storeLigas'
@@ -14,11 +14,6 @@ export const usarStoreActividad = defineStore('actividad', () => {
 
   const actividad = ref([])
   const cargando = ref(false)
-
-  const actividadReciente = computed(() => {
-    const haceVeinticuatroHoras = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    return actividad.value.filter((evento) => evento.fecha > haceVeinticuatroHoras).length
-  })
 
   async function cargarActividad() {
     const idLiga = storeLigas.idLigaActiva
@@ -61,8 +56,7 @@ export const usarStoreActividad = defineStore('actividad', () => {
     await cargarActividad()
   }
 
-  async function registrarIncorporacion(nombreLiga) {
-    const idLiga = storeLigas.idLigaActiva
+  async function registrarIncorporacion(idLiga, nombreLiga) {
     const nombreUsuario = storePerfil.usuarioActual.nombreVisible
 
     await registrarActividad(idLiga, {
@@ -70,8 +64,6 @@ export const usarStoreActividad = defineStore('actividad', () => {
       tipo: TIPOS_ACTIVIDAD.INCORPORACION,
       descripcion: `se ha unido al campeonato ${nombreLiga}`,
     })
-
-    await cargarActividad()
   }
 
   async function registrarAbandono(idLiga, nombreLiga) {
@@ -97,7 +89,6 @@ export const usarStoreActividad = defineStore('actividad', () => {
   return {
     actividad,
     cargando,
-    actividadReciente,
     cargarActividad,
     registrarFichaje,
     registrarVenta,

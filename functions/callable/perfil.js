@@ -5,6 +5,7 @@ const { db, adminAuth } = require('../middleware/firebase')
 const { OPCIONES, DIAS_BLOQUEO_CAMBIO_CORREO } = require('../middleware/constantes')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { agregarBorradoPujasUsuario } = require('./mercado')
+const { borrarLigaEnCascada } = require('./ligas')
 
 function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
   const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)
@@ -99,29 +100,6 @@ function elegirSiguienteOrganizador(participacionesRestantes) {
   return ordenadas[0]
 }
 
-// Versión simplificada de borrarLigaEnCascada (cloud/ligas.js): aquí ya no hay
-// que decrementar `participantes` porque la liga entera va a desaparecer.
-async function borrarLigaCompleta(idLiga) {
-  const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
-  for (const docMercado of mercadosSnap.docs) {
-    const pujasSnap = await docMercado.ref.collection('pujas').get()
-    const batchPujas = db.batch()
-    for (const pujaDoc of pujasSnap.docs) batchPujas.delete(pujaDoc.ref)
-    await batchPujas.commit()
-    await docMercado.ref.delete()
-  }
-
-  const actividadSnap = await db.collection('actividad').where('idLiga', '==', idLiga).get()
-  const batchActividad = db.batch()
-  for (const documento of actividadSnap.docs) batchActividad.delete(documento.ref)
-  await batchActividad.commit()
-
-  await db.collection('ligas').doc(idLiga).delete()
-}
-
-// Tres casos por liga: (1) único miembro → borrar la liga;
-// (2) organizador con más miembros → ceder rol al siguiente;
-// (3) miembro normal → solo decrementar.
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db
     .collection('participaciones')
@@ -151,7 +129,7 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
 
     if (restantes.length === 0) {
       await documentoPropio.ref.delete()
-      await borrarLigaCompleta(idLiga)
+      await borrarLigaEnCascada(idLiga, ligaSnap)
       ligasBorradas += 1
       continue
     }

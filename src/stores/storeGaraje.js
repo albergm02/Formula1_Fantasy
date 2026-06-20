@@ -166,6 +166,10 @@ export const usarStoreGaraje = defineStore('garaje', () => {
         elemento.instancia_id,
       )
       await cargarEquipo(idLigaActiva.value)
+      const tipoElemento = elemento.tipo || elemento.tipoCarta
+      usarStoreActividad()
+        .registrarFichaje(resultado.nombre, tipoElemento, resultado.precioClausula.toFixed(1))
+        .catch(() => {})
       return {
         success: true,
         message: `Has fichado a ${resultado.nombre} por ${resultado.precioClausula.toFixed(1)}M de cláusula.`,

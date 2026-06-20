@@ -17,8 +17,6 @@ function calcularPremioJornada(puntosJornada) {
   return Math.round(premio * 10) / 10
 }
 
-// IDs de cartas de piloto con patrón "<numero>_<variante>" (p.ej. "44_qualy",
-// "3_todo_terreno"). La variante puede contener guiones bajos.
 function descomponerIdCarta(idCarta) {
   const partes = idCarta.split('_')
   const numero = partes[0]
@@ -26,8 +24,6 @@ function descomponerIdCarta(idCarta) {
   return { numero, variante }
 }
 
-// Si OpenF1 no devuelve datos de un piloto, asumo la peor posición (20) para
-// no premiarlo sin información.
 function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
   const factores = {}
   const detalles = {}
@@ -47,11 +43,9 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
   return { factores, detalles }
 }
 
-// Idempotente: si el último GP con datos ya está en `jornadas`, no recalcula.
 async function ejecutarProcesarJornada() {
   const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
   if (candidatos.length === 0) {
-    console.log('[Jornada] No hay Gran Premio finalizado para procesar.')
     return { ok: false, motivo: 'sin_gp_finalizado' }
   }
 
@@ -64,7 +58,6 @@ async function ejecutarProcesarJornada() {
     const idCandidato = `gp_${candidato.meeting_key}`
     const yaProcesada = await db.collection('jornadas').doc(idCandidato).get()
     if (yaProcesada.exists) {
-      console.log(`[Jornada] ${idCandidato} ya fue procesada previamente. Omitida.`)
       return { ok: false, motivo: 'jornada_ya_procesada', idJornada: idCandidato }
     }
 
@@ -79,9 +72,6 @@ async function ejecutarProcesarJornada() {
       condiciones = datos.condiciones
       break
     } catch (error) {
-      console.warn(
-        `[Jornada] GP ${candidato.meeting_key} (${candidato.meeting_name}) sin datos en OpenF1: ${error.message}. Probando el anterior.`,
-      )
       omitidos.push({
         meeting_key: candidato.meeting_key,
         nombre: candidato.meeting_name,
@@ -91,14 +81,11 @@ async function ejecutarProcesarJornada() {
   }
 
   if (!granPremio) {
-    console.log('[Jornada] Ningún GP finalizado tiene datos disponibles en OpenF1.')
     return { ok: false, motivo: 'sin_datos_openf1', omitidos }
   }
 
   const idJornada = `gp_${granPremio.meeting_key}`
 
-  // Recorro TODAS las participaciones en un único batch. Decenas de ligas
-  // caben holgadas dentro del límite de 500 ops por batch.
   const todasParticipaciones = await db.collection('participaciones').get()
   const batch = db.batch()
   let participacionesProcesadas = 0
@@ -107,9 +94,9 @@ async function ejecutarProcesarJornada() {
     const participacion = documento.data()
     const garaje = participacion.garaje
 
-    const pilotosEquipados = garaje
-      ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
-      : []
+    const pilotosEquipados = garaje ?
+      (garaje.pilotos || []).filter((p) => p.equipado !== false) :
+      []
 
     if (!garaje || pilotosEquipados.length === 0) {
       continue
@@ -178,10 +165,6 @@ async function ejecutarProcesarJornada() {
   })
 
   await batch.commit()
-
-  console.log(
-    `[Jornada] ${idJornada} (${granPremio.meeting_name}) procesada. ${participacionesProcesadas} participaciones.`,
-  )
 
   return {
     ok: true,

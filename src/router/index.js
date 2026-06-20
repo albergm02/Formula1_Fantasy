@@ -98,11 +98,6 @@ router.beforeEach(async (to) => {
     await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
   }
 
-  // Releo el perfil en cada navegación admin para tener el flag al día.
-  if (usuario && to.meta.requiresAdmin) {
-    await storeAutenticacion.verificarExistenciaPerfil(usuario.uid, usuario.email)
-  }
-
   if (!usuario && !storeAutenticacion.datosCargados) {
     storeAutenticacion.limpiarSesion()
   }
@@ -133,7 +128,6 @@ router.beforeEach(async (to) => {
     return { name: 'login' }
   }
 
-  // Las rutas con `requiresLiga` necesitan al menos una liga cargada.
   if (to.meta.requiresLiga) {
     if (storePerfil.usuarioActual.idsLigas.length > 0 && storeLigas.detallesLigas.length === 0) {
       await storeLigas.cargarLigasUsuario()
