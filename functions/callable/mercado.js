@@ -241,209 +241,151 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   }
 }
 
-// Configuración por categoría: doc Firestore donde se persisten precios e
-// histórico, cómo construir la clave de una carta y a qué array del garaje
-// pertenece. Centralizar aquí permite que muestreo y propagación sean los
-// mismos algoritmos para pilotos, coches y potenciadores.
-const CATEGORIAS_PRECIO_DINAMICO = {
-  piloto: {
-    docPrecios: 'precios_pilotos',
-    docHistorial: 'historial_pujas',
-    coleccionGaraje: 'pilotos',
-    construirClave: (carta) => `${carta.numero}|${carta.variante}`,
-    esCartaValida: (carta) => carta.numero != null && carta.variante != null,
-  },
-  coche: {
-    docPrecios: 'precios_coches',
-    docHistorial: 'historial_pujas_coches',
-    coleccionGaraje: 'coches',
-    construirClave: (carta) => carta.id,
-    esCartaValida: (carta) => carta.id != null,
-  },
-  potenciador: {
-    docPrecios: 'precios_potenciadores',
-    docHistorial: 'historial_pujas_potenciadores',
-    coleccionGaraje: 'potenciadores',
-    construirClave: (carta) => carta.id,
-    esCartaValida: (carta) => carta.id != null,
-  },
+function claveCartaPorTipo(carta, tipo) {
+  return tipo === 'piloto' ? `${carta.numero}|${carta.variante}` : carta.id
 }
 
-// Si hubo puja ganadora la muestra es la cantidad pagada; si quedó desierta,
-// se aplica FACTOR_DESINTERES como penalización suave al precio anterior.
+function docsPorTipo(tipo) {
+  if (tipo === 'piloto') return { docPrecios: 'precios_pilotos', docHistorial: 'historial_pujas' }
+  if (tipo === 'coche')
+    return { docPrecios: 'precios_coches', docHistorial: 'historial_pujas_coches' }
+  return { docPrecios: 'precios_potenciadores', docHistorial: 'historial_pujas_potenciadores' }
+}
+
+function coleccionGaraje(tipo) {
+  if (tipo === 'piloto') return 'pilotos'
+  if (tipo === 'coche') return 'coches'
+  return 'potenciadores'
+}
+
 async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
-  for (const [tipoCarta, configuracion] of Object.entries(CATEGORIAS_PRECIO_DINAMICO)) {
-    const muestrasPorClave = recopilarMuestrasDeCategoria(
-      cartasMercado,
-      pujasPorCarta,
-      tipoCarta,
-      configuracion,
-    )
-    if (Object.keys(muestrasPorClave).length === 0) continue
-    await fusionarMuestrasYRecalcularPrecios(tipoCarta, configuracion, muestrasPorClave)
+  for (const tipo of ['piloto', 'coche', 'potenciador']) {
+    await actualizarPreciosPorTipo(tipo, cartasMercado, pujasPorCarta)
   }
 }
 
-function recopilarMuestrasDeCategoria(cartasMercado, pujasPorCarta, tipoCarta, configuracion) {
-  const muestrasPorClave = {}
+async function actualizarPreciosPorTipo(tipo, cartasMercado, pujasPorCarta) {
+  const muestras = {}
   for (const carta of cartasMercado) {
-    if (carta.tipoCarta !== tipoCarta) continue
-    if (!configuracion.esCartaValida(carta)) continue
-    const clave = configuracion.construirClave(carta)
-    const pujaGanadora = pujasPorCarta[carta.id]
-    const precioMuestra = calcularPrecioMuestra(carta, pujaGanadora)
-    muestrasPorClave[clave] = Math.round(precioMuestra * 10) / 10
+    if (carta.tipoCarta !== tipo) continue
+    const clave = claveCartaPorTipo(carta, tipo)
+    if (!clave) continue
+    muestras[clave] = calcularPrecioMuestra(carta, pujasPorCarta[carta.id])
   }
-  return muestrasPorClave
-}
+  if (Object.keys(muestras).length === 0) return
 
-// Media móvil de las últimas HISTORIAL_MAX_MUESTRAS muestras por carta.
-// Propaga deltas a garajes y mercados abiertos, o el precio absoluto cuando
-// es la primera vez que esa carta tiene precio dinámico.
-async function fusionarMuestrasYRecalcularPrecios(tipoCarta, configuracion, muestrasPorClave) {
-  const refHistorial = db.collection('catalogo').doc(configuracion.docHistorial)
-  const refPrecios = db.collection('catalogo').doc(configuracion.docPrecios)
+  const { docPrecios, docHistorial } = docsPorTipo(tipo)
+  const refHistorial = db.collection('catalogo').doc(docHistorial)
+  const refPrecios = db.collection('catalogo').doc(docPrecios)
 
   const [snapHistorial, snapPrecios] = await Promise.all([refHistorial.get(), refPrecios.get()])
   const historial = snapHistorial.exists ? snapHistorial.data().muestras || {} : {}
   const preciosAnteriores = snapPrecios.exists ? snapPrecios.data().precios || {} : {}
-
   const preciosNuevos = { ...preciosAnteriores }
 
-  for (const [clave, muestra] of Object.entries(muestrasPorClave)) {
+  for (const [clave, muestra] of Object.entries(muestras)) {
     const previas = historial[clave] || []
     const combinadas = [...previas, muestra].slice(-HISTORIAL_MAX_MUESTRAS)
     historial[clave] = combinadas
-    const media = combinadas.reduce((acc, valor) => acc + valor, 0) / combinadas.length
+    const media = combinadas.reduce((a, v) => a + v, 0) / combinadas.length
     preciosNuevos[clave] = Math.max(PRECIO_MINIMO, Math.round(media * 10) / 10)
   }
 
-  const fechaActualizacion = new Date().toISOString()
+  const fecha = new Date().toISOString()
   await Promise.all([
-    refHistorial.set({ muestras: historial, fechaActualizacion }),
-    refPrecios.set({ precios: preciosNuevos, fechaActualizacion }),
+    refHistorial.set({ muestras: historial, fechaActualizacion: fecha }),
+    refPrecios.set({ precios: preciosNuevos, fechaActualizacion: fecha }),
   ])
 
-  const deltasPorClave = calcularDeltasDePrecio(preciosAnteriores, preciosNuevos)
-  const preciosPrimeraVezPorClave = {}
+  const deltas = {}
+  const nuevosAbsolutos = {}
   for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
     if (preciosAnteriores[clave] == null) {
-      preciosPrimeraVezPorClave[clave] = precioNuevo
+      nuevosAbsolutos[clave] = precioNuevo
+    } else {
+      const delta = Math.round((precioNuevo - preciosAnteriores[clave]) * 10) / 10
+      if (delta !== 0) deltas[clave] = delta
     }
   }
 
-  const propagaciones = []
-  if (Object.keys(deltasPorClave).length > 0) {
-    propagaciones.push(
-      propagarDeltasAGarajes(configuracion, deltasPorClave),
-      propagarDeltasAMercadosAbiertos(tipoCarta, configuracion, deltasPorClave),
-    )
+  const coleccion = coleccionGaraje(tipo)
+  const tareas = []
+  if (Object.keys(deltas).length > 0) {
+    tareas.push(propagarAGarajes(tipo, coleccion, deltas, false))
+    tareas.push(propagarAMercadosAbiertos(tipo, deltas))
   }
-  if (Object.keys(preciosPrimeraVezPorClave).length > 0) {
-    propagaciones.push(propagarPreciosAbsolutosAGarajes(configuracion, preciosPrimeraVezPorClave))
+  if (Object.keys(nuevosAbsolutos).length > 0) {
+    tareas.push(propagarAGarajes(tipo, coleccion, nuevosAbsolutos, true))
   }
-  if (propagaciones.length > 0) await Promise.all(propagaciones)
+  if (tareas.length > 0) await Promise.all(tareas)
 }
 
-function calcularDeltasDePrecio(preciosAnteriores, preciosNuevos) {
-  const deltas = {}
-  for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
-    const precioAnterior = preciosAnteriores[clave]
-    if (precioAnterior == null) continue
-    const delta = Math.round((precioNuevo - precioAnterior) * 10) / 10
-    if (delta !== 0) deltas[clave] = delta
-  }
-  return deltas
-}
-
-// Recorre todos los garajes aplicando una estrategia de recálculo de precio a
-// cada carta válida de la categoría. La estrategia recibe la carta y devuelve
-// su nuevo precio, o null si esa carta no debe cambiar. Así una única función
-// de recorrido sirve tanto para precios absolutos como para deltas.
-async function propagarPreciosAGarajes(configuracion, calcularPrecioCarta) {
-  const participacionesSnap = await db.collection('participaciones').get()
+async function propagarAGarajes(tipo, coleccion, cambiosPorClave, esAbsoluto) {
+  const snap = await db.collection('participaciones').get()
   const batch = db.batch()
-  let garajesActualizados = 0
+  let cambios = 0
 
-  for (const documento of participacionesSnap.docs) {
-    const garaje = documento.data().garaje
-    const cartasEnGaraje = garaje && garaje[configuracion.coleccionGaraje]
-    if (!Array.isArray(cartasEnGaraje)) continue
+  for (const doc of snap.docs) {
+    const garaje = doc.data().garaje
+    const cartas = garaje && garaje[coleccion]
+    if (!Array.isArray(cartas)) continue
 
     let huboCambio = false
-    const cartasActualizadas = cartasEnGaraje.map((carta) => {
-      if (!carta || !configuracion.esCartaValida(carta)) return carta
-      const precioNuevo = calcularPrecioCarta(carta)
-      if (precioNuevo == null) return carta
+    const actualizadas = cartas.map((carta) => {
+      if (!carta) return carta
+      const clave = claveCartaPorTipo(carta, tipo)
+      if (!clave || cambiosPorClave[clave] == null) return carta
+      const precio = esAbsoluto
+        ? cambiosPorClave[clave]
+        : Math.max(
+            PRECIO_MINIMO,
+            Math.round((Number(carta.precio || 0) + cambiosPorClave[clave]) * 10) / 10,
+          )
       huboCambio = true
-      return { ...carta, precio: precioNuevo }
+      return { ...carta, precio }
     })
 
     if (huboCambio) {
-      batch.update(documento.ref, {
-        [`garaje.${configuracion.coleccionGaraje}`]: cartasActualizadas,
-      })
-      garajesActualizados++
+      batch.update(doc.ref, { [`garaje.${coleccion}`]: actualizadas })
+      cambios++
     }
   }
 
-  if (garajesActualizados > 0) await batch.commit()
-  return garajesActualizados
+  if (cambios > 0) await batch.commit()
 }
 
-// Aplica un delta a un precio respetando el suelo PRECIO_MINIMO y un decimal.
-function aplicarDelta(precioActual, delta) {
-  return Math.max(PRECIO_MINIMO, Math.round((Number(precioActual || 0) + delta) * 10) / 10)
-}
-
-// Primera vez que una carta tiene precio dinámico: lo asigno como absoluto en
-// todos los garajes que ya tengan esa carta (no hay precio previo con el que
-// calcular un delta).
-function propagarPreciosAbsolutosAGarajes(configuracion, preciosPorClave) {
-  return propagarPreciosAGarajes(
-    configuracion,
-    (carta) => preciosPorClave[configuracion.construirClave(carta)] ?? null,
-  )
-}
-
-function propagarDeltasAGarajes(configuracion, deltasPorClave) {
-  return propagarPreciosAGarajes(configuracion, (carta) => {
-    const delta = deltasPorClave[configuracion.construirClave(carta)]
-    if (!delta) return null
-    return aplicarDelta(carta.precio, delta)
-  })
-}
-
-// Si no se aplica, dos mercados abiertos a la vez mostrarían precios
-// inconsistentes entre sí.
-async function propagarDeltasAMercadosAbiertos(tipoCarta, configuracion, deltasPorClave) {
-  const mercadosSnap = await db.collection('mercados').where('estado', '==', 'abierto').get()
-  if (mercadosSnap.empty) return 0
+async function propagarAMercadosAbiertos(tipo, deltas) {
+  const snap = await db.collection('mercados').where('estado', '==', 'abierto').get()
+  if (snap.empty) return
 
   const batch = db.batch()
-  let mercadosActualizados = 0
+  let cambios = 0
 
-  for (const documento of mercadosSnap.docs) {
-    const cartas = documento.data().cartas || []
+  for (const doc of snap.docs) {
+    const cartas = doc.data().cartas || []
     let huboCambio = false
 
-    const cartasActualizadas = cartas.map((carta) => {
-      if (carta.tipoCarta !== tipoCarta) return carta
-      if (!configuracion.esCartaValida(carta)) return carta
-      const delta = deltasPorClave[configuracion.construirClave(carta)]
-      if (!delta) return carta
+    const actualizadas = cartas.map((carta) => {
+      if (carta.tipoCarta !== tipo) return carta
+      const clave = claveCartaPorTipo(carta, tipo)
+      if (!clave || deltas[clave] == null) return carta
       huboCambio = true
-      return { ...carta, precio: aplicarDelta(carta.precio, delta) }
+      return {
+        ...carta,
+        precio: Math.max(
+          PRECIO_MINIMO,
+          Math.round((Number(carta.precio || 0) + deltas[clave]) * 10) / 10,
+        ),
+      }
     })
 
     if (huboCambio) {
-      batch.update(documento.ref, { cartas: cartasActualizadas })
-      mercadosActualizados++
+      batch.update(doc.ref, { cartas: actualizadas })
+      cambios++
     }
   }
 
-  if (mercadosActualizados > 0) await batch.commit()
-  return mercadosActualizados
+  if (cambios > 0) await batch.commit()
 }
 
 // Si una liga falla, registro y sigo: prefiero N-1 ligas con mercado nuevo a

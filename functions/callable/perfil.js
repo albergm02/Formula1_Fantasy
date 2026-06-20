@@ -3,10 +3,7 @@ const { FieldValue } = require('firebase-admin/firestore')
 
 const { db, adminAuth } = require('../middleware/firebase')
 const { OPCIONES, DIAS_BLOQUEO_CAMBIO_CORREO } = require('../middleware/constantes')
-const {
-  exigirEmailAutenticado,
-  exigirReautenticacionReciente,
-} = require('../middleware/autenticacion')
+const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { agregarBorradoPujasUsuario } = require('./mercado')
 
 function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
@@ -20,7 +17,6 @@ function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
 // cliente, que podría haberse manipulado.
 exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   exigirEmailAutenticado(request)
-  exigirReautenticacionReciente(request)
   const uid = request.auth.uid
 
   const docUsuario = await db.collection('usuarios').doc(uid).get()
@@ -45,7 +41,6 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
 // participaciones y a las ligas que el usuario organice.
 exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
-  exigirReautenticacionReciente(request)
   const uid = request.auth.uid
   const correoAnterior = String(request.data?.correoAnterior || '')
     .trim()
@@ -206,7 +201,6 @@ exports.eliminarCuentaUsuarioEnCascada = eliminarCuentaUsuarioEnCascada
 
 exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
-  exigirReautenticacionReciente(request)
   const uid = request.auth.uid
   const email = request.auth.token.email || ''
   const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)

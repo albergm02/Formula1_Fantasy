@@ -5,7 +5,6 @@ const mercado = require('./callable/mercado')
 const ligas = require('./callable/ligas')
 const garaje = require('./callable/garaje')
 const perfil = require('./callable/perfil')
-const autenticacion = require('./callable/autenticacion')
 const administracion = require('./callable/administracion')
 
 exports.procesarJornada = jornada.procesarJornada
@@ -27,10 +26,6 @@ exports.ejecutarClausula = garaje.ejecutarClausula
 exports.autorizarCambioCorreo = perfil.autorizarCambioCorreo
 exports.migrarCorreo = perfil.migrarCorreo
 exports.eliminarMiCuenta = perfil.eliminarMiCuenta
-
-exports.verificarBloqueo = autenticacion.verificarBloqueo
-exports.registrarFallo = autenticacion.registrarFallo
-exports.reiniciarFallos = autenticacion.reiniciarFallos
 
 exports.eliminarLigaAdmin = administracion.eliminarLigaAdmin
 exports.eliminarUsuarioAdmin = administracion.eliminarUsuarioAdmin

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
 import { usarStorePerfil } from '@/stores/storePerfil'
 
-import { mensajeErrorFirebase } from '@/utils/erroresFirebase'
+import { mensajeErrorFirebase } from '@/services/servicioAutenticacion'
 
 import Cabecera from '@/components/Cabecera.vue'
 
@@ -241,16 +241,15 @@ function mensajeFirebase(error) {
                         <Message v-if="!puedeUsarContrasena" severity="info" :closable="false">
                             Iniciaste sesión con Google: gestiona tu contraseña desde tu cuenta de Google.
                         </Message>
-                        <Button @click="abrirDialogoBaja" icon="pi pi-trash" label="Eliminar mi cuenta"
+                        <Button @click="abrirDialogoBaja" label="Eliminar mi cuenta"
                             class="!bg-red-700 !border-red-700 !text-white justify-center mt-5" />
                     </div>
                 </template>
             </Card>
         </main>
 
-        <Dialog v-model:visible="dialogoContrasenaAbierto" modal header="Cambiar contraseña"
-            :style="{ width: '90vw', maxWidth: '420px' }"
-            :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
+        <Dialog v-model:visible="dialogoContrasenaAbierto" modal header="CAMBIAR CONTRASEÑA"
+            :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
             <div class="flex flex-col gap-3">
                 <Message severity="info" :closable="false">
                     Te enviaremos un enlace a tu correo para que definas una nueva contraseña.
@@ -270,9 +269,8 @@ function mensajeFirebase(error) {
             </div>
         </Dialog>
 
-        <Dialog v-model:visible="dialogoCorreoAbierto" modal header="Cambiar correo"
-            :style="{ width: '90vw', maxWidth: '420px' }"
-            :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-zinc-700' } }">
+        <Dialog v-model:visible="dialogoCorreoAbierto" modal header="CAMBIAR CORREO"
+            :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
             <div class="flex flex-col gap-3">
                 <Message severity="info" :closable="false">
                     Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras,
@@ -296,9 +294,8 @@ function mensajeFirebase(error) {
             </div>
         </Dialog>
 
-        <Dialog v-model:visible="dialogoBajaAbierto" modal header="Eliminar cuenta"
-            :style="{ width: '90vw', maxWidth: '420px' }"
-            :pt="{ root: { class: '!bg-[#1A1A1F] !text-white border border-red-700' } }">
+        <Dialog v-model:visible="dialogoBajaAbierto" modal header="ELIMINAR CUENTA"
+            :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
             <div class="flex flex-col gap-3">
                 <Message severity="error" :closable="false">
                     Esta acción es permanente. Se borrarán tus participaciones y las ligas que administres en solitario.

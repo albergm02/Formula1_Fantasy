@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
-import { calcularPrecioClausula } from '@/utils/clausulas'
+import { calcularPrecioClausula } from '@/services/servicioGaraje'
 import {
   venderCarta,
   alternarAlineacion,
@@ -130,10 +130,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  const alternarCoche = alternarEquipado
-  const alternarPiloto = alternarEquipado
-  const alternarPotenciador = alternarEquipado
-
   function limpiarEstadoLigaActiva() {
     idLigaActiva.value = null
     idParticipanteActivo.value = null
@@ -179,16 +175,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  /**
-   * Devuelve el valor de mercado actualizado de una carta del garaje.
-   * Pilotos: consulta el mapa dinámico por `<numero>|<variante>`.
-   * Coches y potenciadores: consultan el mapa dinámico por `id`. Si la
-   * carta no aparece en el mapa, devuelve el precio almacenado en la propia
-   * carta como respaldo.
-   *
-   * @param {Object} carta Carta del garaje (piloto, coche o potenciador).
-   * @returns {number} Valor de mercado actual en millones.
-   */
   function obtenerValorMercado(carta) {
     const precioBase = Number(carta?.precio ?? 0)
     const tipoCarta = carta?.tipo || carta?.tipoCarta
@@ -196,11 +182,10 @@ export const usarStoreGaraje = defineStore('garaje', () => {
       const precioDinamico = preciosMercado.value.pilotos[`${carta.numero}|${carta.variante}`]
       return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
     }
-    const mapaPorTipo = {
+    const mapa = {
       coche: preciosMercado.value.coches,
       potenciador: preciosMercado.value.potenciadores,
-    }
-    const mapa = mapaPorTipo[tipoCarta]
+    }[tipoCarta]
     const precioDinamico = mapa ? mapa[carta.id] : null
     return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
   }
@@ -210,9 +195,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     if (coche) return coche
     const piloto = garaje.value.pilotos.find((p) => p.instancia_id === instanciaId)
     if (piloto) return piloto
-    const potenciador = garaje.value.potenciadores.find((p) => p.instancia_id === instanciaId)
-    if (potenciador) return potenciador
-    return null
+    return garaje.value.potenciadores.find((p) => p.instancia_id === instanciaId) || null
   }
 
   return {
@@ -225,12 +208,10 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     ultimaJornada,
     cargarEquipo,
     venderElemento,
-    alternarPotenciador,
+    alternarEquipado,
     limpiarEstadoLigaActiva,
     invertirEnClausula,
     ejecutarClausulaRival,
-    alternarCoche,
-    alternarPiloto,
     obtenerValorMercado,
   }
 })

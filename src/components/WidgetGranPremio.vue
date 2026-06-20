@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usarStoreJornada } from '@/stores/storeJornada'
-import { obtenerCuentaRegresiva } from '@/utils/granPremio'
+import { obtenerCuentaRegresiva } from '@/services/servicioJornada'
 
 const storeJornada = usarStoreJornada()
 const { siguienteGranPremio } = storeToRefs(storeJornada)

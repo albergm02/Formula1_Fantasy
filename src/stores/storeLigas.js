@@ -170,6 +170,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       }
 
       const participaciones = await servicioLigas.cargarParticipantes(idLiga)
+      const participacionPropia = participaciones.find((p) => p.email_usuario === correoUsuario)
       const participacionesRestantes = participaciones.filter(
         (p) => p.email_usuario !== correoUsuario,
       )

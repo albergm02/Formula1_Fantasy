@@ -15,6 +15,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
   const milisegundosRestantes = ref(0)
   const misPujas = ref({})
   const resumenPujas = ref({})
+  const idLigaInicializada = ref(null)
 
   let intervaloId = null
   let cancelarListenerMercado = null
@@ -79,6 +80,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
   }
 
   async function inicializarMercado(idLiga) {
+    if (idLigaInicializada.value === idLiga) return
+
     cargandoMercado.value = true
 
     if (cancelarListenerMercado) cancelarListenerMercado()
@@ -110,6 +113,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
       cargandoMercado.value = false
     })
+
+    idLigaInicializada.value = idLiga
   }
 
   function detenerMercado() {
@@ -119,6 +124,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
       cancelarListenerMercado = null
     }
     tokenSuscripcion++
+    idLigaInicializada.value = null
     mercadoActivo.value = null
     misPujas.value = {}
     resumenPujas.value = {}
@@ -169,6 +175,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   return {
     cargandoMercado,
+    idLigaInicializada,
     misPujas,
     resumenPujas,
     hayMercadoAbierto,

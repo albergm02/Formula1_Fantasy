@@ -10,7 +10,7 @@ import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
 import { usarStoreJornada } from '@/stores/storeJornada'
 
-import { calcularFactorJornada, calcularPuntosJornada, calcularPuntuacionBase } from '@/utils/puntuacion'
+import { calcularFactorJornada, calcularPuntosJornada, calcularPuntuacionBase } from '@/services/servicioJornada'
 
 const VARIANTES = [
     { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
@@ -265,7 +265,7 @@ function formatearPorcentaje(valor) {
                                 <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta"
                                     class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-base font-black"
                                         :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
                                         :title="celda.titulo || undefined">

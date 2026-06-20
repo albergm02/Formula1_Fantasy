@@ -1,10 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  suscribirseHistorialJornadas,
-  cargarCatalogoPilotos,
-  cargarPerfilesPuntuacion,
-} from '@/services/servicioJornada'
+import { suscribirseHistorialJornadas, cargarCatalogoYPerfiles } from '@/services/servicioJornada'
 import {
   obtenerUltimoGranPremioFinalizado,
   obtenerSiguienteGranPremio,
@@ -19,13 +15,11 @@ export const usarStoreJornada = defineStore('jornada', () => {
 
   async function cargarCatalogo() {
     try {
-      catalogoPilotos.value = await cargarCatalogoPilotos()
+      const { pilotos, perfiles } = await cargarCatalogoYPerfiles()
+      catalogoPilotos.value = pilotos
+      perfilesPuntuacion.value = perfiles
     } catch {
       catalogoPilotos.value = []
-    }
-    try {
-      perfilesPuntuacion.value = await cargarPerfilesPuntuacion()
-    } catch {
       perfilesPuntuacion.value = {}
     }
   }

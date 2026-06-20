@@ -141,6 +141,10 @@ async function ejecutarProcesarJornada() {
     const presupuestoActualizado =
       Math.round(((participacion.presupuesto || 0) + premioJornada) * 100) / 100
 
+    // Los potenciadores equipados se consumen al procesar la jornada: solo
+    // sobreviven los que no estaban en uso durante este Gran Premio.
+    const potenciadoresRestantes = (garaje.potenciadores || []).filter((p) => !p.equipado)
+
     const desgloseParticipante = {
       nombreGranPremio: granPremio.meeting_name,
       puntosJornada,
@@ -155,6 +159,7 @@ async function ejecutarProcesarJornada() {
       puntos: puntosAcumulados,
       presupuesto: presupuestoActualizado,
       ultimaJornada: desgloseParticipante,
+      'garaje.potenciadores': potenciadoresRestantes,
     })
 
     participacionesProcesadas++

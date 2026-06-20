@@ -25,22 +25,7 @@ function exigirEmailAutenticado(request) {
   return email
 }
 
-// Protege acciones sensibles (cambiar correo, borrar cuenta) frente a sesiones
-// antiguas. El cliente debe invocar reauthenticate* + getIdToken(true) justo
-// antes para que `auth_time` esté fresco.
-function exigirReautenticacionReciente(request, maxSegundos = 300) {
-  const instanteLogin = request.auth?.token?.auth_time
-  const ahoraSegundos = Math.floor(Date.now() / 1000)
-  if (!instanteLogin || ahoraSegundos - instanteLogin > maxSegundos) {
-    throw new HttpsError(
-      'failed-precondition',
-      'Esta acción exige que vuelvas a introducir tus credenciales.',
-    )
-  }
-}
-
 module.exports = {
   exigirAdministrador,
   exigirEmailAutenticado,
-  exigirReautenticacionReciente,
 }

@@ -4,15 +4,13 @@ import { ref, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
-import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/utils/clausulas'
+import { calcularPrecioClausula, estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioGaraje'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
-import CartaCoche from '@/components/CartaCoche.vue'
-import CartaPiloto from '@/components/CartaPiloto.vue'
-import CartaPotenciador from '@/components/CartaPotenciador.vue'
+import CartaItem from '@/components/CartaItem.vue'
 
 const props = defineProps({
     modoRival: { type: Boolean, default: false },
@@ -90,18 +88,8 @@ const confirmarVentaPiloto = (piloto) => {
     })
 }
 
-const alternarInstalacionPotenciador = async (idInstancia) => {
-    const resultado = await storeGaraje.alternarPotenciador(idInstancia)
-    if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
-}
-
-const alternarEquipoCoche = async (instanciaId) => {
-    const resultado = await storeGaraje.alternarCoche(instanciaId)
-    if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
-}
-
-const alternarEquipoPiloto = async (instanciaId) => {
-    const resultado = await storeGaraje.alternarPiloto(instanciaId)
+const alternarEquipado = async (instanciaId) => {
+    const resultado = await storeGaraje.alternarEquipado(instanciaId)
     if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
 }
 
@@ -200,18 +188,18 @@ const confirmarEjecucionClausula = (elemento) => {
         <section>
             <header v-if="!modoRival" class="flex items-center gap-2 mb-2">
                 <div class="flex-1 h-px bg-zinc-700"></div>
-                <h2 class="text-xs font-black uppercase tracking-widest text-white">Chásis</h2>
+                <h2 class="text-xs font-black uppercase tracking-widest text-white">Coches</h2>
                 <div class="flex-1 h-px bg-zinc-700"></div>
             </header>
             <h3 v-else class="mb-2 text-xs font-bold uppercase tracking-widest text-zinc-500">Coches</h3>
 
             <span v-if="!modoRival" class="text-[9px] uppercase tracking-widest text-[#D4A843] font-black mb-2 block">
-                {{coches.filter((c) => c.equipado).length}} titulares
+                {{coches.filter((c) => c.equipado).length}}/1 titular
             </span>
 
             <div v-if="coches.length > 0" class="grid grid-cols-1 gap-3">
                 <article v-for="coche in coches" :key="coche.instancia_id" class="flex flex-col bg-[#121218]">
-                    <CartaCoche :coche="coche" :modoMercado="false" />
+                    <CartaItem :carta="coche" tipo="coche" :modoMercado="false" />
 
                     <div class="flex flex-col gap-2 px-2 py-2 items-center">
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
@@ -232,7 +220,7 @@ const confirmarEjecucionClausula = (elemento) => {
 
                         <div v-if="!modoRival" class="grid grid-cols-3 gap-1.5 w-full">
                             <Button :label="coche.equipado ? 'En uso' : 'Usar chasis'"
-                                @click="alternarEquipoCoche(coche.instancia_id)" size="small"
+                                @click="alternarEquipado(coche.instancia_id)" size="small"
                                 :class="coche.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                                 :pt="{ label: { class: ['text-[10px] font-black uppercase tracking-wide', coche.equipado ? 'text-emerald-400' : 'text-zinc-300'] } }" />
                             <Button label="Proteger" @click="abrirDialogoProteccion(coche)" size="small"
@@ -269,13 +257,13 @@ const confirmarEjecucionClausula = (elemento) => {
             <h3 v-else class="mb-2 text-xs font-bold uppercase tracking-widest text-zinc-500">Pilotos</h3>
 
             <span v-if="!modoRival" class="text-[9px] uppercase tracking-widest text-[#D4A843] font-black mb-2 block">
-                {{pilotos.filter((p) => p.equipado).length}} titulares
+                {{pilotos.filter((p) => p.equipado).length}}/2 titulares
             </span>
 
             <div v-if="pilotos.length > 0" class="grid grid-cols-1 gap-3">
                 <article v-for="piloto in pilotos" :key="piloto.instancia_id"
                     class="flex flex-col bg-[#121218] border border-zinc-800">
-                    <CartaPiloto :piloto="piloto" :modoMercado="false" />
+                    <CartaItem :carta="piloto" tipo="piloto" :modoMercado="false" />
 
                     <div class="flex flex-col gap-2 px-3 py-2 border-t border-zinc-800/70">
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
@@ -296,7 +284,7 @@ const confirmarEjecucionClausula = (elemento) => {
 
                         <div v-if="!modoRival" class="grid grid-cols-3 gap-1.5">
                             <Button :label="piloto.equipado ? 'Titular' : 'Hacer titular'"
-                                @click="alternarEquipoPiloto(piloto.instancia_id)" size="small"
+                                @click="alternarEquipado(piloto.instancia_id)" size="small"
                                 :class="piloto.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                                 :pt="{ label: { class: ['text-[10px] font-black uppercase tracking-wide', piloto.equipado ? 'text-emerald-400' : 'text-zinc-300'] } }" />
                             <Button label="Proteger" @click="abrirDialogoProteccion(piloto)" size="small"
@@ -339,7 +327,7 @@ const confirmarEjecucionClausula = (elemento) => {
             <div v-if="potenciadores.length > 0" class="grid grid-cols-1 gap-3">
                 <article v-for="potenciador in potenciadores" :key="potenciador.instancia_id"
                     class="flex flex-col bg-[#121218] border border-zinc-800">
-                    <CartaPotenciador :potenciador="potenciador" :modoMercado="false" />
+                    <CartaItem :carta="potenciador" tipo="potenciador" :modoMercado="false" />
                     <div v-if="!modoRival"
                         class="flex flex-col gap-2 px-2 py-2 items-center border-t border-zinc-800/70">
                         <span class="text-[11px] text-zinc-400">
@@ -347,8 +335,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="font-black text-[#D4A843]">{{ formatearValorMercado(potenciador) }}M</span>
                         </span>
                         <Button :label="potenciador.equipado ? 'Instalado' : 'Instalar'"
-                            @click="alternarInstalacionPotenciador(potenciador.instancia_id)" size="small"
-                            class="w-full"
+                            @click="alternarEquipado(potenciador.instancia_id)" size="small" class="w-full"
                             :class="potenciador.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                             :pt="{ label: { class: ['text-[10px] font-black uppercase tracking-wide', potenciador.equipado ? 'text-emerald-400' : 'text-zinc-300'] } }" />
                     </div>

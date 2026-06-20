@@ -79,7 +79,7 @@ onMounted(async () => {
 
       <WidgetDesgloseJornada />
 
-      <div class="flex justify-center pb-2 border-b border-[#FFFFFF]/50">
+      <div class="flex justify-center pb-2 border-b border-zinc-700">
         <h2 class="text-2xl font-black uppercase text-white">Clasificación general</h2>
       </div>
 
@@ -92,37 +92,34 @@ onMounted(async () => {
           class="flex items-center justify-between p-4 border border-white transition-colors" :class="{
             '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storePerfil.usuarioActual.correoAutenticacion,
           }" @click="verEquipoRival(jugador)">
-          <div class="flex items-center gap-4">
-            <div class="relative -top-4 text-2xl font-black italic" :class="{
-              'text-[#D4A843]': indice === 0,
-              'text-gray-200': indice === 1,
-              'text-[#CD7F32]': indice === 2,
-              'text-[#FFFFFF]': indice > 2
-            }">{{ indice + 1 }}º</div>
-            <div class="flex flex-col">
-              <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
-              <span v-if="jugador.correo === storePerfil.usuarioActual.correoAutenticacion"
-                class="mt-1 text-xs text-[#F0ECEC]">
-                Presupuesto: <span class="font-bold text-[#E10600]">${{ Number(jugador.presupuesto || 0).toFixed(2)
-                }}M</span>
-              </span>
-              <span class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
-                Garaje: <span class="font-bold text-[#D4A843]">{{ jugador.valorGaraje }}M</span>
-              </span>
-              <span v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
-                class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
-                Toca para ver su equipo y hacer clausulas.
-              </span>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4">
+              <div class="relative -top-4 text-2xl font-black italic" :class="{
+                'text-[#D4A843]': indice === 0,
+                'text-gray-200': indice === 1,
+                'text-[#CD7F32]': indice === 2,
+                'text-[#FFFFFF]': indice > 2
+              }">{{ indice + 1 }}º</div>
+              <div class="flex flex-col">
+                <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
+                <span class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+                  Garaje: <span class="font-bold text-[#D4A843]">{{ jugador.valorGaraje }}M</span>
+                </span>
+                <span v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
+                  class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+                  Toca para ver su equipo y hacer clausulas.
+                </span>
+              </div>
             </div>
           </div>
 
           <div class="flex items-center gap-3">
+            <i v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
+              class="pi pi-eye text-zinc-500 text-sm"></i>
             <div class="flex flex-col items-end justify-center text-right">
               <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
               <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
             </div>
-            <i v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
-              class="pi pi-eye text-zinc-500 text-sm"></i>
           </div>
         </div>
       </div>

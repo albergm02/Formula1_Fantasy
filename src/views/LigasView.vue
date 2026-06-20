@@ -223,12 +223,12 @@ const handleEliminarLiga = () => {
                       <h3 class="pr-2 text-xl font-black uppercase truncate text-[#E10600]" :title="item.nombre">
                         {{ item.nombre }}
                       </h3>
-                      <div class="flex flex-wrap gap-2 text-xs font-medium">
-                        <span class="flex items-center gap-1">
-                          <i class="pi pi-users text-[#D4A843]"></i> {{ item.participantes }}
+                      <div class="flex flex-wrap gap-3 text-xs font-medium">
+                        <span class="flex items-center gap-1 text-zinc-400">
+                          <i class="pi pi-users text-[#D4A843] text-[10px]"></i> {{ item.participantes }}
                         </span>
-                        <span class="flex items-center gap-1">
-                          <i class="pi pi-key text-[#D4A843]"></i> {{ item.codigo_invitacion }}
+                        <span class="flex items-center gap-1 text-zinc-400 font-mono tracking-widest">
+                          <i class="pi pi-key text-[#D4A843] text-[10px]"></i> {{ item.codigo_invitacion }}
                         </span>
                       </div>
                     </div>
@@ -257,7 +257,8 @@ const handleEliminarLiga = () => {
       </div>
     </div>
 
-    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO">
+    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <span class="text-[#F0ECEC]">Introduzca el nombre de la nueva liga. (Máximo 12 caracteres)</span>
         <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre..." maxlength="12"
@@ -271,7 +272,8 @@ const handleEliminarLiga = () => {
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA">
+    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <span class="text-sm text-[#F0ECEC]">Introduce el código de invitación de 8 dígitos.</span>
         <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3D4" maxlength="8"
@@ -285,7 +287,8 @@ const handleEliminarLiga = () => {
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA">
+    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
         <p class="mb-2 text-center text-sm text-[#F0ECEC]">
           ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
@@ -302,7 +305,8 @@ const handleEliminarLiga = () => {
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoParticipantesVisible" modal header="PARTICIPANTES">
+    <Dialog v-model:visible="dialogoParticipantesVisible" modal header="PARTICIPANTES"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-3 min-w-64">
         <div v-if="cargandoParticipantes" class="text-center text-[#F0ECEC] py-4">Cargando...</div>
         <div v-else-if="participantesLiga.length === 0" class="text-center text-[#F0ECEC] py-4">No hay participantes.

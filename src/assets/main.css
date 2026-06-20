@@ -1,1 +1,26 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
+
+/* Toasts legibles */
+.p-toast {
+  width: auto !important;
+  max-width: 320px !important;
+}
+.p-toast .p-toast-message {
+  padding: 0.75rem 1rem !important;
+}
+.p-toast .p-toast-summary {
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.p-toast .p-toast-detail {
+  font-size: 0.72rem !important;
+  margin-top: 0.2rem !important;
+  line-height: 1.4 !important;
+}
+.p-toast .p-toast-message-icon {
+  font-size: 1rem !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+}

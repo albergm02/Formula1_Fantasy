@@ -60,32 +60,32 @@ function explicarFactor(piloto) {
   const factor = piloto.factorJornada
 
   if (piloto.variante === 'qualy') {
-    lineas.push(`Clasificó P${actuacion.posicionQualy} → factor ×${factor}`)
+    lineas.push(`Clasificó posición ${actuacion.posicionQualy}, factor aplicado: ${factor}`)
   } else if (piloto.variante === 'carrera') {
     const posicionesGanadas = (actuacion.posicionSalida || 20) - (actuacion.posicionCarrera || 20)
     const signo = posicionesGanadas >= 0 ? '+' : ''
-    lineas.push(`Terminó P${actuacion.posicionCarrera} (${signo}${posicionesGanadas} desde salida) → factor ×${factor}`)
+    lineas.push(`Terminó P${actuacion.posicionCarrera}, ${signo}${posicionesGanadas} posiciones desde salida, factor: ${factor}`)
   } else if (piloto.variante === 'todo_terreno') {
     const condiciones = jornada.value?.condiciones || {}
     const clima = condiciones.llovio ? 'Con lluvia' : 'En seco'
-    lineas.push(`${clima} + incidentes de carrera → factor ×${factor}`)
+    lineas.push(`${clima}, factor aplicado: ${factor}`)
   } else if (piloto.variante === 'base') {
-    lineas.push(`Media de Clasificación, Carrera y Todoterreno → factor ×${factor}`)
+    lineas.push(`Media de las tres variantes, factor: ${factor}`)
   } else if (piloto.variante === 'remontador') {
     const adelantamientos = actuacion.numeroAdelantos || 0
     const adelantado = actuacion.numeroVecesAdelantado || 0
     const diferencial = adelantamientos - adelantado
     const signo = diferencial >= 0 ? '+' : ''
-    lineas.push(`${adelantamientos} adelantamientos − ${adelantado} recibidos (${signo}${diferencial}) → factor ×${factor}`)
+    lineas.push(`${adelantamientos} adelantamientos, ${adelantado} recibidos (neto ${signo}${diferencial}), factor: ${factor}`)
   } else if (piloto.variante === 'estratega') {
-    const paradas = actuacion.numeroPitStops ?? '—'
+    const paradas = actuacion.numeroPitStops ?? 'N/A'
     const stint = Math.round((actuacion.porcentajeStintMaximo || 0) * 100)
-    lineas.push(`P${actuacion.posicionCarrera} · ${paradas} paradas · stint más largo ${stint}% → factor ×${factor}`)
+    lineas.push(`P${actuacion.posicionCarrera}, ${paradas} paradas, stint máximo ${stint}%, factor: ${factor}`)
   }
 
   if (piloto.puntuacionBase) {
     const puntosFinales = Math.round(piloto.puntuacionBase * factor)
-    lineas.push(`Base ${piloto.puntuacionBase} pts × ${factor} = ${puntosFinales} pts`)
+    lineas.push(`${piloto.puntuacionBase} pts base x ${factor} = ${puntosFinales} pts`)
   }
 
   return lineas
@@ -115,14 +115,11 @@ function explicarFactor(piloto) {
     </div>
 
     <Dialog v-model:visible="mostrarDetalle" modal header="DESGLOSE DE PUNTOS"
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: '#D4A843', borderBottom: '1px solid #2A2A32', fontWeight: 'bold', letterSpacing: '0.1em' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.25rem' }"
       :style="{ width: '92vw', maxWidth: '420px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
 
       <div class="flex flex-col gap-5">
 
-        <div class="flex items-center gap-2 pb-3 border-b border-zinc-800">
-          <i class="pi pi-flag-fill text-[#E10600]"></i>
+        <div class="pb-3 border-b border-zinc-800">
           <span class="text-sm font-black uppercase tracking-wide text-white">{{ jornada.nombreGranPremio }}</span>
         </div>
 
@@ -130,9 +127,7 @@ function explicarFactor(piloto) {
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condiciones</span>
           <div class="flex flex-wrap gap-2">
             <span v-for="(cond, idx) in condicionesTexto" :key="idx"
-              class="flex items-center gap-1.5 px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold"
-              :class="cond.color">
-              <i class="pi text-[10px]" :class="cond.icono"></i>
+              class="px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold" :class="cond.color">
               {{ cond.texto }}
             </span>
           </div>
@@ -170,10 +165,7 @@ function explicarFactor(piloto) {
         <div v-if="jornada.desglose?.coche" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Coche</span>
           <div class="flex items-center justify-between p-3 bg-[#121218] border border-zinc-800">
-            <div class="flex items-center gap-2">
-              <i class="pi pi-car text-zinc-400"></i>
-              <span class="text-sm font-bold text-white">{{ jornada.desglose.coche.nombre }}</span>
-            </div>
+            <span class="text-sm font-bold text-white">{{ jornada.desglose.coche.nombre }}</span>
             <span class="text-lg font-black text-[#D4A843]">+{{ jornada.desglose.coche.puntos }}</span>
           </div>
         </div>
@@ -184,10 +176,7 @@ function explicarFactor(piloto) {
             <div v-for="(sinergia, idx) in jornada.sinergias || []" :key="idx"
               class="flex items-start justify-between gap-3 p-3 bg-emerald-900/20 border border-emerald-500/30">
               <div class="flex flex-col gap-0.5">
-                <div class="flex items-center gap-2">
-                  <i class="pi pi-bolt text-emerald-400 text-xs"></i>
-                  <span class="text-sm font-bold text-emerald-400">{{ sinergia.nombre }}</span>
-                </div>
+                <span class="text-sm font-bold text-emerald-400">{{ sinergia.nombre }}</span>
                 <span class="text-[10px] text-zinc-400 leading-snug">{{ sinergia.descripcion }}</span>
               </div>
               <span class="text-base font-black text-emerald-400 shrink-0">
@@ -196,10 +185,7 @@ function explicarFactor(piloto) {
             </div>
             <div v-if="!(jornada.sinergias || []).length"
               class="flex items-center justify-between p-3 bg-emerald-900/20 border border-emerald-500/30">
-              <div class="flex items-center gap-2">
-                <i class="pi pi-bolt text-emerald-400"></i>
-                <span class="text-sm font-bold text-emerald-400">Sinergia activa</span>
-              </div>
+              <span class="text-sm font-bold text-emerald-400">Sinergia activa</span>
               <span class="text-lg font-black text-emerald-400">+{{ porcentajeSinergia }}%</span>
             </div>
           </div>

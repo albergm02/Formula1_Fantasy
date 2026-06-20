@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 
 import { usarStoreAutenticacion } from '@/stores/storeAutenticacion'
-import { mensajeErrorFirebase } from '@/utils/erroresFirebase'
+import { mensajeErrorFirebase } from '@/services/servicioAutenticacion'
 
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
