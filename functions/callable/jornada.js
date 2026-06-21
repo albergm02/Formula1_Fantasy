@@ -1,7 +1,9 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 
 const { db } = require('../middleware/firebase')
-const { REGION, TEMPORADA_ACTUAL } = require('../middleware/constantes')
+
+const REGION = 'europe-west1'
+const TEMPORADA_ACTUAL = 2026
 
 const {
   recopilarDatosGranPremio,

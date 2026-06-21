@@ -13,8 +13,6 @@ import { VARIANTES } from '@/utils/variantesPiloto'
 import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 import { calcularFactorJornada, calcularPuntosJornada, calcularPuntuacionBase } from '@/services/servicioJornada'
 
-const VARIANTES_SIN_BASE = VARIANTES.filter((v) => v.id !== 'base')
-
 const storeJornada = usarStoreJornada()
 const { historial, catalogoPilotos, ultimoGranPremioPendiente } =
     storeToRefs(storeJornada)
@@ -145,17 +143,6 @@ function obtenerSimulacionVariantes(piloto) {
     })
 }
 
-function mejorVariantePiloto(piloto) {
-    const condiciones = jornada.value?.condiciones || {}
-    return VARIANTES_SIN_BASE.reduce((mejor, variante) => {
-        const pesos = perfilesPuntuacion[variante.id]?.pesos || {}
-        const puntuacionBase = calcularPuntuacionBase(piloto.atributos, pesos)
-        const factor = calcularFactorJornada(piloto.actuacion, condiciones, variante.id)
-        const puntos = calcularPuntosJornada(puntuacionBase, factor)
-        return puntos > mejor.puntos ? { ...variante, puntos } : mejor
-    }, { puntos: -1 })
-}
-
 function formatearPorcentaje(valor) {
     if (valor == null || valor === 0) return '—'
     return `${Math.round(valor * 100)}%`
@@ -270,7 +257,7 @@ function formatearPorcentaje(valor) {
                                 <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta"
                                     class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta
-                                    }}</span>
+                                        }}</span>
                                     <span class="text-base font-black"
                                         :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
                                         :title="celda.titulo || undefined">
@@ -279,27 +266,6 @@ function formatearPorcentaje(valor) {
                                     </span>
                                 </div>
                             </div>
-                        </section>
-
-                        <section v-if="hayJornada"
-                            class="flex items-center justify-between p-3 bg-[#121218] border border-zinc-700">
-                            <div class="flex flex-col gap-0.5">
-                                <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">
-                                    Clase óptima en este GP
-                                </span>
-                                <div class="flex items-center gap-1.5">
-                                    <i class="pi text-sm" :class="mejorVariantePiloto(piloto).icono"
-                                        :style="{ color: mejorVariantePiloto(piloto).color }"></i>
-                                    <span class="text-sm font-black"
-                                        :style="{ color: mejorVariantePiloto(piloto).color }">
-                                        {{ mejorVariantePiloto(piloto).etiqueta }}
-                                    </span>
-                                </div>
-                            </div>
-                            <span class="text-2xl font-black tabular-nums"
-                                :style="{ color: mejorVariantePiloto(piloto).color }">
-                                +{{ mejorVariantePiloto(piloto).puntos }} pts
-                            </span>
                         </section>
 
                         <section class="flex flex-col gap-2">

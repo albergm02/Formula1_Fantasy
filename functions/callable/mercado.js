@@ -3,8 +3,10 @@ const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { FieldValue } = require('firebase-admin/firestore')
 
 const { db } = require('../middleware/firebase')
-const { OPCIONES, REGION } = require('../middleware/constantes')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
+
+const REGION = 'europe-west1'
+const OPCIONES = { region: REGION, enforceAppCheck: true }
 
 const {
   cargarCatalogo,
@@ -44,11 +46,15 @@ function calcularPrecioMuestra(carta, pujaGanadora) {
   return Number(carta.precio) * FACTOR_DESINTERES
 }
 
-// Formato "<idLiga>_<YYYY-MM-DD>": da idempotencia natural (dos ejecuciones
-// el mismo día resuelven al mismo ID y el segundo `set` no duplica).
-function calcularIdMercado(idLiga, fecha) {
-  const fechaStr = fecha.toISOString().split('T')[0]
-  return `${idLiga}_${fechaStr}`
+// Formato "YYYY-MM-DD": ordena lexicográficamente igual que cronológicamente,
+// lo que permite browsing natural en la consola de Firebase.
+function calcularFechaMercado(fecha) {
+  return fecha.toISOString().split('T')[0]
+}
+
+// Ruta canónica: mercados/{idLiga}/dias/{YYYY-MM-DD}
+function referenciaDiaMercado(idLiga, fecha) {
+  return db.collection('mercados').doc(idLiga).collection('dias').doc(calcularFechaMercado(fecha))
 }
 
 // Día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que el
@@ -64,13 +70,13 @@ function calcularFechaCierre(fechaApertura) {
 // Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana.
 // Las perdedoras se descartan sin reembolso: el dinero comprometido nunca se
 // dedujo del presupuesto real, solo se "reservaba" a nivel UI.
-async function resolverPujasMercado(idMercado) {
-  const pujasSnapshot = await db.collection('mercados').doc(idMercado).collection('pujas').get()
+async function resolverPujasMercado(mercadoRef) {
+  const pujasSnapshot = await mercadoRef.collection('pujas').get()
   if (pujasSnapshot.empty) return
 
   // Necesito los datos completos de cada carta (imagen, número, variante…)
   // para guardarlos en el garaje del ganador. La puja solo conserva el ID.
-  const mercadoSnap = await db.collection('mercados').doc(idMercado).get()
+  const mercadoSnap = await mercadoRef.get()
   const cartasMercado = mercadoSnap.exists ? mercadoSnap.data().cartas || [] : []
   const mapaCartas = {}
   for (const carta of cartasMercado) {
@@ -145,13 +151,16 @@ async function resolverPujasMercado(idMercado) {
       presupuestoRestante -= cantidad
 
       const nombreCarta = cartaGanada.nombre || pujaGanadora.nombreCarta
-      batch.create(db.collection('actividad').doc(), {
-        idLiga: participacion.id_liga,
-        nombreUsuario,
-        tipo: 'compra',
-        descripcion: `ha ganado la puja por ${tipoCarta} ${nombreCarta} por ${cantidad}M`,
-        fecha: FieldValue.serverTimestamp(),
-      })
+      batch.create(
+        db.collection('actividad').doc(participacion.id_liga).collection('eventos').doc(),
+        {
+          idLiga: participacion.id_liga,
+          nombreUsuario,
+          tipo: 'compra',
+          descripcion: `ha ganado la puja por ${tipoCarta} ${nombreCarta} por ${cantidad}M`,
+          fecha: FieldValue.serverTimestamp(),
+        },
+      )
     }
 
     batch.update(participacionRef, {
@@ -195,13 +204,14 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   // Exportado para que callable/ligas.js pueda reutilizarlo al inicializar
   // una liga recién creada sin duplicar la lógica de generación.
   const ahora = new Date()
-  const idMercadoHoy = calcularIdMercado(idLiga, ahora)
+  const fechaHoy = calcularFechaMercado(ahora)
+  const refHoy = referenciaDiaMercado(idLiga, ahora)
 
-  const mercadoExistente = await db.collection('mercados').doc(idMercadoHoy).get()
+  const mercadoExistente = await refHoy.get()
   if (mercadoExistente.exists) {
     return {
-      mensaje: `El mercado ${idMercadoHoy} ya fue generado previamente.`,
-      idMercado: idMercadoHoy,
+      mensaje: `El mercado ${fechaHoy} ya fue generado previamente.`,
+      idMercado: fechaHoy,
       omitido: true,
     }
   }
@@ -210,12 +220,12 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   // para cerrar el ciclo pujas ganadoras → garajes → precios dinámicos.
   const ayer = new Date(ahora)
   ayer.setUTCDate(ayer.getUTCDate() - 1)
-  const idMercadoAyer = calcularIdMercado(idLiga, ayer)
-  const mercadoAyer = await db.collection('mercados').doc(idMercadoAyer).get()
+  const refAyer = referenciaDiaMercado(idLiga, ayer)
+  const mercadoAyer = await refAyer.get()
 
   if (mercadoAyer.exists && mercadoAyer.data().estado === 'abierto') {
-    await resolverPujasMercado(idMercadoAyer)
-    await db.collection('mercados').doc(idMercadoAyer).update({ estado: 'cerrado' })
+    await resolverPujasMercado(refAyer)
+    await refAyer.update({ estado: 'cerrado' })
   }
 
   const catalogoBase = await cargarCatalogo(db)
@@ -225,7 +235,7 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   const cartasDelDia = seleccionarCartasDiarias(catalogoConPrecios, exclusionesLiga)
   const fechaCierre = calcularFechaCierre(ahora)
 
-  await db.collection('mercados').doc(idMercadoHoy).set({
+  await refHoy.set({
     idLiga,
     estado: 'abierto',
     fechaCierre: fechaCierre.toISOString(),
@@ -234,7 +244,7 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
 
   return {
     mensaje: `Mercado generado para liga ${idLiga}.`,
-    idMercado: idMercadoHoy,
+    idMercado: fechaHoy,
     totalCartas: cartasDelDia.length,
     fechaCierre: fechaCierre.toISOString(),
   }
@@ -353,7 +363,7 @@ async function propagarAGarajes(tipo, coleccion, cambiosPorClave, esAbsoluto) {
 }
 
 async function propagarAMercadosAbiertos(tipo, deltas) {
-  const snap = await db.collection('mercados').where('estado', '==', 'abierto').get()
+  const snap = await db.collectionGroup('dias').where('estado', '==', 'abierto').get()
   if (snap.empty) return
 
   const batch = db.batch()
@@ -425,13 +435,8 @@ function sanitizarEmailParaIdPuja(email) {
 
 // Se ignora la puja sobre idCartaExcluida para que actualizar una puja
 // existente no cuente dos veces su importe anterior.
-async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
-  const pujasSnap = await db
-    .collection('mercados')
-    .doc(idMercado)
-    .collection('pujas')
-    .where('emailUsuario', '==', email)
-    .get()
+async function sumarComprometidoEnMercado(mercadoRef, email, idCartaExcluida) {
+  const pujasSnap = await mercadoRef.collection('pujas').where('emailUsuario', '==', email).get()
   return pujasSnap.docs.reduce((suma, documento) => {
     const datos = documento.data()
     if (datos.idCarta === idCartaExcluida) return suma
@@ -442,7 +447,8 @@ async function sumarComprometidoEnMercado(idMercado, email, idCartaExcluida) {
 async function cargarMercadoAbiertoDeLiga(idLiga) {
   const snap = await db
     .collection('mercados')
-    .where('idLiga', '==', idLiga)
+    .doc(idLiga)
+    .collection('dias')
     .where('estado', '==', 'abierto')
     .limit(1)
     .get()
@@ -464,7 +470,6 @@ exports.registrarPuja = onCall(OPCIONES, async (request) => {
   if (!mercadoDoc) {
     throw new HttpsError('failed-precondition', 'No hay mercado abierto para esta liga.')
   }
-  const idMercado = mercadoDoc.id
   const cartas = mercadoDoc.data().cartas || []
   const cartaObjetivo = cartas.find((carta) => carta.id === idCarta)
   if (!cartaObjetivo) {
@@ -488,13 +493,13 @@ exports.registrarPuja = onCall(OPCIONES, async (request) => {
   }
   const participacion = participacionSnap.docs[0]
   const presupuestoActual = Number(participacion.data().presupuesto || 0)
-  const comprometidoEnOtras = await sumarComprometidoEnMercado(idMercado, email, idCarta)
+  const comprometidoEnOtras = await sumarComprometidoEnMercado(mercadoDoc.ref, email, idCarta)
   if (cantidadNumerica + comprometidoEnOtras > presupuestoActual) {
     throw new HttpsError('failed-precondition', 'Presupuesto insuficiente para esta puja.')
   }
 
   const idPuja = `${sanitizarEmailParaIdPuja(email)}_${idCarta}`
-  await db.collection('mercados').doc(idMercado).collection('pujas').doc(idPuja).set({
+  await mercadoDoc.ref.collection('pujas').doc(idPuja).set({
     idCarta,
     tipoCarta: cartaObjetivo.tipoCarta,
     nombreCarta: cartaObjetivo.nombre,
@@ -518,9 +523,8 @@ exports.eliminarPuja = onCall(OPCIONES, async (request) => {
   const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
   if (!mercadoDoc) return { ok: true, eliminado: false }
 
-  const idMercado = mercadoDoc.id
   const idPuja = `${sanitizarEmailParaIdPuja(email)}_${idCarta}`
-  const refPuja = db.collection('mercados').doc(idMercado).collection('pujas').doc(idPuja)
+  const refPuja = mercadoDoc.ref.collection('pujas').doc(idPuja)
   const pujaSnap = await refPuja.get()
   if (!pujaSnap.exists) {
     return { ok: true, eliminado: false }
@@ -537,10 +541,10 @@ exports.eliminarPuja = onCall(OPCIONES, async (request) => {
 // adjudicar a una participación ya inexistente tras abandonar o ser expulsado.
 async function agregarBorradoPujasUsuario(batch, idLiga, email) {
   const correo = String(email).trim().toLowerCase()
-  const mercadosSnapshot = await db.collection('mercados').where('idLiga', '==', idLiga).get()
+  const diasSnapshot = await db.collection('mercados').doc(idLiga).collection('dias').get()
   let pujasEliminadas = 0
-  for (const documentoMercado of mercadosSnapshot.docs) {
-    const pujasSnapshot = await documentoMercado.ref
+  for (const documentoDia of diasSnapshot.docs) {
+    const pujasSnapshot = await documentoDia.ref
       .collection('pujas')
       .where('emailUsuario', '==', correo)
       .get()
@@ -553,7 +557,6 @@ async function agregarBorradoPujasUsuario(batch, idLiga, email) {
 }
 
 // Exportados para reutilización en callable/ligas.js y callable/garaje.js.
-module.exports.calcularIdMercado = calcularIdMercado
 module.exports.cargarMercadoAbiertoDeLiga = cargarMercadoAbiertoDeLiga
 module.exports.agregarBorradoPujasUsuario = agregarBorradoPujasUsuario
 module.exports.ejecutarGeneracionMercadoParaLiga = ejecutarGeneracionMercadoParaLiga

@@ -2,10 +2,12 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
 const { db } = require('../middleware/firebase')
-const { OPCIONES, HORAS_PERIODO_GRACIA } = require('../middleware/constantes')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { exigirJornadaProcesada } = require('../middleware/jornada')
 const { cargarMercadoAbiertoDeLiga } = require('./mercado')
+
+const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
+const HORAS_PERIODO_GRACIA = 48
 
 const PORCENTAJE_REVENTA = 0.9
 const MAX_COCHES_ALINEADOS = 1
@@ -70,7 +72,7 @@ exports.venderCarta = onCall(OPCIONES, async (request) => {
     garaje: { ...garaje, [coleccion]: listaActualizada },
     presupuesto: Number((datos.presupuesto || 0) + valorReventa),
   })
-  batch.create(db.collection('actividad').doc(), {
+  batch.create(db.collection('actividad').doc(datos.id_liga).collection('eventos').doc(), {
     idLiga: datos.id_liga,
     nombreUsuario: datos.nombre_usuario || email,
     tipo: 'venta',
@@ -317,7 +319,7 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
     garaje: garajePropio,
     presupuesto: datosPropio.presupuesto - precioClausula,
   })
-  batch.create(db.collection('actividad').doc(), {
+  batch.create(db.collection('actividad').doc(datosPropio.id_liga).collection('eventos').doc(), {
     idLiga: datosPropio.id_liga,
     nombreUsuario: datosPropio.nombre_usuario || emailAtacante,
     tipo: 'clausula',

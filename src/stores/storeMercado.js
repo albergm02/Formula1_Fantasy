@@ -101,13 +101,14 @@ export const usarStoreMercado = defineStore('mercado', () => {
         const email = storePerfil.usuarioActual.correoAutenticacion
         try {
           const [pujasUsuario, resumen] = await Promise.all([
-            email ? cargarMisPujas(mercado.id, email) : Promise.resolve({}),
-            cargarResumenPujas(mercado.id),
+            email ? cargarMisPujas(mercado, email) : Promise.resolve({}),
+            cargarResumenPujas(mercado),
           ])
           if (tokenLocal !== tokenSuscripcion) return
           misPujas.value = pujasUsuario
           resumenPujas.value = resumen
-        } catch {
+        } catch (error) {
+          console.error('Error al cargar pujas del mercado:', error)
           misPujas.value = {}
           resumenPujas.value = {}
         }

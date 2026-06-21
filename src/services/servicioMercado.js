@@ -25,8 +25,7 @@ const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
  */
 export const suscribirMercadoActivo = (idLiga, alCambiar) => {
   const consulta = query(
-    collection(db, 'mercados'),
-    where('idLiga', '==', idLiga),
+    collection(db, 'mercados', idLiga, 'dias'),
     where('estado', '==', 'abierto'),
     limit(1),
   )
@@ -48,8 +47,8 @@ export const eliminarPuja = async (idLiga, idCarta) => {
   await llamadaEliminarPuja({ idLiga, idCarta })
 }
 
-export const cargarMisPujas = async (idMercado, emailUsuario) => {
-  const refPujas = collection(db, 'mercados', idMercado, 'pujas')
+export const cargarMisPujas = async (mercado, emailUsuario) => {
+  const refPujas = collection(db, 'mercados', mercado.idLiga, 'dias', mercado.id, 'pujas')
   const consulta = query(refPujas, where('emailUsuario', '==', emailUsuario.trim()))
   const resultado = await getDocs(consulta)
 
@@ -79,8 +78,8 @@ export const cargarPreciosDinamicosMercado = async () => {
   }
 }
 
-export const cargarResumenPujas = async (idMercado) => {
-  const refPujas = collection(db, 'mercados', idMercado, 'pujas')
+export const cargarResumenPujas = async (mercado) => {
+  const refPujas = collection(db, 'mercados', mercado.idLiga, 'dias', mercado.id, 'pujas')
   const resultado = await getDocs(refPujas)
 
   const resumen = {}

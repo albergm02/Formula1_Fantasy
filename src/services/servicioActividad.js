@@ -1,4 +1,4 @@
-import { collection, query, where, limit, getDocs } from 'firebase/firestore'
+import { collection, query, limit, getDocs } from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
 export const TIPOS_ACTIVIDAD = {
@@ -16,7 +16,7 @@ export const TIPOS_ACTIVIDAD = {
  * @param {number} [maximo=30]
  */
 export const cargarActividadLiga = async (idLiga, maximo = 30) => {
-  const consulta = query(collection(db, 'actividad'), where('idLiga', '==', idLiga), limit(maximo))
+  const consulta = query(collection(db, 'actividad', idLiga, 'eventos'), limit(maximo))
   const instantanea = await getDocs(consulta)
 
   return instantanea.docs

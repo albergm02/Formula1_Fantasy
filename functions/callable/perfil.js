@@ -2,10 +2,12 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
 const { db, adminAuth } = require('../middleware/firebase')
-const { OPCIONES, DIAS_BLOQUEO_CAMBIO_CORREO } = require('../middleware/constantes')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { agregarBorradoPujasUsuario } = require('./mercado')
 const { borrarLigaEnCascada } = require('./ligas')
+
+const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
+const DIAS_BLOQUEO_CAMBIO_CORREO = 7
 
 function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
   const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)

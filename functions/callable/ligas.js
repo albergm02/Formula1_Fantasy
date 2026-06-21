@@ -2,9 +2,10 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
 const { db } = require('../middleware/firebase')
-const { OPCIONES } = require('../middleware/constantes')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { agregarBorradoPujasUsuario, ejecutarGeneracionMercadoParaLiga } = require('./mercado')
+
+const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 
 // Borra la liga y todo lo asociado (participaciones, mercados con pujas,
 // actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
@@ -20,7 +21,7 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
     batch.delete(documento.ref)
   }
 
-  const mercadosSnap = await db.collection('mercados').where('idLiga', '==', idLiga).get()
+  const mercadosSnap = await db.collection('mercados').doc(idLiga).collection('dias').get()
   for (const documentoMercado of mercadosSnap.docs) {
     const pujasSnap = await documentoMercado.ref.collection('pujas').get()
     for (const documentoPuja of pujasSnap.docs) {
@@ -29,10 +30,11 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
     batch.delete(documentoMercado.ref)
   }
 
-  const actividadSnap = await db.collection('actividad').where('idLiga', '==', idLiga).get()
+  const actividadSnap = await db.collection('actividad').doc(idLiga).collection('eventos').get()
   for (const documento of actividadSnap.docs) {
     batch.delete(documento.ref)
   }
+  batch.delete(db.collection('actividad').doc(idLiga))
 
   const usuariosSnap = await db
     .collection('usuarios')
@@ -168,7 +170,7 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
       ligasIds: FieldValue.arrayRemove(idLiga),
     })
   }
-  batch.create(db.collection('actividad').doc(), {
+  batch.create(db.collection('actividad').doc(idLiga).collection('eventos').doc(), {
     idLiga,
     nombreUsuario: datosParticipacion.nombre_usuario || correoExpulsado,
     tipo: 'abandono',
@@ -248,7 +250,7 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
     ligasIds: FieldValue.arrayUnion(ligaRef.id),
   })
 
-  batch.create(db.collection('actividad').doc(), {
+  batch.create(db.collection('actividad').doc(ligaRef.id).collection('eventos').doc(), {
     idLiga: ligaRef.id,
     nombreUsuario: nombreVisible,
     tipo: 'creacion',
@@ -258,7 +260,9 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 
   await batch.commit()
 
-  ejecutarGeneracionMercadoParaLiga(ligaRef.id).catch(() => {})
+  ejecutarGeneracionMercadoParaLiga(ligaRef.id).catch((error) => {
+    console.error(`Error al generar mercado inicial para liga ${ligaRef.id}:`, error)
+  })
 
   return { ok: true, idLiga: ligaRef.id, codigoInvitacion, nombreLiga: nombre }
 })
@@ -326,7 +330,7 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
     ligasIds: FieldValue.arrayUnion(idLiga),
   })
 
-  batch.create(db.collection('actividad').doc(), {
+  batch.create(db.collection('actividad').doc(idLiga).collection('eventos').doc(), {
     idLiga,
     nombreUsuario: nombreVisible,
     tipo: 'incorporacion',
@@ -395,7 +399,7 @@ exports.abandonarLiga = onCall(OPCIONES, async (request) => {
     ligasIds: FieldValue.arrayRemove(idLiga),
   })
 
-  batch.create(db.collection('actividad').doc(), {
+  batch.create(db.collection('actividad').doc(idLiga).collection('eventos').doc(), {
     idLiga,
     nombreUsuario: participacionPropia.nombre_usuario || email,
     tipo: 'abandono',

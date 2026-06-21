@@ -1,10 +1,11 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 
 const { db } = require('../middleware/firebase')
-const { OPCIONES } = require('../middleware/constantes')
 const { exigirAdministrador } = require('../middleware/autenticacion')
 const { borrarLigaEnCascada } = require('./ligas')
 const { eliminarCuentaUsuarioEnCascada } = require('./perfil')
+
+const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 
 exports.eliminarLigaAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)

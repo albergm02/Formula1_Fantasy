@@ -35,7 +35,6 @@ if (claveRecaptcha) {
 }
 
 const auth = getAuth(app)
-auth.languageCode = 'es'
 const db = getFirestore(app)
 const functions = getFunctions(app, 'europe-west1')
 
