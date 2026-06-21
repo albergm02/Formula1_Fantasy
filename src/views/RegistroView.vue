@@ -144,11 +144,11 @@ const notificarRegistroSolicitado = () => {
 
           <div class="flex flex-col gap-3 mt-4">
 
-            <Button type="submit" label="CREAR EQUIPO" :loading="cargando"
+            <Button type="submit" label="REGISTRARSE" :loading="cargando"
               class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
 
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
-              <span class="text-xs text-[#F0ECEC]">¿Ya tienes equipo? </span>
+              <span class="text-xs text-[#F0ECEC]">¿Ya tienes cuenta? </span>
               <router-link to="/" class="ml-1 text-xs font-black uppercase tracking-widest text-[#D4A843]">
                 Inicia sesión aquí
               </router-link>

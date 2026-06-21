@@ -4,12 +4,7 @@ let catalogoEnMemoria = null
 
 async function sembrarCatalogoEnFirestore(db) {
   const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
-  const batch = db.batch()
-  batch.set(db.collection('catalogo').doc('pilotos'), { items: pilotos })
-  batch.set(db.collection('catalogo').doc('coches'), { items: coches })
-  batch.set(db.collection('catalogo').doc('potenciadores'), { items: potenciadores })
-  await batch.commit()
-  console.log('[Catalogo] Auto-seed ejecutado correctamente.')
+  await db.collection('catalogo').doc('items').set({ pilotos, coches, potenciadores })
   return { pilotos, coches, potenciadores }
 }
 
@@ -18,22 +13,18 @@ async function cargarCatalogo(db) {
     return catalogoEnMemoria
   }
 
-  const referencia = db.collection('catalogo')
-  const [docPilotos, docCoches, docPotenciadores] = await Promise.all([
-    referencia.doc('pilotos').get(),
-    referencia.doc('coches').get(),
-    referencia.doc('potenciadores').get(),
-  ])
+  const docItems = await db.collection('catalogo').doc('items').get()
 
-  if (!docPilotos.exists || !docCoches.exists || !docPotenciadores.exists) {
+  if (!docItems.exists) {
     catalogoEnMemoria = await sembrarCatalogoEnFirestore(db)
     return catalogoEnMemoria
   }
 
+  const datos = docItems.data()
   catalogoEnMemoria = {
-    pilotos: docPilotos.data().items || [],
-    coches: docCoches.data().items || [],
-    potenciadores: docPotenciadores.data().items || [],
+    pilotos: datos.pilotos || [],
+    coches: datos.coches || [],
+    potenciadores: datos.potenciadores || [],
   }
 
   return catalogoEnMemoria
@@ -43,16 +34,12 @@ async function cargarCatalogo(db) {
 // de pujas ganadoras. La clave de un piloto es `<numero>|<variante>`; para
 // coches y potenciadores se usa el `id` único del catálogo.
 async function cargarPreciosDinamicos(db) {
-  const referencia = db.collection('catalogo')
-  const [docPilotos, docCoches, docPotenciadores] = await Promise.all([
-    referencia.doc('precios_pilotos').get(),
-    referencia.doc('precios_coches').get(),
-    referencia.doc('precios_potenciadores').get(),
-  ])
+  const docPrecios = await db.collection('catalogo').doc('precios').get()
+  const datos = docPrecios.exists ? docPrecios.data() : {}
   return {
-    pilotos: docPilotos.exists ? docPilotos.data().precios || {} : {},
-    coches: docCoches.exists ? docCoches.data().precios || {} : {},
-    potenciadores: docPotenciadores.exists ? docPotenciadores.data().precios || {} : {},
+    pilotos: datos.pilotos || {},
+    coches: datos.coches || {},
+    potenciadores: datos.potenciadores || {},
   }
 }
 

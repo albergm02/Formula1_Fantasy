@@ -223,10 +223,8 @@ function crearCartaPiloto(pilotoBase, variante) {
     iconoVariante: variante.icono,
     nombreVariante: variante.nombreHabilidad,
     perfilPuntuacion: variante.perfil,
-    pesos: perfil.pesos,
     atributos: pilotoBase.atributos,
     puntuacionBase,
-    reglasUsuario: perfil.reglasUsuario,
   }
 }
 
@@ -245,10 +243,11 @@ function construirCatalogoCompleto() {
     }),
   )
 
-  const coches = cochesBase.map((coche) => ({
-    ...coche,
-    puntuacionBase: coche.puntos || 0,
-    precio: calcularPrecioInicialCoche(coche),
+  const coches = cochesBase.map(({ puntos, habilidad, ...resto }) => ({
+    ...resto,
+    habilidad: { nombre: habilidad.nombre, descripcion: habilidad.descripcion },
+    puntuacionBase: puntos || 0,
+    precio: calcularPrecioInicialCoche({ puntos }),
   }))
 
   const potenciadores = potenciadoresBase.map((potenciador) => {

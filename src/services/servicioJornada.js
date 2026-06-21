@@ -1,5 +1,6 @@
 import { collection, doc, getDoc, onSnapshot, orderBy, query, limit } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
+import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
 export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) {
   const consulta = query(
@@ -23,12 +24,12 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
  * @returns {Promise<{pilotos: Array, perfiles: Object}>}
  */
 export async function cargarCatalogoYPerfiles() {
-  const documento = await getDoc(doc(db, 'catalogo', 'pilotos'))
+  const documento = await getDoc(doc(db, 'catalogo', 'items'))
   if (!documento.exists()) {
-    throw new Error('Catálogo de pilotos no encontrado en Firestore (catalogo/pilotos).')
+    throw new Error('Catálogo no encontrado en Firestore (catalogo/items).')
   }
 
-  const cartas = documento.data().items || []
+  const cartas = documento.data().pilotos || []
   const pilotosPorNumero = new Map()
   const perfiles = {}
 
@@ -42,17 +43,9 @@ export async function cargarCatalogoYPerfiles() {
         atributos: carta.atributos,
       })
     }
-
-    const clavePerfil = carta.perfilPuntuacion
-    if (clavePerfil && !perfiles[clavePerfil]) {
-      perfiles[clavePerfil] = {
-        pesos: carta.pesos,
-        reglasUsuario: carta.reglasUsuario || [],
-      }
-    }
   }
 
-  return { pilotos: Array.from(pilotosPorNumero.values()), perfiles }
+  return { pilotos: Array.from(pilotosPorNumero.values()), perfiles: perfilesPuntuacion }
 }
 
 export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {

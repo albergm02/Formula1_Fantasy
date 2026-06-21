@@ -43,7 +43,7 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
   const cocheEquipado = garaje.coches ? garaje.coches.find((c) => c.equipado) : garaje.coche || null
 
   if (cocheEquipado) {
-    puntosCoche = Math.round(cocheEquipado.puntos * 10) / 10
+    puntosCoche = Math.round((cocheEquipado.puntuacionBase ?? cocheEquipado.puntos ?? 0) * 10) / 10
     desgloseCoche = { nombre: cocheEquipado.nombre, puntos: puntosCoche }
   }
 

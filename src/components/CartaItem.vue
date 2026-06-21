@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import { useToast } from 'primevue/usetoast'
+import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
 const mostrarDetalles = ref(false)
 const mostrarPuja = ref(false)
@@ -26,7 +27,7 @@ const esPotenciador = computed(() => props.tipo === 'potenciador')
 const barrasAtributos = computed(() => {
     if (!esPiloto.value) return []
     const a = props.carta.atributos
-    const p = props.carta.pesos
+    const p = perfilesPuntuacion[props.carta.perfilPuntuacion]?.pesos
     if (!a || !p) return []
     return [
         { nombre: 'Ritmo', valor: a.ritmo, peso: p.ritmo, color: '#38bdf8' },
@@ -178,13 +179,13 @@ const confirmarEliminarPuja = () => {
                             </div>
                         </div>
                     </div>
-                    <div v-if="carta.reglasUsuario?.length">
+                    <div v-if="perfilesPuntuacion[carta.perfilPuntuacion]?.reglasUsuario?.length">
                         <p class="text-xs font-black uppercase leading-tight mb-2"
                             :style="{ color: carta.colorVariante }">
                             <i class="pi mr-1" :class="carta.iconoVariante"></i>{{ carta.nombreVariante }}
                         </p>
                         <ul class="space-y-1.5">
-                            <li v-for="(regla, i) in carta.reglasUsuario" :key="`regla-${i}`"
+                            <li v-for="(regla, i) in perfilesPuntuacion[carta.perfilPuntuacion]?.reglasUsuario" :key="`regla-${i}`"
                                 class="text-xs text-zinc-300 leading-relaxed">{{ regla }}</li>
                         </ul>
                     </div>
@@ -194,7 +195,7 @@ const confirmarEliminarPuja = () => {
                 <template v-if="esCoche">
                     <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
                         <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Puntos por jornada</p>
-                        <span class="text-3xl font-black text-white">{{ carta.puntos }}</span>
+                        <span class="text-3xl font-black text-white">{{ carta.puntuacionBase }}</span>
                     </div>
                     <div v-if="carta.habilidad">
                         <p class="text-xs font-black text-emerald-400 uppercase tracking-wide mb-1">

@@ -75,16 +75,12 @@ export const cargarMisPujas = async (idMercado, emailUsuario) => {
  * @returns {Promise<{pilotos: Object<string, number>, coches: Object<string, number>, potenciadores: Object<string, number>}>}
  */
 export const cargarPreciosDinamicosMercado = async () => {
-  const referencia = collection(db, 'catalogo')
-  const [docPilotos, docCoches, docPotenciadores] = await Promise.all([
-    getDoc(doc(referencia, 'precios_pilotos')),
-    getDoc(doc(referencia, 'precios_coches')),
-    getDoc(doc(referencia, 'precios_potenciadores')),
-  ])
+  const docPrecios = await getDoc(doc(collection(db, 'catalogo'), 'precios'))
+  const datos = docPrecios.exists() ? docPrecios.data() : {}
   return {
-    pilotos: docPilotos.exists() ? docPilotos.data().precios || {} : {},
-    coches: docCoches.exists() ? docCoches.data().precios || {} : {},
-    potenciadores: docPotenciadores.exists() ? docPotenciadores.data().precios || {} : {},
+    pilotos: datos.pilotos || {},
+    coches: datos.coches || {},
+    potenciadores: datos.potenciadores || {},
   }
 }
 

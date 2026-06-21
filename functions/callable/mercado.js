@@ -245,13 +245,6 @@ function claveCartaPorTipo(carta, tipo) {
   return tipo === 'piloto' ? `${carta.numero}|${carta.variante}` : carta.id
 }
 
-function docsPorTipo(tipo) {
-  if (tipo === 'piloto') return { docPrecios: 'precios_pilotos', docHistorial: 'historial_pujas' }
-  if (tipo === 'coche')
-    return { docPrecios: 'precios_coches', docHistorial: 'historial_pujas_coches' }
-  return { docPrecios: 'precios_potenciadores', docHistorial: 'historial_pujas_potenciadores' }
-}
-
 function coleccionGaraje(tipo) {
   if (tipo === 'piloto') return 'pilotos'
   if (tipo === 'coche') return 'coches'
@@ -259,63 +252,69 @@ function coleccionGaraje(tipo) {
 }
 
 async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
+  const refPrecios = db.collection('catalogo').doc('precios')
+  const refHistorial = db.collection('catalogo').doc('historial')
+  const [snapPrecios, snapHistorial] = await Promise.all([refPrecios.get(), refHistorial.get()])
+
+  const preciosActuales = snapPrecios.exists ? snapPrecios.data() : {}
+  const historialActual = snapHistorial.exists ? snapHistorial.data() : {}
+
+  const preciosNuevos = {
+    pilotos: { ...(preciosActuales.pilotos || {}) },
+    coches: { ...(preciosActuales.coches || {}) },
+    potenciadores: { ...(preciosActuales.potenciadores || {}) },
+  }
+  const historialNuevo = {
+    pilotos: { ...(historialActual.pilotos || {}) },
+    coches: { ...(historialActual.coches || {}) },
+    potenciadores: { ...(historialActual.potenciadores || {}) },
+  }
+
+  const deltasPorTipo = { piloto: {}, coche: {}, potenciador: {} }
+  const nuevosAbsolutosPorTipo = { piloto: {}, coche: {}, potenciador: {} }
+
   for (const tipo of ['piloto', 'coche', 'potenciador']) {
-    await actualizarPreciosPorTipo(tipo, cartasMercado, pujasPorCarta)
-  }
-}
+    const campo = coleccionGaraje(tipo)
+    for (const carta of cartasMercado) {
+      if (carta.tipoCarta !== tipo) continue
+      const clave = claveCartaPorTipo(carta, tipo)
+      if (!clave) continue
 
-async function actualizarPreciosPorTipo(tipo, cartasMercado, pujasPorCarta) {
-  const muestras = {}
-  for (const carta of cartasMercado) {
-    if (carta.tipoCarta !== tipo) continue
-    const clave = claveCartaPorTipo(carta, tipo)
-    if (!clave) continue
-    muestras[clave] = calcularPrecioMuestra(carta, pujasPorCarta[carta.id])
-  }
-  if (Object.keys(muestras).length === 0) return
+      const muestra = calcularPrecioMuestra(carta, pujasPorCarta[carta.id])
+      const previas = historialNuevo[campo][clave] || []
+      const combinadas = [...previas, muestra].slice(-HISTORIAL_MAX_MUESTRAS)
+      historialNuevo[campo][clave] = combinadas
 
-  const { docPrecios, docHistorial } = docsPorTipo(tipo)
-  const refHistorial = db.collection('catalogo').doc(docHistorial)
-  const refPrecios = db.collection('catalogo').doc(docPrecios)
+      const media = combinadas.reduce((a, v) => a + v, 0) / combinadas.length
+      const precioNuevo = Math.max(PRECIO_MINIMO, Math.round(media * 10) / 10)
+      const precioAnterior = preciosActuales[campo]?.[clave]
+      preciosNuevos[campo][clave] = precioNuevo
 
-  const [snapHistorial, snapPrecios] = await Promise.all([refHistorial.get(), refPrecios.get()])
-  const historial = snapHistorial.exists ? snapHistorial.data().muestras || {} : {}
-  const preciosAnteriores = snapPrecios.exists ? snapPrecios.data().precios || {} : {}
-  const preciosNuevos = { ...preciosAnteriores }
-
-  for (const [clave, muestra] of Object.entries(muestras)) {
-    const previas = historial[clave] || []
-    const combinadas = [...previas, muestra].slice(-HISTORIAL_MAX_MUESTRAS)
-    historial[clave] = combinadas
-    const media = combinadas.reduce((a, v) => a + v, 0) / combinadas.length
-    preciosNuevos[clave] = Math.max(PRECIO_MINIMO, Math.round(media * 10) / 10)
+      if (precioAnterior == null) {
+        nuevosAbsolutosPorTipo[tipo][clave] = precioNuevo
+      } else {
+        const delta = Math.round((precioNuevo - precioAnterior) * 10) / 10
+        if (delta !== 0) deltasPorTipo[tipo][clave] = delta
+      }
+    }
   }
 
   const fecha = new Date().toISOString()
   await Promise.all([
-    refHistorial.set({ muestras: historial, fechaActualizacion: fecha }),
-    refPrecios.set({ precios: preciosNuevos, fechaActualizacion: fecha }),
+    refPrecios.set({ ...preciosNuevos, fechaActualizacion: fecha }),
+    refHistorial.set({ ...historialNuevo, fechaActualizacion: fecha }),
   ])
 
-  const deltas = {}
-  const nuevosAbsolutos = {}
-  for (const [clave, precioNuevo] of Object.entries(preciosNuevos)) {
-    if (preciosAnteriores[clave] == null) {
-      nuevosAbsolutos[clave] = precioNuevo
-    } else {
-      const delta = Math.round((precioNuevo - preciosAnteriores[clave]) * 10) / 10
-      if (delta !== 0) deltas[clave] = delta
-    }
-  }
-
-  const coleccion = coleccionGaraje(tipo)
   const tareas = []
-  if (Object.keys(deltas).length > 0) {
-    tareas.push(propagarAGarajes(tipo, coleccion, deltas, false))
-    tareas.push(propagarAMercadosAbiertos(tipo, deltas))
-  }
-  if (Object.keys(nuevosAbsolutos).length > 0) {
-    tareas.push(propagarAGarajes(tipo, coleccion, nuevosAbsolutos, true))
+  for (const tipo of ['piloto', 'coche', 'potenciador']) {
+    const coleccion = coleccionGaraje(tipo)
+    if (Object.keys(deltasPorTipo[tipo]).length > 0) {
+      tareas.push(propagarAGarajes(tipo, coleccion, deltasPorTipo[tipo], false))
+      tareas.push(propagarAMercadosAbiertos(tipo, deltasPorTipo[tipo]))
+    }
+    if (Object.keys(nuevosAbsolutosPorTipo[tipo]).length > 0) {
+      tareas.push(propagarAGarajes(tipo, coleccion, nuevosAbsolutosPorTipo[tipo], true))
+    }
   }
   if (tareas.length > 0) await Promise.all(tareas)
 }
@@ -407,7 +406,6 @@ exports.generarMercado = onSchedule(
       try {
         await ejecutarGeneracionMercadoParaLiga(docLiga.id)
       } catch (error) {
-        console.error(`[Mercado Diario] Liga ${docLiga.id} fallida: ${error.message}`)
         ligasFallidas.push(docLiga.id)
       }
     }

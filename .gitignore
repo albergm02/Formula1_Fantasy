@@ -28,6 +28,7 @@ coverage
 *.tsbuildinfo
 
 .eslintcache
+.firebase/
 
 # Cypress
 /cypress/videos/

@@ -94,9 +94,9 @@ async function ejecutarProcesarJornada() {
     const participacion = documento.data()
     const garaje = participacion.garaje
 
-    const pilotosEquipados = garaje ?
-      (garaje.pilotos || []).filter((p) => p.equipado !== false) :
-      []
+    const pilotosEquipados = garaje
+      ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
+      : []
 
     if (!garaje || pilotosEquipados.length === 0) {
       continue

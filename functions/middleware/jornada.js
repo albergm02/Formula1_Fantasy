@@ -38,7 +38,6 @@ async function exigirJornadaProcesada() {
         'No puedes modificar tu equipo: hay un Gran Premio disputándose en directo.',
       )
     }
-    console.warn('[Jornada] OpenF1 inaccesible, omito bloqueo:', error.message)
     return
   }
 
