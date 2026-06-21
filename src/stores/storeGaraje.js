@@ -1,16 +1,10 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
-import { cargarParticipacionDeUsuario, actualizarParticipacion } from '@/services/servicioLigas'
-import { calcularPrecioClausula } from '@/services/servicioGaraje'
-import {
-  venderCarta,
-  alternarAlineacion,
-  gestionarClausula,
-  ejecutarClausula,
-} from '@/services/servicioGaraje'
+import { cargarParticipacionDeUsuario } from '@/services/servicioLigas'
+import { calcularPrecioClausula, venderCarta, alternarAlineacion, gestionarClausula, ejecutarClausula } from '@/services/servicioGaraje'
 import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
-import { usarStoreActividad } from './storeActividad'
+import { migrarGaraje } from '@/utils/migracionGaraje'
 
 const PRESUPUESTO_INICIAL = 50.0
 
@@ -19,26 +13,6 @@ const crearGarajeVacio = () => ({
   pilotos: [],
   potenciadores: [],
 })
-
-// Convierte garajes del formato anterior (coche singular) al nuevo (coches array)
-// y rellena el flag `equipado` ausente en pilotos legados.
-const migrarGaraje = (garajeOriginal) => {
-  const garaje = { ...garajeOriginal }
-
-  if (garaje.coche !== undefined || !garaje.coches) {
-    garaje.coches = garaje.coche ? [{ ...garaje.coche, equipado: true }] : []
-    delete garaje.coche
-  }
-
-  garaje.pilotos = (garaje.pilotos || []).map((piloto) => ({
-    ...piloto,
-    equipado: piloto.equipado !== undefined ? piloto.equipado : true,
-  }))
-
-  garaje.potenciadores = garaje.potenciadores || []
-
-  return garaje
-}
 
 export const usarStoreGaraje = defineStore('garaje', () => {
   const idLigaActiva = ref(null)
@@ -71,9 +45,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
         ultimaJornada.value = participacion.ultimaJornada || null
 
         if (!participacion.nombre_usuario) {
-          actualizarParticipacion(participacion.id, {
-            nombre_usuario: storePerfil.usuarioActual.nombreVisible,
-          }).catch(() => {})
+          // participacion legada sin nombre; las nuevas siempre lo incluyen
         }
       } else {
         presupuesto.value = PRESUPUESTO_INICIAL
@@ -104,10 +76,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     try {
       const resultado = await venderCarta(idParticipanteActivo.value, elemento.instancia_id)
       await cargarEquipo(idLigaActiva.value)
-      const tipoElemento = elemento.tipo || elemento.tipoCarta
-      usarStoreActividad()
-        .registrarVenta(resultado.nombre, tipoElemento)
-        .catch(() => {})
       return {
         success: true,
         message: `Has obtenido ${resultado.valorReventa.toFixed(2)}M de presupuesto. ¡Hasta pronto, ${resultado.nombre}!`,
@@ -166,10 +134,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
         elemento.instancia_id,
       )
       await cargarEquipo(idLigaActiva.value)
-      const tipoElemento = elemento.tipo || elemento.tipoCarta
-      usarStoreActividad()
-        .registrarFichaje(resultado.nombre, tipoElemento, resultado.precioClausula.toFixed(1))
-        .catch(() => {})
       return {
         success: true,
         message: `Has fichado a ${resultado.nombre} por ${resultado.precioClausula.toFixed(1)}M de cláusula.`,

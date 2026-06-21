@@ -17,7 +17,6 @@ import { db, functions } from './servicioFirebase'
 
 const llamadaRegistrarPuja = httpsCallable(functions, 'registrarPuja')
 const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
-const llamadaEliminarPujas = httpsCallable(functions, 'eliminarPujas')
 
 /**
  * Escucha en tiempo real el mercado abierto de una liga. Cuando el scheduler
@@ -47,10 +46,6 @@ export const registrarPuja = async (idLiga, idCarta, cantidad) => {
 
 export const eliminarPuja = async (idLiga, idCarta) => {
   await llamadaEliminarPuja({ idLiga, idCarta })
-}
-
-export const eliminarPujas = async (idLiga) => {
-  await llamadaEliminarPujas({ idLiga })
 }
 
 export const cargarMisPujas = async (idMercado, emailUsuario) => {

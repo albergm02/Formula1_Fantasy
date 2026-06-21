@@ -184,3 +184,33 @@ exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
   return { ok: true, email, ...resultado }
 })
+
+/**
+ * Crea el documento de usuario en Firestore tras el primer registro.
+ * @param {string} nombreUsuario - Nombre visible elegido por el usuario.
+ */
+exports.crearPerfil = onCall(OPCIONES, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  const uid = request.auth.uid
+  const correo = request.auth.token.email || ''
+  const nombreUsuario = String(request.data?.nombreUsuario || '').trim()
+
+  if (!nombreUsuario) {
+    throw new HttpsError('invalid-argument', 'El nombre de usuario es obligatorio.')
+  }
+
+  const docRef = db.collection('usuarios').doc(uid)
+  const existente = await docRef.get()
+  if (existente.exists) {
+    throw new HttpsError('already-exists', 'El perfil ya existe.')
+  }
+
+  await docRef.set({
+    correoAutenticacion: correo,
+    nombreVisible: nombreUsuario,
+    ligasIds: [],
+    fechaRegistro: FieldValue.serverTimestamp(),
+  })
+
+  return { ok: true }
+})

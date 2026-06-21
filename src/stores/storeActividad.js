@@ -1,15 +1,9 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { usarStorePerfil } from './storePerfil'
 import { usarStoreLigas } from './storeLigas'
-import {
-  cargarActividadLiga,
-  registrarActividad,
-  TIPOS_ACTIVIDAD,
-} from '@/services/servicioActividad'
+import { cargarActividadLiga } from '@/services/servicioActividad'
 
 export const usarStoreActividad = defineStore('actividad', () => {
-  const storePerfil = usarStorePerfil()
   const storeLigas = usarStoreLigas()
 
   const actividad = ref([])
@@ -30,70 +24,9 @@ export const usarStoreActividad = defineStore('actividad', () => {
     }
   }
 
-  async function registrarFichaje(nombreElemento, tipoElemento, precioElemento) {
-    const idLiga = storeLigas.idLigaActiva
-    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
-
-    await registrarActividad(idLiga, {
-      nombreUsuario,
-      tipo: TIPOS_ACTIVIDAD.COMPRA,
-      descripcion: `ha fichado ${tipoElemento} ${nombreElemento} por ${precioElemento}M`,
-    })
-
-    await cargarActividad()
-  }
-
-  async function registrarVenta(nombreElemento, tipoElemento) {
-    const idLiga = storeLigas.idLigaActiva
-    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
-
-    await registrarActividad(idLiga, {
-      nombreUsuario,
-      tipo: TIPOS_ACTIVIDAD.VENTA,
-      descripcion: `ha liberado ${tipoElemento} ${nombreElemento}`,
-    })
-
-    await cargarActividad()
-  }
-
-  async function registrarIncorporacion(idLiga, nombreLiga) {
-    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
-
-    await registrarActividad(idLiga, {
-      nombreUsuario,
-      tipo: TIPOS_ACTIVIDAD.INCORPORACION,
-      descripcion: `se ha unido al campeonato ${nombreLiga}`,
-    })
-  }
-
-  async function registrarAbandono(idLiga, nombreLiga) {
-    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
-
-    await registrarActividad(idLiga, {
-      nombreUsuario,
-      tipo: TIPOS_ACTIVIDAD.ABANDONO,
-      descripcion: `ha abandonado el campeonato ${nombreLiga}`,
-    })
-  }
-
-  async function registrarCreacionLiga(idLiga, nombreLiga) {
-    const nombreUsuario = storePerfil.usuarioActual.nombreVisible
-
-    await registrarActividad(idLiga, {
-      nombreUsuario,
-      tipo: TIPOS_ACTIVIDAD.CREACION,
-      descripcion: `ha creado la liga ${nombreLiga}`,
-    })
-  }
-
   return {
     actividad,
     cargando,
     cargarActividad,
-    registrarFichaje,
-    registrarVenta,
-    registrarIncorporacion,
-    registrarAbandono,
-    registrarCreacionLiga,
   }
 })

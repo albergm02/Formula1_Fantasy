@@ -32,7 +32,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   async function crearPerfil(uid, correoUsuario, nombreUsuario) {
     const storePerfil = usarStorePerfil()
-    await guardarNuevoUsuario(uid, correoUsuario, nombreUsuario)
+    await guardarNuevoUsuario(uid, nombreUsuario)
     storePerfil.establecerDatosUsuario({
       uid,
       correo: correoUsuario,

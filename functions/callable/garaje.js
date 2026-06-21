@@ -63,10 +63,21 @@ exports.venderCarta = onCall(OPCIONES, async (request) => {
   const listaActualizada = [...garaje[coleccion]]
   listaActualizada.splice(indice, 1)
 
-  await referencia.update({
+  const tipoElemento = carta.tipo || carta.tipoCarta
+
+  const batch = db.batch()
+  batch.update(referencia, {
     garaje: { ...garaje, [coleccion]: listaActualizada },
     presupuesto: Number((datos.presupuesto || 0) + valorReventa),
   })
+  batch.create(db.collection('actividad').doc(), {
+    idLiga: datos.id_liga,
+    nombreUsuario: datos.nombre_usuario || email,
+    tipo: 'venta',
+    descripcion: `ha liberado ${tipoElemento} ${carta.nombre}`,
+    fecha: FieldValue.serverTimestamp(),
+  })
+  await batch.commit()
 
   return { ok: true, nombre: carta.nombre, valorReventa }
 })

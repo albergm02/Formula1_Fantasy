@@ -14,9 +14,11 @@ exports.eliminarPuja = mercado.eliminarPuja
 exports.generarMercado = mercado.generarMercado
 
 exports.eliminarLiga = ligas.eliminarLiga
-exports.eliminarPujas = ligas.eliminarPujas
 exports.expulsarParticipante = ligas.expulsarParticipante
 exports.inicializarMercado = ligas.inicializarMercado
+exports.crearLiga = ligas.crearLiga
+exports.unirseALiga = ligas.unirseALiga
+exports.abandonarLiga = ligas.abandonarLiga
 
 exports.venderCarta = garaje.venderCarta
 exports.alternarAlineacion = garaje.alternarAlineacion
@@ -26,6 +28,7 @@ exports.ejecutarClausula = garaje.ejecutarClausula
 exports.autorizarCambioCorreo = perfil.autorizarCambioCorreo
 exports.migrarCorreo = perfil.migrarCorreo
 exports.eliminarMiCuenta = perfil.eliminarMiCuenta
+exports.crearPerfil = perfil.crearPerfil
 
 exports.eliminarLigaAdmin = administracion.eliminarLigaAdmin
 exports.eliminarUsuarioAdmin = administracion.eliminarUsuarioAdmin

@@ -1,43 +1,73 @@
 /**
  * Servicio de ligas: centraliza las operaciones de Firestore relacionadas con
  * ligas y participaciones. Los stores importan desde aquí, nunca desde Firebase.
+ *
+ * Principio Commands/Queries:
+ *  - Queries (lecturas): se ejecutan directamente desde el cliente vía SDK.
+ *  - Commands (escrituras): se delegan a Cloud Functions para garantizar
+ *    atomicidad y validación server-side.
  */
 import {
   collection,
   doc,
   getDocs,
-  addDoc,
-  updateDoc,
   query,
   where,
-  arrayUnion,
   arrayRemove,
   getDoc,
-  deleteDoc,
+  updateDoc,
 } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
+import { migrarGaraje } from '@/utils/migracionGaraje'
 
-const llamadaInicializarMercado = httpsCallable(functions, 'inicializarMercado')
-const llamadaEliminarLigaOrganizador = httpsCallable(functions, 'eliminarLiga')
+const llamadaCrearLiga = httpsCallable(functions, 'crearLiga')
+const llamadaUnirseALiga = httpsCallable(functions, 'unirseALiga')
+const llamadaAbandonarLiga = httpsCallable(functions, 'abandonarLiga')
+const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLiga')
 const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipante')
+const llamadaInicializarMercado = httpsCallable(functions, 'inicializarMercado')
 
-export const inicializarMercado = async (idLiga) => {
-  const respuesta = await llamadaInicializarMercado({ idLiga })
+/** @param {string} nombreLiga */
+export const crearLiga = async (nombreLiga) => {
+  const respuesta = await llamadaCrearLiga({ nombreLiga })
   return respuesta.data
 }
 
+/** @param {string} codigoInvitacion */
+export const unirseALiga = async (codigoInvitacion) => {
+  const respuesta = await llamadaUnirseALiga({ codigoInvitacion })
+  return respuesta.data
+}
+
+/** @param {string} idLiga */
+export const abandonarLiga = async (idLiga) => {
+  const respuesta = await llamadaAbandonarLiga({ idLiga })
+  return respuesta.data
+}
+
+/** @param {string} idLiga */
 export const eliminarLiga = async (idLiga) => {
-  const respuesta = await llamadaEliminarLigaOrganizador({ idLiga })
+  const respuesta = await llamadaEliminarLiga({ idLiga })
   return respuesta.data
 }
 
+/**
+ * @param {string} idLiga
+ * @param {string} emailExpulsado
+ */
 export const expulsarParticipante = async (idLiga, emailExpulsado) => {
   const respuesta = await llamadaExpulsarParticipante({ idLiga, emailExpulsado })
   return respuesta.data
 }
 
-/* ─── Ligas ──────────────────────────────────────────────────────────────── */
+/** @param {string} idLiga */
+export const inicializarMercado = async (idLiga) => {
+  const respuesta = await llamadaInicializarMercado({ idLiga })
+  return respuesta.data
+}
+
+/* ─── Queries: Ligas ─────────────────────────────────────────────────────── */
 
 export const cargarLigas = async (idsLigas) => {
   const instantanea = await getDocs(collection(db, 'ligas'))
@@ -62,34 +92,12 @@ export const buscarLigaPorCodigo = async (codigoInvitacion) => {
   return { id: documento.id, ...documento.data() }
 }
 
-export const crearLiga = async (datosLiga) => {
-  const referencia = await addDoc(collection(db, 'ligas'), datosLiga)
-  return referencia.id
-}
-
-export const actualizarLiga = async (idLiga, datos) => {
-  await updateDoc(doc(db, 'ligas', idLiga), datos)
-}
-
-/* ─── Participaciones ────────────────────────────────────────────────────── */
-
-export const crearParticipacion = async (datosParticipacion) => {
-  const referencia = await addDoc(collection(db, 'participaciones'), datosParticipacion)
-  return referencia.id
-}
+/* ─── Queries: Participaciones ───────────────────────────────────────────── */
 
 export const cargarParticipantes = async (idLiga) => {
   const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga))
   const instantanea = await getDocs(consulta)
   return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
-
-export const actualizarParticipacion = async (idParticipacion, datos) => {
-  await updateDoc(doc(db, 'participaciones', idParticipacion), datos)
-}
-
-export const eliminarParticipacion = async (idParticipacion) => {
-  await deleteDoc(doc(db, 'participaciones', idParticipacion))
 }
 
 /** Cuenta cuántas ligas administra un usuario (límite 2 por usuario). */
@@ -101,16 +109,6 @@ export const contarLigasOrganizadas = async (correoUsuario) => {
   )
   const instantanea = await getDocs(consulta)
   return instantanea.size
-}
-
-/* ─── Usuarios ───────────────────────────────────────────────────────────── */
-
-export const vincularLigaAlUsuario = async (uid, idLiga) => {
-  await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayUnion(idLiga) })
-}
-
-export const desvincularLigaDelUsuario = async (uid, idLiga) => {
-  await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayRemove(idLiga) })
 }
 
 export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
@@ -125,7 +123,17 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
   return { id: documento.id, ...documento.data() }
 }
 
-/* ─── Garaje de participante ─────────────────────────────────────────────── */
+/* ─── Queries: Usuarios ──────────────────────────────────────────────────── */
+
+/**
+ * Desvincula una liga del array `ligasIds` del usuario. Se usa exclusivamente
+ * para limpiar referencias huérfanas detectadas durante la carga de ligas.
+ */
+export const desvincularLigaDelUsuario = async (uid, idLiga) => {
+  await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayRemove(idLiga) })
+}
+
+/* ─── Queries: Garaje de participante ────────────────────────────────────── */
 
 /** Garaje público de un rival (nunca expone el presupuesto). */
 export const cargarGarajeRival = async (idParticipacion) => {
@@ -133,29 +141,14 @@ export const cargarGarajeRival = async (idParticipacion) => {
   if (!documento.exists()) return null
 
   const datos = documento.data()
-  const garajeOriginal = datos.garaje || {
-    coches: [],
-    pilotos: [],
-    potenciadores: [],
-  }
-
-  const garajeMigrado = { ...garajeOriginal }
-  if (garajeMigrado.coche !== undefined || !garajeMigrado.coches) {
-    garajeMigrado.coches = garajeMigrado.coche ? [{ ...garajeMigrado.coche, equipado: true }] : []
-    delete garajeMigrado.coche
-  }
-  garajeMigrado.pilotos = (garajeMigrado.pilotos || []).map((p) => ({
-    ...p,
-    equipado: p.equipado !== undefined ? p.equipado : true,
-  }))
-  garajeMigrado.potenciadores = garajeMigrado.potenciadores || []
+  const garajeOriginal = datos.garaje || { coches: [], pilotos: [], potenciadores: [] }
 
   return {
     id: documento.id,
     nombreUsuario: datos.nombre_usuario || 'Desconocido',
     puntos: datos.puntos || 0,
     ultimaJornada: datos.ultimaJornada || null,
-    garaje: garajeMigrado,
+    garaje: migrarGaraje(garajeOriginal),
   }
 }
 
@@ -187,3 +180,4 @@ export const cargarClasificacion = async (idLiga) => {
       segundo.puntos - primero.puntos || segundo.presupuesto - primero.presupuesto,
   )
 }
+
