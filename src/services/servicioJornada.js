@@ -1,6 +1,5 @@
 import { collection, doc, getDoc, onSnapshot, orderBy, query, limit } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
-import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
 export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) {
   const consulta = query(
@@ -18,10 +17,11 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
   })
 }
 
-/** Lee el catálogo de pilotos una sola vez y extrae tanto el listado deduplicado
- * como los perfiles de puntuación, evitando dos lecturas al mismo documento.
+/**
+ * Lee el catálogo de pilotos desde Firestore y devuelve el listado
+ * deduplicado por número de piloto.
  *
- * @returns {Promise<{pilotos: Array, perfiles: Object}>}
+ * @returns {Promise<Array>}
  */
 export async function cargarCatalogoYPerfiles() {
   const documento = await getDoc(doc(db, 'catalogo', 'items'))
@@ -45,7 +45,7 @@ export async function cargarCatalogoYPerfiles() {
     }
   }
 
-  return { pilotos: Array.from(pilotosPorNumero.values()), perfiles: perfilesPuntuacion }
+  return Array.from(pilotosPorNumero.values())
 }
 
 export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {

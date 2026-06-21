@@ -53,7 +53,10 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: `Liga creada. Código: ${resultado.codigoInvitacion}` }
     } catch (error) {
-      return { success: false, message: error.message || 'Error al crear la liga. Inténtalo de nuevo.' }
+      return {
+        success: false,
+        message: error.message || 'Error al crear la liga. Inténtalo de nuevo.',
+      }
     }
   }
 
@@ -70,7 +73,10 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: 'Te has unido a la liga.' }
     } catch (error) {
-      return { success: false, message: error.message || 'Error al unirse a la liga. Inténtalo de nuevo.' }
+      return {
+        success: false,
+        message: error.message || 'Error al unirse a la liga. Inténtalo de nuevo.',
+      }
     }
   }
 

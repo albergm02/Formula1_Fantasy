@@ -23,7 +23,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     storePerfil.establecerDatosUsuario({
       uid,
       correo: correoUsuario,
-      nombre: datosPerfil.nombre || 'Piloto',
+      nombre: datosPerfil.nombreVisible || datosPerfil.nombre || 'Piloto',
       idsLigas: datosPerfil.ligasIds || [],
       esAdmin: datosPerfil.esAdministrador === true,
     })
@@ -32,7 +32,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   async function crearPerfil(uid, correoUsuario, nombreUsuario) {
     const storePerfil = usarStorePerfil()
-    await guardarNuevoUsuario(uid, nombreUsuario)
+    await guardarNuevoUsuario(uid, correoUsuario, nombreUsuario)
     storePerfil.establecerDatosUsuario({
       uid,
       correo: correoUsuario,

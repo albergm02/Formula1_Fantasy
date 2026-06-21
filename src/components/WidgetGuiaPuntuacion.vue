@@ -1,17 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 
-import { usarStoreJornada } from '@/stores/storeJornada'
-
-const VARIANTES = [
-    { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
-    { id: 'carrera', etiqueta: 'Carrera', icono: 'pi-flag-fill', color: '#f97316' },
-    { id: 'todo_terreno', etiqueta: 'Todo Terreno', icono: 'pi-cloud', color: '#a78bfa' },
-    { id: 'remontador', etiqueta: 'Remontador', icono: 'pi-arrow-up', color: '#ef4444' },
-    { id: 'estratega', etiqueta: 'Estratega', icono: 'pi-chart-bar', color: '#10b981' },
-    { id: 'base', etiqueta: 'Base', icono: 'pi-user', color: '#a1a1aa' },
-]
+import { VARIANTES } from '@/utils/variantesPiloto'
+import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
 const EJEMPLOS_VARIANTE = {
     qualy: {
@@ -40,9 +31,6 @@ const EJEMPLOS_VARIANTE = {
     },
 }
 
-const storeJornada = usarStoreJornada()
-const { perfilesPuntuacion } = storeToRefs(storeJornada)
-
 const guiaAbierta = ref(false)
 const varianteExpandida = ref(null)
 
@@ -53,10 +41,6 @@ function alternarGuia() {
 function alternarVariante(id) {
     varianteExpandida.value = varianteExpandida.value === id ? null : id
 }
-
-onMounted(async () => {
-    await storeJornada.cargarCatalogo()
-})
 </script>
 
 <template>

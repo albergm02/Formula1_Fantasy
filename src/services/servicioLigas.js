@@ -16,6 +16,7 @@ import {
   arrayRemove,
   getDoc,
   updateDoc,
+  documentId,
 } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
@@ -26,7 +27,6 @@ const llamadaUnirseALiga = httpsCallable(functions, 'unirseALiga')
 const llamadaAbandonarLiga = httpsCallable(functions, 'abandonarLiga')
 const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLiga')
 const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipante')
-const llamadaInicializarMercado = httpsCallable(functions, 'inicializarMercado')
 
 /** @param {string} nombreLiga */
 export const crearLiga = async (nombreLiga) => {
@@ -63,17 +63,16 @@ export const expulsarParticipante = async (idLiga, emailExpulsado) => {
 
 /** @param {string} idLiga */
 export const inicializarMercado = async (idLiga) => {
-  const respuesta = await llamadaInicializarMercado({ idLiga })
+  const respuesta = await httpsCallable(functions, 'inicializarMercado')({ idLiga })
   return respuesta.data
 }
 
 /* ─── Queries: Ligas ─────────────────────────────────────────────────────── */
 
 export const cargarLigas = async (idsLigas) => {
-  const instantanea = await getDocs(collection(db, 'ligas'))
-  return instantanea.docs
-    .map((documento) => ({ id: documento.id, ...documento.data() }))
-    .filter((liga) => idsLigas.includes(liga.id))
+  const consulta = query(collection(db, 'ligas'), where(documentId(), 'in', idsLigas))
+  const instantanea = await getDocs(consulta)
+  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
 }
 
 export const cargarLiga = async (idLiga) => {
@@ -97,7 +96,24 @@ export const buscarLigaPorCodigo = async (codigoInvitacion) => {
 export const cargarParticipantes = async (idLiga) => {
   const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga))
   const instantanea = await getDocs(consulta)
-  return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
+  const participaciones = instantanea.docs.map((documento) => ({
+    id: documento.id,
+    ...documento.data(),
+  }))
+
+  const docsUsuario = await Promise.all(
+    participaciones.map((p) =>
+      p.uid_usuario ? getDoc(doc(db, 'usuarios', p.uid_usuario)) : Promise.resolve(null),
+    ),
+  )
+
+  return participaciones.map((participacion, indice) => {
+    const datosUsuario = docsUsuario[indice]?.exists() ? docsUsuario[indice].data() : {}
+    return {
+      ...participacion,
+      nombre_usuario: datosUsuario.nombreVisible || participacion.nombre_usuario,
+    }
+  })
 }
 
 /** Cuenta cuántas ligas administra un usuario (límite 2 por usuario). */
@@ -143,9 +159,12 @@ export const cargarGarajeRival = async (idParticipacion) => {
   const datos = documento.data()
   const garajeOriginal = datos.garaje || { coches: [], pilotos: [], potenciadores: [] }
 
+  const docUsuario = await getDoc(doc(db, 'usuarios', datos.uid_usuario))
+  const nombreActual = docUsuario.exists() ? docUsuario.data().nombreVisible : datos.nombre_usuario
+
   return {
     id: documento.id,
-    nombreUsuario: datos.nombre_usuario || 'Desconocido',
+    nombreUsuario: nombreActual || 'Desconocido',
     puntos: datos.puntos || 0,
     ultimaJornada: datos.ultimaJornada || null,
     garaje: migrarGaraje(garajeOriginal),
@@ -156,7 +175,12 @@ export const cargarGarajeRival = async (idParticipacion) => {
 export const cargarClasificacion = async (idLiga) => {
   const participaciones = await cargarParticipantes(idLiga)
 
-  const filasRanking = participaciones.map((participacion) => {
+  const docsUsuario = await Promise.all(
+    participaciones.map((p) => getDoc(doc(db, 'usuarios', p.uid_usuario))),
+  )
+
+  const filasRanking = participaciones.map((participacion, indice) => {
+    const datosUsuario = docsUsuario[indice].exists() ? docsUsuario[indice].data() : {}
     const garaje = participacion.garaje || {}
     const todasLasCartas = [
       ...(garaje.coches || []),
@@ -168,7 +192,7 @@ export const cargarClasificacion = async (idLiga) => {
     return {
       id: participacion.id,
       correo: participacion.email_usuario,
-      nombre: participacion.nombre_usuario || 'Desconocido',
+      nombre: datosUsuario.nombreVisible || participacion.nombre_usuario || 'Desconocido',
       puntos: participacion.puntos || 0,
       presupuesto: participacion.presupuesto || 0,
       valorGaraje: Math.round(valorGaraje * 10) / 10,
@@ -180,4 +204,3 @@ export const cargarClasificacion = async (idLiga) => {
       segundo.puntos - primero.puntos || segundo.presupuesto - primero.presupuesto,
   )
 }
-

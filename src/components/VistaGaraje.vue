@@ -165,16 +165,10 @@ const confirmarEjecucionClausula = (elemento) => {
                         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Última
                             jornada</span>
                         <span class="text-sm font-bold text-white">{{ participacion.ultimaJornada.nombreGranPremio
-                            }}</span>
+                        }}</span>
                     </div>
                     <span class="text-2xl font-black text-[#D4A843]">+{{ participacion.ultimaJornada.puntosJornada
-                        }}</span>
-                </div>
-                <div v-if="participacion.ultimaJornada.sinergias?.length" class="flex flex-wrap gap-1.5">
-                    <span v-for="(sinergia, idx) in participacion.ultimaJornada.sinergias" :key="idx"
-                        class="px-2 py-0.5 bg-emerald-900/20 border border-emerald-500/40 text-[9px] font-black uppercase tracking-wider text-emerald-400">
-                        {{ sinergia.nombre }} +{{ Math.round(sinergia.bonus * 100) }}%
-                    </span>
+                    }}</span>
                 </div>
             </section>
         </template>
@@ -210,7 +204,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="text-zinc-400">
                                 Cláusula:
                                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(coche).toFixed(1)
-                                    }}M</span>
+                                }}M</span>
                             </span>
                             <span v-if="estaEnPeriodoDeGracia(coche)"
                                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">
@@ -274,7 +268,7 @@ const confirmarEjecucionClausula = (elemento) => {
                             <span class="text-zinc-400">
                                 Cláusula de rescisión:
                                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(piloto).toFixed(1)
-                                    }}M</span>
+                                }}M</span>
                             </span>
                             <span v-if="estaEnPeriodoDeGracia(piloto)"
                                 class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400">

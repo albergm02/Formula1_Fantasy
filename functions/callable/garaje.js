@@ -5,7 +5,7 @@ const { db } = require('../middleware/firebase')
 const { OPCIONES, HORAS_PERIODO_GRACIA } = require('../middleware/constantes')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
 const { exigirJornadaProcesada } = require('../middleware/jornada')
-const { calcularIdMercado } = require('./mercado')
+const { cargarMercadoAbiertoDeLiga } = require('./mercado')
 
 const PORCENTAJE_REVENTA = 0.9
 const MAX_COCHES_ALINEADOS = 1
@@ -238,10 +238,11 @@ function añadirCartaAGaraje(garaje, carta) {
 // ejecutar un clausulazo de 30 M, dejando el presupuesto en negativo si
 // después se resolviera alguna puja a su favor.
 async function calcularComprometidoEnPujas(idLiga, email) {
-  const idMercado = calcularIdMercado(idLiga, new Date())
+  const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
+  if (!mercadoDoc) return 0
   const pujasSnap = await db
     .collection('mercados')
-    .doc(idMercado)
+    .doc(mercadoDoc.id)
     .collection('pujas')
     .where('emailUsuario', '==', email)
     .get()

@@ -9,20 +9,14 @@ import Cabecera from '@/components/Cabecera.vue'
 import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
 import { usarStoreJornada } from '@/stores/storeJornada'
-
+import { VARIANTES } from '@/utils/variantesPiloto'
+import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 import { calcularFactorJornada, calcularPuntosJornada, calcularPuntuacionBase } from '@/services/servicioJornada'
 
-const VARIANTES = [
-    { id: 'qualy', etiqueta: 'Qualy', icono: 'pi-stopwatch', color: '#38bdf8' },
-    { id: 'carrera', etiqueta: 'Carrera', icono: 'pi-flag-fill', color: '#f97316' },
-    { id: 'todo_terreno', etiqueta: 'Todo Terreno', icono: 'pi-cloud', color: '#a78bfa' },
-    { id: 'remontador', etiqueta: 'Remontador', icono: 'pi-arrow-up', color: '#ef4444' },
-    { id: 'estratega', etiqueta: 'Estratega', icono: 'pi-chart-bar', color: '#10b981' },
-    { id: 'base', etiqueta: 'Base', icono: 'pi-user', color: '#a1a1aa' },
-]
+const VARIANTES_SIN_BASE = VARIANTES.filter((v) => v.id !== 'base')
 
 const storeJornada = usarStoreJornada()
-const { historial, catalogoPilotos, perfilesPuntuacion, ultimoGranPremioPendiente } =
+const { historial, catalogoPilotos, ultimoGranPremioPendiente } =
     storeToRefs(storeJornada)
 
 const idJornadaSeleccionada = ref(null)
@@ -143,12 +137,23 @@ const CELDAS_OPENF1 = [
 function obtenerSimulacionVariantes(piloto) {
     const condiciones = jornada.value.condiciones || {}
     return VARIANTES.map((variante) => {
-        const pesos = perfilesPuntuacion.value[variante.id]?.pesos || {}
+        const pesos = perfilesPuntuacion[variante.id]?.pesos || {}
         const puntuacionBase = calcularPuntuacionBase(piloto.atributos, pesos)
         const factor = calcularFactorJornada(piloto.actuacion, condiciones, variante.id)
         const puntos = calcularPuntosJornada(puntuacionBase, factor)
         return { ...variante, puntuacionBase, factor, puntos }
     })
+}
+
+function mejorVariantePiloto(piloto) {
+    const condiciones = jornada.value?.condiciones || {}
+    return VARIANTES_SIN_BASE.reduce((mejor, variante) => {
+        const pesos = perfilesPuntuacion[variante.id]?.pesos || {}
+        const puntuacionBase = calcularPuntuacionBase(piloto.atributos, pesos)
+        const factor = calcularFactorJornada(piloto.actuacion, condiciones, variante.id)
+        const puntos = calcularPuntosJornada(puntuacionBase, factor)
+        return puntos > mejor.puntos ? { ...variante, puntos } : mejor
+    }, { puntos: -1 })
 }
 
 function formatearPorcentaje(valor) {
@@ -265,7 +270,7 @@ function formatearPorcentaje(valor) {
                                 <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta"
                                     class="flex flex-col p-2 bg-[#121218]">
                                     <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta
-                                        }}</span>
+                                    }}</span>
                                     <span class="text-base font-black"
                                         :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
                                         :title="celda.titulo || undefined">
@@ -274,6 +279,27 @@ function formatearPorcentaje(valor) {
                                     </span>
                                 </div>
                             </div>
+                        </section>
+
+                        <section v-if="hayJornada"
+                            class="flex items-center justify-between p-3 bg-[#121218] border border-zinc-700">
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500">
+                                    Clase óptima en este GP
+                                </span>
+                                <div class="flex items-center gap-1.5">
+                                    <i class="pi text-sm" :class="mejorVariantePiloto(piloto).icono"
+                                        :style="{ color: mejorVariantePiloto(piloto).color }"></i>
+                                    <span class="text-sm font-black"
+                                        :style="{ color: mejorVariantePiloto(piloto).color }">
+                                        {{ mejorVariantePiloto(piloto).etiqueta }}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="text-2xl font-black tabular-nums"
+                                :style="{ color: mejorVariantePiloto(piloto).color }">
+                                +{{ mejorVariantePiloto(piloto).puntos }} pts
+                            </span>
                         </section>
 
                         <section class="flex flex-col gap-2">

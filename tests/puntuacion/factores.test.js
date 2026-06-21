@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { calcularFactorJornada } from '@/utils/puntuacion'
+import { createRequire } from 'node:module'
+const cargar = createRequire(import.meta.url)
+const { calcularFactorJornada } = cargar('../../functions/logica/puntuacion.js')
 
 const sinCondiciones = {
   llovio: false,

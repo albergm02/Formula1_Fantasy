@@ -32,7 +32,7 @@ export async function cargarListaUsuarios() {
     .map((d) => ({
       uid: d.id,
       email: d.data().correoAutenticacion || '',
-      nombre: d.data().nombre || d.id,
+      nombre: d.data().nombreVisible || d.data().nombre || d.id,
       esAdministrador: d.data().esAdministrador === true,
       fechaRegistro: d.data().fechaRegistro?.toDate() ?? null,
     }))

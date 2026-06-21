@@ -47,17 +47,17 @@ const pilotosBase = [
 
 // prettier-ignore
 const cochesBase = [
-  { id: 'alpine',       nombre: 'BWT Alpine F1', puntos: 20, imagen: '/Coches/alpine.webp',      tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Alpine.' } },
-  { id: 'aston_martin', nombre: 'Aston Martin Aramco', puntos: 10, imagen: '/Coches/astonmartin.webp', tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Aston Martin.' } },
-  { id: 'audi',         nombre: 'Audi Revolut F1', puntos: 15, imagen: '/Coches/audi.webp',        tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Audi.' } },
-  { id: 'cadillac',     nombre: 'Cadillac F1', puntos: 10, imagen: '/Coches/cadillac.webp',    tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 10, descripcion: 'Bono si alineas pilotos Cadillac.' } },
-  { id: 'ferrari',      nombre: 'Ferrari', puntos: 35, imagen: '/Coches/ferrari.webp',     tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 35, descripcion: 'Bono si alineas pilotos Ferrari.' } },
-  { id: 'haas',         nombre: 'TGR Haas F1', puntos: 25, imagen: '/Coches/haas.webp',        tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 25, descripcion: 'Bono si alineas pilotos Haas.' } },
-  { id: 'mclaren',      nombre: 'McLaren Mastercard', puntos: 30, imagen: '/Coches/mclaren.webp',     tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 30, descripcion: 'Bono si alineas pilotos McLaren.' } },
-  { id: 'mercedes',     nombre: 'Mercedes-AMG', puntos: 40, imagen: '/Coches/mercedes.webp',    tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 40, descripcion: 'Bono si alineas pilotos Mercedes.' } },
-  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB', puntos: 20, imagen: '/Coches/racingbulls.webp', tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Racing Bulls.' } },
-  { id: 'red_bull',     nombre: 'Red Bull Racing', puntos: 20, imagen: '/Coches/redbull.webp',     tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 20, descripcion: 'Bono si alineas pilotos Red Bull.' } },
-  { id: 'williams',     nombre: 'Atlassian Williams', puntos: 15, imagen: '/Coches/williams.webp',    tipoCarta: 'coche', habilidad: { nombre: 'Sinergia de Equipo', puntos: 15, descripcion: 'Bono si alineas pilotos Williams.' } },
+  { id: 'alpine',       nombre: 'BWT Alpine F1',           puntos: 20, imagen: '/Coches/alpine.webp',       tipoCarta: 'coche' },
+  { id: 'aston_martin', nombre: 'Aston Martin Aramco',     puntos: 10, imagen: '/Coches/astonmartin.webp',  tipoCarta: 'coche' },
+  { id: 'audi',         nombre: 'Audi Revolut F1',         puntos: 15, imagen: '/Coches/audi.webp',         tipoCarta: 'coche' },
+  { id: 'cadillac',     nombre: 'Cadillac F1',             puntos: 10, imagen: '/Coches/cadillac.webp',     tipoCarta: 'coche' },
+  { id: 'ferrari',      nombre: 'Ferrari',                 puntos: 35, imagen: '/Coches/ferrari.webp',      tipoCarta: 'coche' },
+  { id: 'haas',         nombre: 'TGR Haas F1',             puntos: 25, imagen: '/Coches/haas.webp',         tipoCarta: 'coche' },
+  { id: 'mclaren',      nombre: 'McLaren Mastercard',      puntos: 30, imagen: '/Coches/mclaren.webp',      tipoCarta: 'coche' },
+  { id: 'mercedes',     nombre: 'Mercedes-AMG',            puntos: 40, imagen: '/Coches/mercedes.webp',     tipoCarta: 'coche' },
+  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB',      puntos: 20, imagen: '/Coches/racingbulls.webp',  tipoCarta: 'coche' },
+  { id: 'red_bull',     nombre: 'Red Bull Racing',         puntos: 20, imagen: '/Coches/redbull.webp',      tipoCarta: 'coche' },
+  { id: 'williams',     nombre: 'Atlassian Williams',      puntos: 15, imagen: '/Coches/williams.webp',     tipoCarta: 'coche' },
 ]
 
 /* eslint-disable */
@@ -93,81 +93,22 @@ const potenciadoresBase = [
 
 // prettier-ignore
 const perfilesPuntuacion = {
-  qualy: {
-    pesos: { ritmo: 0.5, consistencia: 0, adaptabilidad: 0, agresividad: 0.5, gestion: 0 },
-    reglasUsuario: [
-      'Factor según posición en clasificación.',
-      'P1 a P3: factor 1.50',
-      'P4 a P6: factor 1.25',
-      'P7 a P10: factor 1.10',
-      'P11 a P15: factor 0.85',
-      'P16 en adelante: factor 0.65',
-      'Factor limitado al rango 0.50 a 1.50.',
-    ],
-  },
-  carrera: {
-    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.4 },
-    reglasUsuario: [
-      'Factor según posición final en carrera.',
-      'P1: 1.50 / P2: 1.40 / P3: 1.30',
-      'P4 a P5: 1.20 / P6 a P10: 1.00',
-      'P11 a P15: 0.80 / P16 a P20: 0.60',
-      'P20 en adelante: factor 0.50',
-      'Factor limitado al rango 0.50 a 1.50.',
-    ],
-  },
-  todo_terreno: {
-    pesos: { ritmo: 0.1, consistencia: 0.1, adaptabilidad: 0.6, agresividad: 0.1, gestion: 0.1 },
-    reglasUsuario: [
-      'Factor base: lluvia activa 1.00, tiempo seco 0.50.',
-      'Cada Safety Car suma 0.05 al factor.',
-      'Cada Safety Car Virtual suma 0.05 al factor.',
-      'Cada abandono en carrera suma 0.10 al factor.',
-      'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
-      'Factor limitado al rango 0.50 a 1.50.',
-    ],
-  },
-  base: {
-    pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 },
-    reglasUsuario: [
-      'Carta neutra, sin especialización.',
-      'Factor de jornada fijo: 1.00 siempre.',
-      'Puntúa su base íntegra, sin bonus ni penalización por la carrera.',
-    ],
-  },
-  remontador: {
-    pesos: { ritmo: 0.2, consistencia: 0, adaptabilidad: 0.4, agresividad: 0.4, gestion: 0 },
-    reglasUsuario: [
-      'Factor según diferencial de adelantamientos (OpenF1).',
-      'Diferencial = adelantamientos realizados menos recibidos.',
-      'Factor = 1.0 mas diferencial por 0.1.',
-      'Ejemplo: +5 da factor 1.50, neutro da 1.00, -5 da 0.50.',
-      'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
-      'Factor limitado al rango 0.50 a 1.50.',
-    ],
-  },
-  estratega: {
-    pesos: { ritmo: 0.1, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.5 },
-    reglasUsuario: [
-      'Factor compuesto por posición, paradas y stint más largo.',
-      'Base: 0.70.',
-      'Stint mayor al 60%: +0.50 / mayor al 45%: +0.30 / mayor al 35%: +0.20 / mayor al 25%: +0.10.',
-      '1 parada en boxes: +0.15 / 2 paradas: +0.05 / 3 o mas: sin bono.',
-      'P1 a P3: +0.15 / P4 a P10: +0.05 / P16 en adelante: -0.10.',
-      'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
-      'Factor limitado al rango 0.50 a 1.50.',
-    ],
-  },
+  qualy:        { pesos: { ritmo: 0.5, consistencia: 0,   adaptabilidad: 0,   agresividad: 0.5, gestion: 0   } },
+  carrera:      { pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0,   agresividad: 0,   gestion: 0.4 } },
+  todo_terreno: { pesos: { ritmo: 0.1, consistencia: 0.1, adaptabilidad: 0.6, agresividad: 0.1, gestion: 0.1 } },
+  base:         { pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 } },
+  remontador:   { pesos: { ritmo: 0.2, consistencia: 0,   adaptabilidad: 0.4, agresividad: 0.4, gestion: 0   } },
+  estratega:    { pesos: { ritmo: 0.1, consistencia: 0.4, adaptabilidad: 0,   agresividad: 0,   gestion: 0.5 } },
 }
 
 // prettier-ignore
 const variantesPiloto = [
-  { variante: 'qualy',        perfil: 'qualy',        nombreHabilidad: 'Especialista en Qualy',     color: '#38bdf8', icono: 'pi-stopwatch'  },
-  { variante: 'carrera',      perfil: 'carrera',      nombreHabilidad: 'Especialista en Carrera',   color: '#f97316', icono: 'pi-flag-fill'  },
-  { variante: 'todo_terreno', perfil: 'todo_terreno', nombreHabilidad: 'Especialista Todo Terreno', color: '#a78bfa', icono: 'pi-cloud'      },
-  { variante: 'base',         perfil: 'base',         nombreHabilidad: 'Piloto Base',               color: '#a1a1aa', icono: 'pi-user'       },
-  { variante: 'remontador',   perfil: 'remontador',   nombreHabilidad: 'Remontador',                color: '#ef4444', icono: 'pi-arrow-up'   },
-  { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega',                 color: '#10b981', icono: 'pi-chart-bar'  },
+  { variante: 'qualy',        perfil: 'qualy',        nombreHabilidad: 'Especialista en Qualy'     },
+  { variante: 'carrera',      perfil: 'carrera',      nombreHabilidad: 'Especialista en Carrera'   },
+  { variante: 'todo_terreno', perfil: 'todo_terreno', nombreHabilidad: 'Especialista Todo Terreno' },
+  { variante: 'base',         perfil: 'base',         nombreHabilidad: 'Piloto Base'               },
+  { variante: 'remontador',   perfil: 'remontador',   nombreHabilidad: 'Remontador'                },
+  { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega'                 },
 ]
 
 function calcularPuntuacionBase(atributos, pesos) {
@@ -219,10 +160,9 @@ function crearCartaPiloto(pilotoBase, variante) {
     imagen: pilotoBase.imagen,
     tipoCarta: 'piloto',
     variante: variante.variante,
-    colorVariante: variante.color,
-    iconoVariante: variante.icono,
     nombreVariante: variante.nombreHabilidad,
     perfilPuntuacion: variante.perfil,
+    pesos: perfil.pesos,
     atributos: pilotoBase.atributos,
     puntuacionBase,
   }
@@ -243,9 +183,8 @@ function construirCatalogoCompleto() {
     }),
   )
 
-  const coches = cochesBase.map(({ puntos, habilidad, ...resto }) => ({
+  const coches = cochesBase.map(({ puntos, ...resto }) => ({
     ...resto,
-    habilidad: { nombre: habilidad.nombre, descripcion: habilidad.descripcion },
     puntuacionBase: puntos || 0,
     precio: calcularPrecioInicialCoche({ puntos }),
   }))
@@ -265,4 +204,5 @@ function construirCatalogoCompleto() {
 module.exports = {
   construirCatalogoCompleto,
   pilotosBase,
+  perfilesPuntuacion,
 }

@@ -2,7 +2,13 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario } from '@/services/servicioLigas'
-import { calcularPrecioClausula, venderCarta, alternarAlineacion, gestionarClausula, ejecutarClausula } from '@/services/servicioGaraje'
+import {
+  calcularPrecioClausula,
+  venderCarta,
+  alternarAlineacion,
+  gestionarClausula,
+  ejecutarClausula,
+} from '@/services/servicioGaraje'
 import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
 import { migrarGaraje } from '@/utils/migracionGaraje'
 
@@ -43,10 +49,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
         puntos.value = participacion.puntos
         garaje.value = migrarGaraje(participacion.garaje || crearGarajeVacio())
         ultimaJornada.value = participacion.ultimaJornada || null
-
-        if (!participacion.nombre_usuario) {
-          // participacion legada sin nombre; las nuevas siempre lo incluyen
-        }
       } else {
         presupuesto.value = PRESUPUESTO_INICIAL
         puntos.value = 0

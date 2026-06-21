@@ -1,10 +1,4 @@
-import {
-  collection,
-  query,
-  where,
-  limit,
-  getDocs,
-} from 'firebase/firestore'
+import { collection, query, where, limit, getDocs } from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
 export const TIPOS_ACTIVIDAD = {

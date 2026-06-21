@@ -9,19 +9,18 @@
   signInWithPopup,
 } from 'firebase/auth'
 
-import { httpsCallable } from 'firebase/functions'
-import { auth, functions } from './servicioFirebase'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { auth, db } from './servicioFirebase'
 
 const googleProvider = new GoogleAuthProvider()
-const llamadaCrearPerfil = httpsCallable(functions, 'crearPerfil')
 
-/**
- * Crea el documento de usuario en Firestore vía Cloud Function.
- * @param {string} uid
- * @param {string} nombreUsuario
- */
-export const guardarNuevoUsuario = async (uid, nombreUsuario) => {
-  await llamadaCrearPerfil({ nombreUsuario })
+export const guardarNuevoUsuario = async (uid, correoUsuario, nombreUsuario) => {
+  await setDoc(doc(db, 'usuarios', uid), {
+    correoAutenticacion: correoUsuario,
+    nombreVisible: nombreUsuario,
+    ligasIds: [],
+    fechaRegistro: serverTimestamp(),
+  })
 }
 
 export const registrarse = (email, password) =>

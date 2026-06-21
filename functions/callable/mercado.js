@@ -31,7 +31,6 @@ function construirCartaGanada(cartaCompleta, idCarta, pujaGanadora, cantidad, ti
   }
   return {
     ...base,
-    tipo: tipoCarta,
     precioCompra: cantidad,
     instancia_id: Date.now() + Math.random(),
     ...propiedadesClausula,
@@ -555,5 +554,6 @@ async function agregarBorradoPujasUsuario(batch, idLiga, email) {
 
 // Exportados para reutilización en callable/ligas.js y callable/garaje.js.
 module.exports.calcularIdMercado = calcularIdMercado
+module.exports.cargarMercadoAbiertoDeLiga = cargarMercadoAbiertoDeLiga
 module.exports.agregarBorradoPujasUsuario = agregarBorradoPujasUsuario
 module.exports.ejecutarGeneracionMercadoParaLiga = ejecutarGeneracionMercadoParaLiga

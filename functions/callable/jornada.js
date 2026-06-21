@@ -8,7 +8,6 @@ const {
   obtenerGranPremiosFinalizados,
 } = require('../infraestructura/openF1')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../logica/puntuacion')
-const { calcularSinergias, aplicarSinergia } = require('../logica/sinergia')
 
 // Conversión 10:1 (108 puntos → 10.8 M) para mantener los premios en un
 // rango manejable comparado con los precios del catálogo.
@@ -120,8 +119,7 @@ async function ejecutarProcesarJornada() {
       }
     }
 
-    const { multiplicadorTotal, sinergias } = calcularSinergias(garaje)
-    const puntosJornada = aplicarSinergia(resultadoGaraje.puntosTotal, multiplicadorTotal)
+    const puntosJornada = resultadoGaraje.puntosTotal
 
     const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
     const premioJornada = calcularPremioJornada(puntosJornada)
@@ -136,8 +134,6 @@ async function ejecutarProcesarJornada() {
       nombreGranPremio: granPremio.meeting_name,
       puntosJornada,
       premioJornada,
-      multiplicadorSinergia: multiplicadorTotal,
-      sinergias,
       condiciones,
       desglose: resultadoGaraje.desglose,
     }

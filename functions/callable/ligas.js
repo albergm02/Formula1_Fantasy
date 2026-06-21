@@ -205,7 +205,10 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
     .where('rol', '==', 'organizador')
     .get()
   if (ligasOrganizadasSnap.size >= 2) {
-    throw new HttpsError('failed-precondition', 'Has alcanzado el límite máximo de 2 ligas creadas.')
+    throw new HttpsError(
+      'failed-precondition',
+      'Has alcanzado el límite máximo de 2 ligas creadas.',
+    )
   }
 
   const usuarioSnap = await db.collection('usuarios').doc(uid).get()
@@ -216,7 +219,7 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
   }
 
   const codigoInvitacion = Math.random().toString(36).substring(2, 10).toUpperCase()
-  const nombreVisible = datosUsuario.nombreVisible || email
+  const nombreVisible = datosUsuario.nombreVisible || datosUsuario.nombre || email
 
   const batch = db.batch()
 
@@ -295,10 +298,13 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
 
   const expulsados = datosLiga.expulsados || []
   if (expulsados.includes(email)) {
-    throw new HttpsError('permission-denied', 'Has sido expulsado de esta liga y no puedes volver a unirte.')
+    throw new HttpsError(
+      'permission-denied',
+      'Has sido expulsado de esta liga y no puedes volver a unirte.',
+    )
   }
 
-  const nombreVisible = datosUsuario.nombreVisible || email
+  const nombreVisible = datosUsuario.nombreVisible || datosUsuario.nombre || email
 
   const batch = db.batch()
 

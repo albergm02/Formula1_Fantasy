@@ -15,7 +15,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
   const milisegundosRestantes = ref(0)
   const misPujas = ref({})
   const resumenPujas = ref({})
-  const idLigaInicializada = ref(null)
 
   let intervaloId = null
   let cancelarListenerMercado = null
@@ -80,8 +79,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
   }
 
   async function inicializarMercado(idLiga) {
-    if (idLigaInicializada.value === idLiga) return
-
     cargandoMercado.value = true
 
     if (cancelarListenerMercado) cancelarListenerMercado()
@@ -102,19 +99,22 @@ export const usarStoreMercado = defineStore('mercado', () => {
         iniciarCuentaAtras()
         const storePerfil = usarStorePerfil()
         const email = storePerfil.usuarioActual.correoAutenticacion
-        const [pujasUsuario, resumen] = await Promise.all([
-          email ? cargarMisPujas(mercado.id, email) : Promise.resolve({}),
-          cargarResumenPujas(mercado.id),
-        ])
-        if (tokenLocal !== tokenSuscripcion) return
-        misPujas.value = pujasUsuario
-        resumenPujas.value = resumen
+        try {
+          const [pujasUsuario, resumen] = await Promise.all([
+            email ? cargarMisPujas(mercado.id, email) : Promise.resolve({}),
+            cargarResumenPujas(mercado.id),
+          ])
+          if (tokenLocal !== tokenSuscripcion) return
+          misPujas.value = pujasUsuario
+          resumenPujas.value = resumen
+        } catch {
+          misPujas.value = {}
+          resumenPujas.value = {}
+        }
       }
 
       cargandoMercado.value = false
     })
-
-    idLigaInicializada.value = idLiga
   }
 
   function detenerMercado() {
@@ -124,7 +124,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
       cancelarListenerMercado = null
     }
     tokenSuscripcion++
-    idLigaInicializada.value = null
     mercadoActivo.value = null
     misPujas.value = {}
     resumenPujas.value = {}
@@ -175,7 +174,6 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   return {
     cargandoMercado,
-    idLigaInicializada,
     misPujas,
     resumenPujas,
     hayMercadoAbierto,

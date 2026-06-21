@@ -1,5 +1,7 @@
 // Réplica server-side (CommonJS) de src/utils/puntuacion.js.
 
+const { perfilesPuntuacion } = require('../infraestructura/catalogoBase')
+
 const FACTOR_MINIMO = 0.5
 const FACTOR_MAXIMO = 1.5
 
@@ -21,7 +23,8 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
 
   for (const piloto of pilotosEquipados) {
     const atributosModificados = aplicarMejorasAtributos(piloto.atributos, mejorasTotal)
-    const puntuacionBase = calcularPuntuacionBase(atributosModificados, piloto.pesos)
+    const pesos = piloto.pesos || perfilesPuntuacion[piloto.perfilPuntuacion]?.pesos || {}
+    const puntuacionBase = calcularPuntuacionBase(atributosModificados, pesos)
     const factorEstePiloto =
       factoresPorPiloto[piloto.id] != null ? factoresPorPiloto[piloto.id] : 1.0
     const puntosJornada = calcularPuntosJornada(puntuacionBase, factorEstePiloto)

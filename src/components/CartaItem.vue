@@ -4,6 +4,7 @@ import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import { useToast } from 'primevue/usetoast'
 import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
+import { estiloVariante } from '@/utils/variantesPiloto'
 
 const mostrarDetalles = ref(false)
 const mostrarPuja = ref(false)
@@ -23,6 +24,9 @@ const notificacion = useToast()
 const esPiloto = computed(() => props.tipo === 'piloto')
 const esCoche = computed(() => props.tipo === 'coche')
 const esPotenciador = computed(() => props.tipo === 'potenciador')
+
+const colorVariante = computed(() => estiloVariante[props.carta.variante]?.color ?? '#a1a1aa')
+const iconoVariante = computed(() => estiloVariante[props.carta.variante]?.icono ?? 'pi-user')
 
 const barrasAtributos = computed(() => {
     if (!esPiloto.value) return []
@@ -80,7 +84,7 @@ const confirmarEliminarPuja = () => {
 </script>
 
 <template>
-    <div class="w-full h-[160px]" :style="esPiloto ? { border: `2px solid ${carta.colorVariante}` } : {}">
+    <div class="w-full h-[160px]" :style="esPiloto ? { border: `2px solid ${colorVariante}` } : {}">
         <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
             <div class="relative w-full h-full overflow-hidden">
 
@@ -115,8 +119,8 @@ const confirmarEliminarPuja = () => {
                             </div>
                             <span v-if="esPiloto"
                                 class="px-2 py-0.5 flex items-center gap-1 text-[8px] font-black uppercase bg-black/70 border ml-auto"
-                                :style="{ color: carta.colorVariante, borderColor: carta.colorVariante }">
-                                <i class="pi" :class="carta.iconoVariante"></i>
+                                :style="{ color: colorVariante, borderColor: colorVariante }">
+                                <i class="pi" :class="iconoVariante"></i>
                                 {{ carta.variante }}
                             </span>
                         </div>
@@ -156,7 +160,7 @@ const confirmarEliminarPuja = () => {
                 <template v-if="esPiloto">
                     <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
                         <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Puntuación base</p>
-                        <span class="text-xl font-black" :style="{ color: carta.colorVariante }">
+                        <span class="text-xl font-black" :style="{ color: colorVariante }">
                             {{ carta.puntuacionBase }}
                         </span>
                     </div>
@@ -178,16 +182,6 @@ const confirmarEliminarPuja = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div v-if="perfilesPuntuacion[carta.perfilPuntuacion]?.reglasUsuario?.length">
-                        <p class="text-xs font-black uppercase leading-tight mb-2"
-                            :style="{ color: carta.colorVariante }">
-                            <i class="pi mr-1" :class="carta.iconoVariante"></i>{{ carta.nombreVariante }}
-                        </p>
-                        <ul class="space-y-1.5">
-                            <li v-for="(regla, i) in perfilesPuntuacion[carta.perfilPuntuacion]?.reglasUsuario" :key="`regla-${i}`"
-                                class="text-xs text-zinc-300 leading-relaxed">{{ regla }}</li>
-                        </ul>
                     </div>
                 </template>
 
