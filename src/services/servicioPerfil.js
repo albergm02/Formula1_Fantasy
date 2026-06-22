@@ -16,6 +16,7 @@ const googleProvider = new GoogleAuthProvider()
 const llamadaMigrarCorreo = httpsCallable(functions, 'migrarCorreo')
 const llamadaEliminarCuenta = httpsCallable(functions, 'eliminarMiCuenta')
 const llamadaAutorizarCambioCorreo = httpsCallable(functions, 'autorizarCambioCorreo')
+const llamadaCrearPerfil = httpsCallable(functions, 'crearPerfil')
 
 export const migrarCorreo = async (correoAnterior, correoNuevo) => {
   const respuesta = await llamadaMigrarCorreo({ correoAnterior, correoNuevo })
@@ -26,6 +27,8 @@ export const eliminarMiCuenta = async () => {
   const respuesta = await llamadaEliminarCuenta()
   return respuesta.data
 }
+
+export const crearPerfil = (nombreUsuario) => llamadaCrearPerfil({ nombreUsuario })
 
 export const cargarPerfilUsuario = async (uid) => {
   const docSnap = await getDoc(doc(db, 'usuarios', uid))

@@ -1,8 +1,11 @@
 ﻿import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { cargarPerfilUsuario, migrarCorreo } from '@/services/servicioPerfil'
 import {
-  guardarNuevoUsuario,
+  cargarPerfilUsuario,
+  migrarCorreo,
+  crearPerfil as llamarCrearPerfil,
+} from '@/services/servicioPerfil'
+import {
   registrarse,
   enviarVerificacionCorreo,
   iniciarSesion,
@@ -30,12 +33,12 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     perfilExiste.value = true
   }
 
-  async function crearPerfil(uid, correoUsuario, nombreUsuario) {
+  async function crearPerfil(nombreUsuario) {
     const storePerfil = usarStorePerfil()
-    await guardarNuevoUsuario(uid, correoUsuario, nombreUsuario)
+    await llamarCrearPerfil(nombreUsuario)
     storePerfil.establecerDatosUsuario({
-      uid,
-      correo: correoUsuario,
+      uid: auth.currentUser?.uid || '',
+      correo: auth.currentUser?.email || '',
       nombre: nombreUsuario,
       idsLigas: [],
       esAdmin: false,
@@ -92,7 +95,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   async function procesarRegistro(correo, contrasena, nombreUsuario) {
     const credencial = await registrarse(correo, contrasena)
     await enviarVerificacionCorreo()
-    await crearPerfil(credencial.user.uid, credencial.user.email, nombreUsuario)
+    await crearPerfil(nombreUsuario)
     await cerrarSesion()
   }
 

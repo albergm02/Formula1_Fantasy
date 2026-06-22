@@ -9,19 +9,7 @@
   signInWithPopup,
 } from 'firebase/auth'
 
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db } from './servicioFirebase'
-
-const googleProvider = new GoogleAuthProvider()
-
-export const guardarNuevoUsuario = async (uid, correoUsuario, nombreUsuario) => {
-  await setDoc(doc(db, 'usuarios', uid), {
-    correoAutenticacion: correoUsuario,
-    nombreVisible: nombreUsuario,
-    ligasIds: [],
-    fechaRegistro: serverTimestamp(),
-  })
-}
+import { auth } from './servicioFirebase'
 
 export const registrarse = (email, password) =>
   createUserWithEmailAndPassword(auth, email, password)
