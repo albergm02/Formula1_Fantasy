@@ -8,12 +8,7 @@ const { borrarLigaEnCascada } = require('./ligas')
 
 const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 const DIAS_BLOQUEO_CAMBIO_CORREO = 7
-
-function haExpiradoElBloqueoDeCorreo(marcaTemporal) {
-  const fecha = marcaTemporal.toDate ? marcaTemporal.toDate() : new Date(marcaTemporal)
-  const milisegundosBloqueo = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
-  return Date.now() - fecha.getTime() >= milisegundosBloqueo
-}
+const MS_BLOQUEO_CAMBIO_CORREO = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
 
 // El cliente invoca esta callable ANTES de verifyBeforeUpdateEmail: dejamos
 // el bloqueo de 7 días registrado para que la restricción no dependa del
@@ -28,11 +23,14 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   }
 
   const ultimoCambio = docUsuario.data().fechaUltimoCambioCorreo
-  if (ultimoCambio && !haExpiradoElBloqueoDeCorreo(ultimoCambio)) {
-    throw new HttpsError(
-      'failed-precondition',
-      `Solo puedes cambiar el correo una vez cada ${DIAS_BLOQUEO_CAMBIO_CORREO} días.`,
-    )
+  if (ultimoCambio) {
+    const fecha = ultimoCambio.toDate ? ultimoCambio.toDate() : new Date(ultimoCambio)
+    if (Date.now() - fecha.getTime() < MS_BLOQUEO_CAMBIO_CORREO) {
+      throw new HttpsError(
+        'failed-precondition',
+        `Solo puedes cambiar el correo una vez cada ${DIAS_BLOQUEO_CAMBIO_CORREO} días.`,
+      )
+    }
   }
 
   await docUsuario.ref.update({ fechaUltimoCambioCorreo: FieldValue.serverTimestamp() })
@@ -92,16 +90,6 @@ exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   }
 })
 
-function elegirSiguienteOrganizador(participacionesRestantes) {
-  if (participacionesRestantes.length === 0) return null
-  const ordenadas = [...participacionesRestantes].sort((a, b) => {
-    const fechaA = a.fecha_union?.toMillis ? a.fecha_union.toMillis() : 0
-    const fechaB = b.fecha_union?.toMillis ? b.fecha_union.toMillis() : 0
-    return fechaA - fechaB
-  })
-  return ordenadas[0]
-}
-
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db
     .collection('participaciones')
@@ -141,7 +129,11 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
     await batchPujas.commit()
 
     if (datosPropios.rol === 'organizador') {
-      const siguiente = elegirSiguienteOrganizador(restantes)
+      const siguiente = [...restantes].sort((a, b) => {
+        const fechaA = a.fecha_union?.toMillis ? a.fecha_union.toMillis() : 0
+        const fechaB = b.fecha_union?.toMillis ? b.fecha_union.toMillis() : 0
+        return fechaA - fechaB
+      })[0]
       await db.collection('participaciones').doc(siguiente.id).update({ rol: 'organizador' })
       await db
         .collection('ligas')

@@ -39,13 +39,6 @@ function construirCartaGanada(cartaCompleta, idCarta, pujaGanadora, cantidad, ti
   }
 }
 
-// Si hubo puja ganadora, la muestra es la cantidad pagada; si quedó desierta,
-// se aplica FACTOR_DESINTERES como penalización suave al precio anterior.
-function calcularPrecioMuestra(carta, pujaGanadora) {
-  if (pujaGanadora) return Number(pujaGanadora.cantidad)
-  return Number(carta.precio) * FACTOR_DESINTERES
-}
-
 // Formato "YYYY-MM-DD": ordena lexicográficamente igual que cronológicamente,
 // lo que permite browsing natural en la consola de Firebase.
 function calcularFechaMercado(fecha) {
@@ -55,16 +48,6 @@ function calcularFechaMercado(fecha) {
 // Ruta canónica: mercados/{idLiga}/dias/{YYYY-MM-DD}
 function referenciaDiaMercado(idLiga, fecha) {
   return db.collection('mercados').doc(idLiga).collection('dias').doc(calcularFechaMercado(fecha))
-}
-
-// Día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que el
-// scheduler lanza la generación). Cierre y apertura del nuevo mercado
-// ocurren en la misma ejecución del scheduler, sin ventana muerta.
-function calcularFechaCierre(fechaApertura) {
-  const cierre = new Date(fechaApertura)
-  cierre.setUTCDate(cierre.getUTCDate() + 1)
-  cierre.setUTCHours(12, 0, 0, 0)
-  return cierre
 }
 
 // Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana.
@@ -233,7 +216,12 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   const catalogoConPrecios = aplicarPreciosDinamicosACatalogo(catalogoBase, preciosDinamicos)
   const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
   const cartasDelDia = seleccionarCartasDiarias(catalogoConPrecios, exclusionesLiga)
-  const fechaCierre = calcularFechaCierre(ahora)
+  // Día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que el
+  // scheduler lanza la generación). Cierre y apertura del nuevo mercado
+  // ocurren en la misma ejecución del scheduler, sin ventana muerta.
+  const fechaCierre = new Date(ahora)
+  fechaCierre.setUTCDate(fechaCierre.getUTCDate() + 1)
+  fechaCierre.setUTCHours(12, 0, 0, 0)
 
   await refHoy.set({
     idLiga,
@@ -289,7 +277,12 @@ async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
       const clave = claveCartaPorTipo(carta, tipo)
       if (!clave) continue
 
-      const muestra = calcularPrecioMuestra(carta, pujasPorCarta[carta.id])
+      // Si hubo puja ganadora, la muestra es la cantidad pagada; si quedó desierta,
+      // se aplica FACTOR_DESINTERES como penalización suave al precio anterior.
+      const pujaGanadora = pujasPorCarta[carta.id]
+      const muestra = pujaGanadora
+        ? Number(pujaGanadora.cantidad)
+        : Number(carta.precio) * FACTOR_DESINTERES
       const previas = historialNuevo[campo][clave] || []
       const combinadas = [...previas, muestra].slice(-HISTORIAL_MAX_MUESTRAS)
       historialNuevo[campo][clave] = combinadas

@@ -6,10 +6,6 @@ const { pilotosBase } = require('./catalogoBase')
 // pueda bloquear (fail-closed) en lugar de confundirlo con una caída real.
 const SESION_EN_DIRECTO = 'SESION_EN_DIRECTO'
 
-function esPaywallDeSesionEnDirecto(detalle) {
-  return typeof detalle === 'string' && detalle.includes('Live F1 session in progress')
-}
-
 // Reintenta automáticamente ante 429 (rate limit) con espera progresiva 2s/4s/6s.
 // OpenF1 devuelve 404 con `{ detail: 'No results found.' }` en lugar de [];
 // se trata como ausencia de datos para que el llamador decida.
@@ -30,7 +26,8 @@ async function consultarOpenF1(ruta) {
 
     if (respuesta.status === 401 || respuesta.status === 403) {
       const cuerpo = await respuesta.json().catch(() => ({}))
-      if (esPaywallDeSesionEnDirecto(cuerpo?.detail)) {
+      const detalle = cuerpo?.detail
+      if (typeof detalle === 'string' && detalle.includes('Live F1 session in progress')) {
         const error = new Error('OpenF1 ha restringido el acceso por sesión en directo.')
         error.codigo = SESION_EN_DIRECTO
         throw error
@@ -68,18 +65,9 @@ async function obtenerMeetingKeyEnJuego(anio) {
   return enJuego ? enJuego.meeting_key : null
 }
 
-async function obtenerSesiones(meetingKey) {
-  return consultarOpenF1(`/sessions?meeting_key=${meetingKey}`)
-}
-
-function extraerSesionQualy(sesiones) {
-  const qualy = sesiones.filter((s) => s.session_name === 'Qualifying')
-  return qualy.length > 0 ? qualy[qualy.length - 1] : null
-}
-
-function extraerSesionCarrera(sesiones) {
-  const carrera = sesiones.filter((s) => s.session_name === 'Race')
-  return carrera.length > 0 ? carrera[carrera.length - 1] : null
+function extraerUltimaSesion(sesiones, nombre) {
+  const filtradas = sesiones.filter((s) => s.session_name === nombre)
+  return filtradas.length > 0 ? filtradas[filtradas.length - 1] : null
 }
 
 // Uso `/session_result` (posiciones finales con sanciones, DNF, DNS, DSQ
@@ -100,10 +88,6 @@ async function obtenerResultadosSesion(sessionKey) {
   return posicionFinal
 }
 
-async function obtenerResultadosCompletosSesion(sessionKey) {
-  return consultarOpenF1(`/session_result?session_key=${sessionKey}`)
-}
-
 // `/starting_grid` ya incluye sanciones aplicadas al apagado de luces.
 async function obtenerParrillaSalida(sessionKey) {
   const entradas = await consultarOpenF1(`/starting_grid?session_key=${sessionKey}`)
@@ -122,7 +106,7 @@ async function obtenerParrillaSalida(sessionKey) {
 async function obtenerCondicionesCarrera(sessionKey) {
   const datosClima = await consultarOpenF1(`/weather?session_key=${sessionKey}`)
   const datosControlCarrera = await consultarOpenF1(`/race_control?session_key=${sessionKey}`)
-  const resultadosCompletos = await obtenerResultadosCompletosSesion(sessionKey)
+  const resultadosCompletos = await consultarOpenF1(`/session_result?session_key=${sessionKey}`)
 
   const llovio = datosClima.some((lectura) => lectura.rainfall === true || lectura.rainfall === 1)
 
@@ -242,9 +226,9 @@ async function obtenerParadasPorPiloto(sessionKey) {
 }
 
 async function recopilarDatosGranPremio(meetingKey) {
-  const sesiones = await obtenerSesiones(meetingKey)
-  const sesionQualy = extraerSesionQualy(sesiones)
-  const sesionCarrera = extraerSesionCarrera(sesiones)
+  const sesiones = await consultarOpenF1(`/sessions?meeting_key=${meetingKey}`)
+  const sesionQualy = extraerUltimaSesion(sesiones, 'Qualifying')
+  const sesionCarrera = extraerUltimaSesion(sesiones, 'Race')
 
   if (!sesionCarrera) {
     throw new Error(`No se encontró sesión de carrera para meeting_key: ${meetingKey}`)
@@ -252,8 +236,8 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const resultadosQualy = sesionQualy ? await obtenerResultadosSesion(sesionQualy.session_key) : {}
   const resultadosCarrera = await obtenerResultadosSesion(sesionCarrera.session_key)
-  const resultadosCompletosCarrera = await obtenerResultadosCompletosSesion(
-    sesionCarrera.session_key,
+  const resultadosCompletosCarrera = await consultarOpenF1(
+    `/session_result?session_key=${sesionCarrera.session_key}`,
   )
   const parrillaSalida = sesionQualy ? await obtenerParrillaSalida(sesionQualy.session_key) : {}
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)

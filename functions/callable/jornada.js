@@ -11,26 +11,14 @@ const {
 } = require('../infraestructura/openF1')
 const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../logica/puntuacion')
 
-// Conversión 10:1 (108 puntos → 10.8 M) para mantener los premios en un
-// rango manejable comparado con los precios del catálogo.
-function calcularPremioJornada(puntosJornada) {
-  const premio = (puntosJornada || 0) / 10
-  return Math.round(premio * 10) / 10
-}
-
-function descomponerIdCarta(idCarta) {
-  const partes = idCarta.split('_')
-  const numero = partes[0]
-  const variante = partes.slice(1).join('_')
-  return { numero, variante }
-}
-
 function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
   const factores = {}
   const detalles = {}
 
   for (const piloto of pilotos) {
-    const { numero, variante } = descomponerIdCarta(piloto.id)
+    const partes = piloto.id.split('_')
+    const numero = partes[0]
+    const variante = partes.slice(1).join('_')
     const actuacion = actuacionesPorPiloto[numero] || {
       posicionQualy: 20,
       posicionCarrera: 20,
@@ -124,7 +112,9 @@ async function ejecutarProcesarJornada() {
     const puntosJornada = resultadoGaraje.puntosTotal
 
     const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
-    const premioJornada = calcularPremioJornada(puntosJornada)
+    // Conversión 10:1 (108 puntos → 10.8 M) para mantener los premios en un
+    // rango manejable comparado con los precios del catálogo.
+    const premioJornada = Math.round(((puntosJornada || 0) / 10) * 10) / 10
     const presupuestoActualizado =
       Math.round(((participacion.presupuesto || 0) + premioJornada) * 100) / 100
 

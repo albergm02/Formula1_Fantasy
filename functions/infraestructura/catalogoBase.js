@@ -111,47 +111,17 @@ const variantesPiloto = [
   { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega'                 },
 ]
 
-function calcularPuntuacionBase(atributos, pesos) {
-  return (
-    Math.round(
-      ((pesos.ritmo || 0) * atributos.ritmo +
-        (pesos.consistencia || 0) * atributos.consistencia +
-        (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
-        (pesos.agresividad || 0) * (atributos.agresividad || 0) +
-        (pesos.gestion || 0) * (atributos.gestion || 0)) *
-        10,
-    ) / 10
-  )
-}
-
-function calcularPuntuacionBasePotenciador(mejoras = {}) {
-  const ritmo = mejoras.ritmo || 0
-  const consistencia = mejoras.consistencia || 0
-  const adaptabilidad = mejoras.adaptabilidad || 0
-  const agresividad = mejoras.agresividad || 0
-  const gestion = mejoras.gestion || 0
-  return Math.round((ritmo + consistencia + adaptabilidad + agresividad + gestion) * 10) / 10
-}
-
-// Precios iniciales: cálculos directos sobre cada carta sin normalizar contra
-// el resto del catálogo. Se usan solo la primera vez que una carta sale al
-// mercado; a partir de ahí los precios dinámicos del documento Firestore
-// `catalogo/precios_*` reemplazan estos valores.
-function calcularPrecioInicialPiloto(puntuacionBase) {
-  return Math.round((puntuacionBase / 5) * 10) / 10
-}
-
-function calcularPrecioInicialCoche(coche) {
-  return Number(coche.puntos || 0)
-}
-
-function calcularPrecioInicialPotenciador(puntuacionBase) {
-  return Math.round((puntuacionBase / 10) * 10) / 10
-}
-
 function crearCartaPiloto(pilotoBase, variante) {
   const perfil = perfilesPuntuacion[variante.perfil]
-  const puntuacionBase = calcularPuntuacionBase(pilotoBase.atributos, perfil.pesos)
+  const pesos = perfil.pesos
+  const atributos = pilotoBase.atributos
+  const valorBase =
+    (pesos.ritmo || 0) * atributos.ritmo +
+    (pesos.consistencia || 0) * atributos.consistencia +
+    (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
+    (pesos.agresividad || 0) * (atributos.agresividad || 0) +
+    (pesos.gestion || 0) * (atributos.gestion || 0)
+  const puntuacionBase = Math.round(valorBase * 10) / 10
   return {
     id: `${pilotoBase.numero}_${variante.variante}`,
     numero: pilotoBase.numero,
@@ -162,8 +132,8 @@ function crearCartaPiloto(pilotoBase, variante) {
     variante: variante.variante,
     nombreVariante: variante.nombreHabilidad,
     perfilPuntuacion: variante.perfil,
-    pesos: perfil.pesos,
-    atributos: pilotoBase.atributos,
+    pesos,
+    atributos,
     puntuacionBase,
   }
 }
@@ -179,22 +149,29 @@ function construirCatalogoCompleto() {
   const pilotos = pilotosBase.flatMap((pilotoBase) =>
     variantesPiloto.map((variante) => {
       const carta = crearCartaPiloto(pilotoBase, variante)
-      return { ...carta, precio: calcularPrecioInicialPiloto(carta.puntuacionBase) }
+      return { ...carta, precio: Math.round((carta.puntuacionBase / 5) * 10) / 10 }
     }),
   )
 
   const coches = cochesBase.map(({ puntos, ...resto }) => ({
     ...resto,
     puntuacionBase: puntos || 0,
-    precio: calcularPrecioInicialCoche({ puntos }),
+    precio: Number(puntos || 0),
   }))
 
   const potenciadores = potenciadoresBase.map((potenciador) => {
-    const puntuacionBase = calcularPuntuacionBasePotenciador(potenciador.mejoras)
+    const m = potenciador.mejoras || {}
+    const sumaMejoras =
+      (m.ritmo || 0) +
+      (m.consistencia || 0) +
+      (m.adaptabilidad || 0) +
+      (m.agresividad || 0) +
+      (m.gestion || 0)
+    const puntuacionBase = Math.round(sumaMejoras * 10) / 10
     return {
       ...potenciador,
       puntuacionBase,
-      precio: calcularPrecioInicialPotenciador(puntuacionBase),
+      precio: Math.round((puntuacionBase / 10) * 10) / 10,
     }
   })
 

@@ -8,7 +8,6 @@ export const perfilesPuntuacion = {
       'P7 a P10: factor 1.10',
       'P11 a P15: factor 0.85',
       'P16 en adelante: factor 0.65',
-      'Factor limitado al rango 0.50 a 1.50.',
     ],
   },
   carrera: {
@@ -19,7 +18,6 @@ export const perfilesPuntuacion = {
       'P4 a P5: 1.20 / P6 a P10: 1.00',
       'P11 a P15: 0.80 / P16 a P20: 0.60',
       'P20 en adelante: factor 0.50',
-      'Factor limitado al rango 0.50 a 1.50.',
     ],
   },
   todo_terreno: {
@@ -30,7 +28,6 @@ export const perfilesPuntuacion = {
       'Cada Safety Car Virtual suma 0.05 al factor.',
       'Cada abandono en carrera suma 0.10 al factor.',
       'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
-      'Factor limitado al rango 0.50 a 1.50.',
     ],
   },
   base: {
@@ -49,7 +46,6 @@ export const perfilesPuntuacion = {
       'Factor = 1.0 mas diferencial por 0.1.',
       'Ejemplo: +5 da factor 1.50, neutro da 1.00, -5 da 0.50.',
       'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
-      'Factor limitado al rango 0.50 a 1.50.',
     ],
   },
   estratega: {
@@ -61,7 +57,6 @@ export const perfilesPuntuacion = {
       '1 parada en boxes: +0.15 / 2 paradas: +0.05 / 3 o mas: sin bono.',
       'P1 a P3: +0.15 / P4 a P10: +0.05 / P16 en adelante: -0.10.',
       'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
-      'Factor limitado al rango 0.50 a 1.50.',
     ],
   },
 }

@@ -40,10 +40,6 @@ function localizarCartaEnGaraje(garaje, instanciaId) {
   return null
 }
 
-function calcularValorReventa(precio) {
-  return Math.round(Number(precio || 0) * PORCENTAJE_REVENTA * 100) / 100
-}
-
 exports.venderCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idParticipante, instanciaId } = request.data || {}
@@ -61,7 +57,7 @@ exports.venderCarta = onCall(OPCIONES, async (request) => {
   const { coleccion, indice, carta } = localizada
   if (carta.equipado) await exigirJornadaProcesada()
 
-  const valorReventa = calcularValorReventa(carta.precio)
+  const valorReventa = Math.round(Number(carta.precio || 0) * PORCENTAJE_REVENTA * 100) / 100
   const listaActualizada = [...garaje[coleccion]]
   listaActualizada.splice(indice, 1)
 
@@ -202,14 +198,6 @@ function calcularPrecioClausula(carta) {
   return precioBase + inversionDueño * 2
 }
 
-// Evita el "robo en caliente" justo después de una compra.
-function estaEnPeriodoDeGracia(carta) {
-  if (!carta.fechaAdquisicion) return false
-  const fechaAdquisicion = new Date(carta.fechaAdquisicion)
-  const milisegundosGracia = HORAS_PERIODO_GRACIA * 60 * 60 * 1000
-  return Date.now() - fechaAdquisicion.getTime() < milisegundosGracia
-}
-
 // `instancia_id` (timestamp + random) es el único identificador único de
 // una carta concreta: dos jugadores pueden tener "Hamilton qualy" en su
 // garaje, pero cada copia es una instancia distinta con su propio historial.
@@ -224,16 +212,6 @@ function extraerCartaPorInstancia(garaje, instanciaId) {
     }
   }
   return { carta: null }
-}
-
-function añadirCartaAGaraje(garaje, carta) {
-  const tipo = carta.tipo || carta.tipoCarta
-  let coleccion
-  if (tipo === 'coche') coleccion = 'coches'
-  else if (tipo === 'piloto') coleccion = 'pilotos'
-  else coleccion = 'potenciadores'
-  if (!garaje[coleccion]) garaje[coleccion] = []
-  garaje[coleccion].push(carta)
 }
 
 // Sin este cálculo, un jugador podría comprometer 30 M en pujas y a la vez
@@ -288,8 +266,12 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   if (tipoCarta === 'potenciador') {
     throw new HttpsError('failed-precondition', 'Los potenciadores no admiten cláusula.')
   }
-  if (estaEnPeriodoDeGracia(carta)) {
-    throw new HttpsError('failed-precondition', 'La carta está protegida por periodo de gracia.')
+  // Evita el "robo en caliente" justo después de una compra.
+  if (carta.fechaAdquisicion) {
+    const msTranscurridos = Date.now() - new Date(carta.fechaAdquisicion).getTime()
+    if (msTranscurridos < HORAS_PERIODO_GRACIA * 60 * 60 * 1000) {
+      throw new HttpsError('failed-precondition', 'La carta está protegida por periodo de gracia.')
+    }
   }
 
   const precioClausula = calcularPrecioClausula(carta)
@@ -302,13 +284,18 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   // fechaAdquisicion: el nuevo dueño decide si la equipa y arranca su propio
   // periodo de gracia.
   const garajePropio = datosPropio.garaje || {}
-  añadirCartaAGaraje(garajePropio, {
+  const cartaNueva = {
     ...carta,
     precioCompra: precioClausula,
     clausulaInvertida: 0,
     fechaAdquisicion: new Date().toISOString(),
     equipado: false,
-  })
+  }
+  const tipoDestino = cartaNueva.tipo || cartaNueva.tipoCarta
+  const coleccionDestino =
+    tipoDestino === 'coche' ? 'coches' : tipoDestino === 'piloto' ? 'pilotos' : 'potenciadores'
+  if (!garajePropio[coleccionDestino]) garajePropio[coleccionDestino] = []
+  garajePropio[coleccionDestino].push(cartaNueva)
 
   const batch = db.batch()
   batch.update(refRival, {

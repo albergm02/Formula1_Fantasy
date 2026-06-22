@@ -2,12 +2,6 @@
 
 let catalogoEnMemoria = null
 
-async function sembrarCatalogoEnFirestore(db) {
-  const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
-  await db.collection('catalogo').doc('items').set({ pilotos, coches, potenciadores })
-  return { pilotos, coches, potenciadores }
-}
-
 async function cargarCatalogo(db) {
   if (catalogoEnMemoria) {
     return catalogoEnMemoria
@@ -16,7 +10,9 @@ async function cargarCatalogo(db) {
   const docItems = await db.collection('catalogo').doc('items').get()
 
   if (!docItems.exists) {
-    catalogoEnMemoria = await sembrarCatalogoEnFirestore(db)
+    const { pilotos, coches, potenciadores } = construirCatalogoCompleto()
+    await db.collection('catalogo').doc('items').set({ pilotos, coches, potenciadores })
+    catalogoEnMemoria = { pilotos, coches, potenciadores }
     return catalogoEnMemoria
   }
 
@@ -87,20 +83,24 @@ function mezclarArray(array) {
   return array
 }
 
-function normalizarASet(valor) {
-  if (valor instanceof Set) return valor
-  return new Set(valor || [])
-}
-
 // Selecciona las cartas que aparecerán hoy en el mercado.
 // Pilotos: se excluye un (numero, variante) solo si está fichado con esa misma
 // variante; la misma persona puede aparecer en distintas variantes a la vez.
 // Coches y potenciadores: se filtran por id exacto.
 function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
-  const clavesBloqueadas = normalizarASet(exclusiones.clavesPilotoBloqueadas)
-  const idsBloqueados = normalizarASet(exclusiones.idsCartas)
+  const clavesBloqueadas =
+    exclusiones.clavesPilotoBloqueadas instanceof Set
+      ? exclusiones.clavesPilotoBloqueadas
+      : new Set(exclusiones.clavesPilotoBloqueadas || [])
+  const idsBloqueados =
+    exclusiones.idsCartas instanceof Set
+      ? exclusiones.idsCartas
+      : new Set(exclusiones.idsCartas || [])
 
-  const pilotosDelDia = elegirPilotosDelDia(catalogo.pilotos, clavesBloqueadas)
+  const pilotosDisponibles = catalogo.pilotos.filter(
+    (carta) => !clavesBloqueadas.has(construirClavePiloto(carta)),
+  )
+  const pilotosDelDia = mezclarArray([...pilotosDisponibles]).slice(0, CARTAS_POR_DIA.pilotos)
   const cochesDelDia = mezclarArray(catalogo.coches.filter((c) => !idsBloqueados.has(c.id))).slice(
     0,
     CARTAS_POR_DIA.coches,
@@ -112,17 +112,9 @@ function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
   return [...pilotosDelDia, ...cochesDelDia, ...potenciadoresDelDia]
 }
 
-function elegirPilotosDelDia(cartasPiloto, clavesBloqueadas) {
-  const disponibles = cartasPiloto.filter(
-    (carta) => !clavesBloqueadas.has(construirClavePiloto(carta)),
-  )
-  return mezclarArray([...disponibles]).slice(0, CARTAS_POR_DIA.pilotos)
-}
-
 module.exports = {
   cargarCatalogo,
   cargarPreciosDinamicos,
   aplicarPreciosDinamicosACatalogo,
   seleccionarCartasDiarias,
-  sembrarCatalogoEnFirestore,
 }
