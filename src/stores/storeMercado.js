@@ -20,20 +20,15 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   const hayMercadoAbierto = computed(() => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto')
 
-  const pilotosMercado = computed(() => {
-    if (!mercadoActivo.value) return []
-    return mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'piloto')
-  })
-
-  const cochesMercado = computed(() => {
-    if (!mercadoActivo.value) return []
-    return mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'coche')
-  })
-
-  const potenciadoresMercado = computed(() => {
-    if (!mercadoActivo.value) return []
-    return mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'potenciador')
-  })
+  const pilotosMercado = computed(() =>
+    mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'piloto') : [],
+  )
+  const cochesMercado = computed(() =>
+    mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'coche') : [],
+  )
+  const potenciadoresMercado = computed(() =>
+    mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'potenciador') : [],
+  )
 
   const textoCuentaAtras = computed(() => {
     const ms = milisegundosRestantes.value
@@ -138,10 +133,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
       resumenPujas.value = { ...resumenPujas.value, [carta.id]: totalActual + 1 }
     }
 
-    return {
-      success: true,
-      message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.`,
-    }
+    return { success: true, message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.` }
   }
 
   async function eliminarPujaCarta(carta) {
@@ -155,10 +147,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     misPujas.value = restoPujas
 
     const totalActual = resumenPujas.value[carta.id] || 0
-    resumenPujas.value = {
-      ...resumenPujas.value,
-      [carta.id]: Math.max(0, totalActual - 1),
-    }
+    resumenPujas.value = { ...resumenPujas.value, [carta.id]: Math.max(0, totalActual - 1) }
 
     return { success: true, message: `Puja eliminada sobre ${carta.nombre}.` }
   }

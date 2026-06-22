@@ -14,11 +14,7 @@ export function migrarGaraje(garajeOriginal) {
     delete garaje.coche
   }
 
-  garaje.pilotos = (garaje.pilotos || []).map((piloto) => ({
-    ...piloto,
-    equipado: piloto.equipado !== undefined ? piloto.equipado : true,
-  }))
-
+  garaje.pilotos = (garaje.pilotos || []).map((piloto) => ({ ...piloto, equipado: piloto.equipado !== undefined ? piloto.equipado : true }))
   garaje.potenciadores = garaje.potenciadores || []
 
   return garaje

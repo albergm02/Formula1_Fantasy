@@ -5,14 +5,8 @@ import { VARIANTES } from '@/utils/variantesPiloto'
 import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
 const EJEMPLOS_VARIANTE = {
-  qualy: {
-    escenario: 'Piloto con base 72 que clasifica P2.',
-    calculo: 'Factor P2 (P1–P3) = ×1.50 -> 72 × 1.50 = 108 pts.',
-  },
-  carrera: {
-    escenario: 'Piloto con base 68 que termina P3.',
-    calculo: 'Factor P3 = ×1.30 -> 68 × 1.30 = 88,4 pts.',
-  },
+  qualy: { escenario: 'Piloto con base 72 que clasifica P2.', calculo: 'Factor P2 (P1–P3) = ×1.50 -> 72 × 1.50 = 108 pts.' },
+  carrera: { escenario: 'Piloto con base 68 que termina P3.', calculo: 'Factor P3 = ×1.30 -> 68 × 1.30 = 88,4 pts.' },
   todo_terreno: {
     escenario: 'GP sin lluvia, 2 Coches de Seguridad y 3 abandonos. Base del piloto 65.',
     calculo:

@@ -13,9 +13,7 @@ const puntosPilotosTotal = computed(() => {
   return jornada.value.desglose.pilotos.reduce((acc, p) => acc + p.puntosJornada, 0)
 })
 
-const puntosCoche = computed(() => {
-  return jornada.value?.desglose?.coche?.puntos || 0
-})
+const puntosCoche = computed(() => jornada.value?.desglose?.coche?.puntos || 0)
 
 const condicionesTexto = computed(() => {
   if (!jornada.value?.condiciones) return []

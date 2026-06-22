@@ -5,30 +5,15 @@ import { usarStorePerfil } from '@/stores/storePerfil'
 import { usarStoreLigas } from '@/stores/storeLigas'
 
 const rutas = [
-  {
-    path: '/',
-    name: 'login',
-    component: () => import('../views/InicioSesionView.vue'),
-    meta: { requiresGuest: true },
-  },
-  {
-    path: '/registro',
-    name: 'registro',
-    component: () => import('../views/RegistroView.vue'),
-    meta: { requiresGuest: true },
-  },
+  { path: '/', name: 'login', component: () => import('../views/InicioSesionView.vue'), meta: { requiresGuest: true } },
+  { path: '/registro', name: 'registro', component: () => import('../views/RegistroView.vue'), meta: { requiresGuest: true } },
   {
     path: '/registro-google',
     name: 'registro-google',
     component: () => import('../views/CompletarPerfilView.vue'),
     meta: { requiresAuth: true, requiresIncompleteProfile: true },
   },
-  {
-    path: '/ligas',
-    name: 'ligas',
-    component: () => import('../views/LigasView.vue'),
-    meta: { requiresAuth: true },
-  },
+  { path: '/ligas', name: 'ligas', component: () => import('../views/LigasView.vue'), meta: { requiresAuth: true } },
   {
     path: '/dashboard',
     name: 'inicio',
@@ -41,12 +26,7 @@ const rutas = [
     component: () => import('../views/MercadoView.vue'),
     meta: { requiresAuth: true, requiresLiga: true },
   },
-  {
-    path: '/garaje',
-    name: 'garaje',
-    component: () => import('../views/GarajeView.vue'),
-    meta: { requiresAuth: true, requiresLiga: true },
-  },
+  { path: '/garaje', name: 'garaje', component: () => import('../views/GarajeView.vue'), meta: { requiresAuth: true, requiresLiga: true } },
   {
     path: '/clasificacion',
     name: 'clasificacion',
@@ -71,16 +51,8 @@ const rutas = [
     component: () => import('../views/AdministracionView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true },
   },
-  {
-    path: '/perfil',
-    name: 'perfil',
-    component: () => import('../views/PerfilView.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/',
-  },
+  { path: '/perfil', name: 'perfil', component: () => import('../views/PerfilView.vue'), meta: { requiresAuth: true } },
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 const router = createRouter({

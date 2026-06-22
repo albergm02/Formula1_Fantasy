@@ -45,12 +45,7 @@ const storeAutenticacion = usarStoreAutenticacion()
 
 const cargando = ref(false)
 const errorAutenticacion = ref('')
-const valoresInicialesFormulario = ref({
-  username: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-})
+const valoresInicialesFormulario = ref({ username: '', email: '', password: '', confirmPassword: '' })
 
 const handleRegistro = async ({ valid, values }) => {
   if (!valid) return

@@ -52,11 +52,9 @@ const confirmarVentaCoche = (coche) => {
     rejectLabel: 'Cancelar',
     accept: async () => {
       const resultado = await storeGaraje.venderElemento(coche)
-      if (resultado.success) {
+      if (resultado.success)
         notificacion.add({ severity: 'success', summary: 'Venta completada', detail: `Has recuperado ${valorReventa}M`, life: 4000 })
-      } else {
-        notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: resultado.message, life: 5000 })
-      }
+      else notificacion.add({ severity: 'warn', summary: 'Venta denegada', detail: resultado.message, life: 5000 })
     },
   })
 }
@@ -71,11 +69,9 @@ const confirmarVentaPiloto = (piloto) => {
     rejectLabel: 'Cancelar',
     accept: async () => {
       const resultado = await storeGaraje.venderElemento(piloto)
-      if (resultado.success) {
+      if (resultado.success)
         notificacion.add({ severity: 'success', summary: 'Despido completado', detail: `Has recuperado ${valorReventa}M`, life: 4000 })
-      } else {
-        notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: resultado.message, life: 5000 })
-      }
+      else notificacion.add({ severity: 'warn', summary: 'Despido denegado', detail: resultado.message, life: 5000 })
     },
   })
 }
@@ -118,11 +114,8 @@ const confirmarEjecucionClausula = (elemento) => {
     rejectLabel: 'Cancelar',
     accept: async () => {
       const resultado = await storeGaraje.ejecutarClausulaRival(props.participacion.id, elemento)
-      if (resultado.success) {
-        notificacion.add({ severity: 'success', summary: 'Cláusula ejecutada', detail: resultado.message, life: 4000 })
-      } else {
-        notificacion.add({ severity: 'warn', summary: 'Cláusula denegada', detail: resultado.message, life: 5000 })
-      }
+      if (resultado.success) notificacion.add({ severity: 'success', summary: 'Cláusula ejecutada', detail: resultado.message, life: 4000 })
+      else notificacion.add({ severity: 'warn', summary: 'Cláusula denegada', detail: resultado.message, life: 5000 })
     },
   })
 }

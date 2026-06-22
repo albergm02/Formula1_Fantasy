@@ -1,15 +1,8 @@
 const formatearFechaGranPremio = (fechaIso) => {
   const fecha = new Date(fechaIso)
   return {
-    fecha: fecha.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }),
-    hora: fecha.toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
+    fecha: fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+    hora: fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
   }
 }
 

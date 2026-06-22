@@ -83,10 +83,7 @@ export const buscarLigaPorCodigo = async (codigoInvitacion) => {
 export const cargarParticipantes = async (idLiga) => {
   const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga))
   const instantanea = await getDocs(consulta)
-  const participaciones = instantanea.docs.map((documento) => ({
-    id: documento.id,
-    ...documento.data(),
-  }))
+  const participaciones = instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
 
   const docsUsuario = await Promise.all(
     participaciones.map((p) => (p.uid_usuario ? getDoc(doc(db, 'usuarios', p.uid_usuario)) : Promise.resolve(null))),
@@ -94,10 +91,7 @@ export const cargarParticipantes = async (idLiga) => {
 
   return participaciones.map((participacion, indice) => {
     const datosUsuario = docsUsuario[indice]?.exists() ? docsUsuario[indice].data() : {}
-    return {
-      ...participacion,
-      nombre_usuario: datosUsuario.nombreVisible || participacion.nombre_usuario,
-    }
+    return { ...participacion, nombre_usuario: datosUsuario.nombreVisible || participacion.nombre_usuario }
   })
 }
 
@@ -151,7 +145,6 @@ export const cargarGarajeRival = async (idParticipacion) => {
 /** Ranking ordenado por puntos desc, desempate por presupuesto desc. */
 export const cargarClasificacion = async (idLiga) => {
   const participaciones = await cargarParticipantes(idLiga)
-
   const docsUsuario = await Promise.all(participaciones.map((p) => getDoc(doc(db, 'usuarios', p.uid_usuario))))
 
   const filasRanking = participaciones.map((participacion, indice) => {

@@ -96,12 +96,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   }
 
   async function iniciarSesionConCorreo(correo, contrasena) {
-    let credencial
-    try {
-      credencial = await iniciarSesion(correo, contrasena)
-    } catch (error) {
-      throw error
-    }
+    const credencial = await iniciarSesion(correo, contrasena)
     if (!credencial.user.emailVerified) {
       await cerrarSesion()
       throw new Error('CORREO_NO_VERIFICADO')

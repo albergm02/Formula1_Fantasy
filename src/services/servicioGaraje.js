@@ -22,11 +22,7 @@ export const gestionarClausula = async (idParticipante, instanciaId, cantidad) =
 }
 
 export const ejecutarClausula = async (idParticipanteRival, idParticipantePropio, instanciaId) => {
-  const respuesta = await llamadaEjecutarClausula({
-    idParticipanteRival,
-    idParticipantePropio,
-    instanciaId,
-  })
+  const respuesta = await llamadaEjecutarClausula({ idParticipanteRival, idParticipantePropio, instanciaId })
   return respuesta.data
 }
 

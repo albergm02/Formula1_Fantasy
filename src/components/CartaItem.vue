@@ -44,13 +44,7 @@ const barrasAtributos = computed(() => {
 
 const etiquetasMejora = computed(() => {
   if (!esPotenciador.value || !props.carta.mejoras) return []
-  const colores = {
-    ritmo: '#38bdf8',
-    consistencia: '#22c55e',
-    adaptabilidad: '#a78bfa',
-    agresividad: '#ef4444',
-    gestion: '#f59e0b',
-  }
+  const colores = { ritmo: '#38bdf8', consistencia: '#22c55e', adaptabilidad: '#a78bfa', agresividad: '#ef4444', gestion: '#f59e0b' }
   return Object.entries(props.carta.mejoras)
     .filter(([, valor]) => valor !== 0)
     .map(([atributo, valor]) => ({

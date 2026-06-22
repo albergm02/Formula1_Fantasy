@@ -10,12 +10,7 @@ import {
 } from '@/services/servicioPerfil'
 
 export const usarStorePerfil = defineStore('perfil', () => {
-  const usuarioActual = ref({
-    uid: '',
-    correoAutenticacion: '',
-    nombreVisible: '',
-    idsLigas: [],
-  })
+  const usuarioActual = ref({ uid: '', correoAutenticacion: '', nombreVisible: '', idsLigas: [] })
   const esAdministrador = ref(false)
 
   function establecerDatosUsuario({ uid, correo, nombre, idsLigas, esAdmin }) {
@@ -27,12 +22,7 @@ export const usarStorePerfil = defineStore('perfil', () => {
   }
 
   function limpiarDatosUsuario() {
-    usuarioActual.value = {
-      uid: '',
-      correoAutenticacion: '',
-      nombreVisible: '',
-      idsLigas: [],
-    }
+    usuarioActual.value = { uid: '', correoAutenticacion: '', nombreVisible: '', idsLigas: [] }
     esAdministrador.value = false
   }
 

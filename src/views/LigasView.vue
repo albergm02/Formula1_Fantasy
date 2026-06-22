@@ -78,19 +78,14 @@ const handleUnirseLiga = async () => {
 
   const codigoUnionNormalizado = codigoUnion.value.trim().toUpperCase()
 
-  if (!codigoUnionNormalizado) {
-    return
-  }
+  if (!codigoUnionNormalizado) return
 
   cargandoAccion.value = true
   const resultado = await storeLigas.unirseALiga(codigoUnionNormalizado)
   codigoUnion.value = ''
   dialogoUnirseVisible.value = false
-  if (resultado.success) {
-    notificacion.add({ severity: 'success', summary: '¡Bienvenido!', detail: resultado.message })
-  } else {
-    notificacion.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.message })
-  }
+  if (resultado.success) notificacion.add({ severity: 'success', summary: '¡Bienvenido!', detail: resultado.message })
+  else notificacion.add({ severity: 'error', summary: 'Error al unirse', detail: resultado.message })
   cargandoAccion.value = false
 }
 
@@ -101,12 +96,7 @@ const abrirLiga = (idLiga) => {
 
 async function copiarCodigoLiga(codigo) {
   await navigator.clipboard.writeText(codigo)
-  notificacion.add({
-    severity: 'success',
-    summary: 'Código copiado',
-    detail: `"${codigo}" copiado al portapapeles.`,
-    life: 3000,
-  })
+  notificacion.add({ severity: 'success', summary: 'Código copiado', detail: `"${codigo}" copiado al portapapeles.`, life: 3000 })
 }
 
 const handleAbandonarLiga = () => {

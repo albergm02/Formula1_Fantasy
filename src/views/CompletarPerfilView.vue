@@ -30,9 +30,7 @@ const storePerfil = usarStorePerfil()
 
 const cargando = ref(false)
 const errorAutenticacion = ref('')
-const valoresInicialesFormulario = ref({
-  username: '',
-})
+const valoresInicialesFormulario = ref({ username: '' })
 
 const handleCompletarPerfil = async ({ valid, values }) => {
   if (!valid) return

@@ -17,12 +17,9 @@ const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
 export const suscribirMercadoActivo = (idLiga, alCambiar) => {
   const consulta = query(collection(db, 'mercados', idLiga, 'dias'), where('estado', '==', 'abierto'), limit(1))
   return onSnapshot(consulta, (snapshot) => {
-    if (snapshot.empty) {
-      alCambiar(null)
-    } else {
-      const documento = snapshot.docs[0]
-      alCambiar({ id: documento.id, ...documento.data() })
-    }
+    if (snapshot.empty) return alCambiar(null)
+    const documento = snapshot.docs[0]
+    alCambiar({ id: documento.id, ...documento.data() })
   })
 }
 
@@ -58,11 +55,7 @@ export const cargarMisPujas = async (mercado, emailUsuario) => {
 export const cargarPreciosDinamicosMercado = async () => {
   const docPrecios = await getDoc(doc(collection(db, 'catalogo'), 'precios'))
   const datos = docPrecios.exists() ? docPrecios.data() : {}
-  return {
-    pilotos: datos.pilotos || {},
-    coches: datos.coches || {},
-    potenciadores: datos.potenciadores || {},
-  }
+  return { pilotos: datos.pilotos || {}, coches: datos.coches || {}, potenciadores: datos.potenciadores || {} }
 }
 
 export const cargarResumenPujas = async (mercado) => {

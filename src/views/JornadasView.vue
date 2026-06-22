@@ -93,21 +93,10 @@ const condicionesTexto = computed(() => {
   const etiquetas = []
   if (c.llovio) etiquetas.push({ texto: 'Lluvia', color: 'text-blue-400' })
   else etiquetas.push({ texto: 'Seco', color: 'text-[#D4A843]' })
-  if (c.numeroSafetyCarActivos > 0)
-    etiquetas.push({
-      texto: `${c.numeroSafetyCarActivos} Coche de Seguridad`,
-      color: 'text-[#D4A843]',
-    })
+  if (c.numeroSafetyCarActivos > 0) etiquetas.push({ texto: `${c.numeroSafetyCarActivos} Coche de Seguridad`, color: 'text-[#D4A843]' })
   if (c.numeroVirtualSafetyCarActivos > 0)
-    etiquetas.push({
-      texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`,
-      color: 'text-[#D4A843]',
-    })
-  if (c.numeroDNFs > 0)
-    etiquetas.push({
-      texto: `${c.numeroDNFs} ABN`,
-      color: 'text-[#E10600]',
-    })
+    etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`, color: 'text-[#D4A843]' })
+  if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} ABN`, color: 'text-[#E10600]' })
   return etiquetas
 })
 

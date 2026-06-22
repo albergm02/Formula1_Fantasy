@@ -57,9 +57,7 @@ export const reautenticarUsuario = async (contrasenaActual) => {
     return
   }
 
-  if (!contrasenaActual) {
-    throw new Error('Debes introducir tu contraseña actual.')
-  }
+  if (!contrasenaActual) throw new Error('Debes introducir tu contraseña actual.')
   const credencial = EmailAuthProvider.credential(usuario.email, contrasenaActual)
   await reauthenticateWithCredential(usuario, credencial)
   await usuario.getIdToken(true)

@@ -27,11 +27,5 @@ export const usarStoreAdministracion = defineStore('administracion', () => {
     await cargarListas()
   }
 
-  return {
-    ligas,
-    usuarios,
-    cargarListas,
-    eliminarUsuario,
-    eliminarLiga,
-  }
+  return { ligas, usuarios, cargarListas, eliminarUsuario, eliminarLiga }
 })

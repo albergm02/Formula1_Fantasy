@@ -62,12 +62,7 @@ async function confirmarCambioContrasena() {
       life: 6000,
     })
   } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'No se pudo enviar',
-      detail: mensajeFirebase(error),
-      life: 6000,
-    })
+    toast.add({ severity: 'error', summary: 'No se pudo enviar', detail: mensajeFirebase(error), life: 6000 })
   } finally {
     enviandoEnlaceContrasena.value = false
   }
@@ -127,12 +122,7 @@ async function confirmarCambioCorreo() {
       life: 8000,
     })
   } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'No se pudo cambiar',
-      detail: mensajeFirebase(error),
-      life: 6000,
-    })
+    toast.add({ severity: 'error', summary: 'No se pudo cambiar', detail: mensajeFirebase(error), life: 6000 })
   } finally {
     enviandoCorreo.value = false
   }
@@ -152,20 +142,10 @@ async function ejecutarBaja() {
   try {
     await storePerfil.eliminarCuenta(contrasenaParaBaja.value)
     await storeAutenticacion.cerrarSesion()
-    toast.add({
-      severity: 'success',
-      summary: 'Cuenta eliminada correctamente.',
-      detail: '¡Hasta pronto!',
-      life: 5000,
-    })
+    toast.add({ severity: 'success', summary: 'Cuenta eliminada correctamente.', detail: '¡Hasta pronto!', life: 5000 })
     router.push({ name: 'login' })
   } catch (error) {
-    toast.add({
-      severity: 'error',
-      summary: 'No se pudo eliminar su cuenta.',
-      detail: mensajeFirebase(error),
-      life: 7000,
-    })
+    toast.add({ severity: 'error', summary: 'No se pudo eliminar su cuenta.', detail: mensajeFirebase(error), life: 7000 })
   } finally {
     eliminandoCuenta.value = false
     dialogoBajaAbierto.value = false

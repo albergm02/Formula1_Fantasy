@@ -52,10 +52,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: `Liga creada. Código: ${resultado.codigoInvitacion}` }
     } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al crear la liga. Inténtalo de nuevo.',
-      }
+      return { success: false, message: error.message || 'Error al crear la liga. Inténtalo de nuevo.' }
     }
   }
 
@@ -72,10 +69,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await cargarLigasUsuario()
       return { success: true, message: 'Te has unido a la liga.' }
     } catch (error) {
-      return {
-        success: false,
-        message: error.message || 'Error al unirse a la liga. Inténtalo de nuevo.',
-      }
+      return { success: false, message: error.message || 'Error al unirse a la liga. Inténtalo de nuevo.' }
     }
   }
 
@@ -86,9 +80,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       const storePerfil = usarStorePerfil()
       storePerfil.usuarioActual.idsLigas = storePerfil.usuarioActual.idsLigas.filter((id) => id !== idLiga)
 
-      if (idLigaActiva.value === idLiga) {
-        idLigaActiva.value = null
-      }
+      if (idLigaActiva.value === idLiga) idLigaActiva.value = null
 
       await cargarLigasUsuario()
       return { success: true, message: 'Has abandonado la liga.' }
@@ -100,10 +92,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
   async function expulsarParticipante(idLiga, emailParticipante) {
     try {
       const resultado = await servicioLigas.expulsarParticipante(idLiga, emailParticipante)
-      return {
-        success: true,
-        message: `${resultado.nombreExpulsado} ha sido expulsado.`,
-      }
+      return { success: true, message: `${resultado.nombreExpulsado} ha sido expulsado.` }
     } catch (error) {
       return { success: false, message: `Error al expulsar al participante: ${error.message}` }
     }
@@ -122,12 +111,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
     try {
       await servicioLigas.eliminarLiga(idLiga)
-
       storePerfil.usuarioActual.idsLigas = storePerfil.usuarioActual.idsLigas.filter((id) => id !== idLiga)
-
-      if (idLigaActiva.value === idLiga) {
-        idLigaActiva.value = null
-      }
+      if (idLigaActiva.value === idLiga) idLigaActiva.value = null
 
       await cargarLigasUsuario()
       return { success: true, message: 'Has eliminado la liga.' }

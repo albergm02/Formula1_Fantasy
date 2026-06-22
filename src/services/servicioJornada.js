@@ -5,10 +5,7 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
   const consulta = query(collection(db, 'jornadas'), orderBy('fechaProcesamiento', 'desc'), limit(limiteJornadas))
 
   return onSnapshot(consulta, (resultados) => {
-    const jornadas = resultados.docs.map((documento) => ({
-      id: documento.id,
-      ...documento.data(),
-    }))
+    const jornadas = resultados.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
     alActualizar(jornadas)
   })
 }
@@ -21,13 +18,10 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
  */
 export async function cargarCatalogoYPerfiles() {
   const documento = await getDoc(doc(db, 'catalogo', 'items'))
-  if (!documento.exists()) {
-    throw new Error('Catálogo no encontrado en Firestore (catalogo/items).')
-  }
+  if (!documento.exists()) throw new Error('Catálogo no encontrado en Firestore (catalogo/items).')
 
   const cartas = documento.data().pilotos || []
   const pilotosPorNumero = new Map()
-  const perfiles = {}
 
   for (const carta of cartas) {
     if (!pilotosPorNumero.has(carta.numero)) {
@@ -48,9 +42,7 @@ export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   const inicioCarrera = new Date(fechaInicio)
   const tiempoRestante = inicioCarrera - ahora
 
-  if (tiempoRestante <= 0) {
-    return '¡El gran premio ya ha comenzado!'
-  }
+  if (tiempoRestante <= 0) return '¡El gran premio ya ha comenzado!'
 
   const dias = Math.floor(tiempoRestante / (1000 * 60 * 60 * 24))
   const horas = Math.floor((tiempoRestante / (1000 * 60 * 60)) % 24)

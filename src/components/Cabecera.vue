@@ -36,9 +36,7 @@ const irADashboard = () => {
   }
 }
 
-const ocultarResumenEquipo = computed(() => {
-  return ruta.name === 'ligas' || ruta.name === 'perfil' || ruta.name === 'jornada'
-})
+const ocultarResumenEquipo = computed(() => ruta.name === 'ligas' || ruta.name === 'perfil' || ruta.name === 'jornada')
 </script>
 
 <template>

@@ -24,9 +24,5 @@ export const usarStoreActividad = defineStore('actividad', () => {
     }
   }
 
-  return {
-    actividad,
-    cargando,
-    cargarActividad,
-  }
+  return { actividad, cargando, cargarActividad }
 })
