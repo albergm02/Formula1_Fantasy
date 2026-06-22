@@ -82,7 +82,8 @@ const confirmarEliminarPuja = () => {
 </script>
 
 <template>
-  <div class="w-full h-[160px]" :style="esPiloto ? { border: `2px solid ${colorVariante}` } : {}">
+  <div class="w-full h-[160px]"
+    :style="esPiloto ? { border: `2px solid ${colorVariante}` } : esCoche ? { border: '2px solid white' } : esPotenciador ? { border: '2px solid #4ade80' } : {}">
     <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
         <img v-if="carta.imagen" :src="carta.imagen" :alt="carta.nombre" class="w-full h-full object-cover block"
@@ -191,14 +192,10 @@ const confirmarEliminarPuja = () => {
             <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Multiplicador</p>
             <span class="text-2xl font-black text-emerald-400">×{{ carta.multiplicador }}</span>
           </div>
-          <div v-if="etiquetaCondicion" class="flex flex-col gap-1 p-2.5 bg-[#121218] border"
-            :class="etiquetaCondicion.borde">
+          <div v-if="esPotenciador" class="flex flex-col gap-1">
             <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condición</span>
-            <span class="text-xs font-bold" :class="etiquetaCondicion.color">{{ etiquetaCondicion.texto }}</span>
-          </div>
-          <div v-else class="flex flex-col gap-1 p-2.5 bg-[#121218] border border-zinc-800">
-            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condición</span>
-            <span class="text-xs font-bold text-zinc-300">Se aplica en cualquier carrera.</span>
+            <span class="text-xs text-zinc-300">{{ etiquetaCondicion ? etiquetaCondicion.texto : 'Se aplica en carrera'
+              }}</span>
           </div>
         </template>
       </div>

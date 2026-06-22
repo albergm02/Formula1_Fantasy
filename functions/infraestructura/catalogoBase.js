@@ -118,11 +118,34 @@ const variantesPiloto = [
   { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega'                 },
 ]
 
-// Precio inicial uniforme para todas las cartas de piloto. El sistema de pujas
-// dinámicas (catalogo/precios) los ajusta automáticamente a partir del primer
-// Gran Premio en función del rendimiento real observado, sin intervención del
-// desarrollador.
-const PRECIO_INICIAL_PILOTO = 5.0
+// Precios iniciales por piloto basados en el rendimiento del campeonato 2026.
+// Escala de 15M a 30M proporcional a los puntos de cada piloto.
+// El sistema de pujas dinámicas (catalogo/precios) los irá ajustando a partir
+// del primer Gran Premio en función del rendimiento real observado.
+const PRECIOS_POR_PILOTO = {
+   1: 22.0, //  Lando Norris
+   3: 20.3, //  Max Verstappen
+   5: 15.2, //  Gabriel Bortoleto
+   6: 18.3, //  Isack Hadjar
+  10: 18.9, //  Pierre Gasly
+  11: 15.0, //  Sergio Pérez
+  12: 30.0, //  Kimi Antonelli
+  14: 15.1, //  Fernando Alonso
+  16: 22.2, //  Charles Leclerc
+  18: 15.0, //  Lance Stroll
+  23: 15.5, //  Alexander Albon
+  27: 15.0, //  Nico Hulkenberg
+  30: 17.5, //  Liam Lawson
+  31: 15.3, //  Esteban Ocon
+  41: 16.2, //  Arvid Lindblad
+  43: 16.8, //  Franco Colapinto
+  44: 26.1, //  Lewis Hamilton
+  55: 15.6, //  Carlos Sainz
+  63: 25.2, //  George Russell
+  77: 15.0, //  Valtteri Bottas
+  81: 21.5, //  Oscar Piastri
+  87: 16.7, //  Oliver Bearman
+}
 
 function crearCartaPiloto(pilotoBase, variante) {
   return {
@@ -134,7 +157,7 @@ function crearCartaPiloto(pilotoBase, variante) {
     tipoCarta: 'piloto',
     variante: variante.variante,
     nombreVariante: variante.nombreHabilidad,
-    precio: PRECIO_INICIAL_PILOTO,
+    precio: PRECIOS_POR_PILOTO[pilotoBase.numero] ?? 15.0,
   }
 }
 

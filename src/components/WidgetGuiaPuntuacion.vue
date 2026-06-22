@@ -56,12 +56,10 @@ function alternarVariante(id) {
 
     <div v-if="guiaAbierta" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-2">
       <p class="text-[11px] text-zinc-400">
-        Cada variante calcula sus puntos <span class="text-white font-bold">directamente del rendimiento real</span>
+        Cada variante calcula sus puntos directamente del rendimiento real
         del piloto en este Gran Premio (datos de OpenF1). La posición de qualy, la posición de
-        carrera, las paradas y las posiciones ganadas son las únicas variables. Los <span
-          class="text-white font-bold">potenciadores</span>
-        actúan después como
-        multiplicador global de la jornada.
+        carrera, las paradas y las posiciones ganadas son las únicas variables. Los potenciadores
+        actúan después como multiplicador global de la jornada.
       </p>
 
       <div v-for="variante in VARIANTES" :key="variante.id" class="bg-[#121218] border border-zinc-800 overflow-hidden">
@@ -69,7 +67,7 @@ function alternarVariante(id) {
           class="w-full flex items-center gap-3 p-2.5 border-none text-left transition-colors">
           <i class="pi text-base" :class="variante.icono" :style="{ color: variante.color }"></i>
           <span :style="{ color: variante.color }" class="flex-1 text-xs font-bold text-white">{{ variante.etiqueta
-            }}</span>
+          }}</span>
           <i class="pi text-zinc-500 text-[10px]"
             :class="varianteExpandida === variante.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
         </button>

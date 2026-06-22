@@ -44,7 +44,7 @@ export const perfilesPuntuacion = {
       'Premia los adelantamientos en pista.',
       'Diferencial = adelantamientos realizados − veces adelantado.',
       'Diferencial 0 o negativo: 0 puntos.',
-      'Diferencial 1: 3 pts · 2: 7 pts · 3: 12 pts · 4: 18 pts.',
+      'Diferencial 1: 3 pts — 2: 7 pts — 3: 12 pts — 4: 18 pts.',
       'Diferencial 5 o más: 25 puntos (tope).',
       'Si el piloto no termina: 0 puntos.',
     ],
