@@ -187,18 +187,12 @@ const handleEliminarLiga = () => {
     <div class="p-4 mt-4 max-w-4xl mx-auto">
       <div class="flex flex-col gap-6">
         <section class="grid grid-cols-2 gap-4">
-          <Button
-            label="CREAR LIGA"
-            icon="pi pi-plus"
+          <Button label="CREAR LIGA" icon="pi pi-plus"
             class="w-full py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#1A1A1F]"
-            @click="dialogoCrearVisible = true"
-          />
-          <Button
-            label="UNIRSE"
-            icon="pi pi-sign-in"
+            @click="dialogoCrearVisible = true" />
+          <Button label="UNIRSE" icon="pi pi-sign-in"
             class="w-full py-3 !bg-transparent !border-2 !border-[#D4A843] font-black tracking-widest !text-[#D4A843]"
-            @click="dialogoUnirseVisible = true"
-          />
+            @click="dialogoUnirseVisible = true" />
         </section>
 
         <section>
@@ -210,12 +204,8 @@ const handleEliminarLiga = () => {
             <DataView :value="storeLigas.detallesLigas" :pt="{ content: { class: '!bg-transparent' } }">
               <template #list="slotProps">
                 <div class="flex flex-col w-full gap-4">
-                  <div
-                    v-for="(item, index) in slotProps.items"
-                    :key="index"
-                    @click="abrirLiga(item.id)"
-                    class="flex items-center justify-between p-4 bg-[#1A1A1F] rounded-lg"
-                  >
+                  <div v-for="(item, index) in slotProps.items" :key="index" @click="abrirLiga(item.id)"
+                    class="flex items-center justify-between p-4 bg-[#1A1A1F] rounded-lg">
                     <div class="flex flex-col gap-1 w-2/3">
                       <h3 class="pr-2 text-xl font-black uppercase truncate text-[#E10600]" :title="item.nombre">
                         {{ item.nombre }}
@@ -231,21 +221,12 @@ const handleEliminarLiga = () => {
                     </div>
 
                     <div class="flex gap-2 justify-end">
-                      <Button
-                        icon="pi pi-copy"
-                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
-                        @click.stop="copiarCodigoLiga(item.codigo_invitacion)"
-                      />
-                      <Button
-                        icon="pi pi-cog"
-                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
-                        @click.stop="abrirOpcionesLiga(item)"
-                      />
-                      <Button
-                        icon="pi pi-play"
-                        class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
-                        @click.stop="abrirLiga(item.id)"
-                      />
+                      <Button icon="pi pi-copy" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                        @click.stop="copiarCodigoLiga(item.codigo_invitacion)" />
+                      <Button icon="pi pi-cog" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                        @click.stop="abrirOpcionesLiga(item)" />
+                      <Button icon="pi pi-play" class="!bg-[#121218] !border !border-[#D4A843] !text-[#D4A843]"
+                        @click.stop="abrirLiga(item.id)" />
                     </div>
                   </div>
                 </div>
@@ -254,7 +235,8 @@ const handleEliminarLiga = () => {
           </div>
 
           <div v-else-if="!cargando" class="flex justify-center mt-10">
-            <Message severity="secondary" class="!bg-transparent !border !border-[#F0ECEC]/20 !text-center !text-[#F0ECEC]">
+            <Message severity="secondary"
+              class="!bg-transparent !border !border-[#F0ECEC]/20 !text-center !text-[#F0ECEC]">
               No perteneces a ninguna liga todavía. Crea o únete a una.
             </Message>
           </div>
@@ -262,123 +244,70 @@ const handleEliminarLiga = () => {
       </div>
     </div>
 
-    <Dialog
-      v-model:visible="dialogoCrearVisible"
-      modal
-      header="CREAR CAMPEONATO"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="dialogoCrearVisible" modal header="CREAR CAMPEONATO"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <span class="text-[#F0ECEC]">Introduzca el nombre de la nueva liga. (Máximo 12 caracteres)</span>
-        <InputText
-          v-model="nombreNuevaLiga"
-          placeholder="Introduzca aquí el nombre..."
-          maxlength="12"
-          class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#D4A843]"
-          autofocus
-        />
+        <InputText v-model="nombreNuevaLiga" placeholder="Introduzca aquí el nombre..." maxlength="12"
+          class="w-full !bg-[#121218] !text-[#F0ECEC] focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
-          <Button label="Cancelar" @click="dialogoCrearVisible = false" class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button
-            label="Crear"
-            @click="handleCrearLiga"
-            :loading="cargandoAccion"
-            :disabled="cargandoAccion"
-            class="!px-10 !bg-[#D4A843] !border-none font-bold"
-          />
+          <Button label="Cancelar" @click="dialogoCrearVisible = false"
+            class="!bg-transparent !border-none !text-[#F0ECEC]" />
+          <Button label="Crear" @click="handleCrearLiga" :loading="cargandoAccion" :disabled="cargandoAccion"
+            class="!px-10 !bg-[#D4A843] !border-none font-bold" />
         </div>
       </div>
     </Dialog>
 
-    <Dialog
-      v-model:visible="dialogoUnirseVisible"
-      modal
-      header="UNIRSE A LIGA"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="dialogoUnirseVisible" modal header="UNIRSE A LIGA"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <span class="text-sm text-[#F0ECEC]">Introduce el código de invitación de 8 dígitos.</span>
-        <InputText
-          v-model="codigoUnion"
-          placeholder="Ej: A1B2C3D4"
-          maxlength="8"
-          class="w-full !bg-[#121218] uppercase focus:!border-[#D4A843]"
-          autofocus
-        />
+        <InputText v-model="codigoUnion" placeholder="Ej: A1B2C3D4" maxlength="8"
+          class="w-full !bg-[#121218] uppercase focus:!border-[#D4A843]" autofocus />
         <div class="flex justify-end gap-2 mt-2">
-          <Button label="Cancelar" @click="dialogoUnirseVisible = false" class="!bg-transparent !border-none !text-[#F0ECEC]" />
-          <Button
-            label="Unirse"
-            @click="handleUnirseLiga"
-            :loading="cargandoAccion"
-            :disabled="cargandoAccion"
-            class="!px-10 !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
-          />
+          <Button label="Cancelar" @click="dialogoUnirseVisible = false"
+            class="!bg-transparent !border-none !text-[#F0ECEC]" />
+          <Button label="Unirse" @click="handleUnirseLiga" :loading="cargandoAccion" :disabled="cargandoAccion"
+            class="!px-10 !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]" />
         </div>
       </div>
     </Dialog>
 
-    <Dialog
-      v-model:visible="dialogoOpcionesVisible"
-      modal
-      header="AJUSTES DE LIGA"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="dialogoOpcionesVisible" modal header="AJUSTES DE LIGA"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div v-if="ligaSeleccionada" class="flex flex-col gap-4">
         <p class="mb-2 text-center text-sm text-[#F0ECEC]">
-          ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong
-          >?
+          ¿Qué deseas hacer con la liga <strong class="text-white">{{ ligaSeleccionada.nombre }}</strong>?
         </p>
 
-        <Button
-          label="ABANDONAR LIGA"
-          class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
-          @click="handleAbandonarLiga"
-          :loading="cargandoAccion"
-        />
+        <Button label="ABANDONAR LIGA" class="w-full !bg-[#F0ECEC] !border-none font-bold !text-black"
+          @click="handleAbandonarLiga" :loading="cargandoAccion" />
         <template v-if="ligaSeleccionada.correoOrganizador === storePerfil.usuarioActual.correoAutenticacion">
-          <Button
-            label="GESTIONAR PARTICIPANTES"
-            class="w-full !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
-            @click="abrirGestionParticipantes"
-            :loading="cargandoAccion"
-          />
-          <Button
-            label="ELIMINAR LIGA"
-            class="w-full !bg-[#E10600] !border-none font-bold !text-white"
-            @click="handleEliminarLiga"
-            :loading="cargandoAccion"
-          />
+          <Button label="GESTIONAR PARTICIPANTES" class="w-full !bg-[#D4A843] !border-none font-bold !text-[#1A1A1F]"
+            @click="abrirGestionParticipantes" :loading="cargandoAccion" />
+          <Button label="ELIMINAR LIGA" class="w-full !bg-[#E10600] !border-none font-bold !text-white"
+            @click="handleEliminarLiga" :loading="cargandoAccion" />
         </template>
       </div>
     </Dialog>
 
-    <Dialog
-      v-model:visible="dialogoParticipantesVisible"
-      modal
-      header="PARTICIPANTES"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="dialogoParticipantesVisible" modal header="PARTICIPANTES"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-3 min-w-64">
         <div v-if="cargandoParticipantes" class="text-center text-[#F0ECEC] py-4">Cargando...</div>
-        <div v-else-if="participantesLiga.length === 0" class="text-center text-[#F0ECEC] py-4">No hay participantes.</div>
-        <div
-          v-else
-          v-for="participante in participantesLiga"
-          :key="participante.email_usuario"
-          class="flex items-center justify-between p-3 bg-[#1A1A1F] rounded-lg"
-        >
+        <div v-else-if="participantesLiga.length === 0" class="text-center text-[#F0ECEC] py-4">No hay participantes.
+        </div>
+        <div v-else v-for="participante in participantesLiga" :key="participante.email_usuario"
+          class="flex items-center justify-between p-3 bg-[#1A1A1F] rounded-lg">
           <div class="flex flex-col">
             <span class="font-black text-white uppercase text-sm">{{ participante.nombre_usuario }}</span>
-            <span class="text-[10px] text-[#D4A843] uppercase font-bold">{{ participante.rol }}</span>
+            <span class="text-[10px] text-[#D4A843] uppercase font-bold">{{ participante.esOrganizador ? 'Organizador' :
+              'Miembro' }}</span>
           </div>
-          <Button
-            v-if="participante.email_usuario !== storePerfil.usuarioActual.correoAutenticacion"
-            icon="pi pi-user-minus"
-            class="!bg-[#E10600] !border-none !text-white"
-            :loading="cargandoAccion"
-            @click="handleExpulsarParticipante(participante)"
-          />
+          <Button v-if="participante.email_usuario !== storePerfil.usuarioActual.correoAutenticacion"
+            icon="pi pi-user-minus" class="!bg-[#E10600] !border-none !text-white" :loading="cargandoAccion"
+            @click="handleExpulsarParticipante(participante)" />
         </div>
       </div>
     </Dialog>

@@ -17,7 +17,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
   const perfilExiste = ref(false)
   const datosCargados = ref(false)
 
-  async function cargarPerfil(uid, correoUsuario, datosPerfil) {
+    async function cargarPerfil(uid, correoUsuario, datosPerfil) {
     const storePerfil = usarStorePerfil()
     storePerfil.establecerDatosUsuario({
       uid,
@@ -29,7 +29,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     perfilExiste.value = true
   }
 
-  async function crearPerfil(nombreUsuario) {
+    async function crearPerfil(nombreUsuario) {
     const storePerfil = usarStorePerfil()
     await llamarCrearPerfil(nombreUsuario)
     storePerfil.establecerDatosUsuario({
@@ -44,14 +44,14 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   // Tras verificar el correo nuevo en Auth, el token lo refleja pero Firestore
   // conserva el anterior. Tolerante a fallos: se reintentará en el próximo login.
-  async function reconciliarCorreoMigrado(correoToken, correoPerfil) {
+    async function reconciliarCorreoMigrado(correoToken, correoPerfil) {
     const correoNuevo = correoToken.trim().toLowerCase()
     const correoAnterior = correoPerfil.trim().toLowerCase()
     if (!correoAnterior || correoAnterior === correoNuevo) return
     await migrarCorreo(correoAnterior, correoNuevo).catch(() => {})
   }
 
-  async function verificarExistenciaPerfil(uid, correoUsuario) {
+    async function verificarExistenciaPerfil(uid, correoUsuario) {
     const storePerfil = usarStorePerfil()
     datosCargados.value = false
     storePerfil.usuarioActual.uid = uid
@@ -80,7 +80,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     }
   }
 
-  function limpiarSesion() {
+    function limpiarSesion() {
     const storePerfil = usarStorePerfil()
     datosCargados.value = false
     storePerfil.limpiarDatosUsuario()
@@ -88,14 +88,14 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     datosCargados.value = true
   }
 
-  async function procesarRegistro(correo, contrasena, nombreUsuario) {
-    const credencial = await registrarse(correo, contrasena)
+    async function procesarRegistro(correo, contrasena, nombreUsuario) {
+    await registrarse(correo, contrasena)
     await enviarVerificacionCorreo()
     await crearPerfil(nombreUsuario)
     await cerrarSesion()
   }
 
-  async function iniciarSesionConCorreo(correo, contrasena) {
+    async function iniciarSesionConCorreo(correo, contrasena) {
     const credencial = await iniciarSesion(correo, contrasena)
     if (!credencial.user.emailVerified) {
       await cerrarSesion()
@@ -106,7 +106,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     return { esAdministrador: storePerfil.esAdministrador }
   }
 
-  async function iniciarSesionConGoogle() {
+    async function iniciarSesionConGoogle() {
     const credencial = await iniciarSesionConGoogleProveedor()
     const correoGoogle = credencial.user.email?.trim()
     if (!correoGoogle) throw new Error('SIN_CORREO_GOOGLE')
@@ -115,12 +115,12 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     return { perfilEncontrado, esAdministrador: storePerfil.esAdministrador }
   }
 
-  async function cerrarSesion() {
+    async function cerrarSesion() {
     await cerrarSesionProveedor()
     limpiarSesion()
   }
 
-  function observarEstadoSesion(alCambiarUsuario) {
+    function observarEstadoSesion(alCambiarUsuario) {
     return escucharCambioEstadoAutenticacion(alCambiarUsuario)
   }
 

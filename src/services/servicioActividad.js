@@ -12,7 +12,6 @@ export const cargarActividadLiga = async (idLiga, maximo = 30) => {
 
   return instantanea.docs
     .map((documento) => ({
-      id: documento.id,
       ...documento.data(),
       fecha: documento.data().fecha?.toDate() ?? new Date(),
     }))

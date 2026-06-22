@@ -10,12 +10,6 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
   })
 }
 
-/**
- * Lee el catálogo de pilotos desde Firestore y devuelve el listado
- * deduplicado por número de piloto.
- *
- * @returns {Promise<Array>}
- */
 export async function cargarCatalogoYPerfiles() {
   const documento = await getDoc(doc(db, 'catalogo', 'items'))
   if (!documento.exists()) throw new Error('Catálogo no encontrado en Firestore (catalogo/items).')
@@ -30,7 +24,6 @@ export async function cargarCatalogoYPerfiles() {
         nombre: carta.nombre,
         equipo: carta.equipo,
         imagen: carta.imagen,
-        atributos: carta.atributos,
       })
     }
   }
@@ -52,114 +45,85 @@ export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   return `${dias}d ${horas}h ${minutos}m ${segundos}s`
 }
 
-const FACTOR_MINIMO = 0.5
-const FACTOR_MAXIMO = 1.5
+// ============================================================================
+// Cálculo de puntos por variante (réplica frontend del sistema server-side).
+// Mantengo el código duplicado en cliente y servidor a propósito: el cliente
+// usa estas funciones para SIMULAR qué pasaría con cada variante en la vista
+// de Jornadas, mientras que el servidor las usa al PROCESAR la jornada y
+// guardar el resultado oficial en Firestore. Ambos deben coincidir.
+// ============================================================================
 
-export function calcularFactorJornada(actuacion, condiciones, variante) {
-  if (variante === 'qualy') return acotarFactor(calcularFactorQualy(actuacion))
-  if (variante === 'carrera') return acotarFactor(calcularFactorCarrera(actuacion))
-  if (variante === 'todo_terreno') {
-    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
-    return acotarFactor(calcularFactorTodoTerreno(condiciones))
-  }
-  if (variante === 'remontador') {
-    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
-    return acotarFactor(calcularFactorRemontador(actuacion))
-  }
-  if (variante === 'estratega') {
-    if (pilotoSinActuacionValida(actuacion)) return FACTOR_MINIMO
-    return acotarFactor(calcularFactorEstrategia(actuacion))
-  }
-  return 1.0
+const PUNTOS_FIA_POR_POSICION = { 1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6, 8: 4, 9: 2, 10: 1 }
+
+export function calcularPuntosVariante(variante, actuacion, condiciones) {
+  if (variante === 'qualy') return puntosPorPosicion(actuacion?.posicionQualy)
+  if (sinActuacionValida(actuacion) && variante !== 'base') return 0
+  if (variante === 'carrera') return puntosPorPosicion(actuacion.posicionCarrera)
+  if (variante === 'todo_terreno') return puntosTodoTerreno(actuacion, condiciones)
+  if (variante === 'remontador') return puntosRemontador(actuacion)
+  if (variante === 'estratega') return puntosEstratega(actuacion)
+  if (variante === 'base') return puntosBase(actuacion)
+  return 0
 }
 
-export function calcularPuntosJornada(puntuacionBase, factorJornada = 1.0) {
-  return Math.max(0, Math.round(puntuacionBase * factorJornada))
-}
-
-export function calcularPuntuacionBase(atributos, pesos) {
-  const valor =
-    (pesos.ritmo || 0) * atributos.ritmo +
-    (pesos.consistencia || 0) * atributos.consistencia +
-    (pesos.adaptabilidad || 0) * atributos.adaptabilidad +
-    (pesos.agresividad || 0) * (atributos.agresividad || 0) +
-    (pesos.gestion || 0) * (atributos.gestion || 0)
-  return Math.round(valor * 10) / 10
-}
-
-function acotarFactor(factor) {
-  if (factor < FACTOR_MINIMO) return FACTOR_MINIMO
-  if (factor > FACTOR_MAXIMO) return FACTOR_MAXIMO
+export function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroVirtualSafetyCarActivos = 0, numeroDNFs = 0 } = {}) {
+  let factor = 0.5
+  if (llovio) factor += 0.4
+  factor += Math.min(3, numeroSafetyCarActivos + numeroVirtualSafetyCarActivos) * 0.05
+  if (numeroDNFs >= 5) factor += 0.1
   return Math.round(factor * 100) / 100
 }
 
-function pilotoSinActuacionValida(actuacion) {
+function sinActuacionValida(actuacion) {
   return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq || actuacion?.noClasificado)
 }
 
-function calcularFactorQualy({ posicionQualy }) {
-  return resolverFactorPosicionQualy(posicionQualy)
+function puntosPorPosicion(posicion) {
+  return PUNTOS_FIA_POR_POSICION[posicion] || 0
 }
 
-function calcularFactorCarrera({ posicionCarrera }) {
-  return resolverFactorPosicionCarrera(posicionCarrera)
+function puntosTodoTerreno(actuacion, condiciones) {
+  const factor = calcularFactorCaos(condiciones || {})
+  return redondear(puntosPorPosicion(actuacion.posicionCarrera) * factor)
 }
 
-function calcularFactorTodoTerreno({ llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }) {
-  const factorBase = llovio ? 1 : 0.5
-  const bonusCaos = (numeroSafetyCarActivos || 0) * 0.05 + (numeroVirtualSafetyCarActivos || 0) * 0.05 + (numeroDNFs || 0) * 0.1
-  return Math.round((factorBase + bonusCaos) * 100) / 100
+const PUNTOS_REMONTADOR_POR_DIFERENCIAL = [0, 3, 7, 12, 18, 25]
+
+function puntosRemontador({ numeroAdelantos = 0, numeroVecesAdelantado = 0 }) {
+  const adelantamientosNetos = numeroAdelantos - numeroVecesAdelantado
+  if (adelantamientosNetos <= 0) return 0
+  const indice = Math.min(adelantamientosNetos, PUNTOS_REMONTADOR_POR_DIFERENCIAL.length - 1)
+  return PUNTOS_REMONTADOR_POR_DIFERENCIAL[indice]
 }
 
-function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
-  const diferencial = (numeroAdelantos || 0) - (numeroVecesAdelantado || 0)
-  return 1 + diferencial * 0.1
+function puntosEstratega({ posicionCarrera = 20, numeroPitStops = 0, porcentajeStintMaximo = 0 }) {
+  if (numeroPitStops === 0) return 0
+  return bonusParadas(numeroPitStops) + bonusStint(porcentajeStintMaximo) + bonusPosicionEstratega(posicionCarrera)
 }
 
-function calcularFactorEstrategia({ posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 }) {
-  let factor = 0.7
-  factor += resolverBonusGestionStint(porcentajeStintMaximo)
-  factor += resolverBonusEstrategiaParadas(numeroPitStops)
-  factor += resolverBonusPosicionEstratega(posicionCarrera)
-  return factor
+function bonusParadas(numeroPitStops) {
+  if (numeroPitStops === 1) return 10
+  if (numeroPitStops === 2) return 5
+  return 0
 }
 
-function resolverFactorPosicionQualy(posicion) {
-  if (posicion <= 3) return 1.5
-  if (posicion <= 6) return 1.25
-  if (posicion <= 10) return 1.1
-  if (posicion <= 15) return 0.85
-  return 0.65
+function bonusStint(porcentajeStintMaximo) {
+  return Math.round((porcentajeStintMaximo || 0) * 10)
 }
 
-function resolverFactorPosicionCarrera(posicion) {
-  if (posicion === 1) return 1.5
-  if (posicion === 2) return 1.4
-  if (posicion === 3) return 1.3
-  if (posicion <= 5) return 1.2
-  if (posicion <= 10) return 1.0
-  if (posicion <= 15) return 0.8
-  if (posicion <= 20) return 0.6
-  return 0.5
+function bonusPosicionEstratega(posicion) {
+  if (posicion <= 3) return 10
+  if (posicion <= 6) return 7
+  if (posicion <= 10) return 4
+  return 0
 }
 
-function resolverBonusGestionStint(porcentajeStintMaximo) {
-  if (porcentajeStintMaximo >= 0.6) return 0.5
-  if (porcentajeStintMaximo >= 0.45) return 0.3
-  if (porcentajeStintMaximo >= 0.35) return 0.2
-  if (porcentajeStintMaximo >= 0.25) return 0.1
-  return 0.0
+function puntosBase(actuacion) {
+  const puntosQualy = puntosPorPosicion(actuacion.posicionQualy)
+  const puntosCarrera = sinActuacionValida(actuacion) ? 0 : puntosPorPosicion(actuacion.posicionCarrera)
+  return redondear((puntosQualy + puntosCarrera) / 2)
 }
 
-function resolverBonusEstrategiaParadas(numeroPitStops) {
-  if (numeroPitStops === 1) return 0.15
-  if (numeroPitStops === 2) return 0.05
-  return 0.0
-}
-
-function resolverBonusPosicionEstratega(posicionCarrera) {
-  if (posicionCarrera <= 3) return 0.15
-  if (posicionCarrera <= 10) return 0.05
-  if (posicionCarrera <= 15) return 0.0
-  return -0.1
+function redondear(valor) {
+  return Math.round(valor * 100) / 100
 }

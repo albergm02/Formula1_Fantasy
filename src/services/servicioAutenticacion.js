@@ -11,11 +11,12 @@
 
 import { auth } from './servicioFirebase'
 
+const googleProvider = new GoogleAuthProvider()
+
 export const registrarse = (email, password) => createUserWithEmailAndPassword(auth, email, password)
 
 export const iniciarSesion = (email, password) => signInWithEmailAndPassword(auth, email, password)
 
-/** Popup en lugar de redirect para no romper el ciclo de vida de Vue Router. */
 export const iniciarSesionConGoogle = () => signInWithPopup(auth, googleProvider)
 
 export const restablecerContraseña = (email) => sendPasswordResetEmail(auth, email)
@@ -26,7 +27,6 @@ export const enviarVerificacionCorreo = () => sendEmailVerification(auth.current
 
 export const escucharCambioEstadoAutenticacion = (callback) => onAuthStateChanged(auth, callback)
 
-/** Lectura puntual del usuario (resuelve y cancela el observador en el acto). */
 export const obtenerUsuarioActual = () =>
   new Promise((resolve, reject) => {
     const cancelar = onAuthStateChanged(
@@ -39,11 +39,6 @@ export const obtenerUsuarioActual = () =>
     )
   })
 
-/**
- * Traduce códigos de error de Firebase Auth a mensajes legibles en español.
- * @param {Error} error
- * @returns {string}
- */
 export function mensajeErrorFirebase(error) {
   const codigo = error?.code || ''
   if (codigo === 'auth/wrong-password' || codigo === 'auth/invalid-credential') return 'Contraseña introducida incorrecta.'

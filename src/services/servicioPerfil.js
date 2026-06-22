@@ -35,16 +35,11 @@ export const cargarPerfilUsuario = async (uid) => {
   return docSnap.exists() ? docSnap.data() : {}
 }
 
-/** Observador en tiempo real del perfil del usuario (detecta expulsiones, etc.). */
 export const escucharPerfilUsuario = (uid, callback) =>
   onSnapshot(doc(db, 'usuarios', uid), (instantanea) => {
     if (instantanea.exists()) callback(instantanea.data())
   })
 
-/**
- * Reautentica al usuario actual. Si entró por contraseña usa la credencial
- * indicada; si entró por Google, abre el popup de Google.
- */
 export const reautenticarUsuario = async (contrasenaActual) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
@@ -69,11 +64,6 @@ export const solicitarRestablecimientoContrasena = async () => {
   await sendPasswordResetEmail(auth, usuario.email)
 }
 
-/**
- * El servidor valida la reautenticación reciente y el bloqueo de 7 días; tras
- * autorizar, Firebase envía el enlace de confirmación al correo nuevo. El correo
- * en Auth no cambia hasta que el usuario confirme desde ese enlace.
- */
 export const solicitarCambioCorreo = async (correoNuevo) => {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')

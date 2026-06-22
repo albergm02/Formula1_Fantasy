@@ -10,7 +10,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
   const detallesLigas = ref([])
   const idLigaActiva = ref(null)
 
-  async function cargarLigasUsuario() {
+    async function cargarLigasUsuario() {
     const storePerfil = usarStorePerfil()
     const idsAlmacenados = storePerfil.usuarioActual.idsLigas
 
@@ -39,7 +39,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function crearLiga(nombreLiga) {
+    async function crearLiga(nombreLiga) {
     const storePerfil = usarStorePerfil()
 
     if (alcanzoLimiteLigas(storePerfil.usuarioActual.idsLigas)) {
@@ -56,7 +56,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function unirseALiga(codigoInvitacion) {
+    async function unirseALiga(codigoInvitacion) {
     const storePerfil = usarStorePerfil()
 
     if (alcanzoLimiteLigas(storePerfil.usuarioActual.idsLigas)) {
@@ -73,7 +73,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function abandonarLiga(idLiga) {
+    async function abandonarLiga(idLiga) {
     try {
       await servicioLigas.abandonarLiga(idLiga)
 
@@ -89,7 +89,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function expulsarParticipante(idLiga, emailParticipante) {
+    async function expulsarParticipante(idLiga, emailParticipante) {
     try {
       const resultado = await servicioLigas.expulsarParticipante(idLiga, emailParticipante)
       return { success: true, message: `${resultado.nombreExpulsado} ha sido expulsado.` }
@@ -98,7 +98,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function cargarParticipantesLiga(idLiga) {
+    async function cargarParticipantesLiga(idLiga) {
     try {
       return await servicioLigas.cargarParticipantes(idLiga)
     } catch (error) {
@@ -106,7 +106,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function eliminarLiga(idLiga) {
+    async function eliminarLiga(idLiga) {
     const storePerfil = usarStorePerfil()
 
     try {
@@ -121,7 +121,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function cargarClasificacion(idLiga) {
+    async function cargarClasificacion(idLiga) {
     try {
       return await servicioLigas.cargarClasificacion(idLiga)
     } catch (error) {
@@ -129,7 +129,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-  async function cargarGarajeRival(idParticipacion) {
+    async function cargarGarajeRival(idParticipacion) {
     try {
       return await servicioLigas.cargarGarajeRival(idParticipacion)
     } catch (error) {

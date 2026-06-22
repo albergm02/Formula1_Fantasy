@@ -7,6 +7,7 @@ const { eliminarCuentaUsuarioEnCascada } = require('./perfil')
 
 const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 
+
 exports.eliminarLigaAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { idLiga } = request.data || {}
@@ -21,6 +22,7 @@ exports.eliminarLigaAdmin = onCall(OPCIONES, async (request) => {
 
 // Bloqueo expresamente la eliminación de otros administradores desde el panel
 // para evitar "tiroteos" entre admins.
+
 exports.eliminarUsuarioAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { uid } = request.data || {}

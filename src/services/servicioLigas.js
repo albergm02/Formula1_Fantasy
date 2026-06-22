@@ -1,16 +1,6 @@
-/**
- * Servicio de ligas: centraliza las operaciones de Firestore relacionadas con
- * ligas y participaciones. Los stores importan desde aquí, nunca desde Firebase.
- *
- * Principio Commands/Queries:
- *  - Queries (lecturas): se ejecutan directamente desde el cliente vía SDK.
- *  - Commands (escrituras): se delegan a Cloud Functions para garantizar
- *    atomicidad y validación server-side.
- */
 import { collection, doc, getDocs, query, where, arrayRemove, getDoc, updateDoc, documentId } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
-import { migrarGaraje } from '@/utils/migracionGaraje'
 
 const llamadaCrearLiga = httpsCallable(functions, 'crearLiga')
 const llamadaUnirseALiga = httpsCallable(functions, 'unirseALiga')
@@ -18,34 +8,26 @@ const llamadaAbandonarLiga = httpsCallable(functions, 'abandonarLiga')
 const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLiga')
 const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipante')
 
-/** @param {string} nombreLiga */
 export const crearLiga = async (nombreLiga) => {
   const respuesta = await llamadaCrearLiga({ nombreLiga })
   return respuesta.data
 }
 
-/** @param {string} codigoInvitacion */
 export const unirseALiga = async (codigoInvitacion) => {
   const respuesta = await llamadaUnirseALiga({ codigoInvitacion })
   return respuesta.data
 }
 
-/** @param {string} idLiga */
 export const abandonarLiga = async (idLiga) => {
   const respuesta = await llamadaAbandonarLiga({ idLiga })
   return respuesta.data
 }
 
-/** @param {string} idLiga */
 export const eliminarLiga = async (idLiga) => {
   const respuesta = await llamadaEliminarLiga({ idLiga })
   return respuesta.data
 }
 
-/**
- * @param {string} idLiga
- * @param {string} emailExpulsado
- */
 export const expulsarParticipante = async (idLiga, emailExpulsado) => {
   const respuesta = await llamadaExpulsarParticipante({ idLiga, emailExpulsado })
   return respuesta.data
@@ -86,17 +68,12 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
 
 /* ─── Queries: Usuarios ──────────────────────────────────────────────────── */
 
-/**
- * Desvincula una liga del array `ligasIds` del usuario. Se usa exclusivamente
- * para limpiar referencias huérfanas detectadas durante la carga de ligas.
- */
 export const desvincularLigaDelUsuario = async (uid, idLiga) => {
   await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayRemove(idLiga) })
 }
 
 /* ─── Queries: Garaje de participante ────────────────────────────────────── */
 
-/** Garaje público de un rival (nunca expone el presupuesto). */
 export const cargarGarajeRival = async (idParticipacion) => {
   const documento = await getDoc(doc(db, 'participaciones', idParticipacion))
   if (!documento.exists()) return null
@@ -112,11 +89,10 @@ export const cargarGarajeRival = async (idParticipacion) => {
     nombreUsuario: nombreActual || 'Desconocido',
     puntos: datos.puntos || 0,
     ultimaJornada: datos.ultimaJornada || null,
-    garaje: migrarGaraje(garajeOriginal),
+    garaje: garajeOriginal,
   }
 }
 
-/** Ranking ordenado por puntos desc, desempate por presupuesto desc. */
 export const cargarClasificacion = async (idLiga) => {
   const participaciones = await cargarParticipantes(idLiga)
   const docsUsuario = await Promise.all(participaciones.map((p) => getDoc(doc(db, 'usuarios', p.uid_usuario))))

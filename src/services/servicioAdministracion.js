@@ -1,5 +1,5 @@
 import { httpsCallable } from 'firebase/functions'
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, orderBy, query } from 'firebase/firestore'
 import { db, functions } from '@/services/servicioFirebase'
 
 const llamadaEliminarLiga = httpsCallable(functions, 'eliminarLigaAdmin')
@@ -38,4 +38,19 @@ export async function cargarListaUsuarios() {
     }))
     .filter((u) => !u.esAdministrador)
     .map((u) => ({ ...u, etiqueta: `${u.nombre} (${u.email})` }))
+}
+
+export async function cargarListaJornadas() {
+  const consulta = query(collection(db, 'jornadas'), orderBy('fechaProcesamiento', 'desc'))
+  const snap = await getDocs(consulta)
+  return snap.docs.map((documento) => {
+    const datos = documento.data()
+    return {
+      id: documento.id,
+      nombreGranPremio: datos.nombreGranPremio || documento.id,
+      temporada: datos.temporada ?? null,
+      fechaCarrera: datos.fechaCarrera ? new Date(datos.fechaCarrera) : null,
+      fechaProcesamiento: datos.fechaProcesamiento ? new Date(datos.fechaProcesamiento) : null,
+    }
+  })
 }

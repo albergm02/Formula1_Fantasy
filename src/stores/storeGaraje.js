@@ -4,7 +4,6 @@ import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario } from '@/services/servicioLigas'
 import { calcularPrecioClausula, venderCarta, alternarAlineacion, gestionarClausula, ejecutarClausula } from '@/services/servicioGaraje'
 import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
-import { migrarGaraje } from '@/utils/migracionGaraje'
 
 const PRESUPUESTO_INICIAL = 50.0
 
@@ -20,7 +19,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
   const ultimaJornada = ref(null)
   const preciosMercado = ref({ pilotos: {}, coches: {}, potenciadores: {} })
 
-  async function cargarEquipo(idLiga) {
+    async function cargarEquipo(idLiga) {
     cargandoEquipo.value = true
     const storePerfil = usarStorePerfil()
 
@@ -37,7 +36,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
         idParticipanteActivo.value = participacion.id
         presupuesto.value = participacion.presupuesto
         puntos.value = participacion.puntos
-        garaje.value = migrarGaraje(participacion.garaje || crearGarajeVacio())
+        garaje.value = participacion.garaje || crearGarajeVacio()
         ultimaJornada.value = participacion.ultimaJornada || null
       } else {
         presupuesto.value = PRESUPUESTO_INICIAL
@@ -56,9 +55,9 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  const aResultadoFallido = (error) => ({ success: false, message: error?.message || 'Error en el servidor.' })
+    const aResultadoFallido = (error) => ({ success: false, message: error?.message || 'Error en el servidor.' })
 
-  async function venderElemento(elemento) {
+    async function venderElemento(elemento) {
     if (!elemento) return { success: false, message: 'Elemento no encontrado para vender.' }
     try {
       const resultado = await venderCarta(idParticipanteActivo.value, elemento.instancia_id)
@@ -72,7 +71,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  async function alternarEquipado(instanciaId) {
+    async function alternarEquipado(instanciaId) {
     try {
       const resultado = await alternarAlineacion(idParticipanteActivo.value, instanciaId)
       await cargarEquipo(idLigaActiva.value)
@@ -82,7 +81,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  async function invertirEnClausula(instanciaId, cantidad) {
+    async function invertirEnClausula(instanciaId, cantidad) {
     const elemento = encontrarElementoEnGaraje(instanciaId)
     if (!elemento) return { success: false, message: 'Elemento no encontrado en tu garaje.' }
     try {
@@ -96,7 +95,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  async function ejecutarClausulaRival(idParticipanteRival, elemento) {
+    async function ejecutarClausulaRival(idParticipanteRival, elemento) {
     try {
       const resultado = await ejecutarClausula(idParticipanteRival, idParticipanteActivo.value, elemento.instancia_id)
       await cargarEquipo(idLigaActiva.value)
@@ -106,7 +105,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  function obtenerValorMercado(carta) {
+    function obtenerValorMercado(carta) {
     const precioBase = Number(carta?.precio ?? 0)
     const tipoCarta = carta?.tipo || carta?.tipoCarta
     if (tipoCarta === 'piloto') {
@@ -118,7 +117,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
   }
 
-  function encontrarElementoEnGaraje(instanciaId) {
+    function encontrarElementoEnGaraje(instanciaId) {
     const coche = garaje.value.coches.find((c) => c.instancia_id === instanciaId)
     if (coche) return coche
     const piloto = garaje.value.pilotos.find((p) => p.instancia_id === instanciaId)

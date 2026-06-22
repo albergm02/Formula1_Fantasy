@@ -1,62 +1,61 @@
+// Reglas explicadas al usuario en la guía de puntuación.
+// El cálculo real se ejecuta en src/services/servicioJornada.js (cliente) y en
+// functions/logica/puntuacion.js (servidor); este archivo solo describe la
+// regla de cada variante en lenguaje natural para mostrarla en pantalla.
 export const perfilesPuntuacion = {
   qualy: {
-    pesos: { ritmo: 0.5, consistencia: 0, adaptabilidad: 0, agresividad: 0.5, gestion: 0 },
     reglasUsuario: [
-      'Factor según posición en clasificación.',
-      'P1 a P3: factor 1.50',
-      'P4 a P6: factor 1.25',
-      'P7 a P10: factor 1.10',
-      'P11 a P15: factor 0.85',
-      'P16 en adelante: factor 0.65',
+      'Puntos según posición en la sesión de clasificación.',
+      'P1: 25 / P2: 18 / P3: 15 / P4: 12 / P5: 10.',
+      'P6: 8 / P7: 6 / P8: 4 / P9: 2 / P10: 1.',
+      'P11 en adelante: 0 puntos.',
+      'Sigue puntuando aunque el piloto abandone en carrera.',
     ],
   },
   carrera: {
-    pesos: { ritmo: 0.2, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.4 },
     reglasUsuario: [
-      'Factor según posición final en carrera.',
-      'P1: 1.50 / P2: 1.40 / P3: 1.30',
-      'P4 a P5: 1.20 / P6 a P10: 1.00',
-      'P11 a P15: 0.80 / P16 a P20: 0.60',
-      'P20 en adelante: factor 0.50',
+      'Puntos según posición final en carrera.',
+      'P1: 25 / P2: 18 / P3: 15 / P4: 12 / P5: 10.',
+      'P6: 8 / P7: 6 / P8: 4 / P9: 2 / P10: 1.',
+      'P11 en adelante: 0 puntos.',
+      'Si el piloto no termina (ABN / DESC / N/S): 0 puntos.',
     ],
   },
   todo_terreno: {
-    pesos: { ritmo: 0.1, consistencia: 0.1, adaptabilidad: 0.6, agresividad: 0.1, gestion: 0.1 },
     reglasUsuario: [
-      'Factor base: lluvia activa 1.00, tiempo seco 0.50.',
-      'Cada Safety Car suma 0.05 al factor.',
-      'Cada Safety Car Virtual suma 0.05 al factor.',
-      'Cada abandono en carrera suma 0.10 al factor.',
-      'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
+      'Puntos de carrera multiplicados por un factor de caos.',
+      'Factor base: 0.50 (carrera seca y limpia).',
+      'Si llovió: +0.40 al factor.',
+      'Cada Coche de Seguridad (real o virtual): +0.05 (máximo 3).',
+      'Si hubo 5 o más abandonos: +0.10 adicional.',
+      'Si el piloto no termina: 0 puntos.',
     ],
   },
   base: {
-    pesos: { ritmo: 0.2, consistencia: 0.2, adaptabilidad: 0.2, agresividad: 0.2, gestion: 0.2 },
     reglasUsuario: [
-      'Carta neutra, sin especialización.',
-      'Factor de jornada fijo: 1.00 siempre.',
-      'Puntúa su base íntegra, sin bonus ni penalización por la carrera.',
+      'Media de los puntos de Qualy y Carrera.',
+      '(Puntos Qualy + Puntos Carrera) / 2.',
+      'Si abandona en carrera, sólo cuentan los puntos de Qualy / 2.',
+      'La carta segura: rinde menos en el pico pero casi siempre suma algo.',
     ],
   },
   remontador: {
-    pesos: { ritmo: 0.2, consistencia: 0, adaptabilidad: 0.4, agresividad: 0.4, gestion: 0 },
     reglasUsuario: [
-      'Factor según diferencial de adelantamientos (OpenF1).',
-      'Diferencial = adelantamientos realizados menos recibidos.',
-      'Factor = 1.0 mas diferencial por 0.1.',
-      'Ejemplo: +5 da factor 1.50, neutro da 1.00, -5 da 0.50.',
-      'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
+      'Premia los adelantamientos en pista.',
+      'Diferencial = adelantamientos realizados − veces adelantado.',
+      'Diferencial 0 o negativo: 0 puntos.',
+      'Diferencial 1: 3 pts · 2: 7 pts · 3: 12 pts · 4: 18 pts.',
+      'Diferencial 5 o más: 25 puntos (tope).',
+      'Si el piloto no termina: 0 puntos.',
     ],
   },
   estratega: {
-    pesos: { ritmo: 0.1, consistencia: 0.4, adaptabilidad: 0, agresividad: 0, gestion: 0.5 },
     reglasUsuario: [
-      'Factor compuesto por posición, paradas y stint más largo.',
-      'Base: 0.70.',
-      'Stint mayor al 60%: +0.50 / mayor al 45%: +0.30 / mayor al 35%: +0.20 / mayor al 25%: +0.10.',
-      '1 parada en boxes: +0.15 / 2 paradas: +0.05 / 3 o mas: sin bono.',
-      'P1 a P3: +0.15 / P4 a P10: +0.05 / P16 en adelante: -0.10.',
-      'Si el piloto no sale, abandona o es descalificado: factor 0.50.',
+      'Suma de tres bonus: paradas, stint más largo y posición final.',
+      '1 parada en boxes: +10 / 2 paradas: +5 / 3 o más: 0.',
+      'Bonus stint = porcentaje del stint más largo × 10 puntos.',
+      'P1 a P3: +10 / P4 a P6: +7 / P7 a P10: +4 / fuera del 10: 0.',
+      'Si el piloto no termina: 0 puntos.',
     ],
   },
 }

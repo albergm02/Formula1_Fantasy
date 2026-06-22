@@ -2,27 +2,12 @@ const { onSchedule } = require('firebase-functions/v2/scheduler')
 
 const { db } = require('../middleware/firebase')
 const { recopilarDatosGranPremio, obtenerGranPremiosFinalizados } = require('../infraestructura/openF1')
-const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../logica/puntuacion')
+const { calcularPuntuacionGaraje } = require('../logica/puntuacion')
+const { construirPuntosPorPiloto } = require('../logica/jornada')
 
 const REGION = 'europe-west1'
 const TEMPORADA_ACTUAL = 2026
 
-function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
-  const factores = {}
-  const detalles = {}
-
-  for (const piloto of pilotos) {
-    const partes = piloto.id.split('_')
-    const numero = partes[0]
-    const variante = partes.slice(1).join('_')
-    const actuacion = actuacionesPorPiloto[numero] || { posicionQualy: 20, posicionCarrera: 20, posicionSalida: 20 }
-
-    factores[piloto.id] = calcularFactorJornada(actuacion, condiciones, variante)
-    detalles[piloto.id] = { variante, actuacion }
-  }
-
-  return { factores, detalles }
-}
 
 async function ejecutarProcesarJornada() {
   const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
@@ -68,8 +53,8 @@ async function ejecutarProcesarJornada() {
     const pilotosEquipados = garaje ? (garaje.pilotos || []).filter((p) => p.equipado !== false) : []
     if (!garaje || pilotosEquipados.length === 0) continue
 
-    const { factores: factoresPorPiloto, detalles: detallesPorPiloto } = construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
-    const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
+    const { puntos: puntosPorPiloto, detalles: detallesPorPiloto } = construirPuntosPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
+    const resultadoGaraje = calcularPuntuacionGaraje(garaje, { puntosPorPiloto, condiciones, actuacionesPorPiloto })
 
     // Enriquezco el desglose con variante y actuación para que el frontend
     // pueda explicar al jugador POR QUÉ ha sacado esos puntos.
@@ -93,7 +78,7 @@ async function ejecutarProcesarJornada() {
     // sobreviven los que no estaban en uso durante este Gran Premio.
     const potenciadoresRestantes = (garaje.potenciadores || []).filter((p) => !p.equipado)
 
-    const desgloseParticipante = { nombreGranPremio: granPremio.meeting_name, puntosJornada, premioJornada, condiciones, desglose: resultadoGaraje.desglose }
+    const desgloseParticipante = { idJornada, nombreGranPremio: granPremio.meeting_name, puntosJornada, premioJornada, condiciones, desglose: resultadoGaraje.desglose }
 
     batch.update(documento.ref, {
       puntos: puntosAcumulados,

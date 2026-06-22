@@ -9,7 +9,7 @@ export const usarStoreActividad = defineStore('actividad', () => {
   const actividad = ref([])
   const cargando = ref(false)
 
-  async function cargarActividad() {
+    async function cargarActividad() {
     const idLiga = storeLigas.idLigaActiva
     if (!idLiga) return
 

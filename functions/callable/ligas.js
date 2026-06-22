@@ -10,6 +10,7 @@ const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 // Borra la liga y todo lo asociado (participaciones, mercados con pujas,
 // actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
 // una colección a medio borrar, el usuario vería "fantasmas" en la UI.
+
 async function borrarLigaEnCascada(idLiga, ligaSnap) {
   const batch = db.batch()
 
@@ -47,6 +48,7 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
 
 exports.borrarLigaEnCascada = borrarLigaEnCascada
 
+
 exports.inicializarMercado = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
@@ -62,6 +64,7 @@ exports.inicializarMercado = onCall(OPCIONES, async (request) => {
   return { ok: true, ...resultado }
 })
 
+
 exports.eliminarPujas = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
@@ -73,6 +76,7 @@ exports.eliminarPujas = onCall(OPCIONES, async (request) => {
 
   return { ok: true, pujasEliminadas }
 })
+
 
 exports.eliminarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -92,6 +96,7 @@ exports.eliminarLiga = onCall(OPCIONES, async (request) => {
 // Uso FieldValue.increment(-1) para el contador `participantes`: dos
 // expulsiones simultáneas se sumarían correctamente, cosa que un
 // `participantes - 1` calculado en cliente no garantiza.
+
 exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   const emailOrganizador = exigirEmailAutenticado(request)
   const { idLiga, emailExpulsado } = request.data || {}
@@ -153,6 +158,7 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   }
 })
 
+
 exports.crearLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -164,7 +170,7 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 
   const nombre = String(nombreLiga).trim()
 
-  const ligasOrganizadasSnap = await db.collection('participaciones').where('email_usuario', '==', email).where('rol', '==', 'organizador').get()
+  const ligasOrganizadasSnap = await db.collection('participaciones').where('email_usuario', '==', email).where('esOrganizador', '==', true).get()
   if (ligasOrganizadasSnap.size >= 2) {
     throw new HttpsError('failed-precondition', 'Has alcanzado el límite máximo de 2 ligas creadas.')
   }
@@ -196,6 +202,7 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
     email_usuario: email,
     nombre_usuario: nombreVisible,
     rol: 'organizador',
+    esOrganizador: true,
     presupuesto: 50.0,
     puntos: 0,
     garaje: { coches: [], pilotos: [], potenciadores: [] },
@@ -222,6 +229,7 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 
   return { ok: true, idLiga: ligaRef.id, codigoInvitacion, nombreLiga: nombre }
 })
+
 
 exports.unirseALiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -261,6 +269,7 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
     email_usuario: email,
     nombre_usuario: nombreVisible,
     rol: 'miembro',
+    esOrganizador: false,
     presupuesto: 50.0,
     puntos: 0,
     garaje: { coches: [], pilotos: [], potenciadores: [] },
@@ -285,6 +294,7 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
 
   return { ok: true, idLiga, nombreLiga: datosLiga.nombre }
 })
+
 
 exports.abandonarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -311,9 +321,9 @@ exports.abandonarLiga = onCall(OPCIONES, async (request) => {
 
   const batch = db.batch()
 
-  if (participacionPropia.rol === 'organizador') {
+  if (participacionPropia.esOrganizador) {
     const siguienteOrganizador = [...participacionesRestantes].sort((a, b) => a.fecha_union.toMillis() - b.fecha_union.toMillis())[0]
-    batch.update(siguienteOrganizador.ref, { rol: 'organizador' })
+    batch.update(siguienteOrganizador.ref, { esOrganizador: true })
     batch.update(ligaSnap.ref, {
       correoOrganizador: siguienteOrganizador.email_usuario,
       participantes: FieldValue.increment(-1),

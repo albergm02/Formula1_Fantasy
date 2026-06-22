@@ -43,7 +43,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   const totalPujasComprometidas = computed(() => Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0))
 
-  function iniciarCuentaAtras() {
+    function iniciarCuentaAtras() {
     detenerCuentaAtras()
     if (!mercadoActivo.value || !mercadoActivo.value.fechaCierre) return
 
@@ -56,14 +56,14 @@ export const usarStoreMercado = defineStore('mercado', () => {
     intervaloId = setInterval(actualizarRestante, 1000)
   }
 
-  function detenerCuentaAtras() {
+    function detenerCuentaAtras() {
     if (intervaloId) {
       clearInterval(intervaloId)
       intervaloId = null
     }
   }
 
-  async function inicializarMercado(idLiga) {
+    async function inicializarMercado(idLiga) {
     cargandoMercado.value = true
 
     if (cancelarListenerMercado) cancelarListenerMercado()
@@ -103,7 +103,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     })
   }
 
-  function detenerMercado() {
+    function detenerMercado() {
     detenerCuentaAtras()
     if (cancelarListenerMercado) {
       cancelarListenerMercado()
@@ -116,7 +116,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     milisegundosRestantes.value = 0
   }
 
-  async function pujarPorCarta(carta, cantidad) {
+    async function pujarPorCarta(carta, cantidad) {
     const cantidadNum = Number(cantidad)
     const esPujaExistente = misPujas.value[carta.id] !== undefined
 
@@ -136,7 +136,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     return { success: true, message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.` }
   }
 
-  async function eliminarPujaCarta(carta) {
+    async function eliminarPujaCarta(carta) {
     try {
       await eliminarPuja(mercadoActivo.value.idLiga, carta.id)
     } catch (error) {

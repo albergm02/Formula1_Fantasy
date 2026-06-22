@@ -50,7 +50,8 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="storeActividad.actividad.length" class="flex flex-col gap-2">
-        <div v-for="evento in storeActividad.actividad" :key="evento.id" class="flex items-start justify-between p-3 border border-white/5">
+        <div v-for="(evento, indice) in storeActividad.actividad" :key="indice"
+          class="flex items-start justify-between p-3 border border-white/5">
           <p class="text-sm text-[#F0ECEC]">{{ evento.nombreUsuario }} {{ evento.descripcion }}</p>
           <span class="shrink-0 ml-4 text-[10px] uppercase tracking-wide text-zinc-500">
             {{ formatearFecha(evento.fecha) }}

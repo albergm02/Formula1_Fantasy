@@ -13,6 +13,7 @@ const MS_BLOQUEO_CAMBIO_CORREO = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 100
 // El cliente invoca esta callable ANTES de verifyBeforeUpdateEmail: dejamos
 // el bloqueo de 7 días registrado para que la restricción no dependa del
 // cliente, que podría haberse manipulado.
+
 exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -35,6 +36,7 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
 // El usuario se indexa por UID (no por email), así que no hay que copiar/borrar
 // nada: solo actualizo correoAutenticacion y propago el cambio a
 // participaciones y a las ligas que el usuario organice.
+
 exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -67,6 +69,7 @@ exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   return { ok: true, correoNuevo, participacionesMigradas: participacionesSnap.size, ligasMigradas: ligasAdminSnap.size }
 })
 
+
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db.collection('participaciones').where('email_usuario', '==', email).get()
   let ligasBorradas = 0
@@ -96,13 +99,13 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
     await agregarBorradoPujasUsuario(batchPujas, idLiga, email)
     await batchPujas.commit()
 
-    if (datosPropios.rol === 'organizador') {
+    if (datosPropios.esOrganizador) {
       const siguiente = [...restantes].sort((a, b) => {
         const fechaA = a.fecha_union?.toMillis ? a.fecha_union.toMillis() : 0
         const fechaB = b.fecha_union?.toMillis ? b.fecha_union.toMillis() : 0
         return fechaA - fechaB
       })[0]
-      await db.collection('participaciones').doc(siguiente.id).update({ rol: 'organizador' })
+      await db.collection('participaciones').doc(siguiente.id).update({ esOrganizador: true })
       await db.collection('ligas').doc(idLiga).update({
         correoOrganizador: siguiente.email_usuario,
         participantes: (datosLiga.participantes || restantes.length + 1) - 1,
@@ -128,6 +131,7 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
 
 exports.eliminarCuentaUsuarioEnCascada = eliminarCuentaUsuarioEnCascada
 
+
 exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid
@@ -136,10 +140,7 @@ exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   return { ok: true, email, ...resultado }
 })
 
-/**
- * Crea el documento de usuario en Firestore tras el primer registro.
- * @param {string} nombreUsuario - Nombre visible elegido por el usuario.
- */
+
 exports.crearPerfil = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid

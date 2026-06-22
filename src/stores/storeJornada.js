@@ -9,7 +9,7 @@ export const usarStoreJornada = defineStore('jornada', () => {
   const ultimoGranPremioPendiente = ref(null)
   const siguienteGranPremio = ref(null)
 
-  async function cargarCatalogo() {
+    async function cargarCatalogo() {
     try {
       catalogoPilotos.value = await cargarCatalogoYPerfiles()
     } catch {
@@ -19,7 +19,7 @@ export const usarStoreJornada = defineStore('jornada', () => {
 
   // Si Firestore aún no tiene jornadas, consulto OpenF1 directamente para
   // evitar una pantalla vacía mostrando el último Gran Premio finalizado.
-  async function cargarGranPremioPendiente() {
+    async function cargarGranPremioPendiente() {
     if (ultimoGranPremioPendiente.value) return
     try {
       ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
@@ -28,7 +28,7 @@ export const usarStoreJornada = defineStore('jornada', () => {
     }
   }
 
-  function escucharHistorial(alActualizar) {
+    function escucharHistorial(alActualizar) {
     return suscribirseHistorialJornadas(async (jornadas) => {
       historial.value = jornadas
       if (jornadas.length === 0) await cargarGranPremioPendiente()
@@ -36,7 +36,7 @@ export const usarStoreJornada = defineStore('jornada', () => {
     })
   }
 
-  async function cargarSiguienteGranPremio() {
+    async function cargarSiguienteGranPremio() {
     siguienteGranPremio.value = await obtenerSiguienteGranPremio()
   }
 

@@ -1,1 +1,17 @@
 @import 'tailwindcss';
+
+/*
+ * Overrides globales para los Toast de PrimeVue: en escritorio el ancho por
+ * defecto (450 px) es razonable, pero en mobile ocupa casi toda la pantalla.
+ * Reducimos ancho, padding y tipografía proporcionalmente para que el toast
+ * deje ver la interfaz que hay debajo.
+ */
+.p-toast {
+  max-width: calc(100% - 40px);
+  width: auto;
+}
+
+.p-toast .p-toast-message {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}

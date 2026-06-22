@@ -30,40 +30,39 @@ const NOMBRES_VARIANTE = {
   estratega: 'Estratega',
 }
 
-function explicarFactor(piloto) {
-  if (!piloto.variante || !piloto.factorJornada) return []
+const potenciadoresAplicados = computed(() => jornada.value?.desglose?.potenciadoresAplicados || [])
+const multiplicadorGlobal = computed(() => jornada.value?.desglose?.multiplicadorGlobal || 1)
+
+function explicarPiloto(piloto) {
+  if (!piloto.variante) return []
 
   const lineas = []
   const actuacion = piloto.actuacion || {}
-  const factor = piloto.factorJornada
 
   if (piloto.variante === 'qualy') {
-    lineas.push(`Clasificó posición ${actuacion.posicionQualy}, factor aplicado: ${factor}`)
+    lineas.push(`Clasificó P${actuacion.posicionQualy ?? '?'} el sábado.`)
   } else if (piloto.variante === 'carrera') {
-    const posicionesGanadas = (actuacion.posicionSalida || 20) - (actuacion.posicionCarrera || 20)
-    const signo = posicionesGanadas >= 0 ? '+' : ''
-    lineas.push(`Terminó P${actuacion.posicionCarrera}, ${signo}${posicionesGanadas} posiciones desde salida, factor: ${factor}`)
+    lineas.push(`Terminó P${actuacion.posicionCarrera ?? '?'} en la carrera.`)
   } else if (piloto.variante === 'todo_terreno') {
     const condiciones = jornada.value?.condiciones || {}
-    const clima = condiciones.llovio ? 'Con lluvia' : 'En seco'
-    lineas.push(`${clima}, factor aplicado: ${factor}`)
+    const clima = condiciones.llovio ? 'con lluvia' : 'en seco'
+    lineas.push(`P${actuacion.posicionCarrera ?? '?'} en carrera ${clima}.`)
   } else if (piloto.variante === 'base') {
-    lineas.push(`Media de las tres variantes, factor: ${factor}`)
+    lineas.push(`Media de Qualy (P${actuacion.posicionQualy ?? '?'}) y Carrera (P${actuacion.posicionCarrera ?? '?'}).`)
   } else if (piloto.variante === 'remontador') {
-    const adelantamientos = actuacion.numeroAdelantos || 0
-    const adelantado = actuacion.numeroVecesAdelantado || 0
-    const diferencial = adelantamientos - adelantado
+    const adelantos = actuacion.numeroAdelantos ?? 0
+    const recibidos = actuacion.numeroVecesAdelantado ?? 0
+    const diferencial = adelantos - recibidos
     const signo = diferencial >= 0 ? '+' : ''
-    lineas.push(`${adelantamientos} adelantamientos, ${adelantado} recibidos (neto ${signo}${diferencial}), factor: ${factor}`)
+    lineas.push(`${adelantos} adelantamientos, ${recibidos} recibidos (${signo}${diferencial} neto).`)
   } else if (piloto.variante === 'estratega') {
     const paradas = actuacion.numeroPitStops ?? 'N/A'
     const stint = Math.round((actuacion.porcentajeStintMaximo || 0) * 100)
-    lineas.push(`P${actuacion.posicionCarrera}, ${paradas} paradas, stint máximo ${stint}%, factor: ${factor}`)
+    lineas.push(`P${actuacion.posicionCarrera ?? '?'}, ${paradas} paradas, stint máximo ${stint}%.`)
   }
 
-  if (piloto.puntuacionBase) {
-    const puntosFinales = Math.round(piloto.puntuacionBase * factor)
-    lineas.push(`${piloto.puntuacionBase} pts base x ${factor} = ${puntosFinales} pts`)
+  if (piloto.multiplicador && piloto.multiplicador !== 1) {
+    lineas.push(`${piloto.puntosVariante} pts × ${piloto.multiplicador} = ${piloto.puntosJornada} pts`)
   }
 
   return lineas
@@ -120,19 +119,29 @@ function explicarFactor(piloto) {
                     {{ NOMBRES_VARIANTE[piloto.variante] || piloto.variante }}
                   </span>
                 </div>
-                <div class="flex gap-2 text-[10px] text-zinc-500">
-                  <span>RIT: {{ piloto.atributosModificados?.ritmo || '—' }}</span>
-                  <span>CON: {{ piloto.atributosModificados?.consistencia || '—' }}</span>
-                  <span>ADP: {{ piloto.atributosModificados?.adaptabilidad || '—' }}</span>
-                </div>
               </div>
               <span class="text-lg font-black text-[#D4A843]">+{{ piloto.puntosJornada }}</span>
             </div>
-            <div v-if="piloto.factorJornada" class="flex flex-col gap-0.5 pt-1 border-t border-zinc-800/50">
-              <span v-for="(linea, i) in explicarFactor(piloto)" :key="i" class="text-[10px] text-zinc-400">
+            <div class="flex flex-col gap-0.5 pt-1 border-t border-zinc-800/50">
+              <span v-for="(linea, i) in explicarPiloto(piloto)" :key="i" class="text-[10px] text-zinc-400">
                 {{ linea }}
               </span>
             </div>
+          </div>
+        </div>
+
+        <div v-if="potenciadoresAplicados.length" class="flex flex-col gap-2">
+          <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Potenciadores activos</span>
+          <div v-for="potenciador in potenciadoresAplicados" :key="potenciador.id"
+            class="flex items-center justify-between p-2.5 bg-[#121218] border border-zinc-800">
+            <span class="text-xs font-bold text-white">{{ potenciador.nombre }}</span>
+            <span class="text-sm font-black text-emerald-400">×{{ potenciador.multiplicador }}</span>
+          </div>
+          <div v-if="multiplicadorGlobal !== 1"
+            class="flex items-center justify-between px-2.5 py-1.5 bg-emerald-900/20 border border-emerald-500/30">
+            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Multiplicador
+              combinado</span>
+            <span class="text-sm font-black text-emerald-400">×{{ multiplicadorGlobal }}</span>
           </div>
         </div>
 

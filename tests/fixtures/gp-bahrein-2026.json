@@ -1,0 +1,51 @@
+{
+  "nombreGranPremio": "Gran Premio de Bahréin 2026",
+  "fechaCarrera": "2026-03-15",
+  "actuacionesPorPiloto": {
+    "3": {
+      "posicionQualy": 1,
+      "posicionCarrera": 1,
+      "posicionSalida": 1,
+      "numeroAdelantos": 0,
+      "numeroVecesAdelantado": 3,
+      "numeroPitStops": 1,
+      "porcentajeStintMaximo": 0.55,
+      "dnf": false,
+      "dns": false,
+      "dsq": false,
+      "noClasificado": false
+    },
+    "1": {
+      "posicionQualy": 2,
+      "posicionCarrera": 2,
+      "posicionSalida": 2,
+      "numeroAdelantos": 1,
+      "numeroVecesAdelantado": 1,
+      "numeroPitStops": 1,
+      "porcentajeStintMaximo": 0.6,
+      "dnf": false,
+      "dns": false,
+      "dsq": false,
+      "noClasificado": false
+    },
+    "16": {
+      "posicionQualy": 3,
+      "posicionCarrera": 3,
+      "posicionSalida": 3,
+      "numeroAdelantos": 2,
+      "numeroVecesAdelantado": 0,
+      "numeroPitStops": 2,
+      "porcentajeStintMaximo": 0.4,
+      "dnf": false,
+      "dns": false,
+      "dsq": false,
+      "noClasificado": false
+    }
+  },
+  "condiciones": {
+    "llovio": false,
+    "numeroDNFs": 0,
+    "numeroSafetyCarActivos": 0,
+    "numeroVirtualSafetyCarActivos": 0
+  }
+}

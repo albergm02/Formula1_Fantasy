@@ -13,6 +13,7 @@ const PORCENTAJE_REVENTA = 0.9
 const MAX_COCHES_ALINEADOS = 1
 const MAX_PILOTOS_ALINEADOS = 2
 
+
 async function cargarParticipacionPropia(idParticipante, emailInvocador) {
   if (!idParticipante) throw new HttpsError('invalid-argument', 'Falta idParticipante.')
   const referencia = db.collection('participaciones').doc(idParticipante)
@@ -25,6 +26,7 @@ async function cargarParticipacionPropia(idParticipante, emailInvocador) {
   return { referencia, datos }
 }
 
+
 function localizarCartaEnGaraje(garaje, instanciaId) {
   for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
     const lista = garaje[coleccion] || []
@@ -33,6 +35,7 @@ function localizarCartaEnGaraje(garaje, instanciaId) {
   }
   return null
 }
+
 
 exports.venderCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -73,6 +76,7 @@ exports.venderCarta = onCall(OPCIONES, async (request) => {
 // Reglas: 1 chasis máx, 2 pilotos titulares, potenciador exige ≥1 piloto.
 // Al equipar un chasis con otro ya equipado, desalineo el anterior para que
 // el cambio sea atómico desde el punto de vista del usuario.
+
 function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
   const lista = [...(garaje[coleccion] || [])]
   const cartaObjetivo = { ...lista[indiceObjetivo] }
@@ -104,6 +108,7 @@ function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
   return { ...garaje, [coleccion]: lista }
 }
 
+
 exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
@@ -124,6 +129,7 @@ exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
 
 // Cada €1 invertido sube la cláusula en €2 (precio efectivo = precioCompra
 // + 2 × clausulaInvertida). Bloqueado durante la jornada activa.
+
 exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
@@ -166,6 +172,7 @@ exports.gestionarClausula = onCall(OPCIONES, async (request) => {
 // Precio = precioCompra + clausulaInvertida × 2. Uso precioCompra (la
 // inversión histórica del dueño) en lugar del precio actual de mercado, para
 // que la cláusula refleje el coste real de lo que el dueño puso por la carta.
+
 function calcularPrecioClausula(carta) {
   const precioBase = carta.precioCompra ?? carta.precio
   const inversionDueño = carta.clausulaInvertida || 0
@@ -175,6 +182,7 @@ function calcularPrecioClausula(carta) {
 // `instancia_id` (timestamp + random) es el único identificador único de
 // una carta concreta: dos jugadores pueden tener "Hamilton qualy" en su
 // garaje, pero cada copia es una instancia distinta con su propio historial.
+
 function extraerCartaPorInstancia(garaje, instanciaId) {
   for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
     const lista = garaje[coleccion] || []
@@ -191,12 +199,14 @@ function extraerCartaPorInstancia(garaje, instanciaId) {
 // Sin este cálculo, un jugador podría comprometer 30 M en pujas y a la vez
 // ejecutar un clausulazo de 30 M, dejando el presupuesto en negativo si
 // después se resolviera alguna puja a su favor.
+
 async function calcularComprometidoEnPujas(idLiga, email) {
   const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
   if (!mercadoDoc) return 0
   const pujasSnap = await db.collection('mercados').doc(mercadoDoc.id).collection('pujas').where('emailUsuario', '==', email).get()
   return pujasSnap.docs.reduce((suma, documento) => suma + (documento.data().cantidad || 0), 0)
 }
+
 
 exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   const emailAtacante = exigirEmailAutenticado(request)
