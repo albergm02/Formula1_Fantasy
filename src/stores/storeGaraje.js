@@ -82,15 +82,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  function limpiarEstadoLigaActiva() {
-    idLigaActiva.value = null
-    idParticipanteActivo.value = null
-    presupuesto.value = 0
-    puntos.value = 0
-    garaje.value = crearGarajeVacio()
-    ultimaJornada.value = null
-  }
-
   async function invertirEnClausula(instanciaId, cantidad) {
     const elemento = encontrarElementoEnGaraje(instanciaId)
     if (!elemento) return { success: false, message: 'Elemento no encontrado en tu garaje.' }
@@ -146,7 +137,6 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     cargarEquipo,
     venderElemento,
     alternarEquipado,
-    limpiarEstadoLigaActiva,
     invertirEnClausula,
     ejecutarClausulaRival,
     obtenerValorMercado,

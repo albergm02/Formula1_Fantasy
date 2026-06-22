@@ -1,15 +1,6 @@
 import { collection, query, limit, getDocs } from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
-export const TIPOS_ACTIVIDAD = {
-  COMPRA: 'compra',
-  VENTA: 'venta',
-  INCORPORACION: 'incorporacion',
-  ABANDONO: 'abandono',
-  CLAUSULA: 'clausula',
-  CREACION: 'creacion',
-}
-
 /**
  * Devuelve los últimos eventos de actividad de una liga, ordenados por fecha desc.
  * @param {string} idLiga

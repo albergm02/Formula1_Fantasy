@@ -130,7 +130,6 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     perfilExiste,
     datosCargados,
     tieneSesionConContrasena,
-    cargarPerfil,
     crearPerfil,
     verificarExistenciaPerfil,
     limpiarSesion,

@@ -67,10 +67,17 @@ const handleEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <CartaItem v-for="coche in storeMercado.cochesMercado" :key="coche.id" :carta="coche" tipo="coche"
-            :modoMercado="true" :miPuja="storeMercado.misPujas[coche.id] || null"
-            :totalPujas="storeMercado.resumenPujas[coche.id] || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+          <CartaItem
+            v-for="coche in storeMercado.cochesMercado"
+            :key="coche.id"
+            :carta="coche"
+            tipo="coche"
+            :modoMercado="true"
+            :miPuja="storeMercado.misPujas[coche.id] || null"
+            :totalPujas="storeMercado.resumenPujas[coche.id] || 0"
+            @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja"
+          />
         </div>
       </section>
 
@@ -78,10 +85,17 @@ const handleEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <CartaItem v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :carta="piloto" tipo="piloto"
-            :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
-            :totalPujas="storeMercado.resumenPujas[piloto.id] || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+          <CartaItem
+            v-for="piloto in storeMercado.pilotosMercado"
+            :key="piloto.id"
+            :carta="piloto"
+            tipo="piloto"
+            :modoMercado="true"
+            :miPuja="storeMercado.misPujas[piloto.id] || null"
+            :totalPujas="storeMercado.resumenPujas[piloto.id] || 0"
+            @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja"
+          />
         </div>
       </section>
 
@@ -89,10 +103,17 @@ const handleEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <CartaItem v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id" :carta="potenciador"
-            tipo="potenciador" :modoMercado="true" :miPuja="storeMercado.misPujas[potenciador.id] || null"
-            :totalPujas="storeMercado.resumenPujas[potenciador.id] || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+          <CartaItem
+            v-for="potenciador in storeMercado.potenciadoresMercado"
+            :key="potenciador.id"
+            :carta="potenciador"
+            tipo="potenciador"
+            :modoMercado="true"
+            :miPuja="storeMercado.misPujas[potenciador.id] || null"
+            :totalPujas="storeMercado.resumenPujas[potenciador.id] || 0"
+            @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja"
+          />
         </div>
       </section>
     </template>

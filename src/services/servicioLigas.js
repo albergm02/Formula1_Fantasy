@@ -51,31 +51,12 @@ export const expulsarParticipante = async (idLiga, emailExpulsado) => {
   return respuesta.data
 }
 
-/** @param {string} idLiga */
-export const inicializarMercado = async (idLiga) => {
-  const respuesta = await httpsCallable(functions, 'inicializarMercado')({ idLiga })
-  return respuesta.data
-}
-
 /* ─── Queries: Ligas ─────────────────────────────────────────────────────── */
 
 export const cargarLigas = async (idsLigas) => {
   const consulta = query(collection(db, 'ligas'), where(documentId(), 'in', idsLigas))
   const instantanea = await getDocs(consulta)
   return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
-}
-
-export const cargarLiga = async (idLiga) => {
-  const documentoLiga = await getDoc(doc(db, 'ligas', idLiga))
-  return documentoLiga.exists() ? { id: documentoLiga.id, ...documentoLiga.data() } : null
-}
-
-export const buscarLigaPorCodigo = async (codigoInvitacion) => {
-  const consulta = query(collection(db, 'ligas'), where('codigo_invitacion', '==', codigoInvitacion))
-  const instantanea = await getDocs(consulta)
-  if (instantanea.empty) return null
-  const documento = instantanea.docs[0]
-  return { id: documento.id, ...documento.data() }
 }
 
 /* ─── Queries: Participaciones ───────────────────────────────────────────── */
@@ -93,13 +74,6 @@ export const cargarParticipantes = async (idLiga) => {
     const datosUsuario = docsUsuario[indice]?.exists() ? docsUsuario[indice].data() : {}
     return { ...participacion, nombre_usuario: datosUsuario.nombreVisible || participacion.nombre_usuario }
   })
-}
-
-/** Cuenta cuántas ligas administra un usuario (límite 2 por usuario). */
-export const contarLigasOrganizadas = async (correoUsuario) => {
-  const consulta = query(collection(db, 'participaciones'), where('email_usuario', '==', correoUsuario), where('rol', '==', 'organizador'))
-  const instantanea = await getDocs(consulta)
-  return instantanea.size
 }
 
 export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {

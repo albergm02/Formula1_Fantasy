@@ -1,19 +1,11 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 import Dialog from 'primevue/dialog'
-import { ref } from 'vue'
 
 const storeGaraje = usarStoreGaraje()
 const mostrarDetalle = ref(false)
 const jornada = computed(() => storeGaraje.ultimaJornada)
-
-const puntosPilotosTotal = computed(() => {
-  if (!jornada.value?.desglose?.pilotos) return 0
-  return jornada.value.desglose.pilotos.reduce((acc, p) => acc + p.puntosJornada, 0)
-})
-
-const puntosCoche = computed(() => jornada.value?.desglose?.coche?.puntos || 0)
 
 const condicionesTexto = computed(() => {
   if (!jornada.value?.condiciones) return []

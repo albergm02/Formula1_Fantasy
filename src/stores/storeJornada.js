@@ -1,7 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { suscribirseHistorialJornadas, cargarCatalogoYPerfiles } from '@/services/servicioJornada'
-import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 import { obtenerUltimoGranPremioFinalizado, obtenerSiguienteGranPremio } from '@/services/servicioOpenF1'
 
 export const usarStoreJornada = defineStore('jornada', () => {
@@ -44,7 +43,6 @@ export const usarStoreJornada = defineStore('jornada', () => {
   return {
     historial,
     catalogoPilotos,
-    perfilesPuntuacion,
     ultimoGranPremioPendiente,
     siguienteGranPremio,
     cargarCatalogo,
