@@ -20,7 +20,7 @@ const idJornadaSeleccionada = ref(null)
 const cargando = ref(true)
 const pilotoExpandido = ref(null)
 
-let cancelarSuscripcion = () => {}
+let cancelarSuscripcion = () => { }
 
 const jornada = computed(() => {
   if (!historial.value.length) return null
@@ -150,20 +150,18 @@ function formatearPorcentaje(valor) {
         <div v-if="ultimoGranPremioPendiente" class="bg-[#1A1A1F] border border-[#D4A843]/40 p-4 flex flex-col gap-2">
           <div class="flex items-center gap-2">
             <i class="pi pi-clock text-[#D4A843]"></i>
-            <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]"> Último Gran Premio celebrado. </span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-[#D4A843]"> Último Gran Premio celebrado.
+            </span>
           </div>
           <div class="flex items-center gap-3">
-            <img
-              v-if="ultimoGranPremioPendiente.imagen"
-              :src="ultimoGranPremioPendiente.imagen"
-              alt="Circuito"
-              class="w-24 h-16 object-contain"
-            />
+            <img v-if="ultimoGranPremioPendiente.imagen" :src="ultimoGranPremioPendiente.imagen" alt="Circuito"
+              class="w-24 h-16 object-contain" />
             <div class="flex flex-col">
               <span class="text-sm font-bold text-white">
                 {{ ultimoGranPremioPendiente.nombreGranPremio }}
               </span>
-              <span class="text-xs text-zinc-400"> {{ ultimoGranPremioPendiente.circuito }} · {{ ultimoGranPremioPendiente.pais }} </span>
+              <span class="text-xs text-zinc-400"> {{ ultimoGranPremioPendiente.circuito }} · {{
+                ultimoGranPremioPendiente.pais }} </span>
               <span class="text-xs text-zinc-500">{{ ultimoGranPremioPendiente.fecha }}</span>
             </div>
           </div>
@@ -171,14 +169,9 @@ function formatearPorcentaje(valor) {
       </div>
 
       <div v-if="!cargando && historial.length > 1" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-        <button
-          v-for="item in historial"
-          :key="item.id"
-          type="button"
-          @click="seleccionarJornada(item.id)"
+        <button v-for="item in historial" :key="item.id" type="button" @click="seleccionarJornada(item.id)"
           class="flex flex-col items-start gap-0.5 px-3 py-2 border shrink-0 transition-colors"
-          :class="item.id === jornada?.id ? 'bg-[#E10600]/10 border-[#E10600] text-white' : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400'"
-        >
+          :class="item.id === jornada?.id ? 'bg-[#E10600]/10 border-[#E10600] text-white' : 'bg-[#1A1A1F] border-zinc-800 text-zinc-400'">
           <span class="text-[9px] font-black uppercase tracking-widest">
             {{ formatearFechaCorta(item.fechaCarrera || item.fechaProcesamiento) }}
           </span>
@@ -197,30 +190,27 @@ function formatearPorcentaje(valor) {
             </div>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
-            <span
-              v-for="(cond, idx) in condicionesTexto"
-              :key="idx"
+            <span v-for="(cond, idx) in condicionesTexto" :key="idx"
               class="flex items-center gap-1.5 px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold"
-              :class="cond.color"
-            >
+              :class="cond.color">
               {{ cond.texto }}
             </span>
           </div>
           <p class="text-xs text-zinc-200 mt-3">
-            Pulsa cualquier piloto para ver los datos reales recopilados de OpenF1 y cuántos puntos habría sumado bajo cada variante de
+            Pulsa cualquier piloto para ver los datos reales recopilados de OpenF1 y cuántos puntos habría sumado bajo
+            cada variante de
             carta.
           </p>
         </template>
       </Card>
 
       <div v-if="hayJornada" class="flex flex-col gap-2">
-        <div v-for="piloto in filasPilotos" :key="piloto.numero" class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
-          <button
-            type="button"
-            @click="alternarPiloto(piloto.numero)"
-            class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors"
-          >
-            <span class="w-10 text-center text-2xl font-black" :class="piloto.estadoCarrera ? 'text-[#E10600] text-sm' : 'text-[#D4A843]'">
+        <div v-for="piloto in filasPilotos" :key="piloto.numero"
+          class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
+          <button type="button" @click="alternarPiloto(piloto.numero)"
+            class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors">
+            <span class="w-10 text-center text-2xl font-black"
+              :class="piloto.estadoCarrera ? 'text-[#E10600] text-sm' : 'text-[#D4A843]'">
               {{ piloto.estadoCarrera || piloto.actuacion.posicionCarrera }}
             </span>
             <div class="w-20 h-14 bg-black">
@@ -229,21 +219,22 @@ function formatearPorcentaje(valor) {
             <div class="flex-1 flex flex-col">
               <span class="text-sm font-bold text-white uppercase">{{ piloto.nombre }}</span>
             </div>
-            <i class="pi text-zinc-500 text-xs" :class="pilotoExpandido === piloto.numero ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+            <i class="pi text-zinc-500 text-xs"
+              :class="pilotoExpandido === piloto.numero ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
           </button>
 
-          <div v-if="pilotoExpandido === piloto.numero" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-4">
+          <div v-if="pilotoExpandido === piloto.numero"
+            class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-4">
             <section class="flex flex-col gap-2">
               <span class="text-[10px] font-black uppercase text-zinc-500"> Datos recogidos por OpenF1 </span>
               <div class="grid grid-cols-2 gap-1">
                 <div v-for="celda in CELDAS_OPENF1" :key="celda.etiqueta" class="flex flex-col p-2 bg-[#121218]">
                   <span class="text-[9px] uppercase tracking-wider text-zinc-500">{{ celda.etiqueta }}</span>
-                  <span
-                    class="text-base font-black"
+                  <span class="text-base font-black"
                     :class="celda.esResultado && piloto.estadoCarrera ? 'text-[#E10600]' : 'text-white'"
-                    :title="celda.titulo || undefined"
-                  >
-                    {{ celda.esResultado ? piloto.estadoCarrera || celda.campo(piloto.actuacion) : celda.campo(piloto.actuacion) }}
+                    :title="celda.titulo || undefined">
+                    {{ celda.esResultado ? piloto.estadoCarrera || celda.campo(piloto.actuacion) :
+                      celda.campo(piloto.actuacion) }}
                   </span>
                 </div>
               </div>
@@ -252,11 +243,13 @@ function formatearPorcentaje(valor) {
             <section class="flex flex-col gap-2">
               <span class="text-[10px] font-black uppercase text-zinc-500"> Puntos por variante de carta </span>
               <div class="flex flex-col gap-1.5">
-                <div v-for="sim in obtenerSimulacionVariantes(piloto)" :key="sim.id" class="flex items-center gap-3 p-2.5 bg-[#121218]">
+                <div v-for="sim in obtenerSimulacionVariantes(piloto)" :key="sim.id"
+                  class="flex items-center gap-3 p-2.5 bg-[#121218]">
                   <i class="pi text-base" :class="sim.icono" :style="{ color: sim.color }"></i>
                   <div class="flex-1 flex flex-col">
                     <span class="text-xs font-bold text-white">{{ sim.etiqueta }}</span>
-                    <span class="text-[10px] text-zinc-500"> Base {{ sim.puntuacionBase }} × Factor {{ sim.factor }} </span>
+                    <span class="text-[10px] text-zinc-500"> Base {{ sim.puntuacionBase }} × Factor {{ sim.factor }}
+                    </span>
                   </div>
                   <span class="text-lg font-black tabular-nums" :style="{ color: sim.color }"> +{{ sim.puntos }} </span>
                 </div>

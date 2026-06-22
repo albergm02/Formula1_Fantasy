@@ -62,21 +62,16 @@ const ocultarResumenEquipo = computed(() => ruta.name === 'ligas' || ruta.name =
     </div>
   </header>
 
-  <Dialog
-    v-model:visible="dialogoCerrarSesion"
-    modal
-    header="CERRAR SESIÓN"
-    :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-  >
+  <Dialog v-model:visible="dialogoCerrarSesion" modal header="CERRAR SESIÓN"
+    :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
     <div class="space-y-4">
       <p class="text-sm text-zinc-300 text-center">¿Seguro que quieres cerrar la sesión?</p>
-      <button
-        @click="confirmarCerrarSesion"
-        class="w-full py-3 bg-[#E10600]/70 border border-[#E10600] text-white font-black uppercase tracking-widest"
-      >
+      <button @click="confirmarCerrarSesion"
+        class="w-full py-3 bg-[#E10600]/70 border border-[#E10600] text-white font-black uppercase tracking-widest">
         CERRAR SESIÓN
       </button>
-      <button @click="dialogoCerrarSesion = false" class="w-full py-2 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+      <button @click="dialogoCerrarSesion = false"
+        class="w-full py-2 text-zinc-400 text-xs font-bold uppercase tracking-widest">
         CANCELAR
       </button>
     </div>

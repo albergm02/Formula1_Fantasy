@@ -94,23 +94,13 @@ const notificarRegistroSolicitado = () => {
       </template>
 
       <template #content>
-        <Form
-          v-slot="$form"
-          class="flex flex-col gap-4 mt-4"
-          :initial-values="valoresInicialesFormulario"
-          :resolver="esquemaValidacion"
-          @submit="handleRegistro"
-        >
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
+          :resolver="esquemaValidacion" @submit="handleRegistro">
           <div class="flex flex-col gap-1">
-            <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de usuario</label>
-            <InputText
-              id="username"
-              type="text"
-              name="username"
-              placeholder="Escribe aquí tu nombre de usuario..."
-              autocomplete="username"
-              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
-            />
+            <label for="username" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Nombre de
+              usuario</label>
+            <InputText id="username" type="text" name="username" placeholder="Escribe aquí tu nombre de usuario..."
+              autocomplete="username" class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.username.error.message }}
             </Message>
@@ -118,48 +108,30 @@ const notificarRegistroSolicitado = () => {
 
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
-            <InputText
-              id="email"
-              type="email"
-              name="email"
-              autocomplete="email"
-              placeholder="Escribe aquí tu correo..."
-              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
-            />
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="Escribe aquí tu correo..."
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="password" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
-            <Password
-              inputId="password"
-              name="password"
-              autocomplete="new-password"
-              placeholder="Escribe aquí tu contraseña..."
-              toggle-mask
-              :feedback="false"
-              class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
-            />
+            <label for="password"
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
+            <Password inputId="password" name="password" autocomplete="new-password"
+              placeholder="Escribe aquí tu contraseña..." toggle-mask :feedback="false" class="w-full [&>input]:w-full"
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="confirmPassword" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar Contraseña</label>
-            <Password
-              inputId="confirmPassword"
-              name="confirmPassword"
-              autocomplete="new-password"
-              placeholder="Escribe aquí tu contraseña..."
-              toggle-mask
-              :feedback="false"
-              class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
-            />
+            <label for="confirmPassword"
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Confirmar Contraseña</label>
+            <Password inputId="confirmPassword" name="confirmPassword" autocomplete="new-password"
+              placeholder="Escribe aquí tu contraseña..." toggle-mask :feedback="false" class="w-full [&>input]:w-full"
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.confirmPassword?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.confirmPassword.error.message }}
             </Message>
@@ -170,12 +142,8 @@ const notificarRegistroSolicitado = () => {
           </Message>
 
           <div class="flex flex-col gap-3 mt-4">
-            <Button
-              type="submit"
-              label="REGISTRARSE"
-              :loading="cargando"
-              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black"
-            />
+            <Button type="submit" label="REGISTRARSE" :loading="cargando"
+              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
 
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿Ya tienes cuenta? </span>

@@ -85,18 +85,11 @@ const confirmarEliminarPuja = () => {
   <div class="w-full h-[160px]" :style="esPiloto ? { border: `2px solid ${colorVariante}` } : {}">
     <div class="w-full h-full overflow-hidden border border-zinc-700 bg-black">
       <div class="relative w-full h-full overflow-hidden">
-        <img
-          v-if="carta.imagen"
-          :src="carta.imagen"
-          :alt="carta.nombre"
-          class="w-full h-full object-cover block"
-          :style="esPotenciador ? 'object-position: 20% center' : ''"
-        />
+        <img v-if="carta.imagen" :src="carta.imagen" :alt="carta.nombre" class="w-full h-full object-cover block"
+          :style="esPotenciador ? 'object-position: 20% center' : ''" />
 
-        <div
-          v-if="modoMercado && totalPujas > 0"
-          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40"
-        >
+        <div v-if="modoMercado && totalPujas > 0"
+          class="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-zinc-500/40">
           <i class="pi pi-users text-[8px] text-zinc-300"></i>
           <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
         </div>
@@ -116,36 +109,31 @@ const confirmarEliminarPuja = () => {
               <div v-if="modoMercado" class="flex items-center gap-1 px-1.5 py-0.5 bg-black/70">
                 <span class="text-[10px] font-black text-emerald-400"> {{ Number(carta.precio).toFixed(2) }} M </span>
               </div>
-              <span
-                v-if="esPiloto"
+              <span v-if="esPiloto"
                 class="px-2 py-0.5 flex items-center gap-1 text-[8px] font-black uppercase bg-black/70 border ml-auto"
-                :style="{ color: colorVariante, borderColor: colorVariante }"
-              >
+                :style="{ color: colorVariante, borderColor: colorVariante }">
                 <i class="pi" :class="iconoVariante"></i>
                 {{ carta.variante }}
               </span>
             </div>
 
             <div v-if="modoMercado" class="flex gap-2">
-              <button
-                @click="mostrarDetalles = true"
-                class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50"
-              >
+              <button @click="mostrarDetalles = true"
+                class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50">
                 <i class="pi pi-info-circle text-white text-[10px]"></i>
                 <span class="text-white text-[9px] font-black uppercase">INFO</span>
               </button>
-              <button @click="abrirPuja" class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50">
-                <span class="text-[10px] font-black uppercase tracking-widest" :class="miPuja != null ? 'text-[#D4A843]' : 'text-white'">
+              <button @click="abrirPuja"
+                class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50">
+                <span class="text-[10px] font-black uppercase tracking-widest"
+                  :class="miPuja != null ? 'text-[#D4A843]' : 'text-white'">
                   {{ miPuja != null ? 'EDITAR PUJA' : `PUJAR (${Number(carta.precio).toFixed(2)}M)` }}
                 </span>
               </button>
             </div>
 
-            <button
-              v-else
-              @click="mostrarDetalles = true"
-              class="w-full py-2.5 flex items-center justify-center gap-1.5 bg-black/50 border border-white/50"
-            >
+            <button v-else @click="mostrarDetalles = true"
+              class="w-full py-2.5 flex items-center justify-center gap-1.5 bg-black/50 border border-white/50">
               <i class="pi pi-info-circle text-white text-xs"></i>
               <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
             </button>
@@ -155,12 +143,8 @@ const confirmarEliminarPuja = () => {
     </div>
 
     <!-- Dialog detalles -->
-    <Dialog
-      v-model:visible="mostrarDetalles"
-      :header="carta.nombre"
-      modal
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="mostrarDetalles" :header="carta.nombre" modal
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-4">
         <!-- Piloto -->
         <template v-if="esPiloto">
@@ -181,10 +165,9 @@ const confirmarEliminarPuja = () => {
                 </span>
               </div>
               <div class="w-full h-1.5 bg-zinc-800 overflow-hidden">
-                <div
-                  class="h-full"
-                  :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: barra.peso > 0 ? 0.5 : 0.15 }"
-                ></div>
+                <div class="h-full"
+                  :style="{ width: `${barra.valor}%`, backgroundColor: barra.color, opacity: barra.peso > 0 ? 0.5 : 0.15 }">
+                </div>
               </div>
             </div>
           </div>
@@ -224,12 +207,8 @@ const confirmarEliminarPuja = () => {
     </Dialog>
 
     <!-- Dialog puja -->
-    <Dialog
-      v-model:visible="mostrarPuja"
-      header="Realizar Puja"
-      modal
-      :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="mostrarPuja" header="Realizar Puja" modal
+      :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="space-y-4">
         <div class="text-center">
           <p class="text-white font-bold text-sm">{{ carta.nombre }}</p>
@@ -240,22 +219,15 @@ const confirmarEliminarPuja = () => {
         </div>
         <div class="flex flex-col items-center gap-2">
           <label class="text-zinc-300 text-xs font-bold uppercase">Tu puja (M)</label>
-          <InputNumber
-            v-model="cantidadPuja"
-            :step="0.1"
-            :minFractionDigits="2"
-            :maxFractionDigits="2"
-            inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32"
-          />
+          <InputNumber v-model="cantidadPuja" :step="0.1" :minFractionDigits="2" :maxFractionDigits="2"
+            inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32" />
         </div>
-        <button @click="confirmarPuja" class="w-full py-3 bg-[#D4A843]/70 border border-[#D4A843] text-white font-black uppercase">
+        <button @click="confirmarPuja"
+          class="w-full py-3 bg-[#D4A843]/70 border border-[#D4A843] text-white font-black uppercase">
           CONFIRMAR PUJA
         </button>
-        <button
-          v-if="miPuja != null"
-          @click="confirmarEliminarPuja"
-          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 text-white uppercase font-black"
-        >
+        <button v-if="miPuja != null" @click="confirmarEliminarPuja"
+          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 text-white uppercase font-black">
           ELIMINAR PUJA
         </button>
       </div>

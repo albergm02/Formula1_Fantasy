@@ -98,12 +98,8 @@ function explicarFactor(piloto) {
       </div>
     </div>
 
-    <Dialog
-      v-model:visible="mostrarDetalle"
-      modal
-      header="DESGLOSE DE PUNTOS"
-      :style="{ width: '92vw', maxWidth: '420px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
-    >
+    <Dialog v-model:visible="mostrarDetalle" modal header="DESGLOSE DE PUNTOS"
+      :style="{ width: '92vw', maxWidth: '420px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
       <div class="flex flex-col gap-5">
         <div class="pb-3 border-b border-zinc-800">
           <span class="text-sm font-black uppercase tracking-wide text-white">{{ jornada.nombreGranPremio }}</span>
@@ -112,12 +108,8 @@ function explicarFactor(piloto) {
         <div class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condiciones</span>
           <div class="flex flex-wrap gap-2">
-            <span
-              v-for="(cond, idx) in condicionesTexto"
-              :key="idx"
-              class="px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold"
-              :class="cond.color"
-            >
+            <span v-for="(cond, idx) in condicionesTexto" :key="idx"
+              class="px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold" :class="cond.color">
               {{ cond.texto }}
             </span>
           </div>
@@ -125,19 +117,14 @@ function explicarFactor(piloto) {
 
         <div v-if="jornada.desglose?.pilotos?.length" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Pilotos</span>
-          <div
-            v-for="(piloto, idx) in jornada.desglose.pilotos"
-            :key="idx"
-            class="flex flex-col p-3 bg-[#121218] border border-zinc-800 gap-2"
-          >
+          <div v-for="(piloto, idx) in jornada.desglose.pilotos" :key="idx"
+            class="flex flex-col p-3 bg-[#121218] border border-zinc-800 gap-2">
             <div class="flex items-center justify-between">
               <div class="flex flex-col gap-0.5">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-bold text-white">{{ piloto.nombre }}</span>
-                  <span
-                    v-if="piloto.variante"
-                    class="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider border border-zinc-700 text-zinc-400"
-                  >
+                  <span v-if="piloto.variante"
+                    class="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider border border-zinc-700 text-zinc-400">
                     {{ NOMBRES_VARIANTE[piloto.variante] || piloto.variante }}
                   </span>
                 </div>
@@ -170,7 +157,8 @@ function explicarFactor(piloto) {
           <span class="text-3xl font-black text-[#D4A843]">+{{ jornada.puntosJornada }}</span>
         </div>
 
-        <div v-if="jornada.premioJornada" class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
+        <div v-if="jornada.premioJornada"
+          class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
           <div class="flex flex-col">
             <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Premio al presupuesto</span>
             <span class="text-[10px] text-zinc-500">{{ jornada.puntosJornada }} pts ÷ 10</span>

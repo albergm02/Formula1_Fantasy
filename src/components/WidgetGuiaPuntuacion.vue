@@ -42,11 +42,8 @@ function alternarVariante(id) {
 
 <template>
   <div class="bg-[#1A1A1F] border border-zinc-800 overflow-hidden">
-    <button
-      type="button"
-      @click="alternarGuia"
-      class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors"
-    >
+    <button type="button" @click="alternarGuia"
+      class="w-full flex items-center gap-3 p-3 bg-transparent border-none text-left transition-colors">
       <div class="flex-1 flex flex-col">
         <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500"> Guía rápida </span>
         <span class="text-sm font-bold text-white"> ¿Cómo puntúan mis pilotos? </span>
@@ -58,28 +55,31 @@ function alternarVariante(id) {
       <p class="text-[11px] text-zinc-400">
         Cada carta tiene una <span class="text-white font-bold">puntuación base</span>
         (suma ponderada de los atributos del piloto que depende de su clase) y un
-        <span class="text-white font-bold">factor de peso de jornada,</span> que depende de cómo le fue al piloto en este Gran Premio. Los
+        <span class="text-white font-bold">factor de peso de jornada,</span> que depende de cómo le fue al piloto en
+        este Gran Premio. Los
         puntos finales son <span class="text-white font-bold">puntuación base × factor de peso de jornada</span>.
       </p>
 
       <div v-for="variante in VARIANTES" :key="variante.id" class="bg-[#121218] border border-zinc-800 overflow-hidden">
-        <button
-          type="button"
-          @click="alternarVariante(variante.id)"
-          class="w-full flex items-center gap-3 p-2.5 border-none text-left transition-colors"
-        >
+        <button type="button" @click="alternarVariante(variante.id)"
+          class="w-full flex items-center gap-3 p-2.5 border-none text-left transition-colors">
           <i class="pi text-base" :class="variante.icono" :style="{ color: variante.color }"></i>
-          <span :style="{ color: variante.color }" class="flex-1 text-xs font-bold text-white">{{ variante.etiqueta }}</span>
-          <i class="pi text-zinc-500 text-[10px]" :class="varianteExpandida === variante.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+          <span :style="{ color: variante.color }" class="flex-1 text-xs font-bold text-white">{{ variante.etiqueta
+            }}</span>
+          <i class="pi text-zinc-500 text-[10px]"
+            :class="varianteExpandida === variante.id ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
         </button>
 
-        <div v-if="varianteExpandida === variante.id" class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
+        <div v-if="varianteExpandida === variante.id"
+          class="px-3 pb-3 pt-1 border-t border-zinc-800 flex flex-col gap-2">
           <ul class="flex flex-col gap-0.5 list-none p-0 m-0">
-            <li v-for="(regla, idx) in perfilesPuntuacion[variante.id]?.reglasUsuario || []" :key="idx" class="text-[11px] text-zinc-300">
+            <li v-for="(regla, idx) in perfilesPuntuacion[variante.id]?.reglasUsuario || []" :key="idx"
+              class="text-[11px] text-zinc-300">
               {{ regla }}
             </li>
           </ul>
-          <div v-if="EJEMPLOS_VARIANTE[variante.id]" class="flex flex-col gap-1 p-2 bg-[#1A1A1F]" :style="{ borderColor: variante.color }">
+          <div v-if="EJEMPLOS_VARIANTE[variante.id]" class="flex flex-col gap-1 p-2 bg-[#1A1A1F]"
+            :style="{ borderColor: variante.color }">
             <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500"> Ejemplo: </span>
             <span class="text-[11px] text-zinc-300">
               {{ EJEMPLOS_VARIANTE[variante.id].escenario }}
