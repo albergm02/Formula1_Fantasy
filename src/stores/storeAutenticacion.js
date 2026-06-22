@@ -1,10 +1,6 @@
 ﻿import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  cargarPerfilUsuario,
-  migrarCorreo,
-  crearPerfil as llamarCrearPerfil,
-} from '@/services/servicioPerfil'
+import { cargarPerfilUsuario, migrarCorreo, crearPerfil as llamarCrearPerfil } from '@/services/servicioPerfil'
 import {
   registrarse,
   enviarVerificacionCorreo,
@@ -133,9 +129,7 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
     return escucharCambioEstadoAutenticacion(alCambiarUsuario)
   }
 
-  const tieneSesionConContrasena = computed(
-    () => auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false,
-  )
+  const tieneSesionConContrasena = computed(() => auth.currentUser?.providerData.some((p) => p.providerId === 'password') ?? false)
 
   return {
     perfilExiste,

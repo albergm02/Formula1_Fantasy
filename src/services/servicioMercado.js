@@ -2,16 +2,7 @@
  * Servicio del mercado diario. Las mutaciones (pujar/retirar) van por Cloud
  * Functions; las lecturas se hacen directas a Firestore.
  */
-import {
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  getDocs,
-  query,
-  where,
-  limit,
-} from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, getDocs, query, where, limit } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 
@@ -24,11 +15,7 @@ const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
  * de polling ni refresco manual.
  */
 export const suscribirMercadoActivo = (idLiga, alCambiar) => {
-  const consulta = query(
-    collection(db, 'mercados', idLiga, 'dias'),
-    where('estado', '==', 'abierto'),
-    limit(1),
-  )
+  const consulta = query(collection(db, 'mercados', idLiga, 'dias'), where('estado', '==', 'abierto'), limit(1))
   return onSnapshot(consulta, (snapshot) => {
     if (snapshot.empty) {
       alCambiar(null)

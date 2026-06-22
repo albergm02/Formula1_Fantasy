@@ -36,13 +36,11 @@ onMounted(async () => {
 })
 </script>
 
-
 <template>
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
 
     <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-20 p-4 gap-6">
-
       <div class="flex justify-between items-center pb-2 border-b border-[#FFFFFF]/10">
         <h2 class="text-sm font-black uppercase tracking-widest text-white">Actividad del campeonato</h2>
       </div>
@@ -52,11 +50,8 @@ onMounted(async () => {
       </div>
 
       <div v-else-if="storeActividad.actividad.length" class="flex flex-col gap-2">
-        <div v-for="evento in storeActividad.actividad" :key="evento.id"
-          class="flex items-start justify-between p-3 border border-white/5">
-          <p class="text-sm text-[#F0ECEC]">
-            {{ evento.nombreUsuario }} {{ evento.descripcion }}
-          </p>
+        <div v-for="evento in storeActividad.actividad" :key="evento.id" class="flex items-start justify-between p-3 border border-white/5">
+          <p class="text-sm text-[#F0ECEC]">{{ evento.nombreUsuario }} {{ evento.descripcion }}</p>
           <span class="shrink-0 ml-4 text-[10px] uppercase tracking-wide text-zinc-500">
             {{ formatearFecha(evento.fecha) }}
           </span>

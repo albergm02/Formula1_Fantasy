@@ -60,14 +60,7 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
     const factorEstePiloto = factoresPorPiloto[piloto.id] ?? 1.0
     const puntosJornada = Math.max(0, Math.round(puntuacionBase * factorEstePiloto))
 
-    desglosePilotos.push({
-      id: piloto.id,
-      nombre: piloto.nombre,
-      atributosModificados,
-      puntuacionBase,
-      factorJornada: factorEstePiloto,
-      puntosJornada,
-    })
+    desglosePilotos.push({ id: piloto.id, nombre: piloto.nombre, atributosModificados, puntuacionBase, factorJornada: factorEstePiloto, puntosJornada })
     puntosPilotos += puntosJornada
   }
 
@@ -80,22 +73,16 @@ function calcularPuntuacionGaraje(garaje, factoresPorPiloto = {}) {
     desgloseCoche = { nombre: cocheEquipado.nombre, puntos: puntosCoche }
   }
 
-  return {
-    puntosTotal: puntosPilotos + puntosCoche,
-    desglose: { pilotos: desglosePilotos, coche: desgloseCoche },
-  }
+  return { puntosTotal: puntosPilotos + puntosCoche, desglose: { pilotos: desglosePilotos, coche: desgloseCoche } }
 }
 
 function calcularFactorJornada(actuacion, condiciones, variante) {
-  if (variante === 'qualy')
-    return acotarFactor(buscarFactor(TABLA_FACTOR_QUALY, actuacion.posicionQualy))
-  if (variante === 'carrera')
-    return acotarFactor(buscarFactor(TABLA_FACTOR_CARRERA, actuacion.posicionCarrera))
+  if (variante === 'qualy') return acotarFactor(buscarFactor(TABLA_FACTOR_QUALY, actuacion.posicionQualy))
+  if (variante === 'carrera') return acotarFactor(buscarFactor(TABLA_FACTOR_CARRERA, actuacion.posicionCarrera))
 
   // DNS/ABN/DSQ y No Clasificado anulan Todo Terreno, Remontador y Estratega:
   // ninguna tiene sentido sin haber completado la carrera bajo condiciones reales.
-  const sinActuacion =
-    actuacion?.dnf || actuacion?.dns || actuacion?.dsq || actuacion?.noClasificado
+  const sinActuacion = actuacion?.dnf || actuacion?.dns || actuacion?.dsq || actuacion?.noClasificado
   if (sinActuacion && variante !== 'base') return FACTOR_MINIMO
 
   if (variante === 'todo_terreno') return acotarFactor(calcularFactorTodoTerreno(condiciones))
@@ -119,25 +106,13 @@ function acotarFactor(factor) {
   return Math.round(factor * 100) / 100
 }
 
-function calcularFactorTodoTerreno({
-  llovio,
-  numeroDNFs,
-  numeroSafetyCarActivos,
-  numeroVirtualSafetyCarActivos,
-}) {
+function calcularFactorTodoTerreno({ llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }) {
   const factorBase = llovio ? 1 : 0.5
-  const bonusCaos =
-    (numeroSafetyCarActivos || 0) * 0.05 +
-    (numeroVirtualSafetyCarActivos || 0) * 0.05 +
-    (numeroDNFs || 0) * 0.1
+  const bonusCaos = (numeroSafetyCarActivos || 0) * 0.05 + (numeroVirtualSafetyCarActivos || 0) * 0.05 + (numeroDNFs || 0) * 0.1
   return Math.round((factorBase + bonusCaos) * 100) / 100
 }
 
-function calcularFactorEstrategia({
-  posicionCarrera,
-  numeroPitStops,
-  porcentajeStintMaximo = 0.5,
-}) {
+function calcularFactorEstrategia({ posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 }) {
   const bonusStint = TABLA_BONUS_STINT.find((r) => porcentajeStintMaximo >= r.umbral)?.bonus || 0
   const bonusParadas = TABLA_BONUS_PARADAS[numeroPitStops] || 0
   const bonusPosicion = TABLA_BONUS_POSICION_ESTRATEGA.find((r) => posicionCarrera <= r.hasta).bonus
@@ -170,7 +145,4 @@ function acumularMejorasPotenciadores(potenciadores) {
   return mejoras
 }
 
-module.exports = {
-  calcularPuntuacionGaraje,
-  calcularFactorJornada,
-}
+module.exports = { calcularPuntuacionGaraje, calcularFactorJornada }

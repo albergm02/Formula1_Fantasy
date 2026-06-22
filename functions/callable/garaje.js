@@ -14,14 +14,10 @@ const MAX_COCHES_ALINEADOS = 1
 const MAX_PILOTOS_ALINEADOS = 2
 
 async function cargarParticipacionPropia(idParticipante, emailInvocador) {
-  if (!idParticipante) {
-    throw new HttpsError('invalid-argument', 'Falta idParticipante.')
-  }
+  if (!idParticipante) throw new HttpsError('invalid-argument', 'Falta idParticipante.')
   const referencia = db.collection('participaciones').doc(idParticipante)
   const instantanea = await referencia.get()
-  if (!instantanea.exists) {
-    throw new HttpsError('not-found', 'Participación no encontrada.')
-  }
+  if (!instantanea.exists) throw new HttpsError('not-found', 'Participación no encontrada.')
   const datos = instantanea.data()
   if (datos.email_usuario !== emailInvocador) {
     throw new HttpsError('permission-denied', 'Solo puedes operar sobre tu propio equipo.')
@@ -33,9 +29,7 @@ function localizarCartaEnGaraje(garaje, instanciaId) {
   for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
     const lista = garaje[coleccion] || []
     const indice = lista.findIndex((carta) => carta.instancia_id === instanciaId)
-    if (indice !== -1) {
-      return { coleccion, indice, carta: lista[indice] }
-    }
+    if (indice !== -1) return { coleccion, indice, carta: lista[indice] }
   }
   return null
 }
@@ -43,16 +37,12 @@ function localizarCartaEnGaraje(garaje, instanciaId) {
 exports.venderCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idParticipante, instanciaId } = request.data || {}
-  if (instanciaId === undefined) {
-    throw new HttpsError('invalid-argument', 'Falta instanciaId.')
-  }
+  if (instanciaId === undefined) throw new HttpsError('invalid-argument', 'Falta instanciaId.')
 
   const { referencia, datos } = await cargarParticipacionPropia(idParticipante, email)
   const garaje = datos.garaje || {}
   const localizada = localizarCartaEnGaraje(garaje, instanciaId)
-  if (!localizada) {
-    throw new HttpsError('not-found', 'La carta no está en tu garaje.')
-  }
+  if (!localizada) throw new HttpsError('not-found', 'La carta no está en tu garaje.')
 
   const { coleccion, indice, carta } = localizada
   if (carta.equipado) await exigirJornadaProcesada()
@@ -91,29 +81,21 @@ function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
   if (pasaAEquipado && coleccion === 'coches') {
     const yaAlineados = lista.filter((c) => c.equipado).length
     if (yaAlineados >= MAX_COCHES_ALINEADOS) {
-      for (let i = 0; i < lista.length; i++) {
-        lista[i] = { ...lista[i], equipado: false }
-      }
+      for (let i = 0; i < lista.length; i++) lista[i] = { ...lista[i], equipado: false }
     }
   }
 
   if (pasaAEquipado && coleccion === 'pilotos') {
     const yaAlineados = lista.filter((c) => c.equipado).length
     if (yaAlineados >= MAX_PILOTOS_ALINEADOS) {
-      throw new HttpsError(
-        'failed-precondition',
-        'Ya tienes dos pilotos titulares. Desalinea uno antes de añadir otro.',
-      )
+      throw new HttpsError('failed-precondition', 'Ya tienes dos pilotos titulares. Desalinea uno antes de añadir otro.')
     }
   }
 
   if (pasaAEquipado && coleccion === 'potenciadores') {
     const pilotosFichados = (garaje.pilotos || []).length
     if (pilotosFichados === 0) {
-      throw new HttpsError(
-        'failed-precondition',
-        'Necesitas al menos un piloto fichado para instalar un potenciador.',
-      )
+      throw new HttpsError('failed-precondition', 'Necesitas al menos un piloto fichado para instalar un potenciador.')
     }
   }
 
@@ -126,16 +108,12 @@ exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
   const { idParticipante, instanciaId } = request.data || {}
-  if (instanciaId === undefined) {
-    throw new HttpsError('invalid-argument', 'Falta instanciaId.')
-  }
+  if (instanciaId === undefined) throw new HttpsError('invalid-argument', 'Falta instanciaId.')
 
   const { referencia, datos } = await cargarParticipacionPropia(idParticipante, email)
   const garaje = datos.garaje || {}
   const localizada = localizarCartaEnGaraje(garaje, instanciaId)
-  if (!localizada) {
-    throw new HttpsError('not-found', 'La carta no está en tu garaje.')
-  }
+  if (!localizada) throw new HttpsError('not-found', 'La carta no está en tu garaje.')
 
   const garajeActualizado = aplicarCambioAlineacion(garaje, localizada.coleccion, localizada.indice)
   await referencia.update({ garaje: garajeActualizado })
@@ -150,9 +128,7 @@ exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
   const { idParticipante, instanciaId, cantidad } = request.data || {}
-  if (instanciaId === undefined) {
-    throw new HttpsError('invalid-argument', 'Falta instanciaId.')
-  }
+  if (instanciaId === undefined) throw new HttpsError('invalid-argument', 'Falta instanciaId.')
   const cantidadNumerica = Number(cantidad)
   if (!Number.isFinite(cantidadNumerica) || cantidadNumerica <= 0) {
     throw new HttpsError('invalid-argument', 'La cantidad a invertir debe ser positiva.')
@@ -161,9 +137,7 @@ exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   const { referencia, datos } = await cargarParticipacionPropia(idParticipante, email)
   const garaje = datos.garaje || {}
   const localizada = localizarCartaEnGaraje(garaje, instanciaId)
-  if (!localizada) {
-    throw new HttpsError('not-found', 'La carta no está en tu garaje.')
-  }
+  if (!localizada) throw new HttpsError('not-found', 'La carta no está en tu garaje.')
   const { coleccion, indice, carta } = localizada
   const tipoCarta = carta.tipo || carta.tipoCarta
   if (tipoCarta === 'potenciador') {
@@ -220,12 +194,7 @@ function extraerCartaPorInstancia(garaje, instanciaId) {
 async function calcularComprometidoEnPujas(idLiga, email) {
   const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
   if (!mercadoDoc) return 0
-  const pujasSnap = await db
-    .collection('mercados')
-    .doc(mercadoDoc.id)
-    .collection('pujas')
-    .where('emailUsuario', '==', email)
-    .get()
+  const pujasSnap = await db.collection('mercados').doc(mercadoDoc.id).collection('pujas').where('emailUsuario', '==', email).get()
   return pujasSnap.docs.reduce((suma, documento) => suma + (documento.data().cantidad || 0), 0)
 }
 
@@ -258,9 +227,7 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
 
   const garajeRival = datosRival.garaje || {}
   const { carta } = extraerCartaPorInstancia(garajeRival, instanciaId)
-  if (!carta) {
-    throw new HttpsError('not-found', 'La carta ya no está en el equipo rival.')
-  }
+  if (!carta) throw new HttpsError('not-found', 'La carta ya no está en el equipo rival.')
 
   const tipoCarta = carta.tipo || carta.tipoCarta
   if (tipoCarta === 'potenciador') {
@@ -284,16 +251,9 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   // fechaAdquisicion: el nuevo dueño decide si la equipa y arranca su propio
   // periodo de gracia.
   const garajePropio = datosPropio.garaje || {}
-  const cartaNueva = {
-    ...carta,
-    precioCompra: precioClausula,
-    clausulaInvertida: 0,
-    fechaAdquisicion: new Date().toISOString(),
-    equipado: false,
-  }
+  const cartaNueva = { ...carta, precioCompra: precioClausula, clausulaInvertida: 0, fechaAdquisicion: new Date().toISOString(), equipado: false }
   const tipoDestino = cartaNueva.tipo || cartaNueva.tipoCarta
-  const coleccionDestino =
-    tipoDestino === 'coche' ? 'coches' : tipoDestino === 'piloto' ? 'pilotos' : 'potenciadores'
+  const coleccionDestino = tipoDestino === 'coche' ? 'coches' : tipoDestino === 'piloto' ? 'pilotos' : 'potenciadores'
   if (!garajePropio[coleccionDestino]) garajePropio[coleccionDestino] = []
   garajePropio[coleccionDestino].push(cartaNueva)
 

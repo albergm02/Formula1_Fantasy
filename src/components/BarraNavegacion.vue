@@ -21,9 +21,13 @@ const elementos = [
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1F] border-t border-[#E10600]">
     <div class="flex items-start justify-around px-1 pt-3 pb-5">
-      <button v-for="el in elementos" :key="el.ruta" @click="navegar(el.ruta)"
+      <button
+        v-for="el in elementos"
+        :key="el.ruta"
+        @click="navegar(el.ruta)"
         class="flex flex-col items-center gap-1 bg-transparent min-w-0 flex-1"
-        :class="ruta.path === el.ruta ? 'text-[#E10600]' : 'text-zinc-400'">
+        :class="ruta.path === el.ruta ? 'text-[#E10600]' : 'text-zinc-400'"
+      >
         <i class="pi text-xl sm:text-2xl" :class="el.icono"></i>
         <span class="text-[9px] sm:text-[12px] font-bold uppercase truncate">
           {{ el.etiqueta }}

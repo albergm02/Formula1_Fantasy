@@ -70,13 +70,11 @@ onMounted(async () => {
 })
 </script>
 
-
 <template>
   <div class="min-h-screen pb-24 font-sans">
     <Cabecera />
 
     <main class="flex flex-col w-full max-w-lg mx-auto mt-4 p-4 gap-4">
-
       <WidgetDesgloseJornada />
 
       <div class="flex justify-center pb-2 border-b border-zinc-700">
@@ -88,25 +86,37 @@ onMounted(async () => {
       </div>
 
       <div v-else class="flex flex-col gap-3">
-        <div v-for="(jugador, indice) in ranking" :key="jugador.id"
-          class="flex items-center justify-between p-4 border border-white transition-colors" :class="{
+        <div
+          v-for="(jugador, indice) in ranking"
+          :key="jugador.id"
+          class="flex items-center justify-between p-4 border border-white transition-colors"
+          :class="{
             '!border-[#E10600] !bg-[#E10600]/10': jugador.correo === storePerfil.usuarioActual.correoAutenticacion,
-          }" @click="verEquipoRival(jugador)">
+          }"
+          @click="verEquipoRival(jugador)"
+        >
           <div class="flex items-center gap-3">
             <div class="flex items-center gap-4">
-              <div class="relative -top-4 text-2xl font-black italic" :class="{
-                'text-[#D4A843]': indice === 0,
-                'text-gray-200': indice === 1,
-                'text-[#CD7F32]': indice === 2,
-                'text-[#FFFFFF]': indice > 2
-              }">{{ indice + 1 }}º</div>
+              <div
+                class="relative -top-4 text-2xl font-black italic"
+                :class="{
+                  'text-[#D4A843]': indice === 0,
+                  'text-gray-200': indice === 1,
+                  'text-[#CD7F32]': indice === 2,
+                  'text-[#FFFFFF]': indice > 2,
+                }"
+              >
+                {{ indice + 1 }}º
+              </div>
               <div class="flex flex-col">
                 <span class="text-lg font-bold uppercase text-white">{{ jugador.nombre }}</span>
                 <span class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
                   Garaje: <span class="font-bold text-[#D4A843]">{{ jugador.valorGaraje }}M</span>
                 </span>
-                <span v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
-                  class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+                <span
+                  v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
+                  class="mt-1 text-[10px] uppercase tracking-widest text-zinc-500"
+                >
                   Toca para ver su equipo y hacer clausulas.
                 </span>
               </div>
@@ -114,8 +124,7 @@ onMounted(async () => {
           </div>
 
           <div class="flex items-center gap-3">
-            <i v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion"
-              class="pi pi-eye text-zinc-500 text-sm"></i>
+            <i v-if="jugador.correo !== storePerfil.usuarioActual.correoAutenticacion" class="pi pi-eye text-zinc-500 text-sm"></i>
             <div class="flex flex-col items-end justify-center text-right">
               <span class="text-3xl font-black text-[#D4A843]">{{ jugador.puntos }}</span>
               <span class="mt-1 text-xs font-bold uppercase text-[#F0ECEC]">PTS</span>
@@ -124,8 +133,17 @@ onMounted(async () => {
         </div>
       </div>
 
-      <Dialog v-model:visible="dialogoRivalVisible" modal :draggable="false" class="w-full max-w-md mx-auto"
-        :pt="{ root: { class: '!bg-[#0C0C0E] !border-none' }, header: { class: '!bg-[#0C0C0E] !p-3' }, content: { class: '!bg-[#0C0C0E] !p-0' } }">
+      <Dialog
+        v-model:visible="dialogoRivalVisible"
+        modal
+        :draggable="false"
+        class="w-full max-w-md mx-auto"
+        :pt="{
+          root: { class: '!bg-[#0C0C0E] !border-none' },
+          header: { class: '!bg-[#0C0C0E] !p-3' },
+          content: { class: '!bg-[#0C0C0E] !p-0' },
+        }"
+      >
         <template #header>
           <span class="text-sm font-bold uppercase tracking-widest text-zinc-400">Equipo rival</span>
         </template>

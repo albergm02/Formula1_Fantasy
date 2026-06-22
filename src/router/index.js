@@ -133,11 +133,7 @@ router.beforeEach(async (to) => {
       await storeLigas.cargarLigasUsuario()
     }
 
-    if (
-      !storePerfil.usuarioActual ||
-      !storePerfil.usuarioActual.idsLigas ||
-      storePerfil.usuarioActual.idsLigas.length === 0
-    ) {
+    if (!storePerfil.usuarioActual || !storePerfil.usuarioActual.idsLigas || storePerfil.usuarioActual.idsLigas.length === 0) {
       return { name: 'ligas' }
     }
   }

@@ -7,17 +7,7 @@
  *  - Commands (escrituras): se delegan a Cloud Functions para garantizar
  *    atomicidad y validación server-side.
  */
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  where,
-  arrayRemove,
-  getDoc,
-  updateDoc,
-  documentId,
-} from 'firebase/firestore'
+import { collection, doc, getDocs, query, where, arrayRemove, getDoc, updateDoc, documentId } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
 import { migrarGaraje } from '@/utils/migracionGaraje'
@@ -81,10 +71,7 @@ export const cargarLiga = async (idLiga) => {
 }
 
 export const buscarLigaPorCodigo = async (codigoInvitacion) => {
-  const consulta = query(
-    collection(db, 'ligas'),
-    where('codigo_invitacion', '==', codigoInvitacion),
-  )
+  const consulta = query(collection(db, 'ligas'), where('codigo_invitacion', '==', codigoInvitacion))
   const instantanea = await getDocs(consulta)
   if (instantanea.empty) return null
   const documento = instantanea.docs[0]
@@ -102,9 +89,7 @@ export const cargarParticipantes = async (idLiga) => {
   }))
 
   const docsUsuario = await Promise.all(
-    participaciones.map((p) =>
-      p.uid_usuario ? getDoc(doc(db, 'usuarios', p.uid_usuario)) : Promise.resolve(null),
-    ),
+    participaciones.map((p) => (p.uid_usuario ? getDoc(doc(db, 'usuarios', p.uid_usuario)) : Promise.resolve(null))),
   )
 
   return participaciones.map((participacion, indice) => {
@@ -118,21 +103,13 @@ export const cargarParticipantes = async (idLiga) => {
 
 /** Cuenta cuántas ligas administra un usuario (límite 2 por usuario). */
 export const contarLigasOrganizadas = async (correoUsuario) => {
-  const consulta = query(
-    collection(db, 'participaciones'),
-    where('email_usuario', '==', correoUsuario),
-    where('rol', '==', 'organizador'),
-  )
+  const consulta = query(collection(db, 'participaciones'), where('email_usuario', '==', correoUsuario), where('rol', '==', 'organizador'))
   const instantanea = await getDocs(consulta)
   return instantanea.size
 }
 
 export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
-  const consulta = query(
-    collection(db, 'participaciones'),
-    where('id_liga', '==', idLiga),
-    where('email_usuario', '==', correoUsuario),
-  )
+  const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga), where('email_usuario', '==', correoUsuario))
   const instantanea = await getDocs(consulta)
   if (instantanea.empty) return null
   const documento = instantanea.docs[0]
@@ -175,18 +152,12 @@ export const cargarGarajeRival = async (idParticipacion) => {
 export const cargarClasificacion = async (idLiga) => {
   const participaciones = await cargarParticipantes(idLiga)
 
-  const docsUsuario = await Promise.all(
-    participaciones.map((p) => getDoc(doc(db, 'usuarios', p.uid_usuario))),
-  )
+  const docsUsuario = await Promise.all(participaciones.map((p) => getDoc(doc(db, 'usuarios', p.uid_usuario))))
 
   const filasRanking = participaciones.map((participacion, indice) => {
     const datosUsuario = docsUsuario[indice].exists() ? docsUsuario[indice].data() : {}
     const garaje = participacion.garaje || {}
-    const todasLasCartas = [
-      ...(garaje.coches || []),
-      ...(garaje.pilotos || []),
-      ...(garaje.potenciadores || []),
-    ]
+    const todasLasCartas = [...(garaje.coches || []), ...(garaje.pilotos || []), ...(garaje.potenciadores || [])]
     const valorGaraje = todasLasCartas.reduce((suma, carta) => suma + Number(carta?.precio || 0), 0)
 
     return {
@@ -199,8 +170,5 @@ export const cargarClasificacion = async (idLiga) => {
     }
   })
 
-  return filasRanking.sort(
-    (primero, segundo) =>
-      segundo.puntos - primero.puntos || segundo.presupuesto - primero.presupuesto,
-  )
+  return filasRanking.sort((primero, segundo) => segundo.puntos - primero.puntos || segundo.presupuesto - primero.presupuesto)
 }

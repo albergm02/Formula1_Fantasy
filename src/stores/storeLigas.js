@@ -4,8 +4,7 @@ import { usarStorePerfil } from './storePerfil'
 import * as servicioLigas from '@/services/servicioLigas'
 
 const MAX_LIGAS = 5
-const alcanzoLimiteLigas = (idsLigas = []) =>
-  Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
+const alcanzoLimiteLigas = (idsLigas = []) => Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
 
 export const usarStoreLigas = defineStore('ligas', () => {
   const detallesLigas = ref([])
@@ -85,9 +84,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
       await servicioLigas.abandonarLiga(idLiga)
 
       const storePerfil = usarStorePerfil()
-      storePerfil.usuarioActual.idsLigas = storePerfil.usuarioActual.idsLigas.filter(
-        (id) => id !== idLiga,
-      )
+      storePerfil.usuarioActual.idsLigas = storePerfil.usuarioActual.idsLigas.filter((id) => id !== idLiga)
 
       if (idLigaActiva.value === idLiga) {
         idLigaActiva.value = null
@@ -126,9 +123,7 @@ export const usarStoreLigas = defineStore('ligas', () => {
     try {
       await servicioLigas.eliminarLiga(idLiga)
 
-      storePerfil.usuarioActual.idsLigas = storePerfil.usuarioActual.idsLigas.filter(
-        (id) => id !== idLiga,
-      )
+      storePerfil.usuarioActual.idsLigas = storePerfil.usuarioActual.idsLigas.filter((id) => id !== idLiga)
 
       if (idLigaActiva.value === idLiga) {
         idLigaActiva.value = null

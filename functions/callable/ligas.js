@@ -13,33 +13,21 @@ const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 async function borrarLigaEnCascada(idLiga, ligaSnap) {
   const batch = db.batch()
 
-  const participacionesSnap = await db
-    .collection('participaciones')
-    .where('id_liga', '==', idLiga)
-    .get()
-  for (const documento of participacionesSnap.docs) {
-    batch.delete(documento.ref)
-  }
+  const participacionesSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).get()
+  for (const documento of participacionesSnap.docs) batch.delete(documento.ref)
 
   const mercadosSnap = await db.collection('mercados').doc(idLiga).collection('dias').get()
   for (const documentoMercado of mercadosSnap.docs) {
     const pujasSnap = await documentoMercado.ref.collection('pujas').get()
-    for (const documentoPuja of pujasSnap.docs) {
-      batch.delete(documentoPuja.ref)
-    }
+    for (const documentoPuja of pujasSnap.docs) batch.delete(documentoPuja.ref)
     batch.delete(documentoMercado.ref)
   }
 
   const actividadSnap = await db.collection('actividad').doc(idLiga).collection('eventos').get()
-  for (const documento of actividadSnap.docs) {
-    batch.delete(documento.ref)
-  }
+  for (const documento of actividadSnap.docs) batch.delete(documento.ref)
   batch.delete(db.collection('actividad').doc(idLiga))
 
-  const usuariosSnap = await db
-    .collection('usuarios')
-    .where('ligasIds', 'array-contains', idLiga)
-    .get()
+  const usuariosSnap = await db.collection('usuarios').where('ligasIds', 'array-contains', idLiga).get()
   for (const documentoUsuario of usuariosSnap.docs) {
     batch.update(documentoUsuario.ref, { ligasIds: FieldValue.arrayRemove(idLiga) })
   }
@@ -62,14 +50,10 @@ exports.borrarLigaEnCascada = borrarLigaEnCascada
 exports.inicializarMercado = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
+  if (!idLiga) throw new HttpsError('invalid-argument', 'Falta idLiga.')
 
   const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
+  if (!ligaSnap.exists) throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
   if (ligaSnap.data().correoOrganizador !== email) {
     throw new HttpsError('permission-denied', 'Solo el organizador de la liga puede inicializarla.')
   }
@@ -81,9 +65,7 @@ exports.inicializarMercado = onCall(OPCIONES, async (request) => {
 exports.eliminarPujas = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
+  if (!idLiga) throw new HttpsError('invalid-argument', 'Falta idLiga.')
 
   const batch = db.batch()
   const pujasEliminadas = await agregarBorradoPujasUsuario(batch, idLiga, email)
@@ -95,14 +77,10 @@ exports.eliminarPujas = onCall(OPCIONES, async (request) => {
 exports.eliminarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
+  if (!idLiga) throw new HttpsError('invalid-argument', 'Falta idLiga.')
 
   const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
+  if (!ligaSnap.exists) throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
   if (ligaSnap.data().correoOrganizador !== email) {
     throw new HttpsError('permission-denied', 'Solo el organizador puede eliminar la liga.')
   }
@@ -117,9 +95,7 @@ exports.eliminarLiga = onCall(OPCIONES, async (request) => {
 exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   const emailOrganizador = exigirEmailAutenticado(request)
   const { idLiga, emailExpulsado } = request.data || {}
-  if (!idLiga || !emailExpulsado) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga o emailExpulsado.')
-  }
+  if (!idLiga || !emailExpulsado) throw new HttpsError('invalid-argument', 'Falta idLiga o emailExpulsado.')
 
   const correoExpulsado = String(emailExpulsado).trim().toLowerCase()
   if (correoExpulsado === emailOrganizador.toLowerCase()) {
@@ -127,23 +103,14 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   }
 
   const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
+  if (!ligaSnap.exists) throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
   const datosLiga = ligaSnap.data()
   if (datosLiga.correoOrganizador !== emailOrganizador) {
     throw new HttpsError('permission-denied', 'Solo el organizador puede expulsar participantes.')
   }
 
-  const participacionSnap = await db
-    .collection('participaciones')
-    .where('id_liga', '==', idLiga)
-    .where('email_usuario', '==', correoExpulsado)
-    .limit(1)
-    .get()
-  if (participacionSnap.empty) {
-    throw new HttpsError('not-found', 'El participante no pertenece a esta liga.')
-  }
+  const participacionSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).where('email_usuario', '==', correoExpulsado).limit(1).get()
+  if (participacionSnap.empty) throw new HttpsError('not-found', 'El participante no pertenece a esta liga.')
   const participacionExpulsado = participacionSnap.docs[0]
   const datosParticipacion = participacionExpulsado.data()
 
@@ -151,11 +118,7 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   // para poder limpiar también su array ligasIds.
   let uidExpulsado = datosParticipacion.uid_usuario || null
   if (!uidExpulsado) {
-    const usuarioSnap = await db
-      .collection('usuarios')
-      .where('correoAutenticacion', '==', correoExpulsado)
-      .limit(1)
-      .get()
+    const usuarioSnap = await db.collection('usuarios').where('correoAutenticacion', '==', correoExpulsado).limit(1).get()
     if (!usuarioSnap.empty) uidExpulsado = usuarioSnap.docs[0].id
   }
 
@@ -201,16 +164,9 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 
   const nombre = String(nombreLiga).trim()
 
-  const ligasOrganizadasSnap = await db
-    .collection('participaciones')
-    .where('email_usuario', '==', email)
-    .where('rol', '==', 'organizador')
-    .get()
+  const ligasOrganizadasSnap = await db.collection('participaciones').where('email_usuario', '==', email).where('rol', '==', 'organizador').get()
   if (ligasOrganizadasSnap.size >= 2) {
-    throw new HttpsError(
-      'failed-precondition',
-      'Has alcanzado el límite máximo de 2 ligas creadas.',
-    )
+    throw new HttpsError('failed-precondition', 'Has alcanzado el límite máximo de 2 ligas creadas.')
   }
 
   const usuarioSnap = await db.collection('usuarios').doc(uid).get()
@@ -272,9 +228,7 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
   const uid = request.auth.uid
   const { codigoInvitacion } = request.data || {}
 
-  if (!codigoInvitacion) {
-    throw new HttpsError('invalid-argument', 'Falta el código de invitación.')
-  }
+  if (!codigoInvitacion) throw new HttpsError('invalid-argument', 'Falta el código de invitación.')
 
   const usuarioSnap = await db.collection('usuarios').doc(uid).get()
   const datosUsuario = usuarioSnap.data() || {}
@@ -283,29 +237,18 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
     throw new HttpsError('failed-precondition', 'Solo puedes pertenecer a un máximo de 5 ligas.')
   }
 
-  const ligaSnap = await db
-    .collection('ligas')
-    .where('codigo_invitacion', '==', String(codigoInvitacion).trim().toUpperCase())
-    .limit(1)
-    .get()
-  if (ligaSnap.empty) {
-    throw new HttpsError('not-found', 'Código de invitación no válido.')
-  }
+  const ligaSnap = await db.collection('ligas').where('codigo_invitacion', '==', String(codigoInvitacion).trim().toUpperCase()).limit(1).get()
+  if (ligaSnap.empty) throw new HttpsError('not-found', 'Código de invitación no válido.')
 
   const ligaDoc = ligaSnap.docs[0]
   const idLiga = ligaDoc.id
   const datosLiga = ligaDoc.data()
 
-  if (ligasActuales.includes(idLiga)) {
-    throw new HttpsError('already-exists', 'Ya perteneces a esta liga.')
-  }
+  if (ligasActuales.includes(idLiga)) throw new HttpsError('already-exists', 'Ya perteneces a esta liga.')
 
   const expulsados = datosLiga.expulsados || []
   if (expulsados.includes(email)) {
-    throw new HttpsError(
-      'permission-denied',
-      'Has sido expulsado de esta liga y no puedes volver a unirte.',
-    )
+    throw new HttpsError('permission-denied', 'Has sido expulsado de esta liga y no puedes volver a unirte.')
   }
 
   const nombreVisible = datosUsuario.nombreVisible || datosUsuario.nombre || email
@@ -348,28 +291,16 @@ exports.abandonarLiga = onCall(OPCIONES, async (request) => {
   const uid = request.auth.uid
   const { idLiga } = request.data || {}
 
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
+  if (!idLiga) throw new HttpsError('invalid-argument', 'Falta idLiga.')
 
   const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
+  if (!ligaSnap.exists) throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
 
-  const participacionesSnap = await db
-    .collection('participaciones')
-    .where('id_liga', '==', idLiga)
-    .get()
-  const todasLasParticipaciones = participacionesSnap.docs.map((doc) => ({
-    ref: doc.ref,
-    ...doc.data(),
-  }))
+  const participacionesSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).get()
+  const todasLasParticipaciones = participacionesSnap.docs.map((doc) => ({ ref: doc.ref, ...doc.data() }))
 
   const participacionPropia = todasLasParticipaciones.find((p) => p.email_usuario === email)
-  if (!participacionPropia) {
-    throw new HttpsError('not-found', 'No perteneces a esta liga.')
-  }
+  if (!participacionPropia) throw new HttpsError('not-found', 'No perteneces a esta liga.')
 
   const participacionesRestantes = todasLasParticipaciones.filter((p) => p.email_usuario !== email)
 
@@ -381,9 +312,7 @@ exports.abandonarLiga = onCall(OPCIONES, async (request) => {
   const batch = db.batch()
 
   if (participacionPropia.rol === 'organizador') {
-    const siguienteOrganizador = [...participacionesRestantes].sort(
-      (a, b) => a.fecha_union.toMillis() - b.fecha_union.toMillis(),
-    )[0]
+    const siguienteOrganizador = [...participacionesRestantes].sort((a, b) => a.fecha_union.toMillis() - b.fecha_union.toMillis())[0]
     batch.update(siguienteOrganizador.ref, { rol: 'organizador' })
     batch.update(ligaSnap.ref, {
       correoOrganizador: siguienteOrganizador.email_usuario,

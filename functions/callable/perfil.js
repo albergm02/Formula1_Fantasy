@@ -18,18 +18,13 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   const uid = request.auth.uid
 
   const docUsuario = await db.collection('usuarios').doc(uid).get()
-  if (!docUsuario.exists) {
-    throw new HttpsError('not-found', 'No existe el perfil del usuario.')
-  }
+  if (!docUsuario.exists) throw new HttpsError('not-found', 'No existe el perfil del usuario.')
 
   const ultimoCambio = docUsuario.data().fechaUltimoCambioCorreo
   if (ultimoCambio) {
     const fecha = ultimoCambio.toDate ? ultimoCambio.toDate() : new Date(ultimoCambio)
     if (Date.now() - fecha.getTime() < MS_BLOQUEO_CAMBIO_CORREO) {
-      throw new HttpsError(
-        'failed-precondition',
-        `Solo puedes cambiar el correo una vez cada ${DIAS_BLOQUEO_CAMBIO_CORREO} días.`,
-      )
+      throw new HttpsError('failed-precondition', `Solo puedes cambiar el correo una vez cada ${DIAS_BLOQUEO_CAMBIO_CORREO} días.`)
     }
   }
 
@@ -43,27 +38,18 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
 exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
   const uid = request.auth.uid
-  const correoAnterior = String(request.data?.correoAnterior || '')
-    .trim()
-    .toLowerCase()
-  const correoNuevo = String(request.data?.correoNuevo || '')
-    .trim()
-    .toLowerCase()
+  const correoAnterior = String(request.data?.correoAnterior || '').trim().toLowerCase()
+  const correoNuevo = String(request.data?.correoNuevo || '').trim().toLowerCase()
 
   if (!correoAnterior || !correoNuevo || correoAnterior === correoNuevo) {
     throw new HttpsError('invalid-argument', 'Correos inválidos.')
   }
   if (emailToken.toLowerCase() !== correoNuevo) {
-    throw new HttpsError(
-      'failed-precondition',
-      'Debes actualizar el correo en Auth y refrescar el token antes de migrar.',
-    )
+    throw new HttpsError('failed-precondition', 'Debes actualizar el correo en Auth y refrescar el token antes de migrar.')
   }
 
   const docUsuario = await db.collection('usuarios').doc(uid).get()
-  if (!docUsuario.exists) {
-    throw new HttpsError('not-found', 'No existe el perfil del usuario.')
-  }
+  if (!docUsuario.exists) throw new HttpsError('not-found', 'No existe el perfil del usuario.')
 
   const [participacionesSnap, ligasAdminSnap] = await Promise.all([
     db.collection('participaciones').where('email_usuario', '==', correoAnterior).get(),
@@ -73,29 +59,16 @@ exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const batch = db.batch()
   batch.update(db.collection('usuarios').doc(uid), { correoAutenticacion: correoNuevo })
 
-  for (const documento of participacionesSnap.docs) {
-    batch.update(documento.ref, { email_usuario: correoNuevo })
-  }
-  for (const documento of ligasAdminSnap.docs) {
-    batch.update(documento.ref, { correoOrganizador: correoNuevo })
-  }
+  for (const documento of participacionesSnap.docs) batch.update(documento.ref, { email_usuario: correoNuevo })
+  for (const documento of ligasAdminSnap.docs) batch.update(documento.ref, { correoOrganizador: correoNuevo })
 
   await batch.commit()
 
-  return {
-    ok: true,
-    correoNuevo,
-    participacionesMigradas: participacionesSnap.size,
-    ligasMigradas: ligasAdminSnap.size,
-  }
+  return { ok: true, correoNuevo, participacionesMigradas: participacionesSnap.size, ligasMigradas: ligasAdminSnap.size }
 })
 
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
-  const participacionesSnap = await db
-    .collection('participaciones')
-    .where('email_usuario', '==', email)
-    .get()
-
+  const participacionesSnap = await db.collection('participaciones').where('email_usuario', '==', email).get()
   let ligasBorradas = 0
 
   for (const documentoPropio of participacionesSnap.docs) {
@@ -109,13 +82,8 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
     }
     const datosLiga = ligaSnap.data()
 
-    const restantesSnap = await db
-      .collection('participaciones')
-      .where('id_liga', '==', idLiga)
-      .get()
-    const restantes = restantesSnap.docs
-      .filter((d) => d.id !== documentoPropio.id)
-      .map((d) => ({ id: d.id, ...d.data() }))
+    const restantesSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).get()
+    const restantes = restantesSnap.docs.filter((d) => d.id !== documentoPropio.id).map((d) => ({ id: d.id, ...d.data() }))
 
     if (restantes.length === 0) {
       await documentoPropio.ref.delete()
@@ -135,20 +103,12 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
         return fechaA - fechaB
       })[0]
       await db.collection('participaciones').doc(siguiente.id).update({ rol: 'organizador' })
-      await db
-        .collection('ligas')
-        .doc(idLiga)
-        .update({
-          correoOrganizador: siguiente.email_usuario,
-          participantes: (datosLiga.participantes || restantes.length + 1) - 1,
-        })
+      await db.collection('ligas').doc(idLiga).update({
+        correoOrganizador: siguiente.email_usuario,
+        participantes: (datosLiga.participantes || restantes.length + 1) - 1,
+      })
     } else {
-      await db
-        .collection('ligas')
-        .doc(idLiga)
-        .update({
-          participantes: (datosLiga.participantes || restantes.length + 1) - 1,
-        })
+      await db.collection('ligas').doc(idLiga).update({ participantes: (datosLiga.participantes || restantes.length + 1) - 1 })
     }
 
     await documentoPropio.ref.delete()
@@ -160,10 +120,7 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
     await adminAuth.revokeRefreshTokens(uid)
     await adminAuth.deleteUser(uid)
   } catch (error) {
-    throw new HttpsError(
-      'internal',
-      `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`,
-    )
+    throw new HttpsError('internal', `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`)
   }
 
   return { participacionesBorradas: participacionesSnap.size, ligasBorradas }
@@ -189,15 +146,11 @@ exports.crearPerfil = onCall(OPCIONES, async (request) => {
   const correo = request.auth.token.email || ''
   const nombreUsuario = String(request.data?.nombreUsuario || '').trim()
 
-  if (!nombreUsuario) {
-    throw new HttpsError('invalid-argument', 'El nombre de usuario es obligatorio.')
-  }
+  if (!nombreUsuario) throw new HttpsError('invalid-argument', 'El nombre de usuario es obligatorio.')
 
   const docRef = db.collection('usuarios').doc(uid)
   const existente = await docRef.get()
-  if (existente.exists) {
-    throw new HttpsError('already-exists', 'El perfil ya existe.')
-  }
+  if (existente.exists) throw new HttpsError('already-exists', 'El perfil ya existe.')
 
   await docRef.set({
     correoAutenticacion: correo,

@@ -4,9 +4,7 @@ function seleccionarPujasGanadoras(pujas) {
   const pujasPorCarta = {}
   for (const puja of pujas) {
     const actual = pujasPorCarta[puja.idCarta]
-    if (!actual || puja.cantidad > actual.cantidad) {
-      pujasPorCarta[puja.idCarta] = puja
-    }
+    if (!actual || puja.cantidad > actual.cantidad) pujasPorCarta[puja.idCarta] = puja
   }
   return pujasPorCarta
 }

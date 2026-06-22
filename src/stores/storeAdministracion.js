@@ -12,10 +12,7 @@ export const usarStoreAdministracion = defineStore('administracion', () => {
   const usuarios = ref([])
 
   async function cargarListas() {
-    const [listaLigas, listaUsuarios] = await Promise.all([
-      cargarListaLigas(),
-      cargarListaUsuarios(),
-    ])
+    const [listaLigas, listaUsuarios] = await Promise.all([cargarListaLigas(), cargarListaUsuarios()])
     ligas.value = listaLigas
     usuarios.value = listaUsuarios
   }

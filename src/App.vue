@@ -13,14 +13,14 @@ const storePerfil = usarStorePerfil()
 const storeLigas = usarStoreLigas()
 const router = useRouter()
 
-let cancelarObservadorAutenticacion = () => { }
-let cancelarEscuchaPerfil = () => { }
+let cancelarObservadorAutenticacion = () => {}
+let cancelarEscuchaPerfil = () => {}
 
 onMounted(() => {
   cancelarObservadorAutenticacion = storeAutenticacion.observarEstadoSesion((usuario) => {
     if (!usuario) {
       cancelarEscuchaPerfil()
-      cancelarEscuchaPerfil = () => { }
+      cancelarEscuchaPerfil = () => {}
       storeAutenticacion.limpiarSesion()
       const rutaActual = router.currentRoute.value.path
       const estaEnRutaPublica = rutaActual === '/' || rutaActual === '/registro'
@@ -58,13 +58,15 @@ onUnmounted(() => {
   <div class="fixed inset-0 h-full w-full bg-[#0C0C0E] -z-40"></div>
 
   <Toast position="top-center" />
-  <ConfirmDialog :pt="{
-    root: { class: '!bg-[#1A1A1F] !border-none' },
-    title: { class: 'text-[#D4A843]' },
-    content: { class: '!text-[#F0ECEC]' },
-    footer: { class: '!bg-transparent gap-2 flex justify-end' },
-    icon: { class: '!text-[#E10600]' },
-  }" />
+  <ConfirmDialog
+    :pt="{
+      root: { class: '!bg-[#1A1A1F] !border-none' },
+      title: { class: 'text-[#D4A843]' },
+      content: { class: '!text-[#F0ECEC]' },
+      footer: { class: '!bg-transparent gap-2 flex justify-end' },
+      icon: { class: '!text-[#E10600]' },
+    }"
+  />
 
   <div v-if="!storeAutenticacion.datosCargados" class="flex flex-col items-center justify-center h-screen w-full gap-3">
     <i class="text-4xl text-[#D4A843] pi pi-spinner animate-spin"></i>

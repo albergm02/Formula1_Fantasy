@@ -1,6 +1,6 @@
 ﻿<script setup>
-import { onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { usarStoreGaraje } from '@/stores/storeGaraje'
 import { usarStoreLigas } from '@/stores/storeLigas'
@@ -28,7 +28,6 @@ onMounted(async () => {
   await storeGaraje.cargarEquipo(idLiga)
 })
 </script>
-
 
 <template>
   <div class="min-h-screen pb-24 font-sans">

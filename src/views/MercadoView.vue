@@ -58,7 +58,6 @@ const handleEliminarPuja = async (carta) => {
   <Cabecera />
 
   <main class="flex flex-col w-full max-w-lg mx-auto mt-4 mb-20 p-4 gap-6">
-
     <div v-if="storeMercado.cargandoMercado" class="flex justify-center py-20">
       <p class="text-sm font-bold uppercase tracking-widest text-[#D4A843]">Cargando...</p>
     </div>
@@ -68,7 +67,6 @@ const handleEliminarPuja = async (carta) => {
     </div>
 
     <template v-else>
-
       <!-- Cuenta atras del cierre -->
       <div class="flex items-center justify-between bg-[#121218] rounded-lg px-4 py-3">
         <span class="text-xs uppercase tracking-widest text-zinc-400 font-black">Cierre del mercado</span>
@@ -77,10 +75,17 @@ const handleEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <CartaItem v-for="coche in storeMercado.cochesMercado" :key="coche.id" :carta="coche" tipo="coche"
-            :modoMercado="true" :miPuja="storeMercado.misPujas[coche.id] || null"
-            :totalPujas="storeMercado.resumenPujas[coche.id] || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+          <CartaItem
+            v-for="coche in storeMercado.cochesMercado"
+            :key="coche.id"
+            :carta="coche"
+            tipo="coche"
+            :modoMercado="true"
+            :miPuja="storeMercado.misPujas[coche.id] || null"
+            :totalPujas="storeMercado.resumenPujas[coche.id] || 0"
+            @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja"
+          />
         </div>
       </section>
 
@@ -88,10 +93,17 @@ const handleEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <CartaItem v-for="piloto in storeMercado.pilotosMercado" :key="piloto.id" :carta="piloto" tipo="piloto"
-            :modoMercado="true" :miPuja="storeMercado.misPujas[piloto.id] || null"
-            :totalPujas="storeMercado.resumenPujas[piloto.id] || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+          <CartaItem
+            v-for="piloto in storeMercado.pilotosMercado"
+            :key="piloto.id"
+            :carta="piloto"
+            tipo="piloto"
+            :modoMercado="true"
+            :miPuja="storeMercado.misPujas[piloto.id] || null"
+            :totalPujas="storeMercado.resumenPujas[piloto.id] || 0"
+            @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja"
+          />
         </div>
       </section>
 
@@ -99,14 +111,19 @@ const handleEliminarPuja = async (carta) => {
 
       <section class="flex flex-col gap-4">
         <div class="grid grid-cols-1 gap-4">
-          <CartaItem v-for="potenciador in storeMercado.potenciadoresMercado" :key="potenciador.id"
-            :carta="potenciador" tipo="potenciador" :modoMercado="true"
+          <CartaItem
+            v-for="potenciador in storeMercado.potenciadoresMercado"
+            :key="potenciador.id"
+            :carta="potenciador"
+            tipo="potenciador"
+            :modoMercado="true"
             :miPuja="storeMercado.misPujas[potenciador.id] || null"
-            :totalPujas="storeMercado.resumenPujas[potenciador.id] || 0" @pujar="handlePuja"
-            @eliminarPuja="handleEliminarPuja" />
+            :totalPujas="storeMercado.resumenPujas[potenciador.id] || 0"
+            @pujar="handlePuja"
+            @eliminarPuja="handleEliminarPuja"
+          />
         </div>
       </section>
-
     </template>
   </main>
 

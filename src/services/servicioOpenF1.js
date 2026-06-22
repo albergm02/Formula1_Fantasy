@@ -41,10 +41,7 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
   }
 }
 
-export const obtenerUltimoGranPremioFinalizado = async ({
-  fetchImpl = fetch,
-  anio = 2026,
-} = {}) => {
+export const obtenerUltimoGranPremioFinalizado = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   if (!respuesta.ok) {
     const cuerpoError = await respuesta.json().catch(() => ({}))

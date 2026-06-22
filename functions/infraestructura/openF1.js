@@ -34,9 +34,7 @@ async function consultarOpenF1(ruta) {
       }
     }
 
-    if (!respuesta.ok) {
-      throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
-    }
+    if (!respuesta.ok) throw new Error(`Error HTTP ${respuesta.status} al consultar ${url}`)
 
     return respuesta.json()
   }
@@ -76,15 +74,9 @@ function extraerUltimaSesion(sesiones, nombre) {
 async function obtenerResultadosSesion(sessionKey) {
   const resultados = await consultarOpenF1(`/session_result?session_key=${sessionKey}`)
   const posicionFinal = {}
-
   for (const entrada of resultados) {
-    const numero = entrada.driver_number
-    const posicion = entrada.position
-    if (numero != null && posicion != null) {
-      posicionFinal[numero] = posicion
-    }
+    if (entrada.driver_number != null && entrada.position != null) posicionFinal[entrada.driver_number] = entrada.position
   }
-
   return posicionFinal
 }
 
@@ -92,14 +84,9 @@ async function obtenerResultadosSesion(sessionKey) {
 async function obtenerParrillaSalida(sessionKey) {
   const entradas = await consultarOpenF1(`/starting_grid?session_key=${sessionKey}`)
   const parrilla = {}
-
   for (const entrada of entradas) {
-    const numero = entrada.driver_number
-    if (numero != null && entrada.position != null) {
-      parrilla[numero] = entrada.position
-    }
+    if (entrada.driver_number != null && entrada.position != null) parrilla[entrada.driver_number] = entrada.position
   }
-
   return parrilla
 }
 
@@ -118,28 +105,14 @@ async function obtenerCondicionesCarrera(sessionKey) {
     const flag = (mensaje.flag || '').toUpperCase()
     const texto = (mensaje.message || '').toUpperCase()
 
-    if (
-      categoria === 'SAFETYCAR' ||
-      flag === 'SAFETY CAR' ||
-      texto.includes('SAFETY CAR DEPLOYED')
-    ) {
-      numeroSafetyCarActivos++
-    }
-    if (
-      categoria === 'VIRTUALSAFETYCAR' ||
-      flag === 'VIRTUAL SAFETY CAR' ||
-      texto.includes('VIRTUAL SAFETY CAR DEPLOYED')
-    ) {
-      numeroVirtualSafetyCarActivos++
-    }
+    if (categoria === 'SAFETYCAR' || flag === 'SAFETY CAR' || texto.includes('SAFETY CAR DEPLOYED')) numeroSafetyCarActivos++
+    if (categoria === 'VIRTUALSAFETYCAR' || flag === 'VIRTUAL SAFETY CAR' || texto.includes('VIRTUAL SAFETY CAR DEPLOYED')) numeroVirtualSafetyCarActivos++
   }
 
   // DNFs oficiales desde /session_result (más fiable que parsear race_control).
   let numeroDNFs = 0
   for (const fila of resultadosCompletos) {
-    if (fila.dnf === true || fila.dns === true || fila.dsq === true) {
-      numeroDNFs++
-    }
+    if (fila.dnf === true || fila.dns === true || fila.dsq === true) numeroDNFs++
   }
 
   return { llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }
@@ -173,10 +146,7 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
   for (const stint of stints) {
     const numero = stint.driver_number
     if (numero == null) continue
-
-    if (!stintsPorPiloto[numero]) {
-      stintsPorPiloto[numero] = []
-    }
+    if (!stintsPorPiloto[numero]) stintsPorPiloto[numero] = []
     stintsPorPiloto[numero].push(stint)
   }
 
@@ -193,15 +163,11 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
 
     for (const stint of stintsDelPiloto) {
       const vueltasStint = (stint.lap_end || 0) - (stint.lap_start || 0) + 1
-      if (vueltasStint > vueltasMaxStint) {
-        vueltasMaxStint = vueltasStint
-      }
+      if (vueltasStint > vueltasMaxStint) vueltasMaxStint = vueltasStint
       vueltasTotalPiloto += vueltasStint
     }
 
-    const porcentajeStintMaximo =
-      vueltasTotalPiloto > 0 ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 : 0.5
-
+    const porcentajeStintMaximo = vueltasTotalPiloto > 0 ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 : 0.5
     resultado[numero] = { numeroPitStops, porcentajeStintMaximo }
   }
 
@@ -236,9 +202,7 @@ async function recopilarDatosGranPremio(meetingKey) {
 
   const resultadosQualy = sesionQualy ? await obtenerResultadosSesion(sesionQualy.session_key) : {}
   const resultadosCarrera = await obtenerResultadosSesion(sesionCarrera.session_key)
-  const resultadosCompletosCarrera = await consultarOpenF1(
-    `/session_result?session_key=${sesionCarrera.session_key}`,
-  )
+  const resultadosCompletosCarrera = await consultarOpenF1(`/session_result?session_key=${sesionCarrera.session_key}`)
   const parrillaSalida = sesionQualy ? await obtenerParrillaSalida(sesionQualy.session_key) : {}
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
   const adelantamientos = await obtenerAdelantamientosPorPiloto(sesionCarrera.session_key)
@@ -318,9 +282,4 @@ async function recopilarDatosGranPremio(meetingKey) {
   }
 }
 
-module.exports = {
-  obtenerGranPremiosFinalizados,
-  obtenerMeetingKeyEnJuego,
-  recopilarDatosGranPremio,
-  SESION_EN_DIRECTO,
-}
+module.exports = { obtenerGranPremiosFinalizados, obtenerMeetingKeyEnJuego, recopilarDatosGranPremio, SESION_EN_DIRECTO }

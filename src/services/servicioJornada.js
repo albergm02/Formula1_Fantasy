@@ -2,11 +2,7 @@ import { collection, doc, getDoc, onSnapshot, orderBy, query, limit } from 'fire
 import { db } from '@/services/servicioFirebase'
 
 export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) {
-  const consulta = query(
-    collection(db, 'jornadas'),
-    orderBy('fechaProcesamiento', 'desc'),
-    limit(limiteJornadas),
-  )
+  const consulta = query(collection(db, 'jornadas'), orderBy('fechaProcesamiento', 'desc'), limit(limiteJornadas))
 
   return onSnapshot(consulta, (resultados) => {
     const jornadas = resultados.docs.map((documento) => ({
@@ -117,17 +113,9 @@ function calcularFactorCarrera({ posicionCarrera }) {
   return resolverFactorPosicionCarrera(posicionCarrera)
 }
 
-function calcularFactorTodoTerreno({
-  llovio,
-  numeroDNFs,
-  numeroSafetyCarActivos,
-  numeroVirtualSafetyCarActivos,
-}) {
+function calcularFactorTodoTerreno({ llovio, numeroDNFs, numeroSafetyCarActivos, numeroVirtualSafetyCarActivos }) {
   const factorBase = llovio ? 1 : 0.5
-  const bonusCaos =
-    (numeroSafetyCarActivos || 0) * 0.05 +
-    (numeroVirtualSafetyCarActivos || 0) * 0.05 +
-    (numeroDNFs || 0) * 0.1
+  const bonusCaos = (numeroSafetyCarActivos || 0) * 0.05 + (numeroVirtualSafetyCarActivos || 0) * 0.05 + (numeroDNFs || 0) * 0.1
   return Math.round((factorBase + bonusCaos) * 100) / 100
 }
 
@@ -136,11 +124,7 @@ function calcularFactorRemontador({ numeroAdelantos, numeroVecesAdelantado }) {
   return 1 + diferencial * 0.1
 }
 
-function calcularFactorEstrategia({
-  posicionCarrera,
-  numeroPitStops,
-  porcentajeStintMaximo = 0.5,
-}) {
+function calcularFactorEstrategia({ posicionCarrera, numeroPitStops, porcentajeStintMaximo = 0.5 }) {
   let factor = 0.7
   factor += resolverBonusGestionStint(porcentajeStintMaximo)
   factor += resolverBonusEstrategiaParadas(numeroPitStops)

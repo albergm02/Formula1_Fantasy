@@ -10,14 +10,10 @@ const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 exports.eliminarLigaAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { idLiga } = request.data || {}
-  if (!idLiga) {
-    throw new HttpsError('invalid-argument', 'Falta idLiga.')
-  }
+  if (!idLiga) throw new HttpsError('invalid-argument', 'Falta idLiga.')
 
   const ligaSnap = await db.collection('ligas').doc(idLiga).get()
-  if (!ligaSnap.exists) {
-    throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
-  }
+  if (!ligaSnap.exists) throw new HttpsError('not-found', `Liga ${idLiga} no encontrada.`)
 
   const resumen = await borrarLigaEnCascada(idLiga, ligaSnap)
   return { ok: true, idLiga, ...resumen }
@@ -28,19 +24,12 @@ exports.eliminarLigaAdmin = onCall(OPCIONES, async (request) => {
 exports.eliminarUsuarioAdmin = onCall(OPCIONES, async (request) => {
   await exigirAdministrador(request)
   const { uid } = request.data || {}
-  if (!uid) {
-    throw new HttpsError('invalid-argument', 'Falta uid.')
-  }
+  if (!uid) throw new HttpsError('invalid-argument', 'Falta uid.')
 
   const usuarioSnap = await db.collection('usuarios').doc(uid).get()
-  if (!usuarioSnap.exists) {
-    throw new HttpsError('not-found', `Usuario ${uid} no encontrado.`)
-  }
+  if (!usuarioSnap.exists) throw new HttpsError('not-found', `Usuario ${uid} no encontrado.`)
   if (usuarioSnap.data().esAdministrador === true) {
-    throw new HttpsError(
-      'failed-precondition',
-      'No se puede eliminar a otro administrador desde el panel.',
-    )
+    throw new HttpsError('failed-precondition', 'No se puede eliminar a otro administrador desde el panel.')
   }
 
   const email = usuarioSnap.data().correoAutenticacion || ''

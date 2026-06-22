@@ -1,15 +1,11 @@
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 
 const { db } = require('../middleware/firebase')
+const { recopilarDatosGranPremio, obtenerGranPremiosFinalizados } = require('../infraestructura/openF1')
+const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../logica/puntuacion')
 
 const REGION = 'europe-west1'
 const TEMPORADA_ACTUAL = 2026
-
-const {
-  recopilarDatosGranPremio,
-  obtenerGranPremiosFinalizados,
-} = require('../infraestructura/openF1')
-const { calcularPuntuacionGaraje, calcularFactorJornada } = require('../logica/puntuacion')
 
 function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
   const factores = {}
@@ -19,11 +15,7 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
     const partes = piloto.id.split('_')
     const numero = partes[0]
     const variante = partes.slice(1).join('_')
-    const actuacion = actuacionesPorPiloto[numero] || {
-      posicionQualy: 20,
-      posicionCarrera: 20,
-      posicionSalida: 20,
-    }
+    const actuacion = actuacionesPorPiloto[numero] || { posicionQualy: 20, posicionCarrera: 20, posicionSalida: 20 }
 
     factores[piloto.id] = calcularFactorJornada(actuacion, condiciones, variante)
     detalles[piloto.id] = { variante, actuacion }
@@ -34,9 +26,7 @@ function construirFactoresPorPiloto(pilotos, actuacionesPorPiloto, condiciones) 
 
 async function ejecutarProcesarJornada() {
   const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
-  if (candidatos.length === 0) {
-    return { ok: false, motivo: 'sin_gp_finalizado' }
-  }
+  if (candidatos.length === 0) return { ok: false, motivo: 'sin_gp_finalizado' }
 
   let granPremio = null
   let actuacionesPorPiloto = null
@@ -46,9 +36,7 @@ async function ejecutarProcesarJornada() {
   for (const candidato of candidatos) {
     const idCandidato = `gp_${candidato.meeting_key}`
     const yaProcesada = await db.collection('jornadas').doc(idCandidato).get()
-    if (yaProcesada.exists) {
-      return { ok: false, motivo: 'jornada_ya_procesada', idJornada: idCandidato }
-    }
+    if (yaProcesada.exists) return { ok: false, motivo: 'jornada_ya_procesada', idJornada: idCandidato }
 
     try {
       const datos = await recopilarDatosGranPremio(candidato.meeting_key)
@@ -61,17 +49,11 @@ async function ejecutarProcesarJornada() {
       condiciones = datos.condiciones
       break
     } catch (error) {
-      omitidos.push({
-        meeting_key: candidato.meeting_key,
-        nombre: candidato.meeting_name,
-        motivo: error.message,
-      })
+      omitidos.push({ meeting_key: candidato.meeting_key, nombre: candidato.meeting_name, motivo: error.message })
     }
   }
 
-  if (!granPremio) {
-    return { ok: false, motivo: 'sin_datos_openf1', omitidos }
-  }
+  if (!granPremio) return { ok: false, motivo: 'sin_datos_openf1', omitidos }
 
   const idJornada = `gp_${granPremio.meeting_key}`
 
@@ -83,20 +65,10 @@ async function ejecutarProcesarJornada() {
     const participacion = documento.data()
     const garaje = participacion.garaje
 
-    const pilotosEquipados = garaje
-      ? (garaje.pilotos || []).filter((p) => p.equipado !== false)
-      : []
+    const pilotosEquipados = garaje ? (garaje.pilotos || []).filter((p) => p.equipado !== false) : []
+    if (!garaje || pilotosEquipados.length === 0) continue
 
-    if (!garaje || pilotosEquipados.length === 0) {
-      continue
-    }
-
-    const { factores: factoresPorPiloto, detalles: detallesPorPiloto } = construirFactoresPorPiloto(
-      pilotosEquipados,
-      actuacionesPorPiloto,
-      condiciones,
-    )
-
+    const { factores: factoresPorPiloto, detalles: detallesPorPiloto } = construirFactoresPorPiloto(pilotosEquipados, actuacionesPorPiloto, condiciones)
     const resultadoGaraje = calcularPuntuacionGaraje(garaje, factoresPorPiloto)
 
     // Enriquezco el desglose con variante y actuación para que el frontend
@@ -115,20 +87,13 @@ async function ejecutarProcesarJornada() {
     // Conversión 10:1 (108 puntos → 10.8 M) para mantener los premios en un
     // rango manejable comparado con los precios del catálogo.
     const premioJornada = Math.round(((puntosJornada || 0) / 10) * 10) / 10
-    const presupuestoActualizado =
-      Math.round(((participacion.presupuesto || 0) + premioJornada) * 100) / 100
+    const presupuestoActualizado = Math.round(((participacion.presupuesto || 0) + premioJornada) * 100) / 100
 
     // Los potenciadores equipados se consumen al procesar la jornada: solo
     // sobreviven los que no estaban en uso durante este Gran Premio.
     const potenciadoresRestantes = (garaje.potenciadores || []).filter((p) => !p.equipado)
 
-    const desgloseParticipante = {
-      nombreGranPremio: granPremio.meeting_name,
-      puntosJornada,
-      premioJornada,
-      condiciones,
-      desglose: resultadoGaraje.desglose,
-    }
+    const desgloseParticipante = { nombreGranPremio: granPremio.meeting_name, puntosJornada, premioJornada, condiciones, desglose: resultadoGaraje.desglose }
 
     batch.update(documento.ref, {
       puntos: puntosAcumulados,
@@ -154,12 +119,7 @@ async function ejecutarProcesarJornada() {
 
   await batch.commit()
 
-  return {
-    ok: true,
-    idJornada,
-    nombreGranPremio: granPremio.meeting_name,
-    participacionesProcesadas,
-  }
+  return { ok: true, idJornada, nombreGranPremio: granPremio.meeting_name, participacionesProcesadas }
 }
 
 // Se procesa el lunes (un día después de la carrera del domingo) para dar

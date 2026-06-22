@@ -19,8 +19,8 @@ import { z } from 'zod'
 const esquemaValidacion = zodResolver(
   z.object({
     email: z.string().min(1, 'El correo es obligatorio.').email('Formato de correo inválido.'),
-    password: z.string().min(1, 'La contraseña es obligatoria.')
-  })
+    password: z.string().min(1, 'La contraseña es obligatoria.'),
+  }),
 )
 
 const router = useRouter()
@@ -51,8 +51,7 @@ const handleInicioSesion = async ({ valid, values }) => {
 }
 
 const traducirErrorInicioSesion = (error) => {
-  if (error.message === 'CORREO_NO_VERIFICADO')
-    return 'Debes verificar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.'
+  if (error.message === 'CORREO_NO_VERIFICADO') return 'Debes verificar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.'
   if (error.message?.startsWith('Acceso bloqueado')) return error.message
   if (error?.code === 'auth/too-many-requests') return 'Demasiados intentos. Inténtalo más tarde.'
   return 'Correo o contraseña incorrectos.'
@@ -84,23 +83,43 @@ const handleRecuperarContraseña = async () => {
   const correoAEnviar = correoRecuperacion.value.trim()
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoAEnviar)) {
-    notificacion.add({ severity: 'warn', summary: 'Aviso', detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).', life: 4000 })
+    notificacion.add({
+      severity: 'warn',
+      summary: 'Aviso',
+      detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).',
+      life: 4000,
+    })
     return
   }
 
   cargandoRecuperacion.value = true
   try {
     await storeAuth.restablecerContrasena(correoAEnviar)
-    notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
+    notificacion.add({
+      severity: 'success',
+      summary: 'Revisa tu correo',
+      detail: 'Si el correo está registrado, recibirás un enlace de recuperación.',
+      life: 6000,
+    })
     modalRecuperacionVisible.value = false
     correoRecuperacion.value = ''
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      notificacion.add({ severity: 'success', summary: 'Revisa tu correo', detail: 'Si el correo está registrado, recibirás un enlace de recuperación.', life: 6000 })
+      notificacion.add({
+        severity: 'success',
+        summary: 'Revisa tu correo',
+        detail: 'Si el correo está registrado, recibirás un enlace de recuperación.',
+        life: 6000,
+      })
       modalRecuperacionVisible.value = false
       correoRecuperacion.value = ''
     } else {
-      notificacion.add({ severity: 'error', summary: 'Error de conexión', detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.', life: 4000 })
+      notificacion.add({
+        severity: 'error',
+        summary: 'Error de conexión',
+        detail: 'Hubo un problema de red. Inténtalo de nuevo más tarde.',
+        life: 4000,
+      })
     }
   } finally {
     cargandoRecuperacion.value = false
@@ -111,15 +130,11 @@ const alOcultarModalRecuperacion = () => {
   correoRecuperacion.value = ''
   cargandoRecuperacion.value = false
 }
-
 </script>
-
 
 <template>
   <div class="flex items-center justify-center relative min-h-screen p-4 overflow-hidden">
-
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/20 shadow-2xl border border-[#2A2A32] backdrop-blur-sm">
-
       <template #title>
         <div class="flex flex-col items-center gap-4">
           <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
@@ -130,24 +145,40 @@ const alOcultarModalRecuperacion = () => {
       </template>
 
       <template #content>
-        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
-          :resolver="esquemaValidacion" @submit="handleInicioSesion">
-
+        <Form
+          v-slot="$form"
+          class="flex flex-col gap-4 mt-4"
+          :initial-values="valoresInicialesFormulario"
+          :resolver="esquemaValidacion"
+          @submit="handleInicioSesion"
+        >
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
-            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="Escribe aquí tu correo..."
-              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
+            <InputText
+              id="email"
+              type="email"
+              name="email"
+              autocomplete="email"
+              placeholder="Escribe aquí tu correo..."
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
+            />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="password"
-              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
-            <Password inputId="password" name="password" autocomplete="current-password"
-              placeholder="Escribe aquí tu contraseña..." toggle-mask :feedback="false" class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
+            <label for="password" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
+            <Password
+              inputId="password"
+              name="password"
+              autocomplete="current-password"
+              placeholder="Escribe aquí tu contraseña..."
+              toggle-mask
+              :feedback="false"
+              class="w-full [&>input]:w-full"
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
+            />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
@@ -158,17 +189,28 @@ const alOcultarModalRecuperacion = () => {
           </Message>
 
           <div class="flex flex-col gap-3 mt-4">
+            <Button
+              type="submit"
+              label="Iniciar sesión"
+              :loading="cargando"
+              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black"
+            />
 
-            <Button type="submit" label="Iniciar sesión" :loading="cargando"
-              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
-
-            <Button type="button" icon="pi pi-google" label="Entrar con Google"
+            <Button
+              type="button"
+              icon="pi pi-google"
+              label="Entrar con Google"
               class="flex items-center justify-center w-full py-3 gap-2 !bg-white !border-none shadow-lg font-bold uppercase !text-black"
-              @click="handleInicioSesionGoogle" />
+              @click="handleInicioSesionGoogle"
+            />
 
-            <Button type="button" label="¿Olvidaste tu contraseña?" text
+            <Button
+              type="button"
+              label="¿Olvidaste tu contraseña?"
+              text
               class="w-full mt-1 !bg-transparent !border-none font-bold !text-[#D4A843]"
-              @click="modalRecuperacionVisible = true" />
+              @click="modalRecuperacionVisible = true"
+            />
 
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿No tienes equipo? </span>
@@ -181,20 +223,31 @@ const alOcultarModalRecuperacion = () => {
       </template>
     </Card>
 
-    <Dialog v-model:visible="modalRecuperacionVisible" modal header="Recuperar Contraseña"
+    <Dialog
+      v-model:visible="modalRecuperacionVisible"
+      modal
+      header="Recuperar Contraseña"
       @hide="alOcultarModalRecuperacion"
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }">
-
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
+    >
       <div class="flex flex-col gap-4">
         <p class="text-sm text-[#F0ECEC]">Introduzca aquí su correo y le enviaremos un enlace de recuperación.</p>
 
-        <InputText v-model="correoRecuperacion" type="email" placeholder="Escribe aquí tu correo..."
-          autocomplete="email" class="w-full p-3 !border-zinc-700 text-white !bg-[#1A1A1F]"
-          @keyup.enter="handleRecuperarContraseña" />
+        <InputText
+          v-model="correoRecuperacion"
+          type="email"
+          placeholder="Escribe aquí tu correo..."
+          autocomplete="email"
+          class="w-full p-3 !border-zinc-700 text-white !bg-[#1A1A1F]"
+          @keyup.enter="handleRecuperarContraseña"
+        />
 
-        <Button label="ENVIAR CORREO" :loading="cargandoRecuperacion"
+        <Button
+          label="ENVIAR CORREO"
+          :loading="cargandoRecuperacion"
           class="w-full mt-2 py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#121218]"
-          @click="handleRecuperarContraseña" />
+          @click="handleRecuperarContraseña"
+        />
       </div>
     </Dialog>
   </div>

@@ -2,13 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario } from '@/services/servicioLigas'
-import {
-  calcularPrecioClausula,
-  venderCarta,
-  alternarAlineacion,
-  gestionarClausula,
-  ejecutarClausula,
-} from '@/services/servicioGaraje'
+import { calcularPrecioClausula, venderCarta, alternarAlineacion, gestionarClausula, ejecutarClausula } from '@/services/servicioGaraje'
 import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
 import { migrarGaraje } from '@/utils/migracionGaraje'
 
@@ -130,11 +124,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   async function ejecutarClausulaRival(idParticipanteRival, elemento) {
     try {
-      const resultado = await ejecutarClausula(
-        idParticipanteRival,
-        idParticipanteActivo.value,
-        elemento.instancia_id,
-      )
+      const resultado = await ejecutarClausula(idParticipanteRival, idParticipanteActivo.value, elemento.instancia_id)
       await cargarEquipo(idLigaActiva.value)
       return {
         success: true,

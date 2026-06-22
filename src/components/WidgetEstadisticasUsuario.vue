@@ -6,9 +6,7 @@ import { usarStoreLigas } from '@/stores/storeLigas'
 const storeGaraje = usarStoreGaraje()
 const storeLigas = usarStoreLigas()
 const nombreLigaActiva = computed(() => {
-  const ligaActiva = storeLigas.detallesLigas.find(
-    (liga) => liga.id === storeLigas.idLigaActiva,
-  )
+  const ligaActiva = storeLigas.detallesLigas.find((liga) => liga.id === storeLigas.idLigaActiva)
   return ligaActiva.nombre
 })
 </script>

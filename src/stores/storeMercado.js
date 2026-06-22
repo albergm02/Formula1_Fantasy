@@ -1,12 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  suscribirMercadoActivo,
-  registrarPuja,
-  eliminarPuja,
-  cargarMisPujas,
-  cargarResumenPujas,
-} from '@/services/servicioMercado'
+import { suscribirMercadoActivo, registrarPuja, eliminarPuja, cargarMisPujas, cargarResumenPujas } from '@/services/servicioMercado'
 import { usarStorePerfil } from '@/stores/storePerfil'
 
 export const usarStoreMercado = defineStore('mercado', () => {
@@ -24,9 +18,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
   // tardío de la liga anterior pise el estado de la nueva.
   let tokenSuscripcion = 0
 
-  const hayMercadoAbierto = computed(
-    () => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto',
-  )
+  const hayMercadoAbierto = computed(() => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto')
 
   const pilotosMercado = computed(() => {
     if (!mercadoActivo.value) return []
@@ -54,9 +46,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     return `${String(horas).padStart(2, '0')}h ${String(minutos).padStart(2, '0')}m ${String(segundos).padStart(2, '0')}s`
   })
 
-  const totalPujasComprometidas = computed(() =>
-    Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0),
-  )
+  const totalPujasComprometidas = computed(() => Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0))
 
   function iniciarCuentaAtras() {
     detenerCuentaAtras()
