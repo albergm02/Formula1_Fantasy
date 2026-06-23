@@ -1,12 +1,6 @@
 {
   "source": {
-    "include": [
-      "src/stores",
-      "src/services",
-      "functions/callable",
-      "functions/infraestructura",
-      "functions/logica"
-    ],
+    "include": ["src/stores", "src/services", "functions/callable", "functions/infraestructura", "functions/logica"],
     "includePattern": ".+\\.js$"
   },
   "opts": {

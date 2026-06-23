@@ -28,8 +28,6 @@ coverage
 *.tsbuildinfo
 
 .eslintcache
-
-# Claves privadas del Admin SDK de Firebase (nunca deben subirse al repositorio)
 *-adminsdk-*.json
 .firebase/
 
