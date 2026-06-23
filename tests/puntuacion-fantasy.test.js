@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 const cargarModulo = createRequire(import.meta.url)
 const { calcularPuntosVariante, calcularPuntuacionGaraje } = cargarModulo('../functions/logica/puntuacion.js')
 const { construirPuntosPorPiloto } = cargarModulo('../functions/logica/jornada.js')
-const fixtureBahrein = cargarModulo('./fixtures/gp-bahrein-2026.json')
+const ejemplo = cargarModulo('@/ejemplo.json')
 
 // =====================================================================
 // 1. Tabla FIA: Qualy y Carrera comparten escala (techo P1 = 25)
@@ -90,11 +90,11 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       potenciadores: [{ id: 'mapeo_agresivo', nombre: 'Mapeo Agresivo', multiplicador: 1.5, equipado: true }],
     }
 
-    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
+    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, ejemplo.actuacionesPorPiloto, ejemplo.condiciones)
     const resultado = calcularPuntuacionGaraje(garaje, {
       puntosPorPiloto: puntos,
-      condiciones: fixtureBahrein.condiciones,
-      actuacionesPorPiloto: fixtureBahrein.actuacionesPorPiloto,
+      condiciones: ejemplo.condiciones,
+      actuacionesPorPiloto: ejemplo.actuacionesPorPiloto,
     })
 
     // 25 (P1) × 1.5 (Mapeo) = 37.5 + 20 (coche) = 57.5
@@ -108,11 +108,11 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       potenciadores: [{ id: 'meteorologia', nombre: 'Meteorología', multiplicador: 2.0, equipado: true }],
     }
 
-    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
+    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, ejemplo.actuacionesPorPiloto, ejemplo.condiciones)
     const resultado = calcularPuntuacionGaraje(garaje, {
       puntosPorPiloto: puntos,
-      condiciones: fixtureBahrein.condiciones,
-      actuacionesPorPiloto: fixtureBahrein.actuacionesPorPiloto,
+      condiciones: ejemplo.condiciones,
+      actuacionesPorPiloto: ejemplo.actuacionesPorPiloto,
     })
 
     // 25 × 2 = 50
@@ -127,11 +127,11 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       potenciadores: [{ id: 'modo_defensa', nombre: 'Modo Defensa', multiplicador: 1.5, equipado: true }],
     }
 
-    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
+    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, ejemplo.actuacionesPorPiloto, ejemplo.condiciones)
     const resultado = calcularPuntuacionGaraje(garaje, {
       puntosPorPiloto: puntos,
-      condiciones: fixtureBahrein.condiciones,
-      actuacionesPorPiloto: fixtureBahrein.actuacionesPorPiloto,
+      condiciones: ejemplo.condiciones,
+      actuacionesPorPiloto: ejemplo.actuacionesPorPiloto,
     })
 
     // 25 (P1) × 1.5 (Modo Defensa) = 37.5
@@ -146,11 +146,11 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       potenciadores: [{ id: 'modo_override', nombre: 'Modo Override', multiplicador: 1.6, equipado: true }],
     }
 
-    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
+    const { puntos } = construirPuntosPorPiloto(garaje.pilotos, ejemplo.actuacionesPorPiloto, ejemplo.condiciones)
     const resultado = calcularPuntuacionGaraje(garaje, {
       puntosPorPiloto: puntos,
-      condiciones: fixtureBahrein.condiciones,
-      actuacionesPorPiloto: fixtureBahrein.actuacionesPorPiloto,
+      condiciones: ejemplo.condiciones,
+      actuacionesPorPiloto: ejemplo.actuacionesPorPiloto,
     })
 
     // 25 × 1.6 = 40

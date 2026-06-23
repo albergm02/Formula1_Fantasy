@@ -123,7 +123,6 @@ function crearCartaPiloto(pilotoBase, variante) {
   }
 }
 
-
 /**
  * Construye el catálogo completo de pilotos, coches y potenciadores.
  * @returns {Object} - Catálogo completo.

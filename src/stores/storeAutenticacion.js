@@ -113,7 +113,6 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
    */
   function limpiarSesion() {
     const storePerfil = usarStorePerfil()
-    datosCargados.value = false
     storePerfil.limpiarDatosUsuario()
     perfilExiste.value = false
     datosCargados.value = true
