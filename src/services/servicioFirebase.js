@@ -1,3 +1,7 @@
+/**
+ * @module ServicioFirebase
+ * @description Servicio para inicializar y configurar Firebase, incluyendo autenticación, Firestore y funciones en la nube.
+ */
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'

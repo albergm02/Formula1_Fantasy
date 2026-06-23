@@ -1,3 +1,8 @@
+/**
+ * @module functions/callable/Jornada
+ * @description Funciones callable para manejar las operaciones relacionadas con la jornada, incluyendo el procesamiento automático de la jornada y la recopilación de datos de los Grandes Premios.
+ */
+
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 
 const { db } = require('../middleware/firebase')
@@ -103,7 +108,10 @@ async function ejecutarProcesarJornada() {
 }
 
 /**
- * Programa el procesamiento automático de la jornada.
+ * Programa el procesamiento automático de la jornada mediante una Cloud Function (Scheduler).
+ * Se ejecuta automáticamente los lunes a las 19:00 (Europe/Madrid).
+ *
+ * @function procesarJornada
  * @returns {Promise<void>}
  */
 exports.procesarJornada = onSchedule(

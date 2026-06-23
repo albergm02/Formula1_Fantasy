@@ -1,4 +1,9 @@
 /**
+ * @module functions/logica/pujas
+ * @description Funciones de lógica para manejar las pujas, incluyendo la selección de pujas ganadoras.
+ */
+
+/**
  * Selecciona las pujas ganadoras para cada carta.
  * La ganadora es la puja de mayor cantidad. En caso de empate gana la primera
  * registrada, lo que mantiene un comportamiento determinista.

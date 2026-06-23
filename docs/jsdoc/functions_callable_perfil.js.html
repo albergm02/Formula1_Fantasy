@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>functions/callable/perfil.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-ServicioActividad.html">ServicioActividad</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioActividad.html#.cargarActividadLiga">cargarActividadLiga</a></li></ul></li><li><a href="module-ServicioAdministracion.html">ServicioAdministracion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.cargarListaJornadas">cargarListaJornadas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.cargarListaLigas">cargarListaLigas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.cargarListaUsuarios">cargarListaUsuarios</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.eliminarLigaComoAdministrador">eliminarLigaComoAdministrador</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.eliminarUsuarioComoAdministrador">eliminarUsuarioComoAdministrador</a></li></ul></li><li><a href="module-ServicioAutenticacion.html">ServicioAutenticacion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioAutenticacion.html#.mensajeErrorFirebase">mensajeErrorFirebase</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAutenticacion.html#.obtenerUsuarioActual">obtenerUsuarioActual</a></li></ul></li><li><a href="module-ServicioFirebase.html">ServicioFirebase</a></li><li><a href="module-ServicioGaraje.html">ServicioGaraje</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.alternarAlineacion">alternarAlineacion</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.calcularPrecioClausula">calcularPrecioClausula</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.ejecutarClausula">ejecutarClausula</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.estaEnPeriodoDeGracia">estaEnPeriodoDeGracia</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.gestionarClausula">gestionarClausula</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.horasRestantesDeGracia">horasRestantesDeGracia</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.venderCarta">venderCarta</a></li></ul></li><li><a href="module-ServicioJornada.html">ServicioJornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.calcularFactorCaos">calcularFactorCaos</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.calcularPuntosVariante">calcularPuntosVariante</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.cargarCatalogoYPerfiles">cargarCatalogoYPerfiles</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.obtenerCuentaRegresiva">obtenerCuentaRegresiva</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.suscribirseHistorialJornadas">suscribirseHistorialJornadas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~bonusParadas">bonusParadas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~bonusPosicionEstratega">bonusPosicionEstratega</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~bonusStint">bonusStint</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosBase">puntosBase</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosEstratega">puntosEstratega</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosPorPosicion">puntosPorPosicion</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosRemontador">puntosRemontador</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosTodoTerreno">puntosTodoTerreno</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~sinActuacionValida">sinActuacionValida</a></li></ul></li><li><a href="module-ServicioLigas.html">ServicioLigas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.abandonarLiga">abandonarLiga</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarClasificacion">cargarClasificacion</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarGarajeRival">cargarGarajeRival</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarLigas">cargarLigas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarParticipacionDeUsuario">cargarParticipacionDeUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarParticipantes">cargarParticipantes</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.crearLiga">crearLiga</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.desvincularLigaDelUsuario">desvincularLigaDelUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.expulsarParticipante">expulsarParticipante</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.unirseALiga">unirseALiga</a></li></ul></li><li><a href="module-ServicioMercado.html">ServicioMercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.cargarMisPujas">cargarMisPujas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.cargarPreciosDinamicosMercado">cargarPreciosDinamicosMercado</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.cargarResumenPujas">cargarResumenPujas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.eliminarPuja">eliminarPuja</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.registrarPuja">registrarPuja</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.suscribirMercadoActivo">suscribirMercadoActivo</a></li></ul></li><li><a href="module-ServicioOpenF1.html">ServicioOpenF1</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioOpenF1.html#.obtenerSiguienteGranPremio">obtenerSiguienteGranPremio</a></li><li data-type='method' style='display: none;'><a href="module-ServicioOpenF1.html#.obtenerUltimoGranPremioFinalizado">obtenerUltimoGranPremioFinalizado</a></li><li data-type='method' style='display: none;'><a href="module-ServicioOpenF1.html#~formatearFechaGranPremio">formatearFechaGranPremio</a></li></ul></li><li><a href="module-ServicioPerfil.html">ServicioPerfil</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.cargarPerfilUsuario">cargarPerfilUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.crearPerfil">crearPerfil</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.eliminarMiCuenta">eliminarMiCuenta</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.escucharPerfilUsuario">escucharPerfilUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.migrarCorreo">migrarCorreo</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.reautenticarUsuario">reautenticarUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.solicitarCambioCorreo">solicitarCambioCorreo</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.solicitarRestablecimientoContrasena">solicitarRestablecimientoContrasena</a></li></ul></li><li><a href="module-StoreActividad.html">StoreActividad</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreActividad.html#.cargarActividad">cargarActividad</a></li></ul></li><li><a href="module-StoreAdministracion.html">StoreAdministracion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreAdministracion.html#.cargarListas">cargarListas</a></li><li data-type='method' style='display: none;'><a href="module-StoreAdministracion.html#.eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreAdministracion.html#.eliminarUsuario">eliminarUsuario</a></li></ul></li><li><a href="module-StoreAutenticacion.html">StoreAutenticacion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.cargarPerfil">cargarPerfil</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.cerrarSesion">cerrarSesion</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.crearPerfil">crearPerfil</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.iniciarSesionConCorreo">iniciarSesionConCorreo</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.iniciarSesionConGoogle">iniciarSesionConGoogle</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.limpiarSesion">limpiarSesion</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.observarEstadoSesion">observarEstadoSesion</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.procesarRegistro">procesarRegistro</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.reconciliarCorreoMigrado">reconciliarCorreoMigrado</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.verificarExistenciaPerfil">verificarExistenciaPerfil</a></li></ul></li><li><a href="module-StoreGaraje.html">StoreGaraje</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.aResultadoFallido">aResultadoFallido</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.alternarEquipado">alternarEquipado</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.cargarEquipo">cargarEquipo</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.crearGarajeVacio">crearGarajeVacio</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.ejecutarClausulaRival">ejecutarClausulaRival</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.encontrarElementoEnGaraje">encontrarElementoEnGaraje</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.invertirEnClausula">invertirEnClausula</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.obtenerValorMercado">obtenerValorMercado</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.venderElemento">venderElemento</a></li></ul></li><li><a href="module-StoreJornada.html">StoreJornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.cargarCatalogo">cargarCatalogo</a></li><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.cargarGranPremioPendiente">cargarGranPremioPendiente</a></li><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.cargarSiguienteGranPremio">cargarSiguienteGranPremio</a></li><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.escucharHistorial">escucharHistorial</a></li></ul></li><li><a href="module-StoreLigas.html">StoreLigas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.abandonarLiga">abandonarLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.alcanzoLimiteLigas">alcanzoLimiteLigas</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarClasificacion">cargarClasificacion</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarGarajeRival">cargarGarajeRival</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarLigasUsuario">cargarLigasUsuario</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarParticipantesLiga">cargarParticipantesLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.crearLiga">crearLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.expulsarParticipante">expulsarParticipante</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.unirseALiga">unirseALiga</a></li></ul></li><li><a href="module-StoreMercado.html">StoreMercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.actualizarRestante">actualizarRestante</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.detenerCuentaAtras">detenerCuentaAtras</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.detenerMercado">detenerMercado</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.eliminarPujaCarta">eliminarPujaCarta</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.inicializarMercado">inicializarMercado</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.iniciarCuentaAtras">iniciarCuentaAtras</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.pujarPorCarta">pujarPorCarta</a></li></ul></li><li><a href="module-StorePerfil.html">StorePerfil</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.actualizarIdsLigas">actualizarIdsLigas</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.cambiarContrasena">cambiarContrasena</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.cambiarCorreo">cambiarCorreo</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.cargarFechaCambioCorreo">cargarFechaCambioCorreo</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.eliminarCuenta">eliminarCuenta</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.establecerDatosUsuario">establecerDatosUsuario</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.limpiarDatosUsuario">limpiarDatosUsuario</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.observarPerfil">observarPerfil</a></li></ul></li><li><a href="module-functions_callable_Administracion.html">functions/callable/Administracion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Administracion.html#~eliminarLigaAdmin">eliminarLigaAdmin</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Administracion.html#~eliminarUsuarioAdmin">eliminarUsuarioAdmin</a></li></ul></li><li><a href="module-functions_callable_Garaje.html">functions/callable/Garaje</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~alternarAlineacion">alternarAlineacion</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~aplicarCambioAlineacion">aplicarCambioAlineacion</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~calcularComprometidoEnPujas">calcularComprometidoEnPujas</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~calcularPrecioClausula">calcularPrecioClausula</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~cargarParticipacionPropia">cargarParticipacionPropia</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~ejecutarClausula">ejecutarClausula</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~extraerCartaPorInstancia">extraerCartaPorInstancia</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~gestionarClausula">gestionarClausula</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~localizarCartaEnGaraje">localizarCartaEnGaraje</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~venderCarta">venderCarta</a></li></ul></li><li><a href="module-functions_callable_Jornada.html">functions/callable/Jornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Jornada.html#~ejecutarProcesarJornada">ejecutarProcesarJornada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Jornada.html#~procesarJornada">procesarJornada</a></li></ul></li><li><a href="module-functions_callable_Ligas.html">functions/callable/Ligas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~abandonarLiga">abandonarLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~borrarLigaEnCascada">borrarLigaEnCascada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~crearLiga">crearLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~eliminarPujas">eliminarPujas</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~expulsarParticipante">expulsarParticipante</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~inicializarMercado">inicializarMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~unirseALiga">unirseALiga</a></li></ul></li><li><a href="module-functions_callable_Mercado.html">functions/callable/Mercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~actualizarPreciosTrasResolucion">actualizarPreciosTrasResolucion</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~agregarBorradoPujasUsuario">agregarBorradoPujasUsuario</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~calcularFechaMercado">calcularFechaMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~cargarMercadoAbiertoDeLiga">cargarMercadoAbiertoDeLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~claveCartaPorTipo">claveCartaPorTipo</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~coleccionGaraje">coleccionGaraje</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~construirCartaGanada">construirCartaGanada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~ejecutarGeneracionMercadoParaLiga">ejecutarGeneracionMercadoParaLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~eliminarPuja">eliminarPuja</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~generarMercado">generarMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~propagarAGarajes">propagarAGarajes</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~propagarAMercadosAbiertos">propagarAMercadosAbiertos</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~recopilarCartasFichadasEnLiga">recopilarCartasFichadasEnLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~referenciaDiaMercado">referenciaDiaMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~registrarPuja">registrarPuja</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~resolverPujasMercado">resolverPujasMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~sumarComprometidoEnMercado">sumarComprometidoEnMercado</a></li></ul></li><li><a href="module-functions_callable_Perfil.html">functions/callable/Perfil</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~autorizarCambioCorreo">autorizarCambioCorreo</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~crearPerfil">crearPerfil</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~eliminarCuentaUsuarioEnCascada">eliminarCuentaUsuarioEnCascada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~eliminarMiCuenta">eliminarMiCuenta</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~migrarCorreo">migrarCorreo</a></li></ul></li><li><a href="module-functions_infraestructura_CatalogoBase.html">functions/infraestructura/CatalogoBase</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_CatalogoBase.html#~construirCatalogoCompleto">construirCatalogoCompleto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_CatalogoBase.html#~crearCartaPiloto">crearCartaPiloto</a></li></ul></li><li><a href="module-functions_infraestructura_openF1.html">functions/infraestructura/openF1</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~consultarOpenF1">consultarOpenF1</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~extraerUltimaSesion">extraerUltimaSesion</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerAdelantamientosPorPiloto">obtenerAdelantamientosPorPiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerCondicionesCarrera">obtenerCondicionesCarrera</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerDatosStintsPorPiloto">obtenerDatosStintsPorPiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerGranPremiosFinalizados">obtenerGranPremiosFinalizados</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerMeetingKeyEnJuego">obtenerMeetingKeyEnJuego</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerParadasPorPiloto">obtenerParadasPorPiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerParrillaSalida">obtenerParrillaSalida</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerResultadosSesion">obtenerResultadosSesion</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~recopilarDatosGranPremio">recopilarDatosGranPremio</a></li></ul></li><li><a href="module-functions_logica_jornada.html">functions/logica/jornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_jornada.html#~construirPuntosPorPiloto">construirPuntosPorPiloto</a></li></ul></li><li><a href="module-functions_logica_mercado.html">functions/logica/mercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~aplicarPreciosDinamicosACatalogo">aplicarPreciosDinamicosACatalogo</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~cargarCatalogo">cargarCatalogo</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~cargarPreciosDinamicos">cargarPreciosDinamicos</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~construirClavePiloto">construirClavePiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~seleccionarCartasDiarias">seleccionarCartasDiarias</a></li></ul></li><li><a href="module-functions_logica_pujas.html">functions/logica/pujas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_pujas.html#~seleccionarPujasGanadoras">seleccionarPujasGanadoras</a></li></ul></li><li><a href="module-functions_logica_puntuacion.html">functions/logica/puntuacion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~bonusParadas">bonusParadas</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~bonusPosicionEstratega">bonusPosicionEstratega</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~bonusStint">bonusStint</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularFactorCaos">calcularFactorCaos</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularMultiplicadorPotenciadores">calcularMultiplicadorPotenciadores</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularPuntosVariante">calcularPuntosVariante</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularPuntuacionGaraje">calcularPuntuacionGaraje</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosBase">puntosBase</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosEstratega">puntosEstratega</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosPorPosicion">puntosPorPosicion</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosRemontador">puntosRemontador</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosTodoTerreno">puntosTodoTerreno</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~sinActuacionValida">sinActuacionValida</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">functions/callable/perfil.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module functions/callable/Perfil
+ * @description Funciones callable para manejar las operaciones relacionadas con el perfil del usuario, incluyendo la migración de correo, eliminación de cuenta, creación de perfil y gestión de autenticación.
+ */
+
+const { onCall, HttpsError } = require('firebase-functions/v2/https')
+const { FieldValue } = require('firebase-admin/firestore')
+
+const { db, adminAuth } = require('../middleware/firebase')
+const { exigirEmailAutenticado } = require('../middleware/autenticacion')
+const { agregarBorradoPujasUsuario } = require('./mercado')
+const { borrarLigaEnCascada } = require('./ligas')
+
+const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
+const DIAS_BLOQUEO_CAMBIO_CORREO = 7
+const MS_BLOQUEO_CAMBIO_CORREO = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
+
+/**
+ * Autoriza el cambio de correo de un usuario mediante una Cloud Function (Callable).
+ * Verifica que haya transcurrido el periodo de bloqueo entre cambios de correo.
+ *
+ * @function autorizarCambioCorreo
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.auth - Información de autenticación del usuario que invoca la función.
+ * @returns {Promise&lt;Object>} Resultado de la operación, indicando si fue exitosa.
+ */
+exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
+  exigirEmailAutenticado(request)
+  const uid = request.auth.uid
+
+  const docUsuario = await db.collection('usuarios').doc(uid).get()
+  if (!docUsuario.exists) throw new HttpsError('not-found', 'No existe el perfil del usuario.')
+
+  const ultimoCambio = docUsuario.data().fechaUltimoCambioCorreo
+  if (ultimoCambio) {
+    const fecha = ultimoCambio.toDate ? ultimoCambio.toDate() : new Date(ultimoCambio)
+    if (Date.now() - fecha.getTime() &lt; MS_BLOQUEO_CAMBIO_CORREO) {
+      throw new HttpsError('failed-precondition', `Solo puedes cambiar el correo una vez cada ${DIAS_BLOQUEO_CAMBIO_CORREO} días.`)
+    }
+  }
+
+  await docUsuario.ref.update({ fechaUltimoCambioCorreo: FieldValue.serverTimestamp() })
+  return { ok: true }
+})
+
+/**
+ * Migra el correo de un usuario en Auth y propaga el cambio a participaciones y ligas
+ * mediante una Cloud Function (Callable).
+ *
+ * @function migrarCorreo
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.correoAnterior - Correo electrónico anterior del usuario.
+ * @param {string} request.data.correoNuevo - Nuevo correo electrónico del usuario.
+ * @returns {Promise&lt;Object>} Resultado de la operación con el correo migrado y los conteos de documentos actualizados.
+ */
+exports.migrarCorreo = onCall(OPCIONES, async (request) => {
+  const emailToken = exigirEmailAutenticado(request)
+  const uid = request.auth.uid
+  const correoAnterior = String(request.data?.correoAnterior || '').trim().toLowerCase()
+  const correoNuevo = String(request.data?.correoNuevo || '').trim().toLowerCase()
+
+  if (!correoAnterior || !correoNuevo || correoAnterior === correoNuevo) {
+    throw new HttpsError('invalid-argument', 'Correos inválidos.')
+  }
+  if (emailToken.toLowerCase() !== correoNuevo) {
+    throw new HttpsError('failed-precondition', 'Debes actualizar el correo en Auth y refrescar el token antes de migrar.')
+  }
+
+  const docUsuario = await db.collection('usuarios').doc(uid).get()
+  if (!docUsuario.exists) throw new HttpsError('not-found', 'No existe el perfil del usuario.')
+
+  const [participacionesSnap, ligasAdminSnap] = await Promise.all([
+    db.collection('participaciones').where('email_usuario', '==', correoAnterior).get(),
+    db.collection('ligas').where('correoOrganizador', '==', correoAnterior).get(),
+  ])
+
+  const batch = db.batch()
+  batch.update(db.collection('usuarios').doc(uid), { correoAutenticacion: correoNuevo })
+
+  for (const documento of participacionesSnap.docs) batch.update(documento.ref, { email_usuario: correoNuevo })
+  for (const documento of ligasAdminSnap.docs) batch.update(documento.ref, { correoOrganizador: correoNuevo })
+
+  await batch.commit()
+
+  return { ok: true, correoNuevo, participacionesMigradas: participacionesSnap.size, ligasMigradas: ligasAdminSnap.size }
+})
+
+/**
+ * Elimina la cuenta de un usuario en cascada, borrando participaciones y ligas asociadas.
+ * @param {string} uid - UID del usuario.
+ * @param {string} email - Email del usuario.
+ * @returns {Promise&lt;Object>} - Resultado de la operación.
+ */
+async function eliminarCuentaUsuarioEnCascada(uid, email) {
+  const participacionesSnap = await db.collection('participaciones').where('email_usuario', '==', email).get()
+  let ligasBorradas = 0
+
+  for (const documentoPropio of participacionesSnap.docs) {
+    const datosPropios = documentoPropio.data()
+    const idLiga = datosPropios.id_liga
+
+    const ligaSnap = await db.collection('ligas').doc(idLiga).get()
+    if (!ligaSnap.exists) {
+      await documentoPropio.ref.delete()
+      continue
+    }
+    const datosLiga = ligaSnap.data()
+
+    const restantesSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).get()
+    const restantes = restantesSnap.docs.filter((d) => d.id !== documentoPropio.id).map((d) => ({ id: d.id, ...d.data() }))
+
+    if (restantes.length === 0) {
+      await documentoPropio.ref.delete()
+      await borrarLigaEnCascada(idLiga, ligaSnap)
+      ligasBorradas += 1
+      continue
+    }
+
+    const batchPujas = db.batch()
+    await agregarBorradoPujasUsuario(batchPujas, idLiga, email)
+    await batchPujas.commit()
+
+    if (datosPropios.esOrganizador) {
+      const siguiente = [...restantes].sort((a, b) => {
+        const fechaA = a.fecha_union?.toMillis ? a.fecha_union.toMillis() : 0
+        const fechaB = b.fecha_union?.toMillis ? b.fecha_union.toMillis() : 0
+        return fechaA - fechaB
+      })[0]
+      await db.collection('participaciones').doc(siguiente.id).update({ esOrganizador: true })
+      await db.collection('ligas').doc(idLiga).update({
+        correoOrganizador: siguiente.email_usuario,
+        participantes: (datosLiga.participantes || restantes.length + 1) - 1,
+      })
+    } else {
+      await db.collection('ligas').doc(idLiga).update({ participantes: (datosLiga.participantes || restantes.length + 1) - 1 })
+    }
+
+    await documentoPropio.ref.delete()
+  }
+
+  await db.collection('usuarios').doc(uid).delete()
+
+  try {
+    await adminAuth.revokeRefreshTokens(uid)
+    await adminAuth.deleteUser(uid)
+  } catch (error) {
+    throw new HttpsError('internal', `Perfil borrado pero el usuario de Auth no pudo eliminarse: ${error.message}`)
+  }
+
+  return { participacionesBorradas: participacionesSnap.size, ligasBorradas }
+}
+
+exports.eliminarCuentaUsuarioEnCascada = eliminarCuentaUsuarioEnCascada
+
+/**
+ * Elimina la cuenta del usuario que realiza la solicitud mediante una Cloud Function (Callable).
+ * Borra en cascada participaciones, ligas asociadas y el usuario de Authentication.
+ *
+ * @function eliminarMiCuenta
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.auth - Información de autenticación del usuario que invoca la función.
+ * @returns {Promise&lt;Object>} Resultado de la operación con los conteos de participaciones y ligas borradas.
+ */
+exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  const uid = request.auth.uid
+  const email = request.auth.token.email || ''
+  const resultado = await eliminarCuentaUsuarioEnCascada(uid, email)
+  return { ok: true, email, ...resultado }
+})
+
+/**
+ * Crea un perfil de usuario en Firestore mediante una Cloud Function (Callable).
+ *
+ * @function crearPerfil
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.nombreUsuario - Nombre visible del usuario a crear.
+ * @returns {Promise&lt;Object>} Resultado de la operación, indicando si fue exitosa.
+ */
+exports.crearPerfil = onCall(OPCIONES, async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
+  const uid = request.auth.uid
+  const correo = request.auth.token.email || ''
+  const nombreUsuario = String(request.data?.nombreUsuario || '').trim()
+
+  if (!nombreUsuario) throw new HttpsError('invalid-argument', 'El nombre de usuario es obligatorio.')
+
+  const docRef = db.collection('usuarios').doc(uid)
+  const existente = await docRef.get()
+  if (existente.exists) throw new HttpsError('already-exists', 'El perfil ya existe.')
+
+  await docRef.set({
+    correoAutenticacion: correo,
+    nombreVisible: nombreUsuario,
+    ligasIds: [],
+    fechaRegistro: FieldValue.serverTimestamp(),
+  })
+
+  return { ok: true }
+})
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Jun 23 2026 15:48:23 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

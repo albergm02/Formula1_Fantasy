@@ -1,4 +1,9 @@
-﻿const { construirCatalogoCompleto } = require('../infraestructura/catalogoBase')
+﻿/**
+ * @module functions/logica/mercado
+ * @description Funciones de lógica para manejar el mercado, incluyendo la selección de cartas diarias y la aplicación de precios dinámicos.
+ */
+
+const { construirCatalogoCompleto } = require('../infraestructura/catalogoBase')
 
 let catalogoEnMemoria = null
 

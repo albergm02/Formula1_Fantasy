@@ -1,3 +1,7 @@
+/**
+ * @module ServicioGaraje
+ * @description Servicio para manejar las operaciones del garaje del usuario, incluyendo la venta de cartas, alternancia de alineación y gestión de cláusulas.
+ */
 import { httpsCallable } from 'firebase/functions'
 import { functions } from './servicioFirebase'
 
@@ -13,7 +17,7 @@ const HORAS_PERIODO_GRACIA = 48
  * @param {string} instanciaId - ID de la instancia.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const venderCarta = async (idParticipante, instanciaId) => {
+export async function venderCarta(idParticipante, instanciaId) {
   const respuesta = await llamadaVender({ idParticipante, instanciaId })
   return respuesta.data
 }
@@ -24,7 +28,7 @@ export const venderCarta = async (idParticipante, instanciaId) => {
  * @param {string} instanciaId - ID de la instancia.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const alternarAlineacion = async (idParticipante, instanciaId) => {
+export async function alternarAlineacion(idParticipante, instanciaId) {
   const respuesta = await llamadaAlternar({ idParticipante, instanciaId })
   return respuesta.data
 }
@@ -36,7 +40,7 @@ export const alternarAlineacion = async (idParticipante, instanciaId) => {
  * @param {number} cantidad - Cantidad a gestionar.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const gestionarClausula = async (idParticipante, instanciaId, cantidad) => {
+export async function gestionarClausula(idParticipante, instanciaId, cantidad) {
   const respuesta = await llamadaGestionarClausula({ idParticipante, instanciaId, cantidad })
   return respuesta.data
 }
@@ -48,7 +52,7 @@ export const gestionarClausula = async (idParticipante, instanciaId, cantidad) =
  * @param {string} instanciaId - ID de la instancia.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const ejecutarClausula = async (idParticipanteRival, idParticipantePropio, instanciaId) => {
+export async function ejecutarClausula(idParticipanteRival, idParticipantePropio, instanciaId) {
   const respuesta = await llamadaEjecutarClausula({ idParticipanteRival, idParticipantePropio, instanciaId })
   return respuesta.data
 }
@@ -58,7 +62,7 @@ export const ejecutarClausula = async (idParticipanteRival, idParticipantePropio
  * @param {Object} elemento - Elemento a calcular.
  * @returns {number} - Precio de la cláusula.
  */
-export const calcularPrecioClausula = (elemento) => {
+export function calcularPrecioClausula(elemento) {
   const precioBase = elemento.precioCompra ?? elemento.precio
   const inversionDueño = elemento.clausulaInvertida || 0
   return precioBase + inversionDueño * 2
@@ -69,7 +73,7 @@ export const calcularPrecioClausula = (elemento) => {
  * @param {Object} elemento - Elemento a verificar.
  * @returns {boolean} - True si está en período de gracia, false en caso contrario.
  */
-export const estaEnPeriodoDeGracia = (elemento) => {
+export function estaEnPeriodoDeGracia(elemento) {
   if (!elemento.fechaAdquisicion) return false
   const fechaAdquisicion = new Date(elemento.fechaAdquisicion)
   const milisegundosGracia = HORAS_PERIODO_GRACIA * 60 * 60 * 1000
@@ -81,7 +85,7 @@ export const estaEnPeriodoDeGracia = (elemento) => {
  * @param {Object} elemento - Elemento a verificar.
  * @returns {number} - Horas restantes del período de gracia.
  */
-export const horasRestantesDeGracia = (elemento) => {
+export function horasRestantesDeGracia(elemento) {
   if (!elemento.fechaAdquisicion) return 0
   const fechaAdquisicion = new Date(elemento.fechaAdquisicion)
   const milisegundosGracia = HORAS_PERIODO_GRACIA * 60 * 60 * 1000

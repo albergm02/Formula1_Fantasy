@@ -1,3 +1,8 @@
+/**
+ * @module ServicioPerfil
+ * @description Servicio para manejar las operaciones relacionadas con el perfil del usuario, incluyendo la migración de correo, eliminación de cuenta, creación de perfil y gestión de autenticación.
+ */
+
 import {
   EmailAuthProvider,
   GoogleAuthProvider,
@@ -24,7 +29,7 @@ const llamadaCrearPerfil = httpsCallable(functions, 'crearPerfil')
  * @param {string} correoNuevo - Correo electrónico nuevo.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const migrarCorreo = async (correoAnterior, correoNuevo) => {
+export async function migrarCorreo(correoAnterior, correoNuevo) {
   const respuesta = await llamadaMigrarCorreo({ correoAnterior, correoNuevo })
   return respuesta.data
 }
@@ -33,7 +38,7 @@ export const migrarCorreo = async (correoAnterior, correoNuevo) => {
  * Elimina la cuenta del usuario actual.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const eliminarMiCuenta = async () => {
+export async function eliminarMiCuenta() {
   const respuesta = await llamadaEliminarCuenta()
   return respuesta.data
 }
@@ -43,14 +48,16 @@ export const eliminarMiCuenta = async () => {
  * @param {string} nombreUsuario - Nombre del usuario.
  * @returns {Promise<Object>} - Resultado de la operación.
  */
-export const crearPerfil = (nombreUsuario) => llamadaCrearPerfil({ nombreUsuario })
+export function crearPerfil(nombreUsuario) {
+  return llamadaCrearPerfil({ nombreUsuario })
+}
 
 /**
  * Carga el perfil de un usuario.
  * @param {string} uid - ID del usuario.
  * @returns {Promise<Object>} - Datos del perfil del usuario.
  */
-export const cargarPerfilUsuario = async (uid) => {
+export async function cargarPerfilUsuario(uid) {
   const docSnap = await getDoc(doc(db, 'usuarios', uid))
   return docSnap.exists() ? docSnap.data() : {}
 }
@@ -61,17 +68,18 @@ export const cargarPerfilUsuario = async (uid) => {
  * @param {Function} callback - Función a ejecutar cuando cambien los datos del perfil.
  * @returns {Function} - Función para cancelar la suscripción.
  */
-export const escucharPerfilUsuario = (uid, callback) =>
-  onSnapshot(doc(db, 'usuarios', uid), (instantanea) => {
+export function escucharPerfilUsuario(uid, callback) {
+  return onSnapshot(doc(db, 'usuarios', uid), (instantanea) => {
     if (instantanea.exists()) callback(instantanea.data())
   })
+}
 
 /**
  * Reautentica al usuario actual.
  * @param {string} contrasenaActual - Contraseña actual del usuario.
  * @returns {Promise<void>}
  */
-export const reautenticarUsuario = async (contrasenaActual) => {
+export async function reautenticarUsuario(contrasenaActual) {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
 
@@ -93,7 +101,7 @@ export const reautenticarUsuario = async (contrasenaActual) => {
  * Solicita el restablecimiento de la contraseña del usuario actual.
  * @returns {Promise<void>}
  */
-export const solicitarRestablecimientoContrasena = async () => {
+export async function solicitarRestablecimientoContrasena() {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
   await sendPasswordResetEmail(auth, usuario.email)
@@ -104,7 +112,7 @@ export const solicitarRestablecimientoContrasena = async () => {
  * @param {string} correoNuevo - Nuevo correo electrónico.
  * @returns {Promise<void>}
  */
-export const solicitarCambioCorreo = async (correoNuevo) => {
+export async function solicitarCambioCorreo(correoNuevo) {
   const usuario = auth.currentUser
   if (!usuario) throw new Error('No hay sesión activa.')
   await llamadaAutorizarCambioCorreo()

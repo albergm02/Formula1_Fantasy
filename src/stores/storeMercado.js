@@ -1,3 +1,7 @@
+/**
+ * @module StoreMercado
+ * @description Estado global para el mercado de cartas.
+ */
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { suscribirMercadoActivo, registrarPuja, eliminarPuja, cargarMisPujas, cargarResumenPujas } from '@/services/servicioMercado'
@@ -49,22 +53,36 @@ export const usarStoreMercado = defineStore('mercado', () => {
   const totalPujasComprometidas = computed(() => Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0))
 
   /**
+   * Recalcula los milisegundos restantes hasta el cierre del mercado activo.
+   * @function actualizarRestante
+   * @memberof module:StoreMercado
+   * @returns {void}
+   */
+  function actualizarRestante() {
+    const cierre = new Date(mercadoActivo.value.fechaCierre).getTime()
+    milisegundosRestantes.value = Math.max(0, cierre - Date.now())
+  }
+
+  /**
    * Inicia la cuenta atrás del mercado.
+   * @function iniciarCuentaAtras
+   * @memberof module:StoreMercado
    * @returns {void}
    */
   function iniciarCuentaAtras() {
     detenerCuentaAtras()
     if (!mercadoActivo.value || !mercadoActivo.value.fechaCierre) return
 
-    const actualizarRestante = () => {
-      const cierre = new Date(mercadoActivo.value.fechaCierre).getTime()
-      milisegundosRestantes.value = Math.max(0, cierre - Date.now())
-    }
-
     actualizarRestante()
     intervaloId = setInterval(actualizarRestante, 1000)
   }
 
+  /**
+   * Detiene la cuenta atrás del mercado si estaba activa.
+   * @function detenerCuentaAtras
+   * @memberof module:StoreMercado
+   * @returns {void}
+   */
   function detenerCuentaAtras() {
     if (intervaloId) {
       clearInterval(intervaloId)
@@ -74,6 +92,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   /**
    * Inicializa el mercado para una liga específica.
+   * @function inicializarMercado
+   * @memberof module:StoreMercado
    * @param {string} idLiga - ID de la liga.
    */
   async function inicializarMercado(idLiga) {
@@ -118,6 +138,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   /**
    * Detiene el mercado actual y limpia el estado.
+   * @function detenerMercado
+   * @memberof module:StoreMercado
    * @returns {void}
    */
   function detenerMercado() {
@@ -135,6 +157,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   /**
    * Realiza una puja por una carta en el mercado.
+   * @function pujarPorCarta
+   * @memberof module:StoreMercado
    * @param {Object} carta - Carta por la que se realiza la puja.
    * @param {number|string} cantidad - Cantidad de la puja.
    * @returns {Promise<Object>} - Resultado de la operación.
@@ -161,6 +185,8 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   /**
    * Elimina una puja realizada por el usuario sobre una carta en el mercado.
+   * @function eliminarPujaCarta
+   * @memberof module:StoreMercado
    * @param {Object} carta - Carta de la que se desea eliminar la puja.
    * @returns {Promise<Object>} - Resultado de la operación.
    */

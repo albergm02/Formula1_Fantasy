@@ -1,3 +1,7 @@
+/**
+ * @module StoreJornada
+ * @description Estado global para la información de las jornadas.
+ */
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { suscribirseHistorialJornadas, cargarCatalogoYPerfiles } from '@/services/servicioJornada'
@@ -16,6 +20,8 @@ export const usarStoreJornada = defineStore('jornada', () => {
 
   /**
    * Carga el catálogo de pilotos.
+   * @function cargarCatalogo
+   * @memberof module:StoreJornada
    * @returns {Promise<void>}
    */
   async function cargarCatalogo() {
@@ -28,6 +34,8 @@ export const usarStoreJornada = defineStore('jornada', () => {
 
   /**
    * Carga el último Gran Premio pendiente.
+   * @function cargarGranPremioPendiente
+   * @memberof module:StoreJornada
    * @returns {Promise<void>}
    */
   async function cargarGranPremioPendiente() {
@@ -41,6 +49,8 @@ export const usarStoreJornada = defineStore('jornada', () => {
 
   /**
    * Escucha los cambios en el historial de jornadas y actualiza el estado del store.
+   * @function escucharHistorial
+   * @memberof module:StoreJornada
    * @param {Function} alActualizar - Función callback que se ejecuta cuando el historial se actualiza.
    * @returns {Function} - Devuelve una función para cancelar la suscripción al historial.
    */
@@ -54,6 +64,8 @@ export const usarStoreJornada = defineStore('jornada', () => {
 
   /**
    * Carga el siguiente Gran Premio.
+   * @function cargarSiguienteGranPremio
+   * @memberof module:StoreJornada
    * @returns {Promise<void>}
    */
   async function cargarSiguienteGranPremio() {

@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 const cargarModulo = createRequire(import.meta.url)
 const { calcularPuntosVariante, calcularPuntuacionGaraje } = cargarModulo('../functions/logica/puntuacion.js')
 const { construirPuntosPorPiloto } = cargarModulo('../functions/logica/jornada.js')
-const ejemplo = cargarModulo('@/ejemplo.json')
+const ejemplo = cargarModulo('./ejemplo.json')
 
 // =====================================================================
 // 1. Tabla FIA: Qualy y Carrera comparten escala (techo P1 = 25)

@@ -1,3 +1,8 @@
+/**
+ * @module ServicioJornada
+ * @description Servicio para manejar las operaciones relacionadas con las jornadas, incluyendo la suscripción a cambios, carga de catálogo y cálculo de puntos.
+ */
+
 import { collection, doc, getDoc, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
 
@@ -46,7 +51,7 @@ export async function cargarCatalogoYPerfiles() {
  * @param {Date} [ahora=new Date()] - Fecha actual.
  * @returns {string} - Cadena con la cuenta regresiva.
  */
-export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
+export function obtenerCuentaRegresiva(fechaInicio, ahora = new Date()) {
   const inicioCarrera = new Date(fechaInicio)
   const tiempoRestante = inicioCarrera - ahora
 

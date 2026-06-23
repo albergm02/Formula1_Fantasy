@@ -1,3 +1,7 @@
+/**
+ * @module StoreGaraje
+ * @description Estado global para el garaje del usuario, incluyendo coches, pilotos y potenciadores.
+ */
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
@@ -7,7 +11,15 @@ import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
 
 const PRESUPUESTO_INICIAL = 50.0
 
-const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [] })
+/**
+ * Construye un garaje vacío con las tres colecciones de cartas.
+ * @function crearGarajeVacio
+ * @memberof module:StoreGaraje
+ * @returns {{coches: Array, pilotos: Array, potenciadores: Array}} - Garaje sin cartas.
+ */
+function crearGarajeVacio() {
+  return { coches: [], pilotos: [], potenciadores: [] }
+}
 
 /**
  * Store para gestionar el garaje del usuario, incluyendo coches, pilotos y potenciadores.
@@ -25,6 +37,8 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Carga el equipo del usuario para una liga específica, incluyendo participación y precios dinámicos.
+   * @function cargarEquipo
+   * @memberof module:StoreGaraje
    * @param {string} idLiga - El ID de la liga.
    * @returns {Promise<void>}
    */
@@ -64,10 +78,21 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-  const aResultadoFallido = (error) => ({ success: false, message: error?.message || 'Error en el servidor.' })
+  /**
+   * Construye un resultado fallido estandarizado a partir de un error capturado.
+   * @function aResultadoFallido
+   * @memberof module:StoreGaraje
+   * @param {Object} error - Error capturado en el try/catch.
+   * @returns {{success: boolean, message: string}} - Resultado fallido con mensaje.
+   */
+  function aResultadoFallido(error) {
+    return { success: false, message: error?.message || 'Error en el servidor.' }
+  }
 
   /**
    * Vende un elemento del garaje del usuario.
+   * @function venderElemento
+   * @memberof module:StoreGaraje
    * @param {Object} elemento - El elemento a vender.
    * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
    */
@@ -87,6 +112,8 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Alterna el estado de alineación de un elemento en el garaje del usuario.
+   * @function alternarEquipado
+   * @memberof module:StoreGaraje
    * @param {string} instanciaId - El ID de la instancia del elemento.
    * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
    */
@@ -102,6 +129,8 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Invierte en la cláusula de un elemento en el garaje del usuario.
+   * @function invertirEnClausula
+   * @memberof module:StoreGaraje
    * @param {string} instanciaId - El ID de la instancia del elemento.
    * @param {number} cantidad - La cantidad a invertir en la cláusula.
    * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
@@ -122,6 +151,8 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Ejecuta la cláusula de un elemento en el garaje de un rival.
+   * @function ejecutarClausulaRival
+   * @memberof module:StoreGaraje
    * @param {string} idParticipanteRival - El ID del participante rival.
    * @param {Object} elemento - El elemento a fichar.
    * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
@@ -138,6 +169,8 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Obtiene el valor de mercado de una carta.
+   * @function obtenerValorMercado
+   * @memberof module:StoreGaraje
    * @param {Object} carta - La carta cuyo valor de mercado se desea obtener.
    * @returns {number} - Devuelve el valor de mercado de la carta.
    */
@@ -155,6 +188,8 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
   /**
    * Encuentra un elemento en el garaje del usuario por su ID de instancia.
+   * @function encontrarElementoEnGaraje
+   * @memberof module:StoreGaraje
    * @param {string} instanciaId - El ID de la instancia del elemento.
    * @returns {Object|null} - Devuelve el elemento encontrado o null si no se encuentra.
    */

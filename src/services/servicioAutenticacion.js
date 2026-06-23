@@ -1,4 +1,8 @@
-﻿import {
+﻿/**
+ * @module ServicioAutenticacion
+ * @description Servicio para manejar la autenticación de usuarios, incluyendo registro, inicio de sesión y gestión de contraseñas.
+ */
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -13,26 +17,40 @@ import { auth } from './servicioFirebase'
 
 const googleProvider = new GoogleAuthProvider()
 
-export const registrarse = (email, password) => createUserWithEmailAndPassword(auth, email, password)
+export function registrarse(email, password) {
+  return createUserWithEmailAndPassword(auth, email, password)
+}
 
-export const iniciarSesion = (email, password) => signInWithEmailAndPassword(auth, email, password)
+export function iniciarSesion(email, password) {
+  return signInWithEmailAndPassword(auth, email, password)
+}
 
-export const iniciarSesionConGoogle = () => signInWithPopup(auth, googleProvider)
+export function iniciarSesionConGoogle() {
+  return signInWithPopup(auth, googleProvider)
+}
 
-export const restablecerContraseña = (email) => sendPasswordResetEmail(auth, email)
+export function restablecerContraseña(email) {
+  return sendPasswordResetEmail(auth, email)
+}
 
-export const cerrarSesion = () => firebaseSignOut(auth)
+export function cerrarSesion() {
+  return firebaseSignOut(auth)
+}
 
-export const enviarVerificacionCorreo = () => sendEmailVerification(auth.currentUser)
+export function enviarVerificacionCorreo() {
+  return sendEmailVerification(auth.currentUser)
+}
 
-export const escucharCambioEstadoAutenticacion = (callback) => onAuthStateChanged(auth, callback)
+export function escucharCambioEstadoAutenticacion(callback) {
+  return onAuthStateChanged(auth, callback)
+}
 
 /**
  * Obtiene el usuario actualmente autenticado.
  * @returns {Promise<Object|null>} - Usuario autenticado o null si no hay ninguno.
  */
-export const obtenerUsuarioActual = () =>
-  new Promise((resolve, reject) => {
+export function obtenerUsuarioActual() {
+  return new Promise((resolve, reject) => {
     const cancelar = onAuthStateChanged(
       auth,
       (usuario) => {
@@ -42,6 +60,7 @@ export const obtenerUsuarioActual = () =>
       reject,
     )
   })
+}
 
 /**
  * Traduce los códigos de error de Firebase a mensajes legibles.

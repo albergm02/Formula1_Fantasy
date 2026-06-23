@@ -1,4 +1,14 @@
-const formatearFechaGranPremio = (fechaIso) => {
+/**
+ * @module ServicioOpenF1
+ * @description Servicio para interactuar con la API de OpenF1, incluyendo la obtención de información sobre los Grandes Premios.
+ */
+
+/**
+ * Formatea la fecha y hora de un Gran Premio.
+ * @param {string} fechaIso - Fecha en formato ISO.
+ * @returns {Object} - Objeto con la fecha y hora formateadas.
+ */
+function formatearFechaGranPremio(fechaIso) {
   const fecha = new Date(fechaIso)
   return {
     fecha: fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -13,7 +23,7 @@ const formatearFechaGranPremio = (fechaIso) => {
  * @param {number} opciones.anio - Año de la temporada.
  * @returns {Object|null} - Datos del siguiente Gran Premio o null si no hay ninguno.
  */
-export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
+export async function obtenerSiguienteGranPremio({ fetchImpl = fetch, anio = 2026 } = {}) {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   if (!respuesta.ok) {
     const cuerpoError = await respuesta.json().catch(() => ({}))
@@ -48,7 +58,7 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
  * @param {number} opciones.anio - Año de la temporada.
  * @returns {Object|null} - Datos del último Gran Premio finalizado o null si no hay ninguno.
  */
-export const obtenerUltimoGranPremioFinalizado = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
+export async function obtenerUltimoGranPremioFinalizado({ fetchImpl = fetch, anio = 2026 } = {}) {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   if (!respuesta.ok) {
     const cuerpoError = await respuesta.json().catch(() => ({}))

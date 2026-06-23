@@ -1,3 +1,7 @@
+/**
+ * @module ServicioLigas
+ * @description Servicio para manejar las operaciones relacionadas con las ligas, incluyendo creación, unión, abandono, eliminación y gestión de participantes.
+ */
 import { collection, doc, getDocs, query, where, arrayRemove, getDoc, updateDoc, documentId } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
@@ -13,7 +17,7 @@ const llamadaExpulsarParticipante = httpsCallable(functions, 'expulsarParticipan
  * @param {string} nombreLiga - Nombre de la liga.
  * @returns {Object} - Datos de la liga creada.
  */
-export const crearLiga = async (nombreLiga) => {
+export async function crearLiga(nombreLiga) {
   const respuesta = await llamadaCrearLiga({ nombreLiga })
   return respuesta.data
 }
@@ -23,7 +27,7 @@ export const crearLiga = async (nombreLiga) => {
  * @param {string} codigoInvitacion - Código de invitación de la liga.
  * @returns {Object} - Datos de la participación del usuario en la liga.
  */
-export const unirseALiga = async (codigoInvitacion) => {
+export async function unirseALiga(codigoInvitacion) {
   const respuesta = await llamadaUnirseALiga({ codigoInvitacion })
   return respuesta.data
 }
@@ -33,7 +37,7 @@ export const unirseALiga = async (codigoInvitacion) => {
  * @param {string} idLiga - ID de la liga.
  * @returns {Object} - Datos de la operación.
  */
-export const abandonarLiga = async (idLiga) => {
+export async function abandonarLiga(idLiga) {
   const respuesta = await llamadaAbandonarLiga({ idLiga })
   return respuesta.data
 }
@@ -43,7 +47,7 @@ export const abandonarLiga = async (idLiga) => {
  * @param {string} idLiga - ID de la liga.
  * @returns {Object} - Datos de la operación.
  */
-export const eliminarLiga = async (idLiga) => {
+export async function eliminarLiga(idLiga) {
   const respuesta = await llamadaEliminarLiga({ idLiga })
   return respuesta.data
 }
@@ -54,7 +58,7 @@ export const eliminarLiga = async (idLiga) => {
  * @param {string} emailExpulsado - Correo electrónico del participante a expulsar.
  * @returns {Object} - Datos de la operación.
  */
-export const expulsarParticipante = async (idLiga, emailExpulsado) => {
+export async function expulsarParticipante(idLiga, emailExpulsado) {
   const respuesta = await llamadaExpulsarParticipante({ idLiga, emailExpulsado })
   return respuesta.data
 }
@@ -64,7 +68,7 @@ export const expulsarParticipante = async (idLiga, emailExpulsado) => {
  * @param {Array<string>} idsLigas - IDs de las ligas.
  * @returns {Array<Object>} - Datos de las ligas.
  */
-export const cargarLigas = async (idsLigas) => {
+export async function cargarLigas(idsLigas) {
   const consulta = query(collection(db, 'ligas'), where(documentId(), 'in', idsLigas))
   const instantanea = await getDocs(consulta)
   return instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
@@ -75,7 +79,7 @@ export const cargarLigas = async (idsLigas) => {
  * @param {string} idLiga - ID de la liga.
  * @returns {Array<Object>} - Datos de los participantes.
  */
-export const cargarParticipantes = async (idLiga) => {
+export async function cargarParticipantes(idLiga) {
   const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga))
   const instantanea = await getDocs(consulta)
   const participaciones = instantanea.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
@@ -96,7 +100,7 @@ export const cargarParticipantes = async (idLiga) => {
  * @param {string} correoUsuario - Correo electrónico del usuario.
  * @returns {Object|null} - Datos de la participación del usuario o null si no existe.
  */
-export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
+export async function cargarParticipacionDeUsuario(idLiga, correoUsuario) {
   const consulta = query(collection(db, 'participaciones'), where('id_liga', '==', idLiga), where('email_usuario', '==', correoUsuario))
   const instantanea = await getDocs(consulta)
   if (instantanea.empty) return null
@@ -110,7 +114,7 @@ export const cargarParticipacionDeUsuario = async (idLiga, correoUsuario) => {
  * @param {string} idLiga - ID de la liga.
  * @returns {Promise<void>} - Promesa que se resuelve cuando la operación se completa.
  */
-export const desvincularLigaDelUsuario = async (uid, idLiga) => {
+export async function desvincularLigaDelUsuario(uid, idLiga) {
   await updateDoc(doc(db, 'usuarios', uid), { ligasIds: arrayRemove(idLiga) })
 }
 
@@ -119,7 +123,7 @@ export const desvincularLigaDelUsuario = async (uid, idLiga) => {
  * @param {string} idParticipacion - ID de la participación del rival.
  * @returns {Object|null} - Datos del garaje del rival o null si no existe.
  */
-export const cargarGarajeRival = async (idParticipacion) => {
+export async function cargarGarajeRival(idParticipacion) {
   const documento = await getDoc(doc(db, 'participaciones', idParticipacion))
   if (!documento.exists()) return null
 
@@ -143,7 +147,7 @@ export const cargarGarajeRival = async (idParticipacion) => {
  * @param {string} idLiga - ID de la liga.
  * @returns {Array<Object>} - Datos de la clasificación.
  */
-export const cargarClasificacion = async (idLiga) => {
+export async function cargarClasificacion(idLiga) {
   const participaciones = await cargarParticipantes(idLiga)
   const docsUsuario = await Promise.all(participaciones.map((p) => getDoc(doc(db, 'usuarios', p.uid_usuario))))
 

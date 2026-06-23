@@ -1,3 +1,8 @@
+/**
+ * @module StoreActividad
+ * @description Estado global para la actividad de la liga.
+ */
+
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStoreLigas } from './storeLigas'
@@ -16,6 +21,8 @@ export const usarStoreActividad = defineStore('actividad', () => {
 
   /**
    * Carga la actividad de la liga activa.
+   * @function cargarActividad
+   * @memberof module:StoreActividad
    * @returns {Promise<void>}
    */
   async function cargarActividad() {

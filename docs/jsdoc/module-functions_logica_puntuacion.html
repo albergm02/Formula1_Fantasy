@@ -1,0 +1,2817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>functions/logica/puntuacion - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-ServicioActividad.html">ServicioActividad</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioActividad.html#.cargarActividadLiga">cargarActividadLiga</a></li></ul></li><li><a href="module-ServicioAdministracion.html">ServicioAdministracion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.cargarListaJornadas">cargarListaJornadas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.cargarListaLigas">cargarListaLigas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.cargarListaUsuarios">cargarListaUsuarios</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.eliminarLigaComoAdministrador">eliminarLigaComoAdministrador</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAdministracion.html#.eliminarUsuarioComoAdministrador">eliminarUsuarioComoAdministrador</a></li></ul></li><li><a href="module-ServicioAutenticacion.html">ServicioAutenticacion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioAutenticacion.html#.mensajeErrorFirebase">mensajeErrorFirebase</a></li><li data-type='method' style='display: none;'><a href="module-ServicioAutenticacion.html#.obtenerUsuarioActual">obtenerUsuarioActual</a></li></ul></li><li><a href="module-ServicioFirebase.html">ServicioFirebase</a></li><li><a href="module-ServicioGaraje.html">ServicioGaraje</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.alternarAlineacion">alternarAlineacion</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.calcularPrecioClausula">calcularPrecioClausula</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.ejecutarClausula">ejecutarClausula</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.estaEnPeriodoDeGracia">estaEnPeriodoDeGracia</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.gestionarClausula">gestionarClausula</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.horasRestantesDeGracia">horasRestantesDeGracia</a></li><li data-type='method' style='display: none;'><a href="module-ServicioGaraje.html#.venderCarta">venderCarta</a></li></ul></li><li><a href="module-ServicioJornada.html">ServicioJornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.calcularFactorCaos">calcularFactorCaos</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.calcularPuntosVariante">calcularPuntosVariante</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.cargarCatalogoYPerfiles">cargarCatalogoYPerfiles</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.obtenerCuentaRegresiva">obtenerCuentaRegresiva</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#.suscribirseHistorialJornadas">suscribirseHistorialJornadas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~bonusParadas">bonusParadas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~bonusPosicionEstratega">bonusPosicionEstratega</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~bonusStint">bonusStint</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosBase">puntosBase</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosEstratega">puntosEstratega</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosPorPosicion">puntosPorPosicion</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosRemontador">puntosRemontador</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~puntosTodoTerreno">puntosTodoTerreno</a></li><li data-type='method' style='display: none;'><a href="module-ServicioJornada.html#~sinActuacionValida">sinActuacionValida</a></li></ul></li><li><a href="module-ServicioLigas.html">ServicioLigas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.abandonarLiga">abandonarLiga</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarClasificacion">cargarClasificacion</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarGarajeRival">cargarGarajeRival</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarLigas">cargarLigas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarParticipacionDeUsuario">cargarParticipacionDeUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.cargarParticipantes">cargarParticipantes</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.crearLiga">crearLiga</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.desvincularLigaDelUsuario">desvincularLigaDelUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.expulsarParticipante">expulsarParticipante</a></li><li data-type='method' style='display: none;'><a href="module-ServicioLigas.html#.unirseALiga">unirseALiga</a></li></ul></li><li><a href="module-ServicioMercado.html">ServicioMercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.cargarMisPujas">cargarMisPujas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.cargarPreciosDinamicosMercado">cargarPreciosDinamicosMercado</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.cargarResumenPujas">cargarResumenPujas</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.eliminarPuja">eliminarPuja</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.registrarPuja">registrarPuja</a></li><li data-type='method' style='display: none;'><a href="module-ServicioMercado.html#.suscribirMercadoActivo">suscribirMercadoActivo</a></li></ul></li><li><a href="module-ServicioOpenF1.html">ServicioOpenF1</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioOpenF1.html#.obtenerSiguienteGranPremio">obtenerSiguienteGranPremio</a></li><li data-type='method' style='display: none;'><a href="module-ServicioOpenF1.html#.obtenerUltimoGranPremioFinalizado">obtenerUltimoGranPremioFinalizado</a></li><li data-type='method' style='display: none;'><a href="module-ServicioOpenF1.html#~formatearFechaGranPremio">formatearFechaGranPremio</a></li></ul></li><li><a href="module-ServicioPerfil.html">ServicioPerfil</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.cargarPerfilUsuario">cargarPerfilUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.crearPerfil">crearPerfil</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.eliminarMiCuenta">eliminarMiCuenta</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.escucharPerfilUsuario">escucharPerfilUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.migrarCorreo">migrarCorreo</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.reautenticarUsuario">reautenticarUsuario</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.solicitarCambioCorreo">solicitarCambioCorreo</a></li><li data-type='method' style='display: none;'><a href="module-ServicioPerfil.html#.solicitarRestablecimientoContrasena">solicitarRestablecimientoContrasena</a></li></ul></li><li><a href="module-StoreActividad.html">StoreActividad</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreActividad.html#.cargarActividad">cargarActividad</a></li></ul></li><li><a href="module-StoreAdministracion.html">StoreAdministracion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreAdministracion.html#.cargarListas">cargarListas</a></li><li data-type='method' style='display: none;'><a href="module-StoreAdministracion.html#.eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreAdministracion.html#.eliminarUsuario">eliminarUsuario</a></li></ul></li><li><a href="module-StoreAutenticacion.html">StoreAutenticacion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.cargarPerfil">cargarPerfil</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.cerrarSesion">cerrarSesion</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.crearPerfil">crearPerfil</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.iniciarSesionConCorreo">iniciarSesionConCorreo</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.iniciarSesionConGoogle">iniciarSesionConGoogle</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.limpiarSesion">limpiarSesion</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.observarEstadoSesion">observarEstadoSesion</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.procesarRegistro">procesarRegistro</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.reconciliarCorreoMigrado">reconciliarCorreoMigrado</a></li><li data-type='method' style='display: none;'><a href="module-StoreAutenticacion.html#.verificarExistenciaPerfil">verificarExistenciaPerfil</a></li></ul></li><li><a href="module-StoreGaraje.html">StoreGaraje</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.aResultadoFallido">aResultadoFallido</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.alternarEquipado">alternarEquipado</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.cargarEquipo">cargarEquipo</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.crearGarajeVacio">crearGarajeVacio</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.ejecutarClausulaRival">ejecutarClausulaRival</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.encontrarElementoEnGaraje">encontrarElementoEnGaraje</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.invertirEnClausula">invertirEnClausula</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.obtenerValorMercado">obtenerValorMercado</a></li><li data-type='method' style='display: none;'><a href="module-StoreGaraje.html#.venderElemento">venderElemento</a></li></ul></li><li><a href="module-StoreJornada.html">StoreJornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.cargarCatalogo">cargarCatalogo</a></li><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.cargarGranPremioPendiente">cargarGranPremioPendiente</a></li><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.cargarSiguienteGranPremio">cargarSiguienteGranPremio</a></li><li data-type='method' style='display: none;'><a href="module-StoreJornada.html#.escucharHistorial">escucharHistorial</a></li></ul></li><li><a href="module-StoreLigas.html">StoreLigas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.abandonarLiga">abandonarLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.alcanzoLimiteLigas">alcanzoLimiteLigas</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarClasificacion">cargarClasificacion</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarGarajeRival">cargarGarajeRival</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarLigasUsuario">cargarLigasUsuario</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.cargarParticipantesLiga">cargarParticipantesLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.crearLiga">crearLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.expulsarParticipante">expulsarParticipante</a></li><li data-type='method' style='display: none;'><a href="module-StoreLigas.html#.unirseALiga">unirseALiga</a></li></ul></li><li><a href="module-StoreMercado.html">StoreMercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.actualizarRestante">actualizarRestante</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.detenerCuentaAtras">detenerCuentaAtras</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.detenerMercado">detenerMercado</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.eliminarPujaCarta">eliminarPujaCarta</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.inicializarMercado">inicializarMercado</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.iniciarCuentaAtras">iniciarCuentaAtras</a></li><li data-type='method' style='display: none;'><a href="module-StoreMercado.html#.pujarPorCarta">pujarPorCarta</a></li></ul></li><li><a href="module-StorePerfil.html">StorePerfil</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.actualizarIdsLigas">actualizarIdsLigas</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.cambiarContrasena">cambiarContrasena</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.cambiarCorreo">cambiarCorreo</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.cargarFechaCambioCorreo">cargarFechaCambioCorreo</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.eliminarCuenta">eliminarCuenta</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.establecerDatosUsuario">establecerDatosUsuario</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.limpiarDatosUsuario">limpiarDatosUsuario</a></li><li data-type='method' style='display: none;'><a href="module-StorePerfil.html#.observarPerfil">observarPerfil</a></li></ul></li><li><a href="module-functions_callable_Administracion.html">functions/callable/Administracion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Administracion.html#~eliminarLigaAdmin">eliminarLigaAdmin</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Administracion.html#~eliminarUsuarioAdmin">eliminarUsuarioAdmin</a></li></ul></li><li><a href="module-functions_callable_Garaje.html">functions/callable/Garaje</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~alternarAlineacion">alternarAlineacion</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~aplicarCambioAlineacion">aplicarCambioAlineacion</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~calcularComprometidoEnPujas">calcularComprometidoEnPujas</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~calcularPrecioClausula">calcularPrecioClausula</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~cargarParticipacionPropia">cargarParticipacionPropia</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~ejecutarClausula">ejecutarClausula</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~extraerCartaPorInstancia">extraerCartaPorInstancia</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~gestionarClausula">gestionarClausula</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~localizarCartaEnGaraje">localizarCartaEnGaraje</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Garaje.html#~venderCarta">venderCarta</a></li></ul></li><li><a href="module-functions_callable_Jornada.html">functions/callable/Jornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Jornada.html#~ejecutarProcesarJornada">ejecutarProcesarJornada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Jornada.html#~procesarJornada">procesarJornada</a></li></ul></li><li><a href="module-functions_callable_Ligas.html">functions/callable/Ligas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~abandonarLiga">abandonarLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~borrarLigaEnCascada">borrarLigaEnCascada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~crearLiga">crearLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~eliminarLiga">eliminarLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~eliminarPujas">eliminarPujas</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~expulsarParticipante">expulsarParticipante</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~inicializarMercado">inicializarMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Ligas.html#~unirseALiga">unirseALiga</a></li></ul></li><li><a href="module-functions_callable_Mercado.html">functions/callable/Mercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~actualizarPreciosTrasResolucion">actualizarPreciosTrasResolucion</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~agregarBorradoPujasUsuario">agregarBorradoPujasUsuario</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~calcularFechaMercado">calcularFechaMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~cargarMercadoAbiertoDeLiga">cargarMercadoAbiertoDeLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~claveCartaPorTipo">claveCartaPorTipo</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~coleccionGaraje">coleccionGaraje</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~construirCartaGanada">construirCartaGanada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~ejecutarGeneracionMercadoParaLiga">ejecutarGeneracionMercadoParaLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~eliminarPuja">eliminarPuja</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~generarMercado">generarMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~propagarAGarajes">propagarAGarajes</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~propagarAMercadosAbiertos">propagarAMercadosAbiertos</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~recopilarCartasFichadasEnLiga">recopilarCartasFichadasEnLiga</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~referenciaDiaMercado">referenciaDiaMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~registrarPuja">registrarPuja</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~resolverPujasMercado">resolverPujasMercado</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Mercado.html#~sumarComprometidoEnMercado">sumarComprometidoEnMercado</a></li></ul></li><li><a href="module-functions_callable_Perfil.html">functions/callable/Perfil</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~autorizarCambioCorreo">autorizarCambioCorreo</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~crearPerfil">crearPerfil</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~eliminarCuentaUsuarioEnCascada">eliminarCuentaUsuarioEnCascada</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~eliminarMiCuenta">eliminarMiCuenta</a></li><li data-type='method' style='display: none;'><a href="module-functions_callable_Perfil.html#~migrarCorreo">migrarCorreo</a></li></ul></li><li><a href="module-functions_infraestructura_CatalogoBase.html">functions/infraestructura/CatalogoBase</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_CatalogoBase.html#~construirCatalogoCompleto">construirCatalogoCompleto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_CatalogoBase.html#~crearCartaPiloto">crearCartaPiloto</a></li></ul></li><li><a href="module-functions_infraestructura_openF1.html">functions/infraestructura/openF1</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~consultarOpenF1">consultarOpenF1</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~extraerUltimaSesion">extraerUltimaSesion</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerAdelantamientosPorPiloto">obtenerAdelantamientosPorPiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerCondicionesCarrera">obtenerCondicionesCarrera</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerDatosStintsPorPiloto">obtenerDatosStintsPorPiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerGranPremiosFinalizados">obtenerGranPremiosFinalizados</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerMeetingKeyEnJuego">obtenerMeetingKeyEnJuego</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerParadasPorPiloto">obtenerParadasPorPiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerParrillaSalida">obtenerParrillaSalida</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~obtenerResultadosSesion">obtenerResultadosSesion</a></li><li data-type='method' style='display: none;'><a href="module-functions_infraestructura_openF1.html#~recopilarDatosGranPremio">recopilarDatosGranPremio</a></li></ul></li><li><a href="module-functions_logica_jornada.html">functions/logica/jornada</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_jornada.html#~construirPuntosPorPiloto">construirPuntosPorPiloto</a></li></ul></li><li><a href="module-functions_logica_mercado.html">functions/logica/mercado</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~aplicarPreciosDinamicosACatalogo">aplicarPreciosDinamicosACatalogo</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~cargarCatalogo">cargarCatalogo</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~cargarPreciosDinamicos">cargarPreciosDinamicos</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~construirClavePiloto">construirClavePiloto</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_mercado.html#~seleccionarCartasDiarias">seleccionarCartasDiarias</a></li></ul></li><li><a href="module-functions_logica_pujas.html">functions/logica/pujas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_pujas.html#~seleccionarPujasGanadoras">seleccionarPujasGanadoras</a></li></ul></li><li><a href="module-functions_logica_puntuacion.html">functions/logica/puntuacion</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~bonusParadas">bonusParadas</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~bonusPosicionEstratega">bonusPosicionEstratega</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~bonusStint">bonusStint</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularFactorCaos">calcularFactorCaos</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularMultiplicadorPotenciadores">calcularMultiplicadorPotenciadores</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularPuntosVariante">calcularPuntosVariante</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~calcularPuntuacionGaraje">calcularPuntuacionGaraje</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosBase">puntosBase</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosEstratega">puntosEstratega</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosPorPosicion">puntosPorPosicion</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosRemontador">puntosRemontador</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~puntosTodoTerreno">puntosTodoTerreno</a></li><li data-type='method' style='display: none;'><a href="module-functions_logica_puntuacion.html#~sinActuacionValida">sinActuacionValida</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">functions/logica/puntuacion</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+                <div class="description usertext">Funciones de lógica para calcular la puntuación de los pilotos y garajes, incluyendo la aplicación de multiplicadores y factores de caos.</div>
+            
+
+            
+                
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Funciones de lógica para calcular la puntuación de los pilotos y garajes, incluyendo la aplicación de multiplicadores y factores de caos.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="~bonusParadas"><span class="type-signature type-signature-inner">(inner) </span>bonusParadas<span class="signature">(numeroPitStops)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de bonificación por el número de paradas en boxes.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line107">line 107</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroPitStops</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de paradas en boxes del piloto.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos de bonificación por paradas en boxes.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~bonusPosicionEstratega"><span class="type-signature type-signature-inner">(inner) </span>bonusPosicionEstratega<span class="signature">(posicion)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de bonificación por la posición del piloto en la carrera para la variante "estratega".</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line127">line 127</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>posicion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Posición del piloto en la carrera.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos de bonificación por la posición.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~bonusStint"><span class="type-signature type-signature-inner">(inner) </span>bonusStint<span class="signature">(porcentajeStintMaximo)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de bonificación por el porcentaje del stint más largo.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line118">line 118</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>porcentajeStintMaximo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Porcentaje del stint más largo del piloto.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos de bonificación por el stint más largo.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~calcularFactorCaos"><span class="type-signature type-signature-inner">(inner) </span>calcularFactorCaos<span class="signature">(condiciones)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula el factor de caos de la jornada según las condiciones.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line64">line 64</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>condiciones</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Condiciones de la jornada.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>llovio</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Indica si llovió durante la jornada.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroSafetyCarActivos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de Safety Car activos.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroVirtualSafetyCarActivos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de Virtual Safety Car activos.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroDNFs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de pilotos que no terminaron la carrera.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Factor de caos calculado.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~calcularMultiplicadorPotenciadores"><span class="type-signature type-signature-inner">(inner) </span>calcularMultiplicadorPotenciadores<span class="signature">(potenciadores)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula el multiplicador total de los potenciadores equipados.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line152">line 152</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>potenciadores</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Lista de potenciadores.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Multiplicador total y lista de potenciadores aplicados.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~calcularPuntosVariante"><span class="type-signature type-signature-inner">(inner) </span>calcularPuntosVariante<span class="signature">(variante, actuacion, condiciones)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de un piloto según su variante, actuación y condiciones de la jornada.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line15">line 15</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>variante</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Variante del piloto (qualy, carrera, todo_terreno, remontador, estratega, base).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuación del piloto en la jornada.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>condiciones</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Condiciones de la jornada.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos calculados para la variante.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~calcularPuntuacionGaraje"><span class="type-signature type-signature-inner">(inner) </span>calcularPuntuacionGaraje<span class="signature">(garaje, contextoJornada)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula la puntuación total de un garaje en una jornada.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line174">line 174</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>garaje</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Garaje del jugador.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>contextoJornada</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexto de la jornada.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>puntosPorPiloto</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Puntos por piloto.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>condiciones</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Condiciones de la jornada.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacionesPorPiloto</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuaciones por piloto.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntuación total y desglose.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~puntosBase"><span class="type-signature type-signature-inner">(inner) </span>puntosBase<span class="signature">(actuacion)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos base de un piloto según su actuación.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line141">line 141</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuación del piloto.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>posicionQualy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Posición del piloto en la clasificación.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>posicionCarrera</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Posición del piloto en la carrera.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos base calculados.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~puntosEstratega"><span class="type-signature type-signature-inner">(inner) </span>puntosEstratega<span class="signature">(actuacion)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de un piloto con la variante "estratega" según su actuación.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line97">line 97</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuación del piloto.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>posicionCarrera</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Posición del piloto en la carrera.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroPitStops</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de paradas en boxes del piloto.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>porcentajeStintMaximo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Porcentaje del stint más largo del piloto.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos calculados para la variante "estratega".
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~puntosPorPosicion"><span class="type-signature type-signature-inner">(inner) </span>puntosPorPosicion<span class="signature">(posicion)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de un piloto según su posición en la carrera o clasificación.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line40">line 40</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>posicion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Posición del piloto.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos correspondientes a la posición.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~puntosRemontador"><span class="type-signature type-signature-inner">(inner) </span>puntosRemontador<span class="signature">(actuacion)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de un piloto con la variante "remontador" según su actuación.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line82">line 82</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuación del piloto.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroAdelantos</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de adelantamientos realizados por el piloto.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numeroVecesAdelantado</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Número de veces que el piloto fue adelantado.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos calculados para la variante "remontador".
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~puntosTodoTerreno"><span class="type-signature type-signature-inner">(inner) </span>puntosTodoTerreno<span class="signature">(actuacion, condiciones)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Calcula los puntos de un piloto con la variante "todo_terreno" según su actuación y las condiciones de la jornada.</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line50">line 50</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuación del piloto.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>condiciones</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Condiciones de la jornada.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - Puntos calculados para la variante "todo_terreno".
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="~sinActuacionValida"><span class="type-signature type-signature-inner">(inner) </span>sinActuacionValida<span class="signature">(actuacion)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li>Verifica si la actuación del piloto es inválida (DNF, DNS, DSQ o no clasificado).</li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="functions_logica_puntuacion.js.html">functions/logica/puntuacion.js</a>, <a href="functions_logica_puntuacion.js.html#line31">line 31</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>actuacion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Actuación del piloto.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    - True si la actuación es inválida, false en caso contrario.
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Jun 23 2026 15:48:23 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

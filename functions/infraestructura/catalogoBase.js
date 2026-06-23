@@ -1,3 +1,7 @@
+/**
+ * @module functions/infraestructura/CatalogoBase
+ * @description Contiene los datos base de pilotos, coches y potenciadores, así como funciones para construir el catálogo completo.
+ */
 // prettier-ignore
 const pilotosBase = [
   { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren', imagen: '/Pilotos/norris.webp'     },

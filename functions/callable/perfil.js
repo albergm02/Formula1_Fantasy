@@ -1,3 +1,8 @@
+/**
+ * @module functions/callable/Perfil
+ * @description Funciones callable para manejar las operaciones relacionadas con el perfil del usuario, incluyendo la migración de correo, eliminación de cuenta, creación de perfil y gestión de autenticación.
+ */
+
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
@@ -11,9 +16,13 @@ const DIAS_BLOQUEO_CAMBIO_CORREO = 7
 const MS_BLOQUEO_CAMBIO_CORREO = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
 
 /**
- * Autoriza el cambio de correo de un usuario.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Autoriza el cambio de correo de un usuario mediante una Cloud Function (Callable).
+ * Verifica que haya transcurrido el periodo de bloqueo entre cambios de correo.
+ *
+ * @function autorizarCambioCorreo
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.auth - Información de autenticación del usuario que invoca la función.
+ * @returns {Promise<Object>} Resultado de la operación, indicando si fue exitosa.
  */
 exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   exigirEmailAutenticado(request)
@@ -35,9 +44,15 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Migra el correo de un usuario en Auth y propaga el cambio a participaciones y ligas.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Migra el correo de un usuario en Auth y propaga el cambio a participaciones y ligas
+ * mediante una Cloud Function (Callable).
+ *
+ * @function migrarCorreo
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.correoAnterior - Correo electrónico anterior del usuario.
+ * @param {string} request.data.correoNuevo - Nuevo correo electrónico del usuario.
+ * @returns {Promise<Object>} Resultado de la operación con el correo migrado y los conteos de documentos actualizados.
  */
 exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
@@ -139,9 +154,13 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
 exports.eliminarCuentaUsuarioEnCascada = eliminarCuentaUsuarioEnCascada
 
 /**
- * Elimina la cuenta del usuario que realiza la solicitud.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Elimina la cuenta del usuario que realiza la solicitud mediante una Cloud Function (Callable).
+ * Borra en cascada participaciones, ligas asociadas y el usuario de Authentication.
+ *
+ * @function eliminarMiCuenta
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.auth - Información de autenticación del usuario que invoca la función.
+ * @returns {Promise<Object>} Resultado de la operación con los conteos de participaciones y ligas borradas.
  */
 exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
@@ -152,9 +171,13 @@ exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Crea un perfil de usuario.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Crea un perfil de usuario en Firestore mediante una Cloud Function (Callable).
+ *
+ * @function crearPerfil
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.nombreUsuario - Nombre visible del usuario a crear.
+ * @returns {Promise<Object>} Resultado de la operación, indicando si fue exitosa.
  */
 exports.crearPerfil = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')

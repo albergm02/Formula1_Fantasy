@@ -89,8 +89,12 @@ function explicarPiloto(piloto) {
       </div>
     </div>
 
-    <Dialog v-model:visible="mostrarDetalle" modal header="DESGLOSE DE PUNTOS"
-      :style="{ width: '92vw', maxWidth: '420px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog
+      v-model:visible="mostrarDetalle"
+      modal
+      header="DESGLOSE DE PUNTOS"
+      :style="{ width: '92vw', maxWidth: '420px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
+    >
       <div class="flex flex-col gap-5">
         <div class="pb-3 border-b border-zinc-800">
           <span class="text-sm font-black uppercase tracking-wide text-white">{{ jornada.nombreGranPremio }}</span>
@@ -99,8 +103,12 @@ function explicarPiloto(piloto) {
         <div class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condiciones</span>
           <div class="flex flex-wrap gap-2">
-            <span v-for="(cond, idx) in condicionesTexto" :key="idx"
-              class="px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold" :class="cond.color">
+            <span
+              v-for="(cond, idx) in condicionesTexto"
+              :key="idx"
+              class="px-2.5 py-1 bg-[#121218] border border-zinc-800 text-xs font-bold"
+              :class="cond.color"
+            >
               {{ cond.texto }}
             </span>
           </div>
@@ -108,14 +116,19 @@ function explicarPiloto(piloto) {
 
         <div v-if="jornada.desglose?.pilotos?.length" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Pilotos</span>
-          <div v-for="(piloto, idx) in jornada.desglose.pilotos" :key="idx"
-            class="flex flex-col p-3 bg-[#121218] border border-zinc-800 gap-2">
+          <div
+            v-for="(piloto, idx) in jornada.desglose.pilotos"
+            :key="idx"
+            class="flex flex-col p-3 bg-[#121218] border border-zinc-800 gap-2"
+          >
             <div class="flex items-center justify-between">
               <div class="flex flex-col gap-0.5">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-bold text-white">{{ piloto.nombre }}</span>
-                  <span v-if="piloto.variante"
-                    class="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider border border-zinc-700 text-zinc-400">
+                  <span
+                    v-if="piloto.variante"
+                    class="px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider border border-zinc-700 text-zinc-400"
+                  >
                     {{ NOMBRES_VARIANTE[piloto.variante] || piloto.variante }}
                   </span>
                 </div>
@@ -132,15 +145,19 @@ function explicarPiloto(piloto) {
 
         <div v-if="potenciadoresAplicados.length" class="flex flex-col gap-2">
           <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Potenciadores activos</span>
-          <div v-for="potenciador in potenciadoresAplicados" :key="potenciador.id"
-            class="flex items-center justify-between p-2.5 bg-[#121218] border border-zinc-800">
+          <div
+            v-for="potenciador in potenciadoresAplicados"
+            :key="potenciador.id"
+            class="flex items-center justify-between p-2.5 bg-[#121218] border border-zinc-800"
+          >
             <span class="text-xs font-bold text-white">{{ potenciador.nombre }}</span>
             <span class="text-sm font-black text-emerald-400">×{{ potenciador.multiplicador }}</span>
           </div>
-          <div v-if="multiplicadorGlobal !== 1"
-            class="flex items-center justify-between px-2.5 py-1.5 bg-emerald-900/20 border border-emerald-500/30">
-            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Multiplicador
-              combinado</span>
+          <div
+            v-if="multiplicadorGlobal !== 1"
+            class="flex items-center justify-between px-2.5 py-1.5 bg-emerald-900/20 border border-emerald-500/30"
+          >
+            <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Multiplicador combinado</span>
             <span class="text-sm font-black text-emerald-400">×{{ multiplicadorGlobal }}</span>
           </div>
         </div>
@@ -158,8 +175,7 @@ function explicarPiloto(piloto) {
           <span class="text-3xl font-black text-[#D4A843]">+{{ jornada.puntosJornada }}</span>
         </div>
 
-        <div v-if="jornada.premioJornada"
-          class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
+        <div v-if="jornada.premioJornada" class="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30">
           <div class="flex flex-col">
             <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Premio al presupuesto</span>
             <span class="text-[10px] text-zinc-500">{{ jornada.puntosJornada }} pts ÷ 10</span>

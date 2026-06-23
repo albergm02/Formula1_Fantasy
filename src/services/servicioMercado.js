@@ -1,3 +1,7 @@
+/**
+ * @module ServicioMercado
+ * @description Servicio para manejar las operaciones del mercado, incluyendo la suscripción a cambios, registro y eliminación de pujas, y carga de precios dinámicos.
+ */
 import { collection, doc, getDoc, onSnapshot, getDocs, query, where, limit } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from './servicioFirebase'
@@ -11,7 +15,7 @@ const llamadaEliminarPuja = httpsCallable(functions, 'eliminarPuja')
  * @param {Function} alCambiar - Función a ejecutar cuando cambie el mercado activo.
  * @returns {Function} - Función para cancelar la suscripción.
  */
-export const suscribirMercadoActivo = (idLiga, alCambiar) => {
+export function suscribirMercadoActivo(idLiga, alCambiar) {
   const consulta = query(collection(db, 'mercados', idLiga, 'dias'), where('estado', '==', 'abierto'), limit(1))
   return onSnapshot(consulta, (snapshot) => {
     if (snapshot.empty) return alCambiar(null)
@@ -27,7 +31,7 @@ export const suscribirMercadoActivo = (idLiga, alCambiar) => {
  * @param {number} cantidad - Cantidad de la puja.
  * @returns {Promise<void>} - Promesa que se resuelve cuando la operación se completa.
  */
-export const registrarPuja = async (idLiga, idCarta, cantidad) => {
+export async function registrarPuja(idLiga, idCarta, cantidad) {
   await llamadaRegistrarPuja({ idLiga, idCarta, cantidad })
 }
 
@@ -37,7 +41,7 @@ export const registrarPuja = async (idLiga, idCarta, cantidad) => {
  * @param {string} idCarta - ID de la carta.
  * @returns {Promise<void>} - Promesa que se resuelve cuando la operación se completa.
  */
-export const eliminarPuja = async (idLiga, idCarta) => {
+export async function eliminarPuja(idLiga, idCarta) {
   await llamadaEliminarPuja({ idLiga, idCarta })
 }
 
@@ -47,7 +51,7 @@ export const eliminarPuja = async (idLiga, idCarta) => {
  * @param {string} emailUsuario - Correo electrónico del usuario.
  * @returns {Object} - Mapa de pujas del usuario.
  */
-export const cargarMisPujas = async (mercado, emailUsuario) => {
+export async function cargarMisPujas(mercado, emailUsuario) {
   const refPujas = collection(db, 'mercados', mercado.idLiga, 'dias', mercado.id, 'pujas')
   const consulta = query(refPujas, where('emailUsuario', '==', emailUsuario.trim()))
   const resultado = await getDocs(consulta)
@@ -64,7 +68,7 @@ export const cargarMisPujas = async (mercado, emailUsuario) => {
  * Carga los precios dinámicos del mercado.
  * @returns {Object} - Precios dinámicos de pilotos, coches y potenciadores.
  */
-export const cargarPreciosDinamicosMercado = async () => {
+export async function cargarPreciosDinamicosMercado() {
   const docPrecios = await getDoc(doc(collection(db, 'catalogo'), 'precios'))
   const datos = docPrecios.exists() ? docPrecios.data() : {}
   return { pilotos: datos.pilotos || {}, coches: datos.coches || {}, potenciadores: datos.potenciadores || {} }
@@ -75,7 +79,7 @@ export const cargarPreciosDinamicosMercado = async () => {
  * @param {Object} mercado - Mercado activo.
  * @returns {Object} - Resumen de pujas por carta.
  */
-export const cargarResumenPujas = async (mercado) => {
+export async function cargarResumenPujas(mercado) {
   const refPujas = collection(db, 'mercados', mercado.idLiga, 'dias', mercado.id, 'pujas')
   const resultado = await getDocs(refPujas)
 

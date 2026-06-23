@@ -1,3 +1,8 @@
+/**
+ * @module functions/callable/Garaje
+ * @description Funciones callable para manejar las operaciones relacionadas con el garaje del usuario, incluyendo la venta de cartas, la gestión de alineación y la ejecución de cláusulas.
+ */
+
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
@@ -48,9 +53,15 @@ function localizarCartaEnGaraje(garaje, instanciaId) {
 }
 
 /**
- * Vende una carta del garaje de un usuario.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la venta.
+ * Vende una carta del garaje del usuario mediante una Cloud Function (Callable).
+ * Reembolsa el porcentaje configurado del precio de la carta al presupuesto.
+ *
+ * @function venderCarta
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idParticipante - El identificador único de la participación del usuario.
+ * @param {string} request.data.instanciaId - El identificador único de la instancia de la carta a vender.
+ * @returns {Promise<Object>} Resultado de la operación con el nombre de la carta y el valor de reventa.
  */
 exports.venderCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -127,9 +138,15 @@ function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
 }
 
 /**
- * Alterna la alineación de una carta en el garaje de un usuario.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Alterna la alineación de una carta en el garaje del usuario mediante una Cloud Function (Callable).
+ * Equipa o desequipa la carta según su estado actual, respetando los límites por tipo.
+ *
+ * @function alternarAlineacion
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idParticipante - El identificador único de la participación del usuario.
+ * @param {string} request.data.instanciaId - El identificador único de la instancia de la carta a alinear/desalinear.
+ * @returns {Promise<Object>} Resultado de la operación con el nombre de la carta y su nuevo estado de alineación.
  */
 exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -150,9 +167,16 @@ exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Gestiona la cláusula de una carta en el garaje de un usuario.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Gestiona la cláusula de una carta en el garaje del usuario mediante una Cloud Function (Callable).
+ * Invierte una cantidad del presupuesto en la cláusula de la carta.
+ *
+ * @function gestionarClausula
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idParticipante - El identificador único de la participación del usuario.
+ * @param {string} request.data.instanciaId - El identificador único de la instancia de la carta.
+ * @param {number} request.data.cantidad - Cantidad a invertir en la cláusula, debe ser positiva.
+ * @returns {Promise<Object>} Resultado de la operación con el total invertido en la cláusula.
  */ 
 exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -237,9 +261,16 @@ async function calcularComprometidoEnPujas(idLiga, email) {
 }
 
 /**
- * Ejecuta la cláusula de una carta en el garaje de un usuario.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Ejecuta la cláusula de una carta en el garaje de un rival mediante una Cloud Function (Callable).
+ * Transfiere la carta del rival al equipo propio pagando el precio de cláusula correspondiente.
+ *
+ * @function ejecutarClausula
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idParticipanteRival - El identificador único de la participación del rival.
+ * @param {string} request.data.idParticipantePropio - El identificador único de la participación propia.
+ * @param {string} request.data.instanciaId - El identificador único de la instancia de la carta a fichar.
+ * @returns {Promise<Object>} Resultado de la operación con el nombre de la carta fichada y el precio de cláusula pagado.
  */
 exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   const emailAtacante = exigirEmailAutenticado(request)

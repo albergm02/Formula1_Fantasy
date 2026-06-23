@@ -1,3 +1,7 @@
+/**
+ * @module ServicioAdministracion
+ * @description Servicio para manejar la administración de ligas, usuarios y jornadas.
+ */
 import { httpsCallable } from 'firebase/functions'
 import { collection, getDocs, orderBy, query } from 'firebase/firestore'
 import { db, functions } from '@/services/servicioFirebase'

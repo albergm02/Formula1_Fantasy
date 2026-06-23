@@ -1,3 +1,8 @@
+/**
+ * @module functions/infraestructura/openF1
+ * @description Servicio para interactuar con la API de OpenF1, incluyendo la obtención de información sobre los Grandes Premios.
+ */
+
 const URL_BASE = 'https://api.openf1.org/v1'
 const { pilotosBase } = require('./catalogoBase')
 

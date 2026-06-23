@@ -1,3 +1,8 @@
+/**
+ * @module functions/callable/Mercado
+ * @description Funciones callable para manejar las operaciones relacionadas con el mercado, incluyendo la resolución de pujas y la gestión de cartas.
+ */
+
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { onSchedule } = require('firebase-functions/v2/scheduler')
 const { FieldValue } = require('firebase-admin/firestore')
@@ -388,7 +393,10 @@ async function propagarAMercadosAbiertos(tipo, deltas) {
 }
 
 /**
- * Genera el mercado para todas las ligas.
+ * Genera el mercado diario para todas las ligas mediante una Cloud Function programada (Scheduler).
+ * Se ejecuta automáticamente a las 12:00 UTC cada día.
+ *
+ * @function generarMercado
  * @returns {Promise<void>}
  */
 exports.generarMercado = onSchedule(
@@ -449,9 +457,16 @@ async function cargarMercadoAbiertoDeLiga(idLiga) {
 }
 
 /**
- * Registra una puja en el mercado abierto de una liga.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Registra una puja en el mercado abierto de una liga mediante una Cloud Function (Callable).
+ * Verifica que la carta exista, la puja supere el precio base y el presupuesto sea suficiente.
+ *
+ * @function registrarPuja
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga.
+ * @param {string} request.data.idCarta - El identificador único de la carta por la que se puja.
+ * @param {number} request.data.cantidad - Cantidad de la puja, debe ser positiva y mayor o igual al precio base.
+ * @returns {Promise<Object>} Resultado de la operación, indicando si fue exitosa y la cantidad registrada.
  */
 exports.registrarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -504,9 +519,15 @@ exports.registrarPuja = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Elimina una puja en el mercado abierto de una liga.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Elimina una puja del mercado abierto de una liga mediante una Cloud Function (Callable).
+ * Solo el usuario propietario de la puja puede retirarla.
+ *
+ * @function eliminarPuja
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga.
+ * @param {string} request.data.idCarta - El identificador único de la carta cuya puja se desea retirar.
+ * @returns {Promise<Object>} Resultado de la operación, indicando si la puja fue eliminada.
  */
 exports.eliminarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)

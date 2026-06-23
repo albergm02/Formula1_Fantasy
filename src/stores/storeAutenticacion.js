@@ -1,4 +1,8 @@
-﻿import { ref, computed } from 'vue'
+﻿/**
+ * @module StoreAutenticacion
+ * @description Estado global para la autenticación y el perfil del usuario.
+ */
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { cargarPerfilUsuario, migrarCorreo, crearPerfil as llamarCrearPerfil } from '@/services/servicioPerfil'
 import {
@@ -15,7 +19,6 @@ import { usarStorePerfil } from '@/stores/storePerfil'
 
 /**
  * Store para manejar la autenticación y el perfil del usuario.
- *
  * @returns {Object} - Contiene el estado de autenticación, el perfil del usuario y las funciones para iniciar sesión, registrarse y cerrar sesión.
  */
 export const usarStoreAutenticacion = defineStore('autenticacion', () => {
@@ -24,6 +27,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Carga el perfil del usuario en el store.
+   * @function cargarPerfil
+   * @memberof module:StoreAutenticacion
    * @param {string} uid - El UID del usuario.
    * @param {string} correoUsuario - El correo del usuario.
    * @param {Object} datosPerfil - Los datos del perfil del usuario.
@@ -43,6 +48,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Crea un perfil de usuario en la base de datos y actualiza el store de perfil.
+   * @function crearPerfil
+   * @memberof module:StoreAutenticacion
    * @param {string} nombreUsuario - Nombre del usuario a crear.
    * @returns {Promise<void>}
    */
@@ -61,6 +68,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Actualiza el correo del perfil si ha sido migrado desde otro correo.
+   * @function reconciliarCorreoMigrado
+   * @memberof module:StoreAutenticacion
    * @param {string} correoToken - El correo obtenido del token de autenticación.
    * @param {string} correoPerfil - El correo almacenado en el perfil del usuario.
    * @returns {Promise<void>}
@@ -74,6 +83,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Verifica la existencia del perfil del usuario en la base de datos.
+   * @function verificarExistenciaPerfil
+   * @memberof module:StoreAutenticacion
    * @param {string} uid - El UID del usuario.
    * @param {string} correoUsuario - El correo del usuario.
    * @returns {Promise<boolean>} - Devuelve true si el perfil existe, false en caso contrario.
@@ -109,6 +120,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Limpia la sesión del usuario, restableciendo los datos del perfil y el estado de carga.
+   * @function limpiarSesion
+   * @memberof module:StoreAutenticacion
    * @returns {void}
    */
   function limpiarSesion() {
@@ -120,6 +133,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Procesa el registro de un nuevo usuario, incluyendo la creación del perfil y el envío de la verificación de correo.
+   * @function procesarRegistro
+   * @memberof module:StoreAutenticacion
    * @param {string} correo - El correo del usuario.
    * @param {string} contrasena - La contraseña del usuario.
    * @param {string} nombreUsuario - El nombre del usuario.
@@ -134,6 +149,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Inicia sesión con correo y contraseña, verificando la existencia del perfil y el estado de verificación del correo.
+   * @function iniciarSesionConCorreo
+   * @memberof module:StoreAutenticacion
    * @param {string} correo - El correo del usuario.
    * @param {string} contrasena - La contraseña del usuario.
    * @returns {Promise<{esAdministrador: boolean}>} - Devuelve un objeto indicando si el usuario es administrador.
@@ -151,6 +168,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Inicia sesión con Google, verificando la existencia del perfil y el estado de verificación del correo.
+   * @function iniciarSesionConGoogle
+   * @memberof module:StoreAutenticacion
    * @returns {Promise<{perfilEncontrado: boolean, esAdministrador: boolean}>} - Devuelve un objeto indicando si se encontró el perfil y si el usuario es administrador.
    */
   async function iniciarSesionConGoogle() {
@@ -164,6 +183,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Cierra la sesión del usuario, limpiando los datos del perfil y restableciendo el estado de carga.
+   * @function cerrarSesion
+   * @memberof module:StoreAutenticacion
    * @returns {Promise<void>}
    */
   async function cerrarSesion() {
@@ -173,6 +194,8 @@ export const usarStoreAutenticacion = defineStore('autenticacion', () => {
 
   /**
    * Observa el estado de la sesión del usuario, ejecutando una función cuando cambia el usuario.
+   * @function observarEstadoSesion
+   * @memberof module:StoreAutenticacion
    * @param {Function} alCambiarUsuario - Función a ejecutar cuando cambia el usuario.
    * @returns {Function} - Devuelve una función para cancelar la observación.
    */

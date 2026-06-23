@@ -1,3 +1,8 @@
+/**
+ * @module StoreAdministracion
+ * @description Estado global para la administración.
+ */
+
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import {
@@ -18,6 +23,12 @@ export const usarStoreAdministracion = defineStore('administracion', () => {
   const usuarios = ref([])
   const jornadas = ref([])
 
+  /**
+   * Carga en paralelo las listas de ligas, usuarios y jornadas.
+   * @function cargarListas
+   * @memberof module:StoreAdministracion
+   * @returns {Promise<void>}
+   */
   async function cargarListas() {
     const [listaLigas, listaUsuarios, listaJornadas] = await Promise.all([cargarListaLigas(), cargarListaUsuarios(), cargarListaJornadas()])
     ligas.value = listaLigas
@@ -27,6 +38,8 @@ export const usarStoreAdministracion = defineStore('administracion', () => {
   /**
    * Elimina un usuario como administrador.
    *
+   * @function eliminarUsuario
+   * @memberof module:StoreAdministracion
    * @param {string} uid - ID del usuario a eliminar.
    */
   async function eliminarUsuario(uid) {
@@ -37,6 +50,8 @@ export const usarStoreAdministracion = defineStore('administracion', () => {
   /**
    * Elimina una liga como administrador.
    *
+   * @function eliminarLiga
+   * @memberof module:StoreAdministracion
    * @param {string} idLiga - ID de la liga a eliminar.
    */
   async function eliminarLiga(idLiga) {

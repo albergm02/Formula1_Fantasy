@@ -1,3 +1,8 @@
+/**
+ * @module functions/logica/jornada
+ * @description Funciones de lógica para manejar la jornada, incluyendo la construcción de puntos por piloto según su variante y actuación.
+ */
+
 const { calcularPuntosVariante } = require('./puntuacion')
 
 /**

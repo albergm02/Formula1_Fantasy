@@ -1,10 +1,24 @@
+/**
+ * @module StoreLigas
+ * @description Estado global para las ligas del usuario.
+ */
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
 import * as servicioLigas from '@/services/servicioLigas'
 
 const MAX_LIGAS = 5
-const alcanzoLimiteLigas = (idsLigas = []) => Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
+
+/**
+ * Comprueba si un usuario ha alcanzado el límite máximo de ligas permitidas.
+ * @function alcanzoLimiteLigas
+ * @memberof module:StoreLigas
+ * @param {Array<string>} [idsLigas=[]] - IDs de las ligas del usuario.
+ * @returns {boolean} - True si el usuario ya pertenece al máximo de ligas permitidas.
+ */
+function alcanzoLimiteLigas(idsLigas = []) {
+  return Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
+}
 
 /**
  * Store para manejar las ligas del usuario.
@@ -17,6 +31,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Carga las ligas del usuario.
+   * @function cargarLigasUsuario
+   * @memberof module:StoreLigas
    * @returns {Promise<void>}
    */
   async function cargarLigasUsuario() {
@@ -50,6 +66,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Crea una nueva liga.
+   * @function crearLiga
+   * @memberof module:StoreLigas
    * @param {string} nombreLiga - Nombre de la liga a crear.
    * @returns {Promise<Object>} - Resultado de la operación.
    */
@@ -72,6 +90,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Permite a un usuario unirse a una liga existente.
+   * @function unirseALiga
+   * @memberof module:StoreLigas
    * @param {string} codigoInvitacion - Código de invitación de la liga.
    * @returns {Promise<Object>} - Resultado de la operación.
    */
@@ -94,6 +114,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Permite a un usuario abandonar una liga.
+   * @function abandonarLiga
+   * @memberof module:StoreLigas
    * @param {string} idLiga - ID de la liga a abandonar.
    * @returns {Promise<Object>} - Resultado de la operación.
    */
@@ -115,6 +137,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Expulsa a un participante de una liga.
+   * @function expulsarParticipante
+   * @memberof module:StoreLigas
    * @param {string} idLiga - ID de la liga.
    * @param {string} emailParticipante - Email del participante a expulsar.
    * @returns {Promise<Object>} - Resultado de la operación.
@@ -130,6 +154,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Carga los participantes de una liga.
+   * @function cargarParticipantesLiga
+   * @memberof module:StoreLigas
    * @param {string} idLiga - ID de la liga.
    * @returns {Promise<Array>} - Lista de participantes.
    */
@@ -143,6 +169,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Elimina una liga.
+   * @function eliminarLiga
+   * @memberof module:StoreLigas
    * @param {string} idLiga - ID de la liga a eliminar.
    * @returns {Promise<Object>} - Resultado de la operación.
    */
@@ -163,6 +191,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Carga la clasificación de una liga.
+   * @function cargarClasificacion
+   * @memberof module:StoreLigas
    * @param {string} idLiga - ID de la liga.
    * @returns {Promise<Array>} - Lista de clasificaciones.
    */
@@ -176,6 +206,8 @@ export const usarStoreLigas = defineStore('ligas', () => {
 
   /**
    * Carga el garaje de un rival.
+   * @function cargarGarajeRival
+   * @memberof module:StoreLigas
    * @param {string} idParticipacion - ID de la participación del rival.
    * @returns {Promise<Object>} - Garaje del rival.
    */

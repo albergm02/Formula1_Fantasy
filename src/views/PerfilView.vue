@@ -211,23 +211,37 @@ function mensajeFirebase(error) {
         </template>
         <template #content>
           <div class="flex flex-col gap-2">
-            <Button v-if="puedeUsarContrasena" @click="abrirDialogoContrasena" label="Cambiar contraseña"
-              class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
-            <Button v-if="puedeUsarContrasena" @click="abrirDialogoCorreo" label="Cambiar correo"
+            <Button
+              v-if="puedeUsarContrasena"
+              @click="abrirDialogoContrasena"
+              label="Cambiar contraseña"
+              class="!bg-zinc-900 !border-zinc-700 !text-white justify-center"
+            />
+            <Button
+              v-if="puedeUsarContrasena"
+              @click="abrirDialogoCorreo"
+              label="Cambiar correo"
               :disabled="diasRestantesParaCambiarCorreo > 0"
-              class="!bg-zinc-900 !border-zinc-700 !text-white justify-center" />
-            <Button @click="abrirDialogoBaja" label="Eliminar mi cuenta"
-              class="!bg-red-700 !border-red-700 !text-white justify-center mt-5" />
+              class="!bg-zinc-900 !border-zinc-700 !text-white justify-center"
+            />
+            <Button
+              @click="abrirDialogoBaja"
+              label="Eliminar mi cuenta"
+              class="!bg-red-700 !border-red-700 !text-white justify-center mt-5"
+            />
           </div>
         </template>
       </Card>
     </main>
 
-    <Dialog v-model:visible="dialogoContrasenaAbierto" modal header="CAMBIAR CONTRASEÑA"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog
+      v-model:visible="dialogoContrasenaAbierto"
+      modal
+      header="CAMBIAR CONTRASEÑA"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
+    >
       <div class="flex flex-col gap-3">
-        <Message severity="info" :closable="false"> Te enviaremos un enlace a tu correo para que definas una nueva
-          contraseña. </Message>
+        <Message severity="info" :closable="false"> Te enviaremos un enlace a tu correo para que definas una nueva contraseña. </Message>
         <div>
           <p class="text-[10px] text-zinc-500 uppercase">Correo de la cuenta</p>
           <p class="font-bold text-white break-all">
@@ -235,21 +249,26 @@ function mensajeFirebase(error) {
           </p>
         </div>
         <div class="flex justify-end gap-2 mt-2">
-          <Button label="Cancelar" text @click="dialogoContrasenaAbierto = false"
-            class="!bg-zinc-900 !border-zinc-700 !text-white" />
-          <Button label="Enviar enlace" :loading="enviandoEnlaceContrasena" @click="confirmarCambioContrasena"
-            class="!bg-[#D4A843] !border-[#D4A843]" />
+          <Button label="Cancelar" text @click="dialogoContrasenaAbierto = false" class="!bg-zinc-900 !border-zinc-700 !text-white" />
+          <Button
+            label="Enviar enlace"
+            :loading="enviandoEnlaceContrasena"
+            @click="confirmarCambioContrasena"
+            class="!bg-[#D4A843] !border-[#D4A843]"
+          />
         </div>
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoCorreoAbierto" modal header="CAMBIAR CORREO"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog
+      v-model:visible="dialogoCorreoAbierto"
+      modal
+      header="CAMBIAR CORREO"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
+    >
       <div class="flex flex-col gap-3">
         <Message severity="info" :closable="false">
-          Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras, después
-          tendrás
-          que iniciar
+          Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras, después tendrás que iniciar
           sesión de nuevo, y no podrás volver a cambiarlo durante 7 días.
         </Message>
         <label class="text-xs text-zinc-400 uppercase">Nuevo correo</label>
@@ -260,28 +279,27 @@ function mensajeFirebase(error) {
         <Password v-model="contrasenaParaCorreo" :feedback="false" toggleMask inputClass="w-full" />
         <p class="text-xs text-zinc-500">Podrás volver a cambiarlo dentro de 7 días.</p>
         <div class="flex justify-end gap-2 mt-2">
-          <Button label="Cancelar" text @click="dialogoCorreoAbierto = false"
-            class="!bg-zinc-900 !border-zinc-700 !text-white" />
-          <Button label="Enviar enlace" :loading="enviandoCorreo" @click="confirmarCambioCorreo"
-            class="!bg-[#D4A843] !border-[#D4A843]" />
+          <Button label="Cancelar" text @click="dialogoCorreoAbierto = false" class="!bg-zinc-900 !border-zinc-700 !text-white" />
+          <Button label="Enviar enlace" :loading="enviandoCorreo" @click="confirmarCambioCorreo" class="!bg-[#D4A843] !border-[#D4A843]" />
         </div>
       </div>
     </Dialog>
 
-    <Dialog v-model:visible="dialogoBajaAbierto" modal header="ELIMINAR CUENTA"
-      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }">
+    <Dialog
+      v-model:visible="dialogoBajaAbierto"
+      modal
+      header="ELIMINAR CUENTA"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
+    >
       <div class="flex flex-col gap-3">
         <Message severity="error" :closable="false">
           Esta acción es permanente. Se borrarán tus participaciones y las ligas que administres en solitario.
         </Message>
         <label v-if="puedeUsarContrasena" class="text-xs text-zinc-400 uppercase"> Confirma con tu contraseña. </label>
-        <Password v-if="puedeUsarContrasena" v-model="contrasenaParaBaja" :feedback="false" toggleMask
-          inputClass="w-full" />
+        <Password v-if="puedeUsarContrasena" v-model="contrasenaParaBaja" :feedback="false" toggleMask inputClass="w-full" />
         <div class="flex justify-end gap-2 mt-2">
-          <Button label="Cancelar" text @click="dialogoBajaAbierto = false"
-            class="!bg-zinc-900 !border-zinc-700 !text-white" />
-          <Button label="Eliminar" :loading="eliminandoCuenta" @click="ejecutarBaja"
-            class="!bg-red-700 !border-red-700" />
+          <Button label="Cancelar" text @click="dialogoBajaAbierto = false" class="!bg-zinc-900 !border-zinc-700 !text-white" />
+          <Button label="Eliminar" :loading="eliminandoCuenta" @click="ejecutarBaja" class="!bg-red-700 !border-red-700" />
         </div>
       </div>
     </Dialog>

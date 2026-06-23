@@ -1,3 +1,8 @@
+/**
+ * @module functions/callable/Ligas
+ * @description Funciones callable para manejar las operaciones relacionadas con las ligas, incluyendo creación, unión, abandono, eliminación y gestión de participantes.
+ */
+
 const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { FieldValue } = require('firebase-admin/firestore')
 
@@ -53,9 +58,14 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
 exports.borrarLigaEnCascada = borrarLigaEnCascada
 
 /**
- * Inicializa el mercado para una liga.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la inicialización.
+ * Inicializa el mercado para una liga mediante una Cloud Function (Callable).
+ * Solo el organizador de la liga puede invocarla.
+ *
+ * @function inicializarMercado
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga a inicializar.
+ * @returns {Promise<Object>} Resultado de la operación con el identificador del mercado generado.
  */
 exports.inicializarMercado = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -73,9 +83,13 @@ exports.inicializarMercado = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Elimina las pujas de un usuario en una liga.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la eliminación.
+ * Elimina las pujas de un usuario en una liga mediante una Cloud Function (Callable).
+ *
+ * @function eliminarPujas
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga.
+ * @returns {Promise<Object>} Resultado de la operación con el número de pujas eliminadas.
  */
 exports.eliminarPujas = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -90,9 +104,14 @@ exports.eliminarPujas = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Elimina una liga y todo lo asociado.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la eliminación.
+ * Elimina una liga y todo lo asociado mediante una Cloud Function (Callable).
+ * Solo el organizador de la liga puede invocarla.
+ *
+ * @function eliminarLiga
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga a eliminar.
+ * @returns {Promise<Object>} Resultado de la operación con el resumen de borrado en cascada.
  */
 exports.eliminarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -110,10 +129,16 @@ exports.eliminarLiga = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Expulsa a un participante de una liga.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la expulsión.
- */ 
+ * Expulsa a un participante de una liga mediante una Cloud Function (Callable).
+ * Solo el organizador de la liga puede invocarla.
+ *
+ * @function expulsarParticipante
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga.
+ * @param {string} request.data.emailExpulsado - Correo electrónico del participante a expulsar.
+ * @returns {Promise<Object>} Resultado de la operación con el nombre y correo del participante expulsado.
+ */
 exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   const emailOrganizador = exigirEmailAutenticado(request)
   const { idLiga, emailExpulsado } = request.data || {}
@@ -174,9 +199,14 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Crea una nueva liga.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la creación.
+ * Crea una nueva liga mediante una Cloud Function (Callable).
+ * El usuario que la crea se convierte en organizador.
+ *
+ * @function crearLiga
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.nombreLiga - Nombre visible de la liga a crear.
+ * @returns {Promise<Object>} Resultado de la operación con el identificador de la liga y el código de invitación.
  */
 exports.crearLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -251,9 +281,13 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 
 
 /**
- * Permite a un usuario unirse a una liga existente.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Permite a un usuario unirse a una liga existente mediante una Cloud Function (Callable).
+ *
+ * @function unirseALiga
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.codigoInvitacion - Código de invitación de la liga a la que se desea unir.
+ * @returns {Promise<Object>} Resultado de la operación con el identificador y nombre de la liga.
  */
 exports.unirseALiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
@@ -320,9 +354,14 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
 })
 
 /**
- * Permite a un usuario abandonar una liga existente.
- * @param {Object} request - Solicitud de la función callable.
- * @returns {Promise<Object>} - Resultado de la operación.
+ * Permite a un usuario abandonar una liga existente mediante una Cloud Function (Callable).
+ * Si el usuario era el organizador, reasigna el rol al participante más antiguo.
+ *
+ * @function abandonarLiga
+ * @param {Object} request - Objeto de solicitud proporcionado por Firebase.
+ * @param {Object} request.data - Carga útil (payload) enviada desde el cliente Frontend.
+ * @param {string} request.data.idLiga - El identificador único de la liga a abandonar.
+ * @returns {Promise<Object>} Resultado de la operación, indicando si la liga fue eliminada al quedar vacía.
  */
 exports.abandonarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
