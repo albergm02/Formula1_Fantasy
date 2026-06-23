@@ -7,10 +7,14 @@ const { agregarBorradoPujasUsuario, ejecutarGeneracionMercadoParaLiga } = requir
 
 const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 
-// Borra la liga y todo lo asociado (participaciones, mercados con pujas,
-// actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
-// una colección a medio borrar, el usuario vería "fantasmas" en la UI.
-
+/**
+ * Borra la liga y todo lo asociado (participaciones, mercados con pujas,
+ * actividad, vínculos en `usuarios.ligasIds`) en un único commit. Si quedara
+ * una colección a medio borrar, el usuario vería "fantasmas" en la UI.
+ * @param {string} idLiga - ID de la liga a borrar.
+ * @param {FirebaseFirestore.DocumentSnapshot} ligaSnap - Snapshot del documento de la liga.
+ * @returns {Promise<Object>} - Resumen de la operación.
+ */
 async function borrarLigaEnCascada(idLiga, ligaSnap) {
   const batch = db.batch()
 
@@ -48,7 +52,11 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
 
 exports.borrarLigaEnCascada = borrarLigaEnCascada
 
-
+/**
+ * Inicializa el mercado para una liga.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la inicialización.
+ */
 exports.inicializarMercado = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
@@ -64,7 +72,11 @@ exports.inicializarMercado = onCall(OPCIONES, async (request) => {
   return { ok: true, ...resultado }
 })
 
-
+/**
+ * Elimina las pujas de un usuario en una liga.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la eliminación.
+ */
 exports.eliminarPujas = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
@@ -77,7 +89,11 @@ exports.eliminarPujas = onCall(OPCIONES, async (request) => {
   return { ok: true, pujasEliminadas }
 })
 
-
+/**
+ * Elimina una liga y todo lo asociado.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la eliminación.
+ */
 exports.eliminarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga } = request.data || {}
@@ -93,10 +109,11 @@ exports.eliminarLiga = onCall(OPCIONES, async (request) => {
   return { ok: true, idLiga, ...resumen }
 })
 
-// Uso FieldValue.increment(-1) para el contador `participantes`: dos
-// expulsiones simultáneas se sumarían correctamente, cosa que un
-// `participantes - 1` calculado en cliente no garantiza.
-
+/**
+ * Expulsa a un participante de una liga.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la expulsión.
+ */ 
 exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   const emailOrganizador = exigirEmailAutenticado(request)
   const { idLiga, emailExpulsado } = request.data || {}
@@ -119,8 +136,6 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   const participacionExpulsado = participacionSnap.docs[0]
   const datosParticipacion = participacionExpulsado.data()
 
-  // Las participaciones antiguas no guardan uid_usuario: lo busco por correo
-  // para poder limpiar también su array ligasIds.
   let uidExpulsado = datosParticipacion.uid_usuario || null
   if (!uidExpulsado) {
     const usuarioSnap = await db.collection('usuarios').where('correoAutenticacion', '==', correoExpulsado).limit(1).get()
@@ -158,7 +173,11 @@ exports.expulsarParticipante = onCall(OPCIONES, async (request) => {
   }
 })
 
-
+/**
+ * Crea una nueva liga.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la creación.
+ */
 exports.crearLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -231,6 +250,11 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 })
 
 
+/**
+ * Permite a un usuario unirse a una liga existente.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.unirseALiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -295,7 +319,11 @@ exports.unirseALiga = onCall(OPCIONES, async (request) => {
   return { ok: true, idLiga, nombreLiga: datosLiga.nombre }
 })
 
-
+/**
+ * Permite a un usuario abandonar una liga existente.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.abandonarLiga = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const uid = request.auth.uid

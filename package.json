@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.4",
+    "docdash": "^2.0.2",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.1",
     "vite": "^7.3.1",

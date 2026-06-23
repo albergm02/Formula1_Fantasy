@@ -13,7 +13,12 @@ const PORCENTAJE_REVENTA = 0.9
 const MAX_COCHES_ALINEADOS = 1
 const MAX_PILOTOS_ALINEADOS = 2
 
-
+/**
+ * Carga la participación propia de un usuario.
+ * @param {string} idParticipante - ID de la participación.
+ * @param {string} emailInvocador - Email del usuario que invoca la función.
+ * @returns {Promise<Object>} - Referencia e información de la participación.
+ */
 async function cargarParticipacionPropia(idParticipante, emailInvocador) {
   if (!idParticipante) throw new HttpsError('invalid-argument', 'Falta idParticipante.')
   const referencia = db.collection('participaciones').doc(idParticipante)
@@ -27,6 +32,12 @@ async function cargarParticipacionPropia(idParticipante, emailInvocador) {
 }
 
 
+/**
+ * Localiza una carta en el garaje de un usuario.
+ * @param {Object} garaje - Garaje del usuario.
+ * @param {string} instanciaId - ID de la instancia de la carta.
+ * @returns {Object|null} - Información de la carta localizada o null si no se encuentra.
+ */
 function localizarCartaEnGaraje(garaje, instanciaId) {
   for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
     const lista = garaje[coleccion] || []
@@ -36,7 +47,11 @@ function localizarCartaEnGaraje(garaje, instanciaId) {
   return null
 }
 
-
+/**
+ * Vende una carta del garaje de un usuario.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la venta.
+ */
 exports.venderCarta = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idParticipante, instanciaId } = request.data || {}
@@ -73,10 +88,13 @@ exports.venderCarta = onCall(OPCIONES, async (request) => {
   return { ok: true, nombre: carta.nombre, valorReventa }
 })
 
-// Reglas: 1 chasis máx, 2 pilotos titulares, potenciador exige ≥1 piloto.
-// Al equipar un chasis con otro ya equipado, desalineo el anterior para que
-// el cambio sea atómico desde el punto de vista del usuario.
-
+/**
+ * Aplica un cambio de alineación a una carta en el garaje de un usuario.
+ * @param {Object} garaje - Garaje del usuario.
+ * @param {string} coleccion - Colección a la que pertenece la carta.
+ * @param {number} indiceObjetivo - Índice de la carta en la colección.
+ * @returns {Object} - Garaje actualizado.
+ */
 function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
   const lista = [...(garaje[coleccion] || [])]
   const cartaObjetivo = { ...lista[indiceObjetivo] }
@@ -108,7 +126,11 @@ function aplicarCambioAlineacion(garaje, coleccion, indiceObjetivo) {
   return { ...garaje, [coleccion]: lista }
 }
 
-
+/**
+ * Alterna la alineación de una carta en el garaje de un usuario.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
@@ -127,9 +149,11 @@ exports.alternarAlineacion = onCall(OPCIONES, async (request) => {
   return { ok: true, equipado: cartaResultante.equipado, nombre: cartaResultante.nombre }
 })
 
-// Cada €1 invertido sube la cláusula en €2 (precio efectivo = precioCompra
-// + 2 × clausulaInvertida). Bloqueado durante la jornada activa.
-
+/**
+ * Gestiona la cláusula de una carta en el garaje de un usuario.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */ 
 exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
@@ -169,20 +193,23 @@ exports.gestionarClausula = onCall(OPCIONES, async (request) => {
   return { ok: true, clausulaInvertida: lista[indice].clausulaInvertida }
 })
 
-// Precio = precioCompra + clausulaInvertida × 2. Uso precioCompra (la
-// inversión histórica del dueño) en lugar del precio actual de mercado, para
-// que la cláusula refleje el coste real de lo que el dueño puso por la carta.
-
+/**
+ * Calcula el precio de la cláusula de una carta.
+ * @param {Object} carta - Carta para la que se calcula el precio.
+ * @returns {number} - Precio de la cláusula.
+ */
 function calcularPrecioClausula(carta) {
   const precioBase = carta.precioCompra ?? carta.precio
   const inversionDueño = carta.clausulaInvertida || 0
   return precioBase + inversionDueño * 2
 }
 
-// `instancia_id` (timestamp + random) es el único identificador único de
-// una carta concreta: dos jugadores pueden tener "Hamilton qualy" en su
-// garaje, pero cada copia es una instancia distinta con su propio historial.
-
+/**
+ * Extrae una carta del garaje por su instancia.
+ * @param {Object} garaje - Garaje del usuario.
+ * @param {string} instanciaId - ID de la instancia de la carta.
+ * @returns {Object} - Carta extraída o null si no se encuentra.
+ */
 function extraerCartaPorInstancia(garaje, instanciaId) {
   for (const coleccion of ['coches', 'pilotos', 'potenciadores']) {
     const lista = garaje[coleccion] || []
@@ -196,10 +223,12 @@ function extraerCartaPorInstancia(garaje, instanciaId) {
   return { carta: null }
 }
 
-// Sin este cálculo, un jugador podría comprometer 30 M en pujas y a la vez
-// ejecutar un clausulazo de 30 M, dejando el presupuesto en negativo si
-// después se resolviera alguna puja a su favor.
-
+/**
+ * Calcula el monto comprometido en pujas de un usuario en una liga.
+ * @param {string} idLiga - ID de la liga.
+ * @param {string} email - Email del usuario.
+ * @returns {Promise<number>} - Monto comprometido en pujas.
+ */
 async function calcularComprometidoEnPujas(idLiga, email) {
   const mercadoDoc = await cargarMercadoAbiertoDeLiga(idLiga)
   if (!mercadoDoc) return 0
@@ -207,7 +236,11 @@ async function calcularComprometidoEnPujas(idLiga, email) {
   return pujasSnap.docs.reduce((suma, documento) => suma + (documento.data().cantidad || 0), 0)
 }
 
-
+/**
+ * Ejecuta la cláusula de una carta en el garaje de un usuario.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   const emailAtacante = exigirEmailAutenticado(request)
   await exigirJornadaProcesada()
@@ -243,7 +276,7 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
   if (tipoCarta === 'potenciador') {
     throw new HttpsError('failed-precondition', 'Los potenciadores no admiten cláusula.')
   }
-  // Evita el "robo en caliente" justo después de una compra.
+  
   if (carta.fechaAdquisicion) {
     const msTranscurridos = Date.now() - new Date(carta.fechaAdquisicion).getTime()
     if (msTranscurridos < HORAS_PERIODO_GRACIA * 60 * 60 * 1000) {
@@ -257,9 +290,6 @@ exports.ejecutarClausula = onCall(OPCIONES, async (request) => {
     throw new HttpsError('failed-precondition', 'No tienes presupuesto suficiente.')
   }
 
-  // La carta cambia de manos con equipado:false, clausulaInvertida:0 y nueva
-  // fechaAdquisicion: el nuevo dueño decide si la equipa y arranca su propio
-  // periodo de gracia.
   const garajePropio = datosPropio.garaje || {}
   const cartaNueva = { ...carta, precioCompra: precioClausula, clausulaInvertida: 0, fechaAdquisicion: new Date().toISOString(), equipado: false }
   const tipoDestino = cartaNueva.tipo || cartaNueva.tipoCarta

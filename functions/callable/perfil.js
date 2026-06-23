@@ -10,10 +10,11 @@ const OPCIONES = { region: 'europe-west1', enforceAppCheck: true }
 const DIAS_BLOQUEO_CAMBIO_CORREO = 7
 const MS_BLOQUEO_CAMBIO_CORREO = DIAS_BLOQUEO_CAMBIO_CORREO * 24 * 60 * 60 * 1000
 
-// El cliente invoca esta callable ANTES de verifyBeforeUpdateEmail: dejamos
-// el bloqueo de 7 días registrado para que la restricción no dependa del
-// cliente, que podría haberse manipulado.
-
+/**
+ * Autoriza el cambio de correo de un usuario.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -33,10 +34,11 @@ exports.autorizarCambioCorreo = onCall(OPCIONES, async (request) => {
   return { ok: true }
 })
 
-// El usuario se indexa por UID (no por email), así que no hay que copiar/borrar
-// nada: solo actualizo correoAutenticacion y propago el cambio a
-// participaciones y a las ligas que el usuario organice.
-
+/**
+ * Migra el correo de un usuario en Auth y propaga el cambio a participaciones y ligas.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   const emailToken = exigirEmailAutenticado(request)
   const uid = request.auth.uid
@@ -69,7 +71,12 @@ exports.migrarCorreo = onCall(OPCIONES, async (request) => {
   return { ok: true, correoNuevo, participacionesMigradas: participacionesSnap.size, ligasMigradas: ligasAdminSnap.size }
 })
 
-
+/**
+ * Elimina la cuenta de un usuario en cascada, borrando participaciones y ligas asociadas.
+ * @param {string} uid - UID del usuario.
+ * @param {string} email - Email del usuario.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 async function eliminarCuentaUsuarioEnCascada(uid, email) {
   const participacionesSnap = await db.collection('participaciones').where('email_usuario', '==', email).get()
   let ligasBorradas = 0
@@ -131,7 +138,11 @@ async function eliminarCuentaUsuarioEnCascada(uid, email) {
 
 exports.eliminarCuentaUsuarioEnCascada = eliminarCuentaUsuarioEnCascada
 
-
+/**
+ * Elimina la cuenta del usuario que realiza la solicitud.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid
@@ -140,7 +151,11 @@ exports.eliminarMiCuenta = onCall(OPCIONES, async (request) => {
   return { ok: true, email, ...resultado }
 })
 
-
+/**
+ * Crea un perfil de usuario.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.crearPerfil = onCall(OPCIONES, async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.')
   const uid = request.auth.uid

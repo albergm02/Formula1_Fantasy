@@ -3,6 +3,11 @@ import { defineStore } from 'pinia'
 import { suscribirMercadoActivo, registrarPuja, eliminarPuja, cargarMisPujas, cargarResumenPujas } from '@/services/servicioMercado'
 import { usarStorePerfil } from '@/stores/storePerfil'
 
+/**
+ * Store para manejar el mercado de cartas, incluyendo la actividad del mercado, las pujas del usuario y el resumen de pujas.
+ *
+ * @returns {Object} - Contiene el estado del mercado, las pujas del usuario, el resumen de pujas y funciones para inicializar y gestionar el mercado.
+ */
 export const usarStoreMercado = defineStore('mercado', () => {
   const mercadoActivo = ref(null)
   const cargandoMercado = ref(false)
@@ -12,11 +17,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   let intervaloId = null
   let cancelarListenerMercado = null
-  // Incremento este token cada vez que cambio de mercado o lo detengo.
-  // Cualquier callback de Firestore en vuelo compara contra el valor con
-  // el que arrancó y se descarta si ya no coincide: evita que un snapshot
-  // tardío de la liga anterior pise el estado de la nueva.
-  let tokenSuscripcion = 0
+  let idLigaActual = null
 
   const hayMercadoAbierto = computed(() => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto')
 
@@ -30,6 +31,10 @@ export const usarStoreMercado = defineStore('mercado', () => {
     mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'potenciador') : [],
   )
 
+  /**
+   * Texto que muestra la cuenta atrás del mercado.
+   * @returns {string} - Texto de la cuenta atrás.
+   */
   const textoCuentaAtras = computed(() => {
     const ms = milisegundosRestantes.value
     if (ms <= 0) return 'Mercado cerrado'
@@ -43,7 +48,11 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   const totalPujasComprometidas = computed(() => Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0))
 
-    function iniciarCuentaAtras() {
+  /**
+   * Inicia la cuenta atrás del mercado.
+   * @returns {void}
+   */
+  function iniciarCuentaAtras() {
     detenerCuentaAtras()
     if (!mercadoActivo.value || !mercadoActivo.value.fechaCierre) return
 
@@ -56,25 +65,29 @@ export const usarStoreMercado = defineStore('mercado', () => {
     intervaloId = setInterval(actualizarRestante, 1000)
   }
 
-    function detenerCuentaAtras() {
+  function detenerCuentaAtras() {
     if (intervaloId) {
       clearInterval(intervaloId)
       intervaloId = null
     }
   }
 
-    async function inicializarMercado(idLiga) {
+  /**
+   * Inicializa el mercado para una liga específica.
+   * @param {string} idLiga - ID de la liga.
+   */
+  async function inicializarMercado(idLiga) {
     cargandoMercado.value = true
 
     if (cancelarListenerMercado) cancelarListenerMercado()
-    const tokenLocal = ++tokenSuscripcion
+    idLigaActual = idLiga
     mercadoActivo.value = null
     misPujas.value = {}
     resumenPujas.value = {}
     milisegundosRestantes.value = 0
 
     cancelarListenerMercado = suscribirMercadoActivo(idLiga, async (mercado) => {
-      if (tokenLocal !== tokenSuscripcion) return
+      if (idLiga !== idLigaActual) return
       detenerCuentaAtras()
       mercadoActivo.value = mercado
       misPujas.value = {}
@@ -89,7 +102,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
             email ? cargarMisPujas(mercado, email) : Promise.resolve({}),
             cargarResumenPujas(mercado),
           ])
-          if (tokenLocal !== tokenSuscripcion) return
+          if (idLiga !== idLigaActual) return
           misPujas.value = pujasUsuario
           resumenPujas.value = resumen
         } catch (error) {
@@ -103,20 +116,30 @@ export const usarStoreMercado = defineStore('mercado', () => {
     })
   }
 
-    function detenerMercado() {
+  /**
+   * Detiene el mercado actual y limpia el estado.
+   * @returns {void}
+   */
+  function detenerMercado() {
     detenerCuentaAtras()
     if (cancelarListenerMercado) {
       cancelarListenerMercado()
       cancelarListenerMercado = null
     }
-    tokenSuscripcion++
+    idLigaActual = null
     mercadoActivo.value = null
     misPujas.value = {}
     resumenPujas.value = {}
     milisegundosRestantes.value = 0
   }
 
-    async function pujarPorCarta(carta, cantidad) {
+  /**
+   * Realiza una puja por una carta en el mercado.
+   * @param {Object} carta - Carta por la que se realiza la puja.
+   * @param {number|string} cantidad - Cantidad de la puja.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function pujarPorCarta(carta, cantidad) {
     const cantidadNum = Number(cantidad)
     const esPujaExistente = misPujas.value[carta.id] !== undefined
 
@@ -136,7 +159,12 @@ export const usarStoreMercado = defineStore('mercado', () => {
     return { success: true, message: `Puja de ${cantidadNum.toFixed(2)}M registrada sobre ${carta.nombre}.` }
   }
 
-    async function eliminarPujaCarta(carta) {
+  /**
+   * Elimina una puja realizada por el usuario sobre una carta en el mercado.
+   * @param {Object} carta - Carta de la que se desea eliminar la puja.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function eliminarPujaCarta(carta) {
     try {
       await eliminarPuja(mercadoActivo.value.idLiga, carta.id)
     } catch (error) {

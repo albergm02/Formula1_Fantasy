@@ -13,41 +13,56 @@ const HISTORIAL_MAX_MUESTRAS = 5
 const FACTOR_DESINTERES = 0.95
 const PRECIO_MINIMO = 5
 
-
+/**
+ * Construye una carta ganada por un participante.
+ * @param {Object} cartaCompleta - Datos completos de la carta.
+ * @param {string} idCarta - ID de la carta.
+ * @param {Object} pujaGanadora - Datos de la puja ganadora.
+ * @param {number} cantidad - Cantidad ganada.
+ * @param {string} tipoCarta - Tipo de carta.
+ * @returns {Object} - Carta ganada.
+ */
 function construirCartaGanada(cartaCompleta, idCarta, pujaGanadora, cantidad, tipoCarta) {
   const base = cartaCompleta || { id: idCarta, nombre: pujaGanadora.nombreCarta, tipoCarta, precio: pujaGanadora.precioCarta }
   return { ...base, precioCompra: cantidad, instancia_id: crypto.randomUUID(), clausulaInvertida: 0, fechaAdquisicion: new Date().toISOString() }
 }
 
-// Formato "YYYY-MM-DD": ordena lexicográficamente igual que cronológicamente,
-// lo que permite browsing natural en la consola de Firebase.
+/**
+ * Calcula la fecha del mercado en formato "YYYY-MM-DD".
+ * @param {Date} fecha - Fecha a formatear.
+ * @returns {string} - Fecha formateada.
+ */
 function calcularFechaMercado(fecha) {
   return fecha.toISOString().split('T')[0]
 }
 
-// Ruta canónica: mercados/{idLiga}/dias/{YYYY-MM-DD}
+/**
+ * Obtiene la referencia al documento del día del mercado para una liga específica.
+ * @param {string} idLiga - ID de la liga.
+ * @param {Date} fecha - Fecha del mercado.
+ * @returns {FirebaseFirestore.DocumentReference} - Referencia al documento del día del mercado.
+ */
 function referenciaDiaMercado(idLiga, fecha) {
   return db.collection('mercados').doc(idLiga).collection('dias').doc(calcularFechaMercado(fecha))
 }
 
-// Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana.
-// Las perdedoras se descartan sin reembolso: el dinero comprometido nunca se
-// dedujo del presupuesto real, solo se "reservaba" a nivel UI.
-
+/**
+ * Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana.
+ * Las perdedoras se descartan sin reembolso: el dinero comprometido nunca se
+ * dedujo del presupuesto real, solo se "reservaba" a nivel UI.
+ * @param {FirebaseFirestore.DocumentReference} mercadoRef - Referencia al documento del mercado.
+ * @returns {Promise<void>}
+ */
 async function resolverPujasMercado(mercadoRef) {
   const pujasSnapshot = await mercadoRef.collection('pujas').get()
   if (pujasSnapshot.empty) return
 
-  // Necesito los datos completos de cada carta (imagen, número, variante…)
-  // para guardarlos en el garaje del ganador. La puja solo conserva el ID.
   const mercadoSnap = await mercadoRef.get()
   const cartasMercado = mercadoSnap.exists ? mercadoSnap.data().cartas || [] : []
   const mapaCartas = Object.fromEntries(cartasMercado.map((carta) => [carta.id, carta]))
 
   const pujasPorCarta = seleccionarPujasGanadoras(pujasSnapshot.docs.map((doc) => doc.data()))
 
-  // Agrupo por participante para no sobreescribir el mismo documento varias
-  // veces dentro del mismo batch (cada update reemplazaría al anterior).
   const cartasPorParticipante = {}
   for (const [idCarta, pujaGanadora] of Object.entries(pujasPorCarta)) {
     const { idParticipante } = pujaGanadora
@@ -78,8 +93,6 @@ async function resolverPujasMercado(mercadoRef) {
     for (const { idCarta, pujaGanadora } of cartasGanadas) {
       const { cantidad, tipoCarta } = pujaGanadora
 
-      // Si el presupuesto ya no llega tras lo ganado en esta misma resolución,
-      // descarto la siguiente. No reembolso: la puja nunca tocó el presupuesto.
       if (cantidad > presupuestoRestante) continue
 
       const cartaCompleta = mapaCartas[idCarta]
@@ -114,9 +127,11 @@ async function resolverPujasMercado(mercadoRef) {
   await actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta)
 }
 
-// Evita ofrecer una carta que nadie podría comprar porque ya tiene dueño en
-// la liga. El mismo piloto puede aparecer en otras variantes.
-
+/**
+ * Recopila las cartas fichadas en una liga específica.
+ * @param {string} idLiga - ID de la liga.
+ * @returns {Promise<Object>} - Conjuntos de claves de pilotos bloqueadas y IDs de cartas.
+ */
 async function recopilarCartasFichadasEnLiga(idLiga) {
   const participacionesSnap = await db
     .collection('participaciones')
@@ -141,10 +156,13 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
   return { clavesPilotoBloqueadas, idsCartas }
 }
 
-
+/**
+ * Genera el mercado para una liga específica.
+ * @param {string} idLiga - ID de la liga.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 async function ejecutarGeneracionMercadoParaLiga(idLiga) {
-  // Exportado para que callable/ligas.js pueda reutilizarlo al inicializar
-  // una liga recién creada sin duplicar la lógica de generación.
+
   const ahora = new Date()
   const fechaHoy = calcularFechaMercado(ahora)
   const refHoy = referenciaDiaMercado(idLiga, ahora)
@@ -188,19 +206,33 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   return { mensaje: `Mercado generado para liga ${idLiga}.`, idMercado: fechaHoy, totalCartas: cartasDelDia.length, fechaCierre: fechaCierre.toISOString() }
 }
 
-
+/**
+ * Genera la clave única de una carta según su tipo.
+ * @param {Object} carta - Carta del mercado.
+ * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
+ * @returns {string} - Clave única de la carta.
+ */
 function claveCartaPorTipo(carta, tipo) {
   return tipo === 'piloto' ? `${carta.numero}|${carta.variante}` : carta.id
 }
 
-
+/**
+ * Obtiene la colección del garaje según el tipo de carta.
+ * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
+ * @returns {string} - Nombre de la colección en el garaje.
+ */
 function coleccionGaraje(tipo) {
   if (tipo === 'piloto') return 'pilotos'
   if (tipo === 'coche') return 'coches'
   return 'potenciadores'
 }
 
-
+/**
+ * Actualiza los precios de las cartas tras la resolución de un mercado.
+ * @param {Array<Object>} cartasMercado - Cartas del mercado.
+ * @param {Object} pujasPorCarta - Pujas ganadoras por carta.
+ * @returns {Promise<void>}
+ */
 async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
   const refPrecios = db.collection('catalogo').doc('precios')
   const refHistorial = db.collection('catalogo').doc('historial')
@@ -230,8 +262,6 @@ async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
       const clave = claveCartaPorTipo(carta, tipo)
       if (!clave) continue
 
-      // Si hubo puja ganadora, la muestra es la cantidad pagada; si quedó desierta,
-      // se aplica FACTOR_DESINTERES como penalización suave al precio anterior.
       const pujaGanadora = pujasPorCarta[carta.id]
       const muestra = pujaGanadora
         ? Number(pujaGanadora.cantidad)
@@ -274,7 +304,14 @@ async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
   if (tareas.length > 0) await Promise.all(tareas)
 }
 
-
+/**
+ * Propaga los cambios de precios a los garajes de los participantes.
+ * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
+ * @param {string} coleccion - Nombre de la colección en el garaje.
+ * @param {Object} cambiosPorClave - Cambios de precios por clave de carta.
+ * @param {boolean} esAbsoluto - Indica si los cambios son absolutos o relativos.
+ * @returns {Promise<void>}
+ */
 async function propagarAGarajes(tipo, coleccion, cambiosPorClave, esAbsoluto) {
   const snap = await db.collection('participaciones').get()
   const batch = db.batch()
@@ -310,6 +347,12 @@ async function propagarAGarajes(tipo, coleccion, cambiosPorClave, esAbsoluto) {
 }
 
 
+/**
+ * Propaga los cambios de precios a los mercados abiertos.
+ * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
+ * @param {Object} deltas - Cambios de precios por clave de carta.
+ * @returns {Promise<void>}
+ */
 async function propagarAMercadosAbiertos(tipo, deltas) {
   const snap = await db.collectionGroup('dias').where('estado', '==', 'abierto').get()
   if (snap.empty) return
@@ -344,9 +387,10 @@ async function propagarAMercadosAbiertos(tipo, deltas) {
   if (cambios > 0) await batch.commit()
 }
 
-// Si una liga falla, registro y sigo: prefiero N-1 ligas con mercado nuevo a
-// fallar todas por una. El throw final hace que Scheduler reintente; las
-// ligas ya procesadas son idempotentes y no se duplican.
+/**
+ * Genera el mercado para todas las ligas.
+ * @returns {Promise<void>}
+ */
 exports.generarMercado = onSchedule(
   {
     schedule: 'every day 12:00',
@@ -373,16 +417,18 @@ exports.generarMercado = onSchedule(
   },
 )
 
-// Saneado idéntico al histórico del cliente para que las pujas existentes
-// sigan localizables.
 
 function sanitizarEmailParaIdPuja(email) {
   return email.replace(/[.@]/g, '_')
 }
 
-// Se ignora la puja sobre idCartaExcluida para que actualizar una puja
-// existente no cuente dos veces su importe anterior.
-
+/**
+ * Suma la cantidad comprometida en el mercado por un usuario, excluyendo una carta específica.
+ * @param {Object} mercadoRef - Referencia al documento del mercado.
+ * @param {string} email - Email del usuario.
+ * @param {string} idCartaExcluida - ID de la carta a excluir.
+ * @returns {Promise<number>} - Cantidad comprometida.
+ */
 async function sumarComprometidoEnMercado(mercadoRef, email, idCartaExcluida) {
   const pujasSnap = await mercadoRef.collection('pujas').where('emailUsuario', '==', email).get()
   return pujasSnap.docs.reduce((suma, documento) => {
@@ -392,12 +438,21 @@ async function sumarComprometidoEnMercado(mercadoRef, email, idCartaExcluida) {
   }, 0)
 }
 
-
+/**
+ * Carga el mercado abierto de una liga.
+ * @param {string} idLiga - ID de la liga.
+ * @returns {Promise<Object|null>} - Documento del mercado abierto o null si no existe.
+ */
 async function cargarMercadoAbiertoDeLiga(idLiga) {
   const snap = await db.collection('mercados').doc(idLiga).collection('dias').where('estado', '==', 'abierto').limit(1).get()
   return snap.empty ? null : snap.docs[0]
 }
 
+/**
+ * Registra una puja en el mercado abierto de una liga.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.registrarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta, cantidad } = request.data || {}
@@ -448,6 +503,11 @@ exports.registrarPuja = onCall(OPCIONES, async (request) => {
   return { ok: true, cantidad: cantidadNumerica }
 })
 
+/**
+ * Elimina una puja en el mercado abierto de una liga.
+ * @param {Object} request - Solicitud de la función callable.
+ * @returns {Promise<Object>} - Resultado de la operación.
+ */
 exports.eliminarPuja = onCall(OPCIONES, async (request) => {
   const email = exigirEmailAutenticado(request)
   const { idLiga, idCarta } = request.data || {}
@@ -471,9 +531,15 @@ exports.eliminarPuja = onCall(OPCIONES, async (request) => {
   return { ok: true, eliminado: true }
 })
 
-// Añade al lote el borrado de todas las pujas de un usuario en cualquier
-// mercado de la liga. Evita pujas huérfanas que el planificador intentaría
-// adjudicar a una participación ya inexistente tras abandonar o ser expulsado.
+/**
+ * Añade al lote el borrado de todas las pujas de un usuario en cualquier
+ * mercado de la liga. Evita pujas huérfanas que el planificador intentaría
+ * adjudicar a una participación ya inexistente tras abandonar o ser expulsado.
+ * @param {Object} batch - Lote de operaciones de Firestore.
+ * @param {string} idLiga - ID de la liga.
+ * @param {string} email - Email del usuario.
+ * @returns {Promise<number>} - Número de pujas eliminadas.
+ */
 async function agregarBorradoPujasUsuario(batch, idLiga, email) {
   const correo = String(email).trim().toLowerCase()
   const diasSnapshot = await db.collection('mercados').doc(idLiga).collection('dias').get()
@@ -488,7 +554,6 @@ async function agregarBorradoPujasUsuario(batch, idLiga, email) {
   return pujasEliminadas
 }
 
-// Exportados para reutilización en callable/ligas.js y callable/garaje.js.
 module.exports.cargarMercadoAbiertoDeLiga = cargarMercadoAbiertoDeLiga
 module.exports.agregarBorradoPujasUsuario = agregarBorradoPujasUsuario
 module.exports.ejecutarGeneracionMercadoParaLiga = ejecutarGeneracionMercadoParaLiga

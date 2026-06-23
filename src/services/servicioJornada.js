@@ -1,8 +1,13 @@
-import { collection, doc, getDoc, onSnapshot, orderBy, query, limit } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { db } from '@/services/servicioFirebase'
 
-export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) {
-  const consulta = query(collection(db, 'jornadas'), orderBy('fechaProcesamiento', 'desc'), limit(limiteJornadas))
+/**
+ * Suscribe a los cambios en el historial de jornadas.
+ * @param {Function} alActualizar - Función a ejecutar al actualizar el historial.
+ * @returns {Function} - Función para cancelar la suscripción.
+ */
+export function suscribirseHistorialJornadas(alActualizar) {
+  const consulta = query(collection(db, 'jornadas'), orderBy('fechaProcesamiento', 'desc'))
 
   return onSnapshot(consulta, (resultados) => {
     const jornadas = resultados.docs.map((documento) => ({ id: documento.id, ...documento.data() }))
@@ -10,6 +15,10 @@ export function suscribirseHistorialJornadas(alActualizar, limiteJornadas = 24) 
   })
 }
 
+/**
+ * Carga el catálogo y los perfiles de pilotos.
+ * @returns {Promise<Array>} - Array de pilotos.
+ */
 export async function cargarCatalogoYPerfiles() {
   const documento = await getDoc(doc(db, 'catalogo', 'items'))
   if (!documento.exists()) throw new Error('Catálogo no encontrado en Firestore (catalogo/items).')
@@ -31,6 +40,12 @@ export async function cargarCatalogoYPerfiles() {
   return Array.from(pilotosPorNumero.values())
 }
 
+/**
+ * Obtiene la cuenta regresiva para el inicio de una carrera.
+ * @param {string|Date} fechaInicio - Fecha de inicio de la carrera.
+ * @param {Date} [ahora=new Date()] - Fecha actual.
+ * @returns {string} - Cadena con la cuenta regresiva.
+ */
 export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   const inicioCarrera = new Date(fechaInicio)
   const tiempoRestante = inicioCarrera - ahora
@@ -45,16 +60,13 @@ export const obtenerCuentaRegresiva = (fechaInicio, ahora = new Date()) => {
   return `${dias}d ${horas}h ${minutos}m ${segundos}s`
 }
 
-// ============================================================================
-// Cálculo de puntos por variante (réplica frontend del sistema server-side).
-// Mantengo el código duplicado en cliente y servidor a propósito: el cliente
-// usa estas funciones para SIMULAR qué pasaría con cada variante en la vista
-// de Jornadas, mientras que el servidor las usa al PROCESAR la jornada y
-// guardar el resultado oficial en Firestore. Ambos deben coincidir.
-// ============================================================================
-
-const PUNTOS_FIA_POR_POSICION = { 1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6, 8: 4, 9: 2, 10: 1 }
-
+/**
+ * Calcula los puntos de una variante.
+ * @param {string} variante - Variante a calcular.
+ * @param {Object} actuacion - Actuación del piloto.
+ * @param {Object} condiciones - Condiciones de la carrera.
+ * @returns {number} - Puntos calculados.
+ */
 export function calcularPuntosVariante(variante, actuacion, condiciones) {
   if (variante === 'qualy') return puntosPorPosicion(actuacion?.posicionQualy)
   if (sinActuacionValida(actuacion) && variante !== 'base') return 0
@@ -66,6 +78,15 @@ export function calcularPuntosVariante(variante, actuacion, condiciones) {
   return 0
 }
 
+/**
+ * Calcula el factor de caos de una carrera.
+ * @param {Object} opciones - Opciones para calcular el factor de caos.
+ * @param {boolean} opciones.llovio - Indica si llovió durante la carrera.
+ * @param {number} opciones.numeroSafetyCarActivos - Número de Safety Car activos.
+ * @param {number} opciones.numeroVirtualSafetyCarActivos - Número de Virtual Safety Car activos.
+ * @param {number} opciones.numeroDNFs - Número de pilotos que no terminaron la carrera.
+ * @returns {number} - Factor de caos calculado.
+ */
 export function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroVirtualSafetyCarActivos = 0, numeroDNFs = 0 } = {}) {
   let factor = 0.5
   if (llovio) factor += 0.4
@@ -74,21 +95,44 @@ export function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroV
   return Math.round(factor * 100) / 100
 }
 
+/**
+ * Verifica si una actuación no es válida.
+ * @param {Object} actuacion - Actuación del piloto.
+ * @returns {boolean} - True si la actuación no es válida, false en caso contrario.
+ */
 function sinActuacionValida(actuacion) {
   return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq || actuacion?.noClasificado)
 }
 
+const PUNTOS_FIA_POR_POSICION = { 1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6, 8: 4, 9: 2, 10: 1 }
+/**
+ * Calcula los puntos por posición.
+ * @param {number} posicion - Posición del piloto.
+ * @returns {number} - Puntos calculados.
+ */
 function puntosPorPosicion(posicion) {
   return PUNTOS_FIA_POR_POSICION[posicion] || 0
 }
 
+/**
+ * Calcula los puntos para la variante "todo terreno".
+ * @param {Object} actuacion - Actuación del piloto.
+ * @param {Object} condiciones - Condiciones de la carrera.
+ * @returns {number} - Puntos calculados.
+ */
 function puntosTodoTerreno(actuacion, condiciones) {
   const factor = calcularFactorCaos(condiciones || {})
   return redondear(puntosPorPosicion(actuacion.posicionCarrera) * factor)
 }
 
 const PUNTOS_REMONTADOR_POR_DIFERENCIAL = [0, 3, 7, 12, 18, 25]
-
+/**
+ * Calcula los puntos para la variante "remontador".
+ * @param {Object} actuacion - Actuación del piloto.
+ * @param {number} actuacion.numeroAdelantos - Número de adelantamientos realizados.
+ * @param {number} actuacion.numeroVecesAdelantado - Número de veces que el piloto fue adelantado.
+ * @returns {number} - Puntos calculados.
+ */
 function puntosRemontador({ numeroAdelantos = 0, numeroVecesAdelantado = 0 }) {
   const adelantamientosNetos = numeroAdelantos - numeroVecesAdelantado
   if (adelantamientosNetos <= 0) return 0
@@ -96,21 +140,44 @@ function puntosRemontador({ numeroAdelantos = 0, numeroVecesAdelantado = 0 }) {
   return PUNTOS_REMONTADOR_POR_DIFERENCIAL[indice]
 }
 
+/**
+ * Calcula los puntos para la variante "estratega".
+ * @param {Object} actuacion - Actuación del piloto.
+ * @param {number} actuacion.posicionCarrera - Posición final en la carrera.
+ * @param {number} actuacion.numeroPitStops - Número de paradas en boxes.
+ * @param {number} actuacion.porcentajeStintMaximo - Porcentaje del stint más largo.
+ * @returns {number} - Puntos calculados.
+ */
 function puntosEstratega({ posicionCarrera = 20, numeroPitStops = 0, porcentajeStintMaximo = 0 }) {
   if (numeroPitStops === 0) return 0
   return bonusParadas(numeroPitStops) + bonusStint(porcentajeStintMaximo) + bonusPosicionEstratega(posicionCarrera)
 }
 
+/**
+ * Calcula el bonus por número de paradas en boxes.
+ * @param {number} numeroPitStops - Número de paradas en boxes.
+ * @returns {number} - Bonus calculado.
+ */
 function bonusParadas(numeroPitStops) {
   if (numeroPitStops === 1) return 10
   if (numeroPitStops === 2) return 5
   return 0
 }
 
+/**
+ * Calcula el bonus por porcentaje del stint más largo.
+ * @param {number} porcentajeStintMaximo - Porcentaje del stint más largo.
+ * @returns {number} - Bonus calculado.
+ */
 function bonusStint(porcentajeStintMaximo) {
   return Math.round((porcentajeStintMaximo || 0) * 10)
 }
 
+/**
+ * Calcula el bonus por posición en la variante "estratega".
+ * @param {number} posicion - Posición final en la carrera.
+ * @returns {number} - Bonus calculado.
+ */
 function bonusPosicionEstratega(posicion) {
   if (posicion <= 3) return 10
   if (posicion <= 6) return 7
@@ -118,6 +185,13 @@ function bonusPosicionEstratega(posicion) {
   return 0
 }
 
+/**
+ * Calcula los puntos base de un piloto.
+ * @param {Object} actuacion - Actuación del piloto.
+ * @param {number} actuacion.posicionQualy - Posición en la clasificación.
+ * @param {number} actuacion.posicionCarrera - Posición final en la carrera.
+ * @returns {number} - Puntos calculados.
+ */
 function puntosBase(actuacion) {
   const puntosQualy = puntosPorPosicion(actuacion.posicionQualy)
   const puntosCarrera = sinActuacionValida(actuacion) ? 0 : puntosPorPosicion(actuacion.posicionCarrera)

@@ -192,11 +192,7 @@ const confirmarEliminarPuja = () => {
             <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Multiplicador</p>
             <span class="text-2xl font-black text-emerald-400">×{{ carta.multiplicador }}</span>
           </div>
-          <div v-if="esPotenciador" class="flex flex-col gap-1">
-            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Condición</span>
-            <span class="text-xs text-zinc-300">{{ etiquetaCondicion ? etiquetaCondicion.texto : 'Se aplica en carrera'
-              }}</span>
-          </div>
+
         </template>
       </div>
     </Dialog>

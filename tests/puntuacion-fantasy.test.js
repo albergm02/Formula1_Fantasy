@@ -6,15 +6,6 @@ const { calcularPuntosVariante, calcularPuntuacionGaraje } = cargarModulo('../fu
 const { construirPuntosPorPiloto } = cargarModulo('../functions/logica/jornada.js')
 const fixtureBahrein = cargarModulo('./fixtures/gp-bahrein-2026.json')
 
-/**
- * Sistema de puntuación 2026.
- *
- *   1. La tabla FIA aplicada a Qualy y Carrera (techo idéntico).
- *   2. Las variantes contextuales (Todo Terreno, Remontador, Estratega).
- *   3. Las reglas de borde por abandono (DNF / DSQ / DNS / NC).
- *   4. El ciclo completo desde fixture: puntos × multiplicador condicional.
- */
-
 // =====================================================================
 // 1. Tabla FIA: Qualy y Carrera comparten escala (techo P1 = 25)
 // =====================================================================
@@ -89,14 +80,14 @@ describe('3. Pilotos sin actuación válida en carrera', () => {
 })
 
 // =====================================================================
-// 4. Ciclo completo: fixture → puntos del garaje con potenciador condicional
+// 4. Ciclo completo: fixture → puntos del garaje con potenciador
 // =====================================================================
 describe('4. Ciclo completo desde fixture de OpenF1', () => {
   it('Verstappen Carrera + Red Bull + Mapeo Agresivo (×1.5) suma 57.5 puntos', () => {
     const garaje = {
       pilotos: [{ id: '3_carrera', numero: 3, nombre: 'Max Verstappen', variante: 'carrera', equipado: true }],
       coches: [{ id: 'red_bull', nombre: 'Red Bull Racing', puntuacionBase: 20, equipado: true }],
-      potenciadores: [{ id: 'mapeo_agresivo', nombre: 'Mapeo Agresivo', multiplicador: 1.5, condicion: null, equipado: true }],
+      potenciadores: [{ id: 'mapeo_agresivo', nombre: 'Mapeo Agresivo', multiplicador: 1.5, equipado: true }],
     }
 
     const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
@@ -110,11 +101,11 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
     expect(resultado.puntosTotal).toBe(57.5)
   })
 
-  it('Meteorología (×2 si llueve) NO se aplica en una carrera seca', () => {
+  it('Meteorología (×2) siempre se aplica independientemente del clima', () => {
     const garaje = {
       pilotos: [{ id: '3_carrera', numero: 3, nombre: 'Max Verstappen', variante: 'carrera', equipado: true }],
       coches: [],
-      potenciadores: [{ id: 'meteorologia', nombre: 'Meteorología', multiplicador: 2.0, condicion: 'lluvia', equipado: true }],
+      potenciadores: [{ id: 'meteorologia', nombre: 'Meteorología', multiplicador: 2.0, equipado: true }],
     }
 
     const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
@@ -124,17 +115,16 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       actuacionesPorPiloto: fixtureBahrein.actuacionesPorPiloto,
     })
 
-    // Carrera seca: el multiplicador no se activa, 25 × 1 = 25
-    expect(resultado.puntosTotal).toBe(25)
-    expect(resultado.desglose.potenciadoresAplicados).toEqual([])
+    // 25 × 2 = 50
+    expect(resultado.puntosTotal).toBe(50)
+    expect(resultado.desglose.potenciadoresAplicados).toHaveLength(1)
   })
 
-  it('Modo Defensa (stint_largo) SÍ se aplica si un piloto del garaje tuvo un stint ≥ 50%', () => {
-    // Verstappen en Bahrein tuvo porcentajeStintMaximo = 0.55 → cumple stint_largo
+  it('Modo Defensa (×1.5) siempre se aplica independientemente del stint', () => {
     const garaje = {
       pilotos: [{ id: '3_carrera', numero: 3, nombre: 'Max Verstappen', variante: 'carrera', equipado: true }],
       coches: [],
-      potenciadores: [{ id: 'modo_defensa', nombre: 'Modo Defensa', multiplicador: 1.5, condicion: 'stint_largo', equipado: true }],
+      potenciadores: [{ id: 'modo_defensa', nombre: 'Modo Defensa', multiplicador: 1.5, equipado: true }],
     }
 
     const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
@@ -149,12 +139,11 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
     expect(resultado.desglose.potenciadoresAplicados).toHaveLength(1)
   })
 
-  it('Modo Override (mis_remontadas) NO se aplica si ningún piloto remonta ≥3 posiciones netas', () => {
-    // Verstappen tiene diferencial neto = 0 - 3 = -3 → no cumple mis_remontadas
+  it('Modo Override (×1.6) siempre se aplica independientemente de las remontadas', () => {
     const garaje = {
       pilotos: [{ id: '3_carrera', numero: 3, nombre: 'Max Verstappen', variante: 'carrera', equipado: true }],
       coches: [],
-      potenciadores: [{ id: 'modo_override', nombre: 'Modo Override', multiplicador: 1.6, condicion: 'mis_remontadas', equipado: true }],
+      potenciadores: [{ id: 'modo_override', nombre: 'Modo Override', multiplicador: 1.6, equipado: true }],
     }
 
     const { puntos } = construirPuntosPorPiloto(garaje.pilotos, fixtureBahrein.actuacionesPorPiloto, fixtureBahrein.condiciones)
@@ -164,7 +153,8 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       actuacionesPorPiloto: fixtureBahrein.actuacionesPorPiloto,
     })
 
-    expect(resultado.puntosTotal).toBe(25)
-    expect(resultado.desglose.potenciadoresAplicados).toEqual([])
+    // 25 × 1.6 = 40
+    expect(resultado.puntosTotal).toBe(40)
+    expect(resultado.desglose.potenciadoresAplicados).toHaveLength(1)
   })
 })

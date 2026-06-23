@@ -1,9 +1,12 @@
 const { calcularPuntosVariante } = require('./puntuacion')
 
-// Calcula los puntos de jornada de cada piloto equipado (según su variante)
-// y guarda la actuación que los justifica para que el frontend pueda explicar
-// al jugador el porqué de la puntuación obtenida. La función es pura: no toca
-// Firebase ni red, lo que permite ejercitarla desde tests con fixtures JSON.
+/**
+ * Construye los puntos de cada piloto según su variante y actuación.
+ * @param {Array} pilotos - Lista de pilotos.
+ * @param {Object} actuacionesPorPiloto - Actuaciones de cada piloto.
+ * @param {Object} condiciones - Condiciones de la jornada.
+ * @returns {Object} - Puntos y detalles de cada piloto.
+ */
 function construirPuntosPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
   const puntos = {}
   const detalles = {}

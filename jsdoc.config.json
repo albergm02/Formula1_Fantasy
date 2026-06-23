@@ -1,0 +1,23 @@
+{
+  "source": {
+    "include": [
+      "src/stores",
+      "src/services",
+      "functions/callable",
+      "functions/infraestructura",
+      "functions/logica"
+    ],
+    "includePattern": ".+\\.js$"
+  },
+  "opts": {
+    "recurse": true,
+    "destination": "docs/jsdoc",
+    "template": "node_modules/docdash"
+  },
+  "docdash": {
+    "title": "F1 Fantasy – Documentación",
+    "collapse": true,
+    "search": true,
+    "typedefs": true
+  }
+}

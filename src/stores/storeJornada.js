@@ -3,13 +3,22 @@ import { defineStore } from 'pinia'
 import { suscribirseHistorialJornadas, cargarCatalogoYPerfiles } from '@/services/servicioJornada'
 import { obtenerUltimoGranPremioFinalizado, obtenerSiguienteGranPremio } from '@/services/servicioOpenF1'
 
+/**
+ * Store para manejar la información de las jornadas, incluyendo el historial de jornadas, el catálogo de pilotos y los próximos eventos.
+ *
+ * @returns {Object} - Contiene el historial de jornadas, el catálogo de pilotos, el último Gran Premio pendiente y el siguiente Gran Premio, junto con funciones para cargar y escuchar estos datos.
+ */
 export const usarStoreJornada = defineStore('jornada', () => {
   const historial = ref([])
   const catalogoPilotos = ref([])
   const ultimoGranPremioPendiente = ref(null)
   const siguienteGranPremio = ref(null)
 
-    async function cargarCatalogo() {
+  /**
+   * Carga el catálogo de pilotos.
+   * @returns {Promise<void>}
+   */
+  async function cargarCatalogo() {
     try {
       catalogoPilotos.value = await cargarCatalogoYPerfiles()
     } catch {
@@ -17,9 +26,11 @@ export const usarStoreJornada = defineStore('jornada', () => {
     }
   }
 
-  // Si Firestore aún no tiene jornadas, consulto OpenF1 directamente para
-  // evitar una pantalla vacía mostrando el último Gran Premio finalizado.
-    async function cargarGranPremioPendiente() {
+  /**
+   * Carga el último Gran Premio pendiente.
+   * @returns {Promise<void>}
+   */
+  async function cargarGranPremioPendiente() {
     if (ultimoGranPremioPendiente.value) return
     try {
       ultimoGranPremioPendiente.value = await obtenerUltimoGranPremioFinalizado()
@@ -28,7 +39,12 @@ export const usarStoreJornada = defineStore('jornada', () => {
     }
   }
 
-    function escucharHistorial(alActualizar) {
+  /**
+   * Escucha los cambios en el historial de jornadas y actualiza el estado del store.
+   * @param {Function} alActualizar - Función callback que se ejecuta cuando el historial se actualiza.
+   * @returns {Function} - Devuelve una función para cancelar la suscripción al historial.
+   */
+  function escucharHistorial(alActualizar) {
     return suscribirseHistorialJornadas(async (jornadas) => {
       historial.value = jornadas
       if (jornadas.length === 0) await cargarGranPremioPendiente()
@@ -36,7 +52,11 @@ export const usarStoreJornada = defineStore('jornada', () => {
     })
   }
 
-    async function cargarSiguienteGranPremio() {
+  /**
+   * Carga el siguiente Gran Premio.
+   * @returns {Promise<void>}
+   */
+  async function cargarSiguienteGranPremio() {
     siguienteGranPremio.value = await obtenerSiguienteGranPremio()
   }
 

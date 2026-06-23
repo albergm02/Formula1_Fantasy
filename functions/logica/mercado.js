@@ -2,6 +2,11 @@
 
 let catalogoEnMemoria = null
 
+/**
+ * Carga el catálogo completo desde la base de datos o lo construye si no existe.
+ * @param {Object} db - Instancia de Firestore.
+ * @returns {Promise<Object>} - Catálogo completo.
+ */
 async function cargarCatalogo(db) {
   if (catalogoEnMemoria) return catalogoEnMemoria
 
@@ -19,17 +24,23 @@ async function cargarCatalogo(db) {
   return catalogoEnMemoria
 }
 
-// Mapas { clave: precio } por tipo de carta, calculados a partir del histórico
-// de pujas ganadoras. La clave de un piloto es `<numero>|<variante>`; para
-// coches y potenciadores se usa el `id` único del catálogo.
+/**
+ * Carga los precios dinámicos desde la base de datos.
+ * @param {Object} db - Instancia de Firestore.
+ * @returns {Promise<Object>} - Precios dinámicos por tipo de carta.
+ */
 async function cargarPreciosDinamicos(db) {
   const docPrecios = await db.collection('catalogo').doc('precios').get()
   const datos = docPrecios.exists ? docPrecios.data() : {}
   return { pilotos: datos.pilotos || {}, coches: datos.coches || {}, potenciadores: datos.potenciadores || {} }
 }
 
-// Devuelve una copia del catálogo con precios dinámicos aplicados a cada
-// categoría. Si una carta no tiene precio dinámico, conserva su precio base.
+/**
+ * Aplica los precios dinámicos a un catálogo de cartas.
+ * @param {Object} catalogo - Catálogo de cartas.
+ * @param {Object} preciosDinamicos - Precios dinámicos por tipo de carta.
+ * @returns {Object} - Catálogo con precios dinámicos aplicados.
+ */
 function aplicarPreciosDinamicosACatalogo(catalogo, preciosDinamicos = {}) {
   const preciosPilotos = preciosDinamicos.pilotos || {}
   const preciosCoches = preciosDinamicos.coches || {}
@@ -48,8 +59,12 @@ function sustituirPrecioSiExiste(carta, precioDinamico) {
   return { ...carta, precio: Math.max(0.5, Number(precioDinamico)) }
 }
 
-// Clave única de una carta de piloto: <numero>|<variante>. Sirve como
-// identificador para precios dinámicos y para detectar duplicados.
+
+/**
+ * Construye la clave única de un piloto para precios dinámicos y detección de duplicados.
+ * @param {Object} piloto - Piloto del catálogo.
+ * @returns {string} - Clave única del piloto.
+ */
 function construirClavePiloto(piloto) {
   return `${piloto.numero}|${piloto.variante}`
 }
@@ -64,10 +79,15 @@ function mezclarArray(array) {
   return array
 }
 
-// Selecciona las cartas que aparecerán hoy en el mercado.
-// Pilotos: se excluye un (numero, variante) solo si está fichado con esa misma
-// variante; la misma persona puede aparecer en distintas variantes a la vez.
-// Coches y potenciadores: se filtran por id exacto.
+/**
+ * Selecciona las cartas que aparecerán hoy en el mercado.
+ * Pilotos: se excluye un (numero, variante) solo si está fichado con esa misma
+ * variante; la misma persona puede aparecer en distintas variantes a la vez.
+ * Coches y potenciadores: se filtran por id exacto.
+ * @param {Object} catalogo - Catálogo de cartas.
+ * @param {Object} exclusiones - Exclusiones para la selección de cartas.
+ * @returns {Array} - Cartas seleccionadas para el día.
+ */
 function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
   const clavesBloqueadas = exclusiones.clavesPilotoBloqueadas instanceof Set ? exclusiones.clavesPilotoBloqueadas : new Set(exclusiones.clavesPilotoBloqueadas || [])
   const idsBloqueados = exclusiones.idsCartas instanceof Set ? exclusiones.idsCartas : new Set(exclusiones.idsCartas || [])

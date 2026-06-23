@@ -8,7 +8,10 @@ const { construirPuntosPorPiloto } = require('../logica/jornada')
 const REGION = 'europe-west1'
 const TEMPORADA_ACTUAL = 2026
 
-
+/**
+ * Procesa la jornada actual.
+ * @returns {Promise<Object>} - Resultado del procesamiento.
+ */
 async function ejecutarProcesarJornada() {
   const candidatos = await obtenerGranPremiosFinalizados(TEMPORADA_ACTUAL)
   if (candidatos.length === 0) return { ok: false, motivo: 'sin_gp_finalizado' }
@@ -69,15 +72,9 @@ async function ejecutarProcesarJornada() {
     const puntosJornada = resultadoGaraje.puntosTotal
 
     const puntosAcumulados = (participacion.puntos || 0) + puntosJornada
-    // Conversión 10:1 (108 puntos → 10.8 M) para mantener los premios en un
-    // rango manejable comparado con los precios del catálogo.
     const premioJornada = Math.round(((puntosJornada || 0) / 10) * 10) / 10
     const presupuestoActualizado = Math.round(((participacion.presupuesto || 0) + premioJornada) * 100) / 100
-
-    // Los potenciadores equipados se consumen al procesar la jornada: solo
-    // sobreviven los que no estaban en uso durante este Gran Premio.
     const potenciadoresRestantes = (garaje.potenciadores || []).filter((p) => !p.equipado)
-
     const desgloseParticipante = { idJornada, nombreGranPremio: granPremio.meeting_name, puntosJornada, premioJornada, condiciones, desglose: resultadoGaraje.desglose }
 
     batch.update(documento.ref, {
@@ -90,8 +87,6 @@ async function ejecutarProcesarJornada() {
     participacionesProcesadas++
   }
 
-  // El marcado de la jornada va en el mismo batch para garantizar atomicidad
-  // total: o se aplica todo o no se aplica nada.
   batch.set(db.collection('jornadas').doc(idJornada), {
     meetingKey: granPremio.meeting_key,
     nombreGranPremio: granPremio.meeting_name,
@@ -107,11 +102,10 @@ async function ejecutarProcesarJornada() {
   return { ok: true, idJornada, nombreGranPremio: granPremio.meeting_name, participacionesProcesadas }
 }
 
-// Se procesa el lunes (un día después de la carrera del domingo) para dar
-// tiempo a que OpenF1 consolide los resultados oficiales: posiciones
-// definitivas, abandonos (DNF) y sanciones ya aplicadas. Procesar el mismo
-// domingo capturaba datos provisionales (pilotos aún sin posición asignada o
-// con abandonos temporales que luego se reverían).
+/**
+ * Programa el procesamiento automático de la jornada.
+ * @returns {Promise<void>}
+ */
 exports.procesarJornada = onSchedule(
   {
     schedule: 'every monday 19:00',

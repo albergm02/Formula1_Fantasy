@@ -1,7 +1,3 @@
-// Reglas explicadas al usuario en la guía de puntuación.
-// El cálculo real se ejecuta en src/services/servicioJornada.js (cliente) y en
-// functions/logica/puntuacion.js (servidor); este archivo solo describe la
-// regla de cada variante en lenguaje natural para mostrarla en pantalla.
 export const perfilesPuntuacion = {
   qualy: {
     reglasUsuario: [

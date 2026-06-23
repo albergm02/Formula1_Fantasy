@@ -6,11 +6,20 @@ import * as servicioLigas from '@/services/servicioLigas'
 const MAX_LIGAS = 5
 const alcanzoLimiteLigas = (idsLigas = []) => Array.isArray(idsLigas) && idsLigas.length >= MAX_LIGAS
 
+/**
+ * Store para manejar las ligas del usuario.
+ *
+ * @returns {Object} - Contiene los detalles de las ligas, la liga activa y funciones para gestionar las ligas.
+ */
 export const usarStoreLigas = defineStore('ligas', () => {
   const detallesLigas = ref([])
   const idLigaActiva = ref(null)
 
-    async function cargarLigasUsuario() {
+  /**
+   * Carga las ligas del usuario.
+   * @returns {Promise<void>}
+   */
+  async function cargarLigasUsuario() {
     const storePerfil = usarStorePerfil()
     const idsAlmacenados = storePerfil.usuarioActual.idsLigas
 
@@ -39,7 +48,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function crearLiga(nombreLiga) {
+  /**
+   * Crea una nueva liga.
+   * @param {string} nombreLiga - Nombre de la liga a crear.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function crearLiga(nombreLiga) {
     const storePerfil = usarStorePerfil()
 
     if (alcanzoLimiteLigas(storePerfil.usuarioActual.idsLigas)) {
@@ -56,7 +70,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function unirseALiga(codigoInvitacion) {
+  /**
+   * Permite a un usuario unirse a una liga existente.
+   * @param {string} codigoInvitacion - Código de invitación de la liga.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function unirseALiga(codigoInvitacion) {
     const storePerfil = usarStorePerfil()
 
     if (alcanzoLimiteLigas(storePerfil.usuarioActual.idsLigas)) {
@@ -73,7 +92,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function abandonarLiga(idLiga) {
+  /**
+   * Permite a un usuario abandonar una liga.
+   * @param {string} idLiga - ID de la liga a abandonar.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function abandonarLiga(idLiga) {
     try {
       await servicioLigas.abandonarLiga(idLiga)
 
@@ -89,7 +113,13 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function expulsarParticipante(idLiga, emailParticipante) {
+  /**
+   * Expulsa a un participante de una liga.
+   * @param {string} idLiga - ID de la liga.
+   * @param {string} emailParticipante - Email del participante a expulsar.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function expulsarParticipante(idLiga, emailParticipante) {
     try {
       const resultado = await servicioLigas.expulsarParticipante(idLiga, emailParticipante)
       return { success: true, message: `${resultado.nombreExpulsado} ha sido expulsado.` }
@@ -98,7 +128,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function cargarParticipantesLiga(idLiga) {
+  /**
+   * Carga los participantes de una liga.
+   * @param {string} idLiga - ID de la liga.
+   * @returns {Promise<Array>} - Lista de participantes.
+   */
+  async function cargarParticipantesLiga(idLiga) {
     try {
       return await servicioLigas.cargarParticipantes(idLiga)
     } catch (error) {
@@ -106,7 +141,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function eliminarLiga(idLiga) {
+  /**
+   * Elimina una liga.
+   * @param {string} idLiga - ID de la liga a eliminar.
+   * @returns {Promise<Object>} - Resultado de la operación.
+   */
+  async function eliminarLiga(idLiga) {
     const storePerfil = usarStorePerfil()
 
     try {
@@ -121,7 +161,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function cargarClasificacion(idLiga) {
+  /**
+   * Carga la clasificación de una liga.
+   * @param {string} idLiga - ID de la liga.
+   * @returns {Promise<Array>} - Lista de clasificaciones.
+   */
+  async function cargarClasificacion(idLiga) {
     try {
       return await servicioLigas.cargarClasificacion(idLiga)
     } catch (error) {
@@ -129,7 +174,12 @@ export const usarStoreLigas = defineStore('ligas', () => {
     }
   }
 
-    async function cargarGarajeRival(idParticipacion) {
+  /**
+   * Carga el garaje de un rival.
+   * @param {string} idParticipacion - ID de la participación del rival.
+   * @returns {Promise<Object>} - Garaje del rival.
+   */
+  async function cargarGarajeRival(idParticipacion) {
     try {
       return await servicioLigas.cargarGarajeRival(idParticipacion)
     } catch (error) {

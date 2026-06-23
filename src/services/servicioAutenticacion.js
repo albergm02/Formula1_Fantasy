@@ -27,6 +27,10 @@ export const enviarVerificacionCorreo = () => sendEmailVerification(auth.current
 
 export const escucharCambioEstadoAutenticacion = (callback) => onAuthStateChanged(auth, callback)
 
+/**
+ * Obtiene el usuario actualmente autenticado.
+ * @returns {Promise<Object|null>} - Usuario autenticado o null si no hay ninguno.
+ */
 export const obtenerUsuarioActual = () =>
   new Promise((resolve, reject) => {
     const cancelar = onAuthStateChanged(
@@ -39,6 +43,11 @@ export const obtenerUsuarioActual = () =>
     )
   })
 
+/**
+ * Traduce los códigos de error de Firebase a mensajes legibles.
+ * @param {Object} error - Error de Firebase.
+ * @returns {string} - Mensaje de error legible.
+ */
 export function mensajeErrorFirebase(error) {
   const codigo = error?.code || ''
   if (codigo === 'auth/wrong-password' || codigo === 'auth/invalid-credential') return 'Contraseña introducida incorrecta.'

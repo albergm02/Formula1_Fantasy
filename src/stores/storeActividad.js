@@ -3,13 +3,22 @@ import { defineStore } from 'pinia'
 import { usarStoreLigas } from './storeLigas'
 import { cargarActividadLiga } from '@/services/servicioActividad'
 
+/**
+ * Store para manejar la actividad de la liga.
+ *
+ * @returns {Object} - Contiene la actividad, el estado de carga y la función para cargar la actividad.
+ */
 export const usarStoreActividad = defineStore('actividad', () => {
   const storeLigas = usarStoreLigas()
 
   const actividad = ref([])
   const cargando = ref(false)
 
-    async function cargarActividad() {
+  /**
+   * Carga la actividad de la liga activa.
+   * @returns {Promise<void>}
+   */
+  async function cargarActividad() {
     const idLiga = storeLigas.idLigaActiva
     if (!idLiga) return
 

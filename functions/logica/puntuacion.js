@@ -79,36 +79,17 @@ function puntosBase(actuacion) {
 }
 
 
-function calcularMultiplicadorPotenciadores(potenciadores = [], contexto = {}) {
+function calcularMultiplicadorPotenciadores(potenciadores = []) {
   const aplicados = []
   let multiplicador = 1
 
   for (const potenciador of potenciadores) {
     if (!potenciador.equipado) continue
-    if (!cumpleCondicion(potenciador.condicion, contexto)) continue
     multiplicador *= potenciador.multiplicador || 1
-    aplicados.push({ id: potenciador.id, nombre: potenciador.nombre, multiplicador: potenciador.multiplicador, condicion: potenciador.condicion })
+    aplicados.push({ id: potenciador.id, nombre: potenciador.nombre, multiplicador: potenciador.multiplicador })
   }
 
   return { multiplicador: Math.round(multiplicador * 100) / 100, aplicados }
-}
-
-function cumpleCondicion(condicion, contexto) {
-  if (!condicion) return true
-  const { condiciones = {}, actuacionesGaraje = [] } = contexto
-  const totalSC = (condiciones.numeroSafetyCarActivos || 0) + (condiciones.numeroVirtualSafetyCarActivos || 0)
-
-  if (condicion === 'lluvia')               return Boolean(condiciones.llovio)
-  if (condicion === 'sin_lluvia')           return !condiciones.llovio
-  if (condicion === 'safety_car')           return totalSC >= 1
-  if (condicion === 'carrera_limpia')       return !condiciones.llovio && totalSC === 0
-  if (condicion === 'caos')                 return (condiciones.numeroDNFs || 0) >= 3
-  if (condicion === 'sin_abandonos')        return (condiciones.numeroDNFs || 0) === 0
-  if (condicion === 'stint_largo')          return actuacionesGaraje.some((a) => (a?.porcentajeStintMaximo || 0) >= 0.5)
-  if (condicion === 'mis_remontadas')       return actuacionesGaraje.some((a) => puntosRemontador(a) > 0)
-  if (condicion === 'mis_pilotos_terminan') return actuacionesGaraje.length > 0 && actuacionesGaraje.every((a) => !sinActuacionValida(a))
-  if (condicion === 'mi_piloto_punto')      return actuacionesGaraje.some((a) => puntosPorPosicion(a?.posicionCarrera) > 0)
-  return true
 }
 
 
@@ -116,9 +97,8 @@ function calcularPuntuacionGaraje(garaje, contextoJornada = {}) {
   const { puntosPorPiloto = {}, condiciones = {}, actuacionesPorPiloto = {} } = contextoJornada
 
   const pilotosEquipados = (garaje.pilotos || []).filter((p) => p.equipado !== false)
-  const actuacionesGaraje = pilotosEquipados.map((piloto) => actuacionesPorPiloto[piloto.numero]).filter(Boolean)
 
-  const { multiplicador, aplicados } = calcularMultiplicadorPotenciadores(garaje.potenciadores || [], { condiciones, actuacionesGaraje })
+  const { multiplicador, aplicados } = calcularMultiplicadorPotenciadores(garaje.potenciadores || [])
   const desglosePilotos = []
   let puntosPilotos = 0
 

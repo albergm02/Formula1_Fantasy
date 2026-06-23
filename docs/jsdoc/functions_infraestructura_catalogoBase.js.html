@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>functions/infraestructura/catalogoBase.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#SESION_EN_DIRECTO">SESION_EN_DIRECTO</a></li><li><a href="global.html#abandonarLiga">abandonarLiga</a></li><li><a href="global.html#actualizarPreciosTrasResolucion">actualizarPreciosTrasResolucion</a></li><li><a href="global.html#agregarBorradoPujasUsuario">agregarBorradoPujasUsuario</a></li><li><a href="global.html#alternarAlineacion">alternarAlineacion</a></li><li><a href="global.html#aplicarCambioAlineacion">aplicarCambioAlineacion</a></li><li><a href="global.html#aplicarPreciosDinamicosACatalogo">aplicarPreciosDinamicosACatalogo</a></li><li><a href="global.html#autorizarCambioCorreo">autorizarCambioCorreo</a></li><li><a href="global.html#bonusParadas">bonusParadas</a></li><li><a href="global.html#bonusPosicionEstratega">bonusPosicionEstratega</a></li><li><a href="global.html#bonusStint">bonusStint</a></li><li><a href="global.html#borrarLigaEnCascada">borrarLigaEnCascada</a></li><li><a href="global.html#calcularComprometidoEnPujas">calcularComprometidoEnPujas</a></li><li><a href="global.html#calcularFactorCaos">calcularFactorCaos</a></li><li><a href="global.html#calcularFechaMercado">calcularFechaMercado</a></li><li><a href="global.html#calcularPrecioClausula">calcularPrecioClausula</a></li><li><a href="global.html#calcularPuntosVariante">calcularPuntosVariante</a></li><li><a href="global.html#cargarActividadLiga">cargarActividadLiga</a></li><li><a href="global.html#cargarCatalogo">cargarCatalogo</a></li><li><a href="global.html#cargarCatalogoYPerfiles">cargarCatalogoYPerfiles</a></li><li><a href="global.html#cargarClasificacion">cargarClasificacion</a></li><li><a href="global.html#cargarGarajeRival">cargarGarajeRival</a></li><li><a href="global.html#cargarLigas">cargarLigas</a></li><li><a href="global.html#cargarListaJornadas">cargarListaJornadas</a></li><li><a href="global.html#cargarListaLigas">cargarListaLigas</a></li><li><a href="global.html#cargarListaUsuarios">cargarListaUsuarios</a></li><li><a href="global.html#cargarMercadoAbiertoDeLiga">cargarMercadoAbiertoDeLiga</a></li><li><a href="global.html#cargarMisPujas">cargarMisPujas</a></li><li><a href="global.html#cargarParticipacionDeUsuario">cargarParticipacionDeUsuario</a></li><li><a href="global.html#cargarParticipacionPropia">cargarParticipacionPropia</a></li><li><a href="global.html#cargarParticipantes">cargarParticipantes</a></li><li><a href="global.html#cargarPerfilUsuario">cargarPerfilUsuario</a></li><li><a href="global.html#cargarPreciosDinamicos">cargarPreciosDinamicos</a></li><li><a href="global.html#cargarPreciosDinamicosMercado">cargarPreciosDinamicosMercado</a></li><li><a href="global.html#cargarResumenPujas">cargarResumenPujas</a></li><li><a href="global.html#claveCartaPorTipo">claveCartaPorTipo</a></li><li><a href="global.html#claveRecaptcha">claveRecaptcha</a></li><li><a href="global.html#coleccionGaraje">coleccionGaraje</a></li><li><a href="global.html#construirCartaGanada">construirCartaGanada</a></li><li><a href="global.html#construirCatalogoCompleto">construirCatalogoCompleto</a></li><li><a href="global.html#construirClavePiloto">construirClavePiloto</a></li><li><a href="global.html#construirPuntosPorPiloto">construirPuntosPorPiloto</a></li><li><a href="global.html#consultarOpenF1">consultarOpenF1</a></li><li><a href="global.html#crearCartaPiloto">crearCartaPiloto</a></li><li><a href="global.html#crearLiga">crearLiga</a></li><li><a href="global.html#crearPerfil">crearPerfil</a></li><li><a href="global.html#desvincularLigaDelUsuario">desvincularLigaDelUsuario</a></li><li><a href="global.html#ejecutarClausula">ejecutarClausula</a></li><li><a href="global.html#ejecutarGeneracionMercadoParaLiga">ejecutarGeneracionMercadoParaLiga</a></li><li><a href="global.html#ejecutarProcesarJornada">ejecutarProcesarJornada</a></li><li><a href="global.html#eliminarCuentaUsuarioEnCascada">eliminarCuentaUsuarioEnCascada</a></li><li><a href="global.html#eliminarLiga">eliminarLiga</a></li><li><a href="global.html#eliminarLigaAdmin">eliminarLigaAdmin</a></li><li><a href="global.html#eliminarLigaComoAdministrador">eliminarLigaComoAdministrador</a></li><li><a href="global.html#eliminarMiCuenta">eliminarMiCuenta</a></li><li><a href="global.html#eliminarPuja">eliminarPuja</a></li><li><a href="global.html#eliminarPujas">eliminarPujas</a></li><li><a href="global.html#eliminarUsuarioAdmin">eliminarUsuarioAdmin</a></li><li><a href="global.html#eliminarUsuarioComoAdministrador">eliminarUsuarioComoAdministrador</a></li><li><a href="global.html#escucharPerfilUsuario">escucharPerfilUsuario</a></li><li><a href="global.html#estaEnPeriodoDeGracia">estaEnPeriodoDeGracia</a></li><li><a href="global.html#expulsarParticipante">expulsarParticipante</a></li><li><a href="global.html#extraerCartaPorInstancia">extraerCartaPorInstancia</a></li><li><a href="global.html#extraerUltimaSesion">extraerUltimaSesion</a></li><li><a href="global.html#generarMercado">generarMercado</a></li><li><a href="global.html#gestionarClausula">gestionarClausula</a></li><li><a href="global.html#horasRestantesDeGracia">horasRestantesDeGracia</a></li><li><a href="global.html#inicializarMercado">inicializarMercado</a></li><li><a href="global.html#localizarCartaEnGaraje">localizarCartaEnGaraje</a></li><li><a href="global.html#mensajeErrorFirebase">mensajeErrorFirebase</a></li><li><a href="global.html#migrarCorreo">migrarCorreo</a></li><li><a href="global.html#obtenerAdelantamientosPorPiloto">obtenerAdelantamientosPorPiloto</a></li><li><a href="global.html#obtenerCondicionesCarrera">obtenerCondicionesCarrera</a></li><li><a href="global.html#obtenerCuentaRegresiva">obtenerCuentaRegresiva</a></li><li><a href="global.html#obtenerDatosStintsPorPiloto">obtenerDatosStintsPorPiloto</a></li><li><a href="global.html#obtenerGranPremiosFinalizados">obtenerGranPremiosFinalizados</a></li><li><a href="global.html#obtenerMeetingKeyEnJuego">obtenerMeetingKeyEnJuego</a></li><li><a href="global.html#obtenerParadasPorPiloto">obtenerParadasPorPiloto</a></li><li><a href="global.html#obtenerParrillaSalida">obtenerParrillaSalida</a></li><li><a href="global.html#obtenerResultadosSesion">obtenerResultadosSesion</a></li><li><a href="global.html#obtenerSiguienteGranPremio">obtenerSiguienteGranPremio</a></li><li><a href="global.html#obtenerUltimoGranPremioFinalizado">obtenerUltimoGranPremioFinalizado</a></li><li><a href="global.html#obtenerUsuarioActual">obtenerUsuarioActual</a></li><li><a href="global.html#procesarJornada">procesarJornada</a></li><li><a href="global.html#propagarAGarajes">propagarAGarajes</a></li><li><a href="global.html#propagarAMercadosAbiertos">propagarAMercadosAbiertos</a></li><li><a href="global.html#puntosBase">puntosBase</a></li><li><a href="global.html#puntosEstratega">puntosEstratega</a></li><li><a href="global.html#puntosPorPosicion">puntosPorPosicion</a></li><li><a href="global.html#puntosRemontador">puntosRemontador</a></li><li><a href="global.html#puntosTodoTerreno">puntosTodoTerreno</a></li><li><a href="global.html#reautenticarUsuario">reautenticarUsuario</a></li><li><a href="global.html#recopilarCartasFichadasEnLiga">recopilarCartasFichadasEnLiga</a></li><li><a href="global.html#recopilarDatosGranPremio">recopilarDatosGranPremio</a></li><li><a href="global.html#referenciaDiaMercado">referenciaDiaMercado</a></li><li><a href="global.html#registrarPuja">registrarPuja</a></li><li><a href="global.html#resolverPujasMercado">resolverPujasMercado</a></li><li><a href="global.html#seleccionarCartasDiarias">seleccionarCartasDiarias</a></li><li><a href="global.html#seleccionarPujasGanadoras">seleccionarPujasGanadoras</a></li><li><a href="global.html#sinActuacionValida">sinActuacionValida</a></li><li><a href="global.html#solicitarCambioCorreo">solicitarCambioCorreo</a></li><li><a href="global.html#solicitarRestablecimientoContrasena">solicitarRestablecimientoContrasena</a></li><li><a href="global.html#sumarComprometidoEnMercado">sumarComprometidoEnMercado</a></li><li><a href="global.html#suscribirMercadoActivo">suscribirMercadoActivo</a></li><li><a href="global.html#suscribirseHistorialJornadas">suscribirseHistorialJornadas</a></li><li><a href="global.html#unirseALiga">unirseALiga</a></li><li><a href="global.html#usarStoreActividad">usarStoreActividad</a></li><li><a href="global.html#usarStoreAdministracion">usarStoreAdministracion</a></li><li><a href="global.html#usarStoreAutenticacion">usarStoreAutenticacion</a></li><li><a href="global.html#usarStoreGaraje">usarStoreGaraje</a></li><li><a href="global.html#usarStoreJornada">usarStoreJornada</a></li><li><a href="global.html#usarStoreLigas">usarStoreLigas</a></li><li><a href="global.html#usarStoreMercado">usarStoreMercado</a></li><li><a href="global.html#usarStorePerfil">usarStorePerfil</a></li><li><a href="global.html#venderCarta">venderCarta</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">functions/infraestructura/catalogoBase.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// prettier-ignore
+const pilotosBase = [
+  { numero:  1, nombre: 'Lando Norris',      equipo: 'McLaren', imagen: '/Pilotos/norris.webp'     },
+  { numero: 81, nombre: 'Oscar Piastri',     equipo: 'McLaren', imagen: '/Pilotos/piastri.webp'    },
+  { numero:  3, nombre: 'Max Verstappen',    equipo: 'Red Bull', imagen: '/Pilotos/verstappen.webp' },
+  { numero:  6, nombre: 'Isack Hadjar',      equipo: 'Red Bull', imagen: '/Pilotos/hadjar.webp'     },
+  { numero: 16, nombre: 'Charles Leclerc',   equipo: 'Ferrari', imagen: '/Pilotos/leclerc.webp'    },
+  { numero: 44, nombre: 'Lewis Hamilton',    equipo: 'Ferrari', imagen: '/Pilotos/hamilton.webp'   },
+  { numero: 63, nombre: 'George Russell',    equipo: 'Mercedes', imagen: '/Pilotos/russell.webp'    },
+  { numero: 12, nombre: 'Kimi Antonelli',    equipo: 'Mercedes', imagen: '/Pilotos/antonelli.webp'  },
+  { numero: 14, nombre: 'Fernando Alonso',   equipo: 'Aston Martin', imagen: '/Pilotos/alonso.webp'    },
+  { numero: 18, nombre: 'Lance Stroll',      equipo: 'Aston Martin', imagen: '/Pilotos/stroll.webp'    },
+  { numero: 55, nombre: 'Carlos Sainz',      equipo: 'Williams', imagen: '/Pilotos/sainz.webp'      },
+  { numero: 23, nombre: 'Alexander Albon',   equipo: 'Williams', imagen: '/Pilotos/albon.webp'      },
+  { numero: 31, nombre: 'Esteban Ocon',      equipo: 'Haas', imagen: '/Pilotos/ocon.webp'       },
+  { numero: 87, nombre: 'Oliver Bearman',    equipo: 'Haas', imagen: '/Pilotos/bearman.webp'    },
+  { numero: 27, nombre: 'Nico Hulkenberg',   equipo: 'Audi', imagen: '/Pilotos/hulkenberg.webp' },
+  { numero:  5, nombre: 'Gabriel Bortoleto', equipo: 'Audi', imagen: '/Pilotos/bortoleto.webp'  },
+  { numero: 10, nombre: 'Pierre Gasly',      equipo: 'Alpine', imagen: '/Pilotos/gasly.webp'      },
+  { numero: 43, nombre: 'Franco Colapinto',  equipo: 'Alpine', imagen: '/Pilotos/colapinto.webp'  },
+  { numero: 30, nombre: 'Liam Lawson',       equipo: 'Racing Bulls', imagen: '/Pilotos/lawson.webp'    },
+  { numero: 41, nombre: 'Arvid Lindblad',    equipo: 'Racing Bulls', imagen: '/Pilotos/lindblad.webp'  },
+  { numero: 11, nombre: 'Sergio Perez',      equipo: 'Cadillac', imagen: '/Pilotos/perez.webp'     },
+  { numero: 77, nombre: 'Valtteri Bottas',   equipo: 'Cadillac', imagen: '/Pilotos/bottas.webp'    },
+]
+
+// prettier-ignore
+const cochesBase = [
+  { id: 'alpine',       nombre: 'BWT Alpine F1',           puntos: 20, imagen: '/Coches/alpine.webp',       tipoCarta: 'coche' },
+  { id: 'aston_martin', nombre: 'Aston Martin Aramco',     puntos: 10, imagen: '/Coches/astonmartin.webp',  tipoCarta: 'coche' },
+  { id: 'audi',         nombre: 'Audi Revolut F1',         puntos: 15, imagen: '/Coches/audi.webp',         tipoCarta: 'coche' },
+  { id: 'cadillac',     nombre: 'Cadillac F1',             puntos: 10, imagen: '/Coches/cadillac.webp',     tipoCarta: 'coche' },
+  { id: 'ferrari',      nombre: 'Ferrari',                 puntos: 35, imagen: '/Coches/ferrari.webp',      tipoCarta: 'coche' },
+  { id: 'haas',         nombre: 'TGR Haas F1',             puntos: 25, imagen: '/Coches/haas.webp',         tipoCarta: 'coche' },
+  { id: 'mclaren',      nombre: 'McLaren Mastercard',      puntos: 30, imagen: '/Coches/mclaren.webp',      tipoCarta: 'coche' },
+  { id: 'mercedes',     nombre: 'Mercedes-AMG',            puntos: 40, imagen: '/Coches/mercedes.webp',     tipoCarta: 'coche' },
+  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB',      puntos: 20, imagen: '/Coches/racingbulls.webp',  tipoCarta: 'coche' },
+  { id: 'red_bull',     nombre: 'Red Bull Racing',         puntos: 20, imagen: '/Coches/redbull.webp',      tipoCarta: 'coche' },
+  { id: 'williams',     nombre: 'Atlassian Williams',      puntos: 15, imagen: '/Coches/williams.webp',     tipoCarta: 'coche' },
+]
+
+// prettier-ignore
+const potenciadoresBase = [
+  { id: 'x_mode',                nombre: 'X-Mode',                     imagen: '/Potenciadores/x-mode.webp',                 tipoCarta: 'potenciador', multiplicador: 1.5,  descripcion: 'Diseñado para las rectas, ajusta el ángulo del alerón delantero y trasero, reduciendo la resistencia al avance.'     },
+  { id: 'z_mode',                nombre: 'Z-Mode',                     imagen: '/Potenciadores/z-mode.webp',                 tipoCarta: 'potenciador', multiplicador: 1.5,  descripcion: 'Diseñado para las curvas y zonas reviradas, el alerón delantero y trasero se cierran para empujar el coche contra el suelo.' },
+  { id: 'fondo_plano',           nombre: 'Fondo Plano',                imagen: '/Potenciadores/fondo_plano.webp',            tipoCarta: 'potenciador', multiplicador: 1.35, descripcion: 'Crea el efecto suelo: genera una zona de baja presión que succiona el monoplaza hacia el asfalto.'      },
+  { id: 'deflectores_laterales', nombre: 'Deflectores Laterales',      imagen: '/Potenciadores/deflectores_laterales.webp', tipoCarta: 'potenciador', multiplicador: 1.3,  descripcion: 'Organiza, limpia y distribuye flujos de aire que viajan desde la parte delantera hasta la parte trasera del coche.' },
+  { id: 'morro_aerodinamico',    nombre: 'Morro Aerodinámico',         imagen: '/Potenciadores/morro_aerodinamico.webp',    tipoCarta: 'potenciador', multiplicador: 1.4,  descripcion: 'Gestiona y prepara el flujo de aire antes de que golpee al resto del coche.'              },
+  { id: 'x_mode_plus',           nombre: 'X-Mode+',                    imagen: '/Potenciadores/x-mode-plus.webp',           tipoCarta: 'potenciador', multiplicador: 1.6,  descripcion: 'Tercer modo intermedio del X-Mode, soluciona problemas de seguridad, especialmente en condiciones de lluvia.'      },
+  { id: 'mgu_k',                 nombre: 'MGU-K',                      imagen: '/Potenciadores/mgu-k.webp',                 tipoCarta: 'potenciador', multiplicador: 1.55, descripcion: 'La Unidad Motor de Generador Cinético recupera la energía perdida en frenada para convertirla en electricidad.'  },
+  { id: 'bateria_triple',        nombre: 'Bateria Triple',             imagen: '/Potenciadores/bateria_triple.webp',        tipoCarta: 'potenciador', multiplicador: 1.45, descripcion: 'Aumenta la potencia eléctrica considerablemente, permitiendo entregar el triple de potencia eléctrica que antes.'         },
+  { id: 'mapeo_agresivo',        nombre: 'Mapeo Agresivo',             imagen: '/Potenciadores/mapeo_agresivo.webp',        tipoCarta: 'potenciador', multiplicador: 1.6,  descripcion: 'Configuración electrónica extrema diseñada para extraer el mayor rendimiento del motor, asumiendo un gran desgaste.'                },
+  { id: 'software_mejorado',     nombre: 'Software de Energia',        imagen: '/Potenciadores/software_mejorado.webp',     tipoCarta: 'potenciador', multiplicador: 1.35, descripcion: 'Celebro electrónico que decide cuando cargar batería y cuando soltar la potencia a lo largo de una vuelta.'           },
+  { id: 'combustible_sostenible',nombre: 'Combustible Biodegradable',  imagen: '/Potenciadores/combustible_sostenible.webp',tipoCarta: 'potenciador', multiplicador: 1.3,  descripcion: 'Tipo de carburante fabricado 100% a partir de residuos orgánicos, permite modificar libremente las mangueras del motor.' },
+  { id: 'suspension_reactiva',   nombre: 'Suspension Reactiva',        imagen: '/Potenciadores/suspension_reactiva.webp',   tipoCarta: 'potenciador', multiplicador: 1.4,  descripcion: 'Sistema mecánico diseñado para mantener la altura del coche constante respecto al suelo.'                },
+  { id: 'chasis_ultraligero',    nombre: 'Chasis Ligero',              imagen: '/Potenciadores/chasis_ultraligero.webp',    tipoCarta: 'potenciador', multiplicador: 1.45, descripcion: 'Reduce radicalmente el tamaño y el peso del monoplaza, disminuyendo la distancia entre ejes.'      },
+  { id: 'frenos_reactivos',      nombre: 'Frenos Reactivos',           imagen: '/Potenciadores/frenos_reactivos.webp',      tipoCarta: 'potenciador', multiplicador: 1.35, descripcion: 'Funcionamiento inteligente del sistema hidráulico y electrónico trasero, coordina 3 fuerzas de frenado distintas.' },
+  { id: 'caja_de_cambios',       nombre: 'Caja de Cambios',            imagen: '/Potenciadores/caja_de_cambios.webp',       tipoCarta: 'potenciador', multiplicador: 1.4,  descripcion: 'Transmite la potencia eléctrica y de gasolina del motor hacia las ruedas traseras.'            },
+  { id: 'direccion_asistida',    nombre: 'Direccion Asistida',         imagen: '/Potenciadores/direccion_asistida.webp',    tipoCarta: 'potenciador', multiplicador: 1.3,  descripcion: 'Reduce el esfuerzo físico del piloto sobre el volante, permitiendole girar el coche con precisión.'             },
+  { id: 'estratega',             nombre: 'Estratega',                  imagen: '/Potenciadores/estratega.webp',             tipoCarta: 'potenciador', multiplicador: 1.6,  descripcion: 'Cerebro matemático que decide cuando parar el coche en boxes, qué neumáticos montar y como gestionar el ritmo de carrera.' },
+  { id: 'pit_crew',              nombre: 'Pit Crew',                   imagen: '/Potenciadores/pit_crew.webp',             tipoCarta: 'potenciador', multiplicador: 1.4,  descripcion: 'Grupo de personas encargado de cambiar los cuatro neumáticos del coche y realizar reparaciones de emergencia en parada.' },
+  { id: 'analista',              nombre: 'Analista de Datos',          imagen: '/Potenciadores/analista.webp',              tipoCarta: 'potenciador', multiplicador: 1.3,  descripcion: 'Recopila, procesa e interpreta los millones de métricas generadas por el coche.'             },
+  { id: 'ingeniero',             nombre: 'Ingeniero de Rendimiento',   imagen: '/Potenciadores/ingeniero.webp',             tipoCarta: 'potenciador', multiplicador: 1.4,  descripcion: 'Exprime el máximo agarre y velocidad pura del monoplaza ajustando las configuraciones mecánico-eléctricas.'              },
+  { id: 'ingeniero_coms',        nombre: 'Ingeniero de Comunicaciones',imagen: '/Potenciadores/ingeniero_coms.webp',        tipoCarta: 'potenciador', multiplicador: 1.3,  descripcion: 'Estratega cuya función es dirigir el plan de sesión, dar información de tráfico y gestionar la psicología del piloto.' },
+  { id: 'modo_override',         nombre: 'Modo Override',              imagen: '/Potenciadores/modo_override.webp',         tipoCarta: 'potenciador', multiplicador: 1.7,  descripcion: 'Sistema de asistencia eléctrica para adelantamientos, sustituye por completo al antiguo DRS.'          },
+  { id: 'modo_defensa',          nombre: 'Modo Defensa',               imagen: '/Potenciadores/modo_defensa.webp',          tipoCarta: 'potenciador', multiplicador: 1.6,  descripcion: 'Estrategia electrónica del motor configurada para proteger la posición ante un ataque.'           },
+  { id: 'meteorologia',          nombre: 'Meteorologia',               imagen: '/Potenciadores/meterologia.webp',           tipoCarta: 'potenciador', multiplicador: 2.1,  descripcion: 'Conjunto de sensores diseñados para medir, registrar y analizar variables físicas de la atmosfera.'                },
+  { id: 'simulador_nocturno',    nombre: 'Simulador nocturno',         imagen: '/Potenciadores/simulador_nocturno.webp',    tipoCarta: 'potenciador', multiplicador: 1.3,  descripcion: 'Trabajo técnico de simulación del equipo a altas horas de madrugada para corregir el monoplaza.'         },
+]
+
+// prettier-ignore
+const variantesPiloto = [
+  { variante: 'qualy',        perfil: 'qualy',        nombreHabilidad: 'Especialista en Qualy'     },
+  { variante: 'carrera',      perfil: 'carrera',      nombreHabilidad: 'Especialista en Carrera'   },
+  { variante: 'todo_terreno', perfil: 'todo_terreno', nombreHabilidad: 'Especialista Todo Terreno' },
+  { variante: 'base',         perfil: 'base',         nombreHabilidad: 'Piloto Base'               },
+  { variante: 'remontador',   perfil: 'remontador',   nombreHabilidad: 'Remontador'                },
+  { variante: 'estratega',    perfil: 'estratega',    nombreHabilidad: 'Estratega'                 },
+]
+
+const PRECIOS_POR_PILOTO = {
+   1: 22.0, //  Lando Norris
+   3: 20.3, //  Max Verstappen
+   5: 15.2, //  Gabriel Bortoleto
+   6: 18.3, //  Isack Hadjar
+  10: 18.9, //  Pierre Gasly
+  11: 15.0, //  Sergio Pérez
+  12: 30.0, //  Kimi Antonelli
+  14: 15.1, //  Fernando Alonso
+  16: 22.2, //  Charles Leclerc
+  18: 15.0, //  Lance Stroll
+  23: 15.5, //  Alexander Albon
+  27: 15.0, //  Nico Hulkenberg
+  30: 17.5, //  Liam Lawson
+  31: 15.3, //  Esteban Ocon
+  41: 16.2, //  Arvid Lindblad
+  43: 16.8, //  Franco Colapinto
+  44: 26.1, //  Lewis Hamilton
+  55: 15.6, //  Carlos Sainz
+  63: 25.2, //  George Russell
+  77: 15.0, //  Valtteri Bottas
+  81: 21.5, //  Oscar Piastri
+  87: 16.7, //  Oliver Bearman
+}
+
+/**
+ * Crea una carta de piloto a partir de la base y la variante.
+ * @param {Object} pilotoBase - Datos del piloto base.
+ * @param {Object} variante - Datos de la variante del piloto.
+ * @returns {Object} - Carta de piloto completa.
+ */
+function crearCartaPiloto(pilotoBase, variante) {
+  return {
+    id: `${pilotoBase.numero}_${variante.variante}`,
+    numero: pilotoBase.numero,
+    nombre: pilotoBase.nombre,
+    equipo: pilotoBase.equipo,
+    imagen: pilotoBase.imagen,
+    tipoCarta: 'piloto',
+    variante: variante.variante,
+    nombreVariante: variante.nombreHabilidad,
+    precio: PRECIOS_POR_PILOTO[pilotoBase.numero] ?? 15.0,
+  }
+}
+
+
+/**
+ * Construye el catálogo completo de pilotos, coches y potenciadores.
+ * @returns {Object} - Catálogo completo.
+ */
+function construirCatalogoCompleto() {
+  const pilotos = pilotosBase.flatMap((pilotoBase) => variantesPiloto.map((variante) => crearCartaPiloto(pilotoBase, variante)))
+
+  const coches = cochesBase.map(({ puntos, ...resto }) => ({
+    ...resto,
+    puntuacionBase: puntos || 0,
+    precio: Number(puntos || 0),
+  }))
+
+  const potenciadores = potenciadoresBase.map((potenciador) => ({
+    ...potenciador,
+    precio: Math.round((potenciador.multiplicador - 1) * 10 * 10) / 10,
+  }))
+
+  return { pilotos, coches, potenciadores }
+}
+
+module.exports = {
+  construirCatalogoCompleto,
+  pilotosBase,
+  variantesPiloto,
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Jun 23 2026 05:01:39 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

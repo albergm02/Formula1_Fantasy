@@ -1,15 +1,7 @@
-/**
- * Servicio de inicialización de Firebase.
- * Centraliza la configuración y exporta las instancias de Auth y Firestore.
- * Todos los módulos que necesitan interactuar con Firebase importan desde aquí.
- * @module servicioFirebase
- */
-
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getFunctions } from 'firebase/functions'
-import { getAnalytics, isSupported } from 'firebase/analytics'
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check'
 
 const firebaseConfig = {
@@ -23,7 +15,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 
+/**
+ * Clave de reCAPTCHA para la verificación de la aplicación.
+ * @type {string}
+ */
 const claveRecaptcha = import.meta.env.VITE_RECAPTCHA_SITE_KEY
+
+/**
+ * Inicializa App Check con reCAPTCHA.
+ * @returns {void}
+ */
 if (claveRecaptcha) {
   if (import.meta.env.DEV && import.meta.env.VITE_APPCHECK_DEBUG_TOKEN) {
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN
@@ -39,7 +40,3 @@ const db = getFirestore(app)
 const functions = getFunctions(app, 'europe-west1')
 
 export { app, auth, db, functions }
-
-isSupported().then((soportado) => {
-  if (soportado) getAnalytics(app)
-})

@@ -9,11 +9,16 @@ import {
   eliminarMiCuenta,
 } from '@/services/servicioPerfil'
 
+/**
+ * Store para manejar el perfil del usuario, incluyendo la información del usuario actual y las funciones para actualizarla.
+ *
+ * @returns {Object} - Contiene el estado del perfil del usuario y funciones para gestionarlo.
+ */
 export const usarStorePerfil = defineStore('perfil', () => {
   const usuarioActual = ref({ uid: '', correoAutenticacion: '', nombreVisible: '', idsLigas: [] })
   const esAdministrador = ref(false)
 
-    function establecerDatosUsuario({ uid, correo, nombre, idsLigas, esAdmin }) {
+  function establecerDatosUsuario({ uid, correo, nombre, idsLigas, esAdmin }) {
     usuarioActual.value.uid = uid
     usuarioActual.value.correoAutenticacion = correo
     usuarioActual.value.nombreVisible = nombre
@@ -21,36 +26,36 @@ export const usarStorePerfil = defineStore('perfil', () => {
     esAdministrador.value = esAdmin
   }
 
-    function limpiarDatosUsuario() {
+  function limpiarDatosUsuario() {
     usuarioActual.value = { uid: '', correoAutenticacion: '', nombreVisible: '', idsLigas: [] }
     esAdministrador.value = false
   }
 
-    function actualizarIdsLigas(idsNuevos) {
+  function actualizarIdsLigas(idsNuevos) {
     usuarioActual.value.idsLigas = idsNuevos
   }
 
-    async function cargarFechaCambioCorreo(uid) {
+  async function cargarFechaCambioCorreo(uid) {
     const datos = await cargarPerfilUsuario(uid)
     if (!datos.fechaUltimoCambioCorreo) return null
     return datos.fechaUltimoCambioCorreo.toDate()
   }
 
-    async function cambiarContrasena() {
+  async function cambiarContrasena() {
     await solicitarRestablecimientoContrasena()
   }
 
-    async function cambiarCorreo(correoNuevo, contrasenaActual) {
+  async function cambiarCorreo(correoNuevo, contrasenaActual) {
     await reautenticarUsuario(contrasenaActual)
     await solicitarCambioCorreo(correoNuevo)
   }
 
-    async function eliminarCuenta(contrasenaActual) {
+  async function eliminarCuenta(contrasenaActual) {
     await reautenticarUsuario(contrasenaActual)
     await eliminarMiCuenta()
   }
 
-    function observarPerfil(uid, alCambiarPerfil) {
+  function observarPerfil(uid, alCambiarPerfil) {
     return escucharPerfilUsuario(uid, alCambiarPerfil)
   }
 

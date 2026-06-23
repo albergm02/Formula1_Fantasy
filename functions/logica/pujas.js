@@ -1,5 +1,10 @@
-// La ganadora es la puja de mayor cantidad. En caso de empate gana la primera
-// registrada, lo que mantiene un comportamiento determinista.
+/**
+ * Selecciona las pujas ganadoras para cada carta.
+ * La ganadora es la puja de mayor cantidad. En caso de empate gana la primera
+ * registrada, lo que mantiene un comportamiento determinista.
+ * @param {Array} pujas - Lista de pujas.
+ * @returns {Object} - Pujas ganadoras por carta.
+ */
 function seleccionarPujasGanadoras(pujas) {
   const pujasPorCarta = {}
   for (const puja of pujas) {

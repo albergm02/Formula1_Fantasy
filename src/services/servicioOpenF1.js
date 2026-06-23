@@ -6,6 +6,13 @@ const formatearFechaGranPremio = (fechaIso) => {
   }
 }
 
+/**
+ * Obtiene el siguiente Gran Premio.
+ * @param {Object} opciones - Opciones de la función.
+ * @param {Function} opciones.fetchImpl - Implementación de fetch.
+ * @param {number} opciones.anio - Año de la temporada.
+ * @returns {Object|null} - Datos del siguiente Gran Premio o null si no hay ninguno.
+ */
 export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   if (!respuesta.ok) {
@@ -34,6 +41,13 @@ export const obtenerSiguienteGranPremio = async ({ fetchImpl = fetch, anio = 202
   }
 }
 
+/**
+ * Obtiene el último Gran Premio finalizado.
+ * @param {Object} opciones - Opciones de la función.
+ * @param {Function} opciones.fetchImpl - Implementación de fetch.
+ * @param {number} opciones.anio - Año de la temporada.
+ * @returns {Object|null} - Datos del último Gran Premio finalizado o null si no hay ninguno.
+ */
 export const obtenerUltimoGranPremioFinalizado = async ({ fetchImpl = fetch, anio = 2026 } = {}) => {
   const respuesta = await fetchImpl(`https://api.openf1.org/v1/meetings?year=${anio}`)
   if (!respuesta.ok) {

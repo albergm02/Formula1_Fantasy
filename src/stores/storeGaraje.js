@@ -9,6 +9,10 @@ const PRESUPUESTO_INICIAL = 50.0
 
 const crearGarajeVacio = () => ({ coches: [], pilotos: [], potenciadores: [] })
 
+/**
+ * Store para gestionar el garaje del usuario, incluyendo coches, pilotos y potenciadores.
+ * @returns {Object} - Contiene el estado del garaje, presupuesto, puntos y funciones para cargar y gestionar el garaje.
+ */
 export const usarStoreGaraje = defineStore('garaje', () => {
   const idLigaActiva = ref(null)
   const idParticipanteActivo = ref(null)
@@ -19,7 +23,12 @@ export const usarStoreGaraje = defineStore('garaje', () => {
   const ultimaJornada = ref(null)
   const preciosMercado = ref({ pilotos: {}, coches: {}, potenciadores: {} })
 
-    async function cargarEquipo(idLiga) {
+  /**
+   * Carga el equipo del usuario para una liga específica, incluyendo participación y precios dinámicos.
+   * @param {string} idLiga - El ID de la liga.
+   * @returns {Promise<void>}
+   */
+  async function cargarEquipo(idLiga) {
     cargandoEquipo.value = true
     const storePerfil = usarStorePerfil()
 
@@ -55,9 +64,14 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-    const aResultadoFallido = (error) => ({ success: false, message: error?.message || 'Error en el servidor.' })
+  const aResultadoFallido = (error) => ({ success: false, message: error?.message || 'Error en el servidor.' })
 
-    async function venderElemento(elemento) {
+  /**
+   * Vende un elemento del garaje del usuario.
+   * @param {Object} elemento - El elemento a vender.
+   * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
+   */
+  async function venderElemento(elemento) {
     if (!elemento) return { success: false, message: 'Elemento no encontrado para vender.' }
     try {
       const resultado = await venderCarta(idParticipanteActivo.value, elemento.instancia_id)
@@ -71,7 +85,12 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-    async function alternarEquipado(instanciaId) {
+  /**
+   * Alterna el estado de alineación de un elemento en el garaje del usuario.
+   * @param {string} instanciaId - El ID de la instancia del elemento.
+   * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
+   */
+  async function alternarEquipado(instanciaId) {
     try {
       const resultado = await alternarAlineacion(idParticipanteActivo.value, instanciaId)
       await cargarEquipo(idLigaActiva.value)
@@ -81,7 +100,13 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-    async function invertirEnClausula(instanciaId, cantidad) {
+  /**
+   * Invierte en la cláusula de un elemento en el garaje del usuario.
+   * @param {string} instanciaId - El ID de la instancia del elemento.
+   * @param {number} cantidad - La cantidad a invertir en la cláusula.
+   * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
+   */
+  async function invertirEnClausula(instanciaId, cantidad) {
     const elemento = encontrarElementoEnGaraje(instanciaId)
     if (!elemento) return { success: false, message: 'Elemento no encontrado en tu garaje.' }
     try {
@@ -95,7 +120,13 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-    async function ejecutarClausulaRival(idParticipanteRival, elemento) {
+  /**
+   * Ejecuta la cláusula de un elemento en el garaje de un rival.
+   * @param {string} idParticipanteRival - El ID del participante rival.
+   * @param {Object} elemento - El elemento a fichar.
+   * @returns {Promise<{success: boolean, message: string}>} - Devuelve un objeto indicando el éxito de la operación y un mensaje.
+   */
+  async function ejecutarClausulaRival(idParticipanteRival, elemento) {
     try {
       const resultado = await ejecutarClausula(idParticipanteRival, idParticipanteActivo.value, elemento.instancia_id)
       await cargarEquipo(idLigaActiva.value)
@@ -105,7 +136,12 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     }
   }
 
-    function obtenerValorMercado(carta) {
+  /**
+   * Obtiene el valor de mercado de una carta.
+   * @param {Object} carta - La carta cuyo valor de mercado se desea obtener.
+   * @returns {number} - Devuelve el valor de mercado de la carta.
+   */
+  function obtenerValorMercado(carta) {
     const precioBase = Number(carta?.precio ?? 0)
     const tipoCarta = carta?.tipo || carta?.tipoCarta
     if (tipoCarta === 'piloto') {
@@ -117,7 +153,12 @@ export const usarStoreGaraje = defineStore('garaje', () => {
     return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
   }
 
-    function encontrarElementoEnGaraje(instanciaId) {
+  /**
+   * Encuentra un elemento en el garaje del usuario por su ID de instancia.
+   * @param {string} instanciaId - El ID de la instancia del elemento.
+   * @returns {Object|null} - Devuelve el elemento encontrado o null si no se encuentra.
+   */
+  function encontrarElementoEnGaraje(instanciaId) {
     const coche = garaje.value.coches.find((c) => c.instancia_id === instanciaId)
     if (coche) return coche
     const piloto = garaje.value.pilotos.find((p) => p.instancia_id === instanciaId)
