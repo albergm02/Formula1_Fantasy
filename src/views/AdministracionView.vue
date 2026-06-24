@@ -116,9 +116,18 @@ function formatearFechaHora(fecha) {
 
     <main class="flex-1 p-10 max-w-6xl mx-auto w-full space-y-4">
       <div class="grid grid-cols-1 gap-4">
-        <DataTable :value="usuarios" v-model:filters="filtroUsuarios" :loading="cargando"
-          :globalFilterFields="['nombre', 'email', 'uid']" dataKey="uid" paginator :rows="8" removableSort stripedRows
-          class="text-sm">
+        <DataTable
+          :value="usuarios"
+          v-model:filters="filtroUsuarios"
+          :loading="cargando"
+          :globalFilterFields="['nombre', 'email', 'uid']"
+          dataKey="uid"
+          paginator
+          :rows="8"
+          removableSort
+          stripedRows
+          class="text-sm"
+        >
           <template #header>
             <div class="flex flex-wrap items-left gap-2">
               <IconField>
@@ -141,9 +150,18 @@ function formatearFechaHora(fecha) {
           </Column>
         </DataTable>
 
-        <DataTable :value="ligas" v-model:filters="filtroLigas" :loading="cargando"
-          :globalFilterFields="['nombre', 'organizador', 'id']" dataKey="id" paginator :rows="8" removableSort
-          stripedRows class="text-sm">
+        <DataTable
+          :value="ligas"
+          v-model:filters="filtroLigas"
+          :loading="cargando"
+          :globalFilterFields="['nombre', 'organizador', 'id']"
+          dataKey="id"
+          paginator
+          :rows="8"
+          removableSort
+          stripedRows
+          class="text-sm"
+        >
           <template #header>
             <div class="flex flex-wrap items-left justify-between gap-2">
               <IconField>

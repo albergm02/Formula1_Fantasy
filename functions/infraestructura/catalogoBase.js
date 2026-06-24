@@ -30,17 +30,17 @@ const pilotosBase = [
 
 // prettier-ignore
 const cochesBase = [
-  { id: 'alpine',       nombre: 'BWT Alpine F1',           puntos: 20, imagen: '/Coches/alpine.webp',       tipoCarta: 'coche' },
-  { id: 'aston_martin', nombre: 'Aston Martin Aramco',     puntos: 10, imagen: '/Coches/astonmartin.webp',  tipoCarta: 'coche' },
-  { id: 'audi',         nombre: 'Audi Revolut F1',         puntos: 15, imagen: '/Coches/audi.webp',         tipoCarta: 'coche' },
-  { id: 'cadillac',     nombre: 'Cadillac F1',             puntos: 10, imagen: '/Coches/cadillac.webp',     tipoCarta: 'coche' },
-  { id: 'ferrari',      nombre: 'Ferrari',                 puntos: 35, imagen: '/Coches/ferrari.webp',      tipoCarta: 'coche' },
-  { id: 'haas',         nombre: 'TGR Haas F1',             puntos: 25, imagen: '/Coches/haas.webp',         tipoCarta: 'coche' },
-  { id: 'mclaren',      nombre: 'McLaren Mastercard',      puntos: 30, imagen: '/Coches/mclaren.webp',      tipoCarta: 'coche' },
-  { id: 'mercedes',     nombre: 'Mercedes-AMG',            puntos: 40, imagen: '/Coches/mercedes.webp',     tipoCarta: 'coche' },
-  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB',      puntos: 20, imagen: '/Coches/racingbulls.webp',  tipoCarta: 'coche' },
-  { id: 'red_bull',     nombre: 'Red Bull Racing',         puntos: 20, imagen: '/Coches/redbull.webp',      tipoCarta: 'coche' },
-  { id: 'williams',     nombre: 'Atlassian Williams',      puntos: 15, imagen: '/Coches/williams.webp',     tipoCarta: 'coche' },
+  { id: 'alpine',       nombre: 'BWT Alpine F1',           precio: 20, puntuacion:  6, imagen: '/Coches/alpine.webp',       tipoCarta: 'coche' },
+  { id: 'aston_martin', nombre: 'Aston Martin Aramco',     precio: 10, puntuacion:  3, imagen: '/Coches/astonmartin.webp',  tipoCarta: 'coche' },
+  { id: 'audi',         nombre: 'Audi Revolut F1',         precio: 15, puntuacion:  5, imagen: '/Coches/audi.webp',         tipoCarta: 'coche' },
+  { id: 'cadillac',     nombre: 'Cadillac F1',             precio: 10, puntuacion:  3, imagen: '/Coches/cadillac.webp',     tipoCarta: 'coche' },
+  { id: 'ferrari',      nombre: 'Ferrari',                 precio: 35, puntuacion: 10, imagen: '/Coches/ferrari.webp',      tipoCarta: 'coche' },
+  { id: 'haas',         nombre: 'TGR Haas F1',             precio: 25, puntuacion:  7, imagen: '/Coches/haas.webp',         tipoCarta: 'coche' },
+  { id: 'mclaren',      nombre: 'McLaren Mastercard',      precio: 30, puntuacion:  9, imagen: '/Coches/mclaren.webp',      tipoCarta: 'coche' },
+  { id: 'mercedes',     nombre: 'Mercedes-AMG',            precio: 40, puntuacion: 11, imagen: '/Coches/mercedes.webp',     tipoCarta: 'coche' },
+  { id: 'racing_bulls', nombre: 'Racing Bulls VCARB',      precio: 20, puntuacion:  6, imagen: '/Coches/racingbulls.webp',  tipoCarta: 'coche' },
+  { id: 'red_bull',     nombre: 'Red Bull Racing',         precio: 20, puntuacion:  6, imagen: '/Coches/redbull.webp',      tipoCarta: 'coche' },
+  { id: 'williams',     nombre: 'Atlassian Williams',      precio: 15, puntuacion:  5, imagen: '/Coches/williams.webp',     tipoCarta: 'coche' },
 ]
 
 // prettier-ignore
@@ -134,10 +134,9 @@ function crearCartaPiloto(pilotoBase, variante) {
 function construirCatalogoCompleto() {
   const pilotos = pilotosBase.flatMap((pilotoBase) => variantesPiloto.map((variante) => crearCartaPiloto(pilotoBase, variante)))
 
-  const coches = cochesBase.map(({ puntos, ...resto }) => ({
+  const coches = cochesBase.map(({ puntuacion, ...resto }) => ({
     ...resto,
-    puntuacionBase: puntos || 0,
-    precio: Number(puntos || 0),
+    puntuacionBase: puntuacion || 0,
   }))
 
   const potenciadores = potenciadoresBase.map((potenciador) => ({

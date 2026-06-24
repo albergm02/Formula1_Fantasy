@@ -83,10 +83,10 @@ describe('3. Pilotos sin actuación válida en carrera', () => {
 // 4. Ciclo completo: fixture → puntos del garaje con potenciador
 // =====================================================================
 describe('4. Ciclo completo desde fixture de OpenF1', () => {
-  it('Verstappen Carrera + Red Bull + Mapeo Agresivo (×1.5) suma 57.5 puntos', () => {
+  it('Verstappen Carrera + Red Bull + Mapeo Agresivo (×1.5) suma 43.5 puntos', () => {
     const garaje = {
       pilotos: [{ id: '3_carrera', numero: 3, nombre: 'Max Verstappen', variante: 'carrera', equipado: true }],
-      coches: [{ id: 'red_bull', nombre: 'Red Bull Racing', puntuacionBase: 20, equipado: true }],
+      coches: [{ id: 'red_bull', nombre: 'Red Bull Racing', puntuacionBase: 6, equipado: true }],
       potenciadores: [{ id: 'mapeo_agresivo', nombre: 'Mapeo Agresivo', multiplicador: 1.5, equipado: true }],
     }
 
@@ -97,8 +97,8 @@ describe('4. Ciclo completo desde fixture de OpenF1', () => {
       actuacionesPorPiloto: ejemplo.actuacionesPorPiloto,
     })
 
-    // 25 (P1) × 1.5 (Mapeo) = 37.5 + 20 (coche) = 57.5
-    expect(resultado.puntosTotal).toBe(57.5)
+    // 25 (P1) × 1.5 (Mapeo) = 37.5 + 6 (coche) = 43.5
+    expect(resultado.puntosTotal).toBe(43.5)
   })
 
   it('Meteorología (×2) siempre se aplica independientemente del clima', () => {
