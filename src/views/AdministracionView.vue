@@ -23,12 +23,11 @@ const confirm = useConfirm()
 
 const storeAdministracion = usarStoreAdministracion()
 const storeAutenticacion = usarStoreAutenticacion()
-const { ligas, usuarios, jornadas } = storeToRefs(storeAdministracion)
+const { ligas, usuarios } = storeToRefs(storeAdministracion)
 
 const cargando = ref(false)
 const filtroUsuarios = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } })
 const filtroLigas = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } })
-const filtroJornadas = ref({ global: { value: null, matchMode: FilterMatchMode.CONTAINS } })
 
 onMounted(cargarPanel)
 
@@ -117,18 +116,9 @@ function formatearFechaHora(fecha) {
 
     <main class="flex-1 p-10 max-w-6xl mx-auto w-full space-y-4">
       <div class="grid grid-cols-1 gap-4">
-        <DataTable
-          :value="usuarios"
-          v-model:filters="filtroUsuarios"
-          :loading="cargando"
-          :globalFilterFields="['nombre', 'email', 'uid']"
-          dataKey="uid"
-          paginator
-          :rows="8"
-          removableSort
-          stripedRows
-          class="text-sm"
-        >
+        <DataTable :value="usuarios" v-model:filters="filtroUsuarios" :loading="cargando"
+          :globalFilterFields="['nombre', 'email', 'uid']" dataKey="uid" paginator :rows="8" removableSort stripedRows
+          class="text-sm">
           <template #header>
             <div class="flex flex-wrap items-left gap-2">
               <IconField>
@@ -151,18 +141,9 @@ function formatearFechaHora(fecha) {
           </Column>
         </DataTable>
 
-        <DataTable
-          :value="ligas"
-          v-model:filters="filtroLigas"
-          :loading="cargando"
-          :globalFilterFields="['nombre', 'organizador', 'id']"
-          dataKey="id"
-          paginator
-          :rows="8"
-          removableSort
-          stripedRows
-          class="text-sm"
-        >
+        <DataTable :value="ligas" v-model:filters="filtroLigas" :loading="cargando"
+          :globalFilterFields="['nombre', 'organizador', 'id']" dataKey="id" paginator :rows="8" removableSort
+          stripedRows class="text-sm">
           <template #header>
             <div class="flex flex-wrap items-left justify-between gap-2">
               <IconField>
@@ -183,38 +164,6 @@ function formatearFechaHora(fecha) {
             <template #body="{ data }">
               <Button icon="pi pi-trash" severity="danger" @click="eliminarLiga(data)" />
             </template>
-          </Column>
-        </DataTable>
-
-        <DataTable
-          :value="jornadas"
-          v-model:filters="filtroJornadas"
-          :loading="cargando"
-          :globalFilterFields="['nombreGranPremio', 'id']"
-          dataKey="id"
-          paginator
-          :rows="8"
-          removableSort
-          stripedRows
-          class="text-sm"
-        >
-          <template #header>
-            <div class="flex flex-wrap items-left justify-between gap-2">
-              <IconField>
-                <InputIcon class="pi pi-search" />
-                <InputText v-model="filtroJornadas.global.value" placeholder="Buscar jornada..." />
-              </IconField>
-            </div>
-          </template>
-          <template #empty>No hay jornadas procesadas.</template>
-
-          <Column field="nombreGranPremio" header="Gran Premio" sortable />
-          <Column field="temporada" header="Temporada" sortable />
-          <Column header="Carrera" sortable sortField="fechaCarrera">
-            <template #body="{ data }">{{ formatearFecha(data.fechaCarrera) }}</template>
-          </Column>
-          <Column header="Procesada" sortable sortField="fechaProcesamiento">
-            <template #body="{ data }">{{ formatearFechaHora(data.fechaProcesamiento) }}</template>
           </Column>
         </DataTable>
       </div>
