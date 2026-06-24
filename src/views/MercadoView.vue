@@ -60,9 +60,9 @@ const handleEliminarPuja = async (carta) => {
 
     <template v-else>
       <!-- Cuenta atras del cierre -->
-      <div class="flex items-center justify-between bg-[#121218] rounded-lg px-4 py-3">
-        <span class="text-xs uppercase tracking-widest text-zinc-400 font-black">Cierre del mercado</span>
-        <span class="text-lg font-black text-[#D4A843]">{{ storeMercado.textoCuentaAtras }}</span>
+      <div class="flex items-center justify-between pb-2 border-b border-[#FFFFFF]/10">
+        <h2 class="text-sm font-black uppercase tracking-widest text-white">Cierre del mercado</h2>
+        <span class="text-sm font-black text-[#D4A843]">{{ storeMercado.textoCuentaAtras }}</span>
       </div>
 
       <section class="flex flex-col gap-4">

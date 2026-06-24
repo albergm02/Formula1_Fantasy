@@ -149,9 +149,9 @@ const confirmarEjecucionClausula = (elemento) => {
       </section>
     </template>
 
-    <div v-if="!modoRival" class="flex items-center justify-between bg-[#121218] rounded-lg px-4 py-3">
-      <span class="text-xs uppercase tracking-widest text-zinc-400 font-black">Valor de mercado del garaje</span>
-      <span class="text-lg font-black text-[#D4A843]">{{ valorTotalGaraje }}M</span>
+    <div v-if="!modoRival" class="flex items-center justify-between pb-2 border-b border-[#FFFFFF]/10">
+      <h2 class="text-sm font-black uppercase tracking-widest text-white">Valor de mercado</h2>
+      <span class="text-sm font-black text-[#D4A843]">{{ valorTotalGaraje }}M</span>
     </div>
 
     <!-- ─── Chásis ─── -->

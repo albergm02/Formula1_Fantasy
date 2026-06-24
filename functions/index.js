@@ -8,6 +8,7 @@ const perfil = require('./callable/perfil')
 const administracion = require('./callable/administracion')
 
 exports.procesarJornada = jornada.procesarJornada
+exports.reprocesarJornada = jornada.reprocesarJornada
 
 exports.registrarPuja = mercado.registrarPuja
 exports.eliminarPuja = mercado.eliminarPuja

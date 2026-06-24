@@ -10,7 +10,7 @@ import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
 import { usarStoreJornada } from '@/stores/storeJornada'
 import { VARIANTES } from '@/utils/variantesPiloto'
-import { calcularPuntosVariante } from '@/services/servicioJornada'
+import { calcularPuntosVariante, calcularFactorCaos } from '@/services/servicioJornada'
 
 const storeJornada = usarStoreJornada()
 const { historial, catalogoPilotos, ultimoGranPremioPendiente } = storeToRefs(storeJornada)
@@ -95,6 +95,8 @@ const condicionesTexto = computed(() => {
   if (c.numeroVirtualSafetyCarActivos > 0)
     etiquetas.push({ texto: `${c.numeroVirtualSafetyCarActivos} Coche de Seguridad Virtual`, color: 'text-[#D4A843]' })
   if (c.numeroDNFs > 0) etiquetas.push({ texto: `${c.numeroDNFs} ABN`, color: 'text-[#E10600]' })
+  const factorCaos = calcularFactorCaos(c)
+  etiquetas.push({ texto: `×${factorCaos} Todoterreno`, color: 'text-[#a78bfa]' })
   return etiquetas
 })
 

@@ -14,9 +14,9 @@ const EJEMPLOS_VARIANTE = {
     calculo: 'P1 → 25 pts. Si termina P3 → 15 pts. Si abandona (ABN / DESC / N/S) → 0 pts.',
   },
   todo_terreno: {
-    escenario: 'P1 en una carrera con lluvia y 2 Coches de Seguridad.',
+    escenario: 'P1 en carrera con lluvia y 2 Coches de Seguridad (0 abandonos de más).',
     calculo:
-      'Factor caos = 0.50 + 0.40 (lluvia) + 0.10 (2 SC) = 1.00 → 25 × 1.00 = 25 pts. En seco sin incidentes el mismo P1 da 25 × 0.50 = 12.5 pts.',
+      'Factor = 0.50 + 0.40 (lluvia) + 0.10 (2 SC × 0.05) = 1.00 → 25 × 1.00 = 25 pts. En seco y limpio el mismo P1 da 25 × 0.50 = 12.5 pts. El tope posible es 1.15 (lluvia + 3 SC + 5 DNF).',
   },
   base: {
     escenario: 'Piloto con pole (P1 qualy) y victoria (P1 carrera).',

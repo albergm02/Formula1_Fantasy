@@ -19,20 +19,19 @@ export const perfilesPuntuacion = {
   },
   todo_terreno: {
     reglasUsuario: [
-      'Puntos de carrera multiplicados por un factor de caos.',
-      'Factor base: 0.50 (carrera seca y limpia).',
-      'Si llovió: +0.40 al factor.',
-      'Cada Coche de Seguridad (real o virtual): +0.05 (máximo 3).',
-      'Si hubo 5 o más abandonos: +0.10 adicional.',
-      'Si el piloto no termina: 0 puntos.',
+      'Puntos de carrera multiplicados por un factor de caos (rango 0.70 a 1.45).',
+      'Factor base: 0.70 (carrera seca y sin incidentes).',
+      'Si llovió: +0.30.',
+      'Cada Coche de Seguridad (real o virtual cuentan por igual): +0.05, hasta un máximo de 3 (tope +0.15).',
+      'Si hubo 5 o más abandonos en la carrera: +0.30.',
+      'Si el piloto no termina: 0 puntos (el factor no aplica).',
     ],
   },
   base: {
     reglasUsuario: [
-      'Media de los puntos de Qualy y Carrera.',
-      '(Puntos Qualy + Puntos Carrera) / 2.',
-      'Si abandona en carrera, sólo cuentan los puntos de Qualy / 2.',
-      'La carta segura: rinde menos en el pico pero casi siempre suma algo.',
+      'Media de los puntos de Clasificación y Carrera.',
+      '(Puntos Clasificación + Puntos Carrera) / 2.',
+      'Si abandona en carrera, sólo cuentan los puntos de Clasificación / 2.',
     ],
   },
   remontador: {

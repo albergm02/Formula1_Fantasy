@@ -34,10 +34,10 @@ describe('2. Variantes contextuales', () => {
     const seco = { llovio: false, numeroSafetyCarActivos: 0, numeroVirtualSafetyCarActivos: 0, numeroDNFs: 0 }
     const apocaliptico = { llovio: true, numeroSafetyCarActivos: 2, numeroVirtualSafetyCarActivos: 1, numeroDNFs: 6 }
 
-    // 25 (P1) × 0.5 (factor mínimo, carrera seca limpia) = 12.5
-    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, seco)).toBe(12.5)
-    // 25 (P1) × (0.5 + 0.4 lluvia + 0.15 SC + 0.1 DNFs) = 25 × 1.15 = 28.75
-    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, apocaliptico)).toBe(28.75)
+    // 25 (P1) × 0.7 (factor mínimo, carrera seca limpia) = 17.5
+    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, seco)).toBe(17.5)
+    // 25 (P1) × (0.7 + 0.3 lluvia + 0.15 SC + 0.30 DNFs) = 25 × 1.45 = 36.25
+    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, apocaliptico)).toBe(36.25)
   })
 
   it('Remontador: tabla por diferencial neto de adelantamientos', () => {

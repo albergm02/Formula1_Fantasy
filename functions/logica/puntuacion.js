@@ -62,10 +62,10 @@ function puntosTodoTerreno(actuacion, condiciones) {
  * @returns {number} - Factor de caos calculado.
  */
 function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroVirtualSafetyCarActivos = 0, numeroDNFs = 0 }) {
-  let factor = 0.5
-  if (llovio) factor += 0.4
+  let factor = 0.7
+  if (llovio) factor += 0.3
   factor += Math.min(3, numeroSafetyCarActivos + numeroVirtualSafetyCarActivos) * 0.05
-  if (numeroDNFs >= 5) factor += 0.1
+  if (numeroDNFs >= 5) factor += 0.3
   return Math.round(factor * 100) / 100
 }
 

@@ -27,18 +27,6 @@ const esPotenciador = computed(() => props.tipo === 'potenciador')
 const colorVariante = computed(() => estiloVariante[props.carta.variante]?.color ?? '#a1a1aa')
 const iconoVariante = computed(() => estiloVariante[props.carta.variante]?.icono ?? 'pi-user')
 
-const descripcionVariante = computed(() => {
-  const descripciones = {
-    qualy: 'Puntúa según la posición conseguida en la sesión de clasificación del sábado. Sistema FIA: 25 puntos al pole, 1 punto al P10.',
-    carrera: 'Puntúa según la posición final en la carrera del domingo. Sistema FIA: 25 puntos al ganador, 1 punto al P10.',
-    todo_terreno: 'Puntos de carrera multiplicados por un factor de caos: lluvia, Coches de Seguridad y abandonos suben el multiplicador.',
-    base: 'Media simple entre los puntos de Qualy y los de Carrera. La opción segura: rinde menos en el pico pero casi siempre suma.',
-    remontador: 'Premia los adelantamientos en pista. Tabla por diferencial neto: 1→3 · 2→7 · 3→12 · 4→18 · 5 o más→25 (tope).',
-    estratega: 'Combina paradas en boxes, longitud del stint más largo y posición final. Premia la gestión perfecta de la carrera.',
-  }
-  return descripciones[props.carta.variante] || ''
-})
-
 const etiquetaCondicion = computed(() => {
   if (!esPotenciador.value) return null
   const mapa = {
@@ -204,10 +192,6 @@ const confirmarEliminarPuja = () => {
               <i class="pi mr-1" :class="iconoVariante"></i>
               {{ carta.nombreVariante || carta.variante }}
             </span>
-          </div>
-          <div class="flex flex-col gap-2 pb-3 border-b border-zinc-800">
-            <p class="text-[10px] font-black uppercase tracking-widest" :style="{ color: colorVariante }">Cómo puntua esta variante</p>
-            <p class="text-xs text-zinc-300 leading-relaxed">{{ descripcionVariante }}</p>
           </div>
         </template>
 
