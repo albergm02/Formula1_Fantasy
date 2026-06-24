@@ -104,8 +104,8 @@ const handleAbandonarLiga = () => {
     message: `¿Estás seguro de que quieres abandonar la liga "${ligaSeleccionada.value.nombre}"?`,
     header: 'CONFIRMACIÓN DE ABANDONO',
     acceptLabel: 'Abandonar',
-    rejectClass: '!bg-transparent !border-none !text-white',
     acceptClass: '!bg-[#D4A843] !border-none !text-[#1A1A1F]',
+    rejectClass: '!bg-gray-700 !border-gray-700 !text-white',
     accept: async () => {
       cargandoAccion.value = true
       const resultado = await storeLigas.abandonarLiga(ligaSeleccionada.value.id)
@@ -139,8 +139,8 @@ const handleExpulsarParticipante = (participante) => {
     message: `¿Seguro que quieres expulsar a ${participante.nombre_usuario} de la liga?`,
     header: 'CONFIRMACIÓN DE EXPULSIÓN',
     acceptLabel: 'Expulsar',
-    rejectClass: '!bg-transparent !border-none !text-white',
-    acceptClass: '!bg-[#E10600] !border-none !text-white',
+    acceptClass: '!bg-red-700 !border-red-700 !text-white',
+    rejectClass: '!bg-gray-700 !border-gray-700 !text-white',
     accept: async () => {
       cargandoAccion.value = true
       const resultado = await storeLigas.expulsarParticipante(ligaSeleccionada.value.id, participante.email_usuario)
@@ -162,8 +162,8 @@ const handleEliminarLiga = () => {
     message: `¿Estás seguro de que quieres eliminar la liga "${ligaSeleccionada.value.nombre}"? Todos los participantes serán expulsados y los datos serán borrados permanentemente.`,
     header: 'ELIMINAR LIGA',
     acceptLabel: 'Eliminar para todos',
-    rejectClass: '!bg-transparent !border-none !text-white',
-    acceptClass: '!bg-[#E10600] !border-none !text-white',
+    acceptClass: '!bg-red-700 !border-red-700 !text-white',
+    rejectClass: '!bg-gray-700 !border-gray-700 !text-white',
     accept: async () => {
       cargandoAccion.value = true
       const resultado = await storeLigas.eliminarLiga(ligaSeleccionada.value.id)

@@ -1,6 +1,7 @@
 ﻿<script setup>
 import { ref, computed } from 'vue'
 import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import { useToast } from 'primevue/usetoast'
 import { estiloVariante } from '@/utils/variantesPiloto'
@@ -81,6 +82,10 @@ const confirmarPuja = () => {
 
 const confirmarEliminarPuja = () => {
   emit('eliminarPuja', props.carta)
+  mostrarPuja.value = false
+}
+
+const cerrarDialogoPuja = () => {
   mostrarPuja.value = false
 }
 </script>
@@ -248,16 +253,25 @@ const confirmarEliminarPuja = () => {
             inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32"
           />
         </div>
-        <button @click="confirmarPuja" class="w-full py-3 bg-[#D4A843]/70 border border-[#D4A843] text-white font-black uppercase">
-          CONFIRMAR PUJA
-        </button>
-        <button
+        <Button
+          label="Confirmar puja"
+          @click="confirmarPuja"
+          class="w-full !bg-[#D4A843] !border-[#D4A843] !text-[#1A1A1F]"
+          :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+        />
+        <Button
           v-if="miPuja != null"
+          label="Eliminar puja"
           @click="confirmarEliminarPuja"
-          class="w-full py-3 flex items-center justify-center bg-red-900/40 border border-red-500/50 text-white uppercase font-black"
-        >
-          ELIMINAR PUJA
-        </button>
+          class="w-full !bg-red-700 !border-red-700 !text-white"
+          :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+        />
+        <Button
+          label="Cancelar"
+          @click="cerrarDialogoPuja"
+          class="w-full !bg-gray-700 !border-gray-700 !text-white"
+          :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+        />
       </div>
     </Dialog>
   </div>
