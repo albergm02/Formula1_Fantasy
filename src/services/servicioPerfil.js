@@ -63,7 +63,7 @@ export async function cargarPerfilUsuario(uid) {
 }
 
 /**
- * Escucha los cambios en el perfil de un usuario.
+ * Escucha los cambios en el perfil de un usuario, si la base de datos de usuarios cambia, entonces se ejecuta el callback.
  * @param {string} uid - ID del usuario.
  * @param {Function} callback - Función a ejecutar cuando cambien los datos del perfil.
  * @returns {Function} - Función para cancelar la suscripción.

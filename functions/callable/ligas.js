@@ -270,9 +270,7 @@ exports.crearLiga = onCall(OPCIONES, async (request) => {
 
   await batch.commit()
 
-  ejecutarGeneracionMercadoParaLiga(ligaRef.id).catch((error) => {
-    console.error(`Error al generar mercado inicial para liga ${ligaRef.id}:`, error)
-  })
+  ejecutarGeneracionMercadoParaLiga(ligaRef.id)
 
   return { ok: true, idLiga: ligaRef.id, codigoInvitacion, nombreLiga: nombre }
 })

@@ -62,10 +62,11 @@ function puntosTodoTerreno(actuacion, condiciones) {
  * @returns {number} - Factor de caos calculado.
  */
 function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroVirtualSafetyCarActivos = 0, numeroDNFs = 0 }) {
-  let factor = 0.7
-  if (llovio) factor += 0.3
+  // El factor empieza desde 0.8 y se incrementa según las condiciones de la jornada
+  let factor = 0.8
+  if (llovio) factor += 0.4
   factor += Math.min(3, numeroSafetyCarActivos + numeroVirtualSafetyCarActivos) * 0.05
-  if (numeroDNFs >= 5) factor += 0.3
+  if (numeroDNFs >= 5) factor += 0.1
   return Math.round(factor * 100) / 100
 }
 
@@ -132,7 +133,7 @@ function bonusPosicionEstratega(posicion) {
 }
 
 /**
- * Calcula los puntos base de un piloto según su actuación.
+ * Calcula los puntos de la variante base.
  * @param {Object} actuacion - Actuación del piloto.
  * @param {number} actuacion.posicionQualy - Posición del piloto en la clasificación.
  * @param {number} actuacion.posicionCarrera - Posición del piloto en la carrera.
@@ -155,6 +156,7 @@ function calcularMultiplicadorPotenciadores(potenciadores = []) {
 
   for (const potenciador of potenciadores) {
     if (!potenciador.equipado) continue
+    // Multiplicadores 
     multiplicador *= potenciador.multiplicador || 1
     aplicados.push({ id: potenciador.id, nombre: potenciador.nombre, multiplicador: potenciador.multiplicador })
   }
@@ -163,16 +165,15 @@ function calcularMultiplicadorPotenciadores(potenciadores = []) {
 }
 
 /**
- * Calcula la puntuación total de un garaje en una jornada.
+ * Calcula la puntuación total de un garaje en una jornada, para ello se consideran los puntos de los pilotos, el coche y los potenciadores aplicados
+ * Recorre los pilotos equipados y calcula sus puntos considerando los multiplicadores de los potenciadores.
  * @param {Object} garaje - Garaje del jugador.
  * @param {Object} contextoJornada - Contexto de la jornada.
  * @param {Object} contextoJornada.puntosPorPiloto - Puntos por piloto.
- * @param {Object} contextoJornada.condiciones - Condiciones de la jornada.
- * @param {Object} contextoJornada.actuacionesPorPiloto - Actuaciones por piloto.
  * @returns {Object} - Puntuación total y desglose.
  */
 function calcularPuntuacionGaraje(garaje, contextoJornada = {}) {
-  const { puntosPorPiloto = {}, condiciones = {}, actuacionesPorPiloto = {} } = contextoJornada
+  const { puntosPorPiloto = {} } = contextoJornada
 
   const pilotosEquipados = (garaje.pilotos || []).filter((p) => p.equipado !== false)
 
@@ -209,6 +210,7 @@ function calcularPuntuacionGaraje(garaje, contextoJornada = {}) {
   }
 }
 
+// Redondeo general
 function redondear(valor) {
   return Math.round(valor * 100) / 100
 }

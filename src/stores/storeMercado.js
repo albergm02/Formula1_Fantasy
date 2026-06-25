@@ -30,12 +30,16 @@ export const usarStoreMercado = defineStore('mercado', () => {
   const pilotosMercado = computed(() =>
     mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'piloto') : [],
   )
+
   const cochesMercado = computed(() =>
     mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'coche') : [],
   )
+
   const potenciadoresMercado = computed(() =>
     mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'potenciador') : [],
   )
+
+  const totalPujasComprometidas = computed(() => Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0))
 
   /**
    * Texto que muestra la cuenta atrás del mercado.
@@ -43,16 +47,14 @@ export const usarStoreMercado = defineStore('mercado', () => {
    */
   const textoCuentaAtras = computed(() => {
     const ms = milisegundosRestantes.value
-    if (ms <= 0) return 'Mercado cerrado'
+    if (ms <= 0) return 'Cerrado'
 
     const horas = Math.floor(ms / (1000 * 60 * 60))
     const minutos = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60))
     const segundos = Math.floor((ms % (1000 * 60)) / 1000)
-
+    // padStart para asegurar que siempre tenga dos dígitos el formato de horas, minutos y segundos
     return `${String(horas).padStart(2, '0')}h ${String(minutos).padStart(2, '0')}m ${String(segundos).padStart(2, '0')}s`
   })
-
-  const totalPujasComprometidas = computed(() => Object.values(misPujas.value).reduce((suma, cantidad) => suma + cantidad, 0))
 
   /**
    * Recalcula los milisegundos restantes hasta el cierre del mercado activo.
@@ -76,6 +78,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
     if (!mercadoActivo.value || !mercadoActivo.value.fechaCierre) return
 
     actualizarRestante()
+    // Intervalo de actualización para el contador
     intervaloId = setInterval(actualizarRestante, 1000)
   }
 

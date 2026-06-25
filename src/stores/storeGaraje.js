@@ -8,7 +8,7 @@ import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario } from '@/services/servicioLigas'
 import { calcularPrecioClausula, venderCarta, alternarAlineacion, gestionarClausula, ejecutarClausula } from '@/services/servicioGaraje'
 
-const PRESUPUESTO_INICIAL = 50.0
+const PRESUPUESTO_INICIAL = 70.0
 
 /**
  * Construye un garaje vacío con las tres colecciones de cartas.

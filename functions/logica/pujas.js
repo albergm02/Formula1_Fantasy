@@ -5,16 +5,8 @@
 
 /**
  * Agrupa las pujas por carta y las ordena en orden descendente por cantidad.
- * En caso de empate a cantidad, gana el desempate la puja registrada primero
- * (campo `fecha` como tie-breaker ascendente): el orden de iteración por
- * defecto de Firestore es por id de documento, no por tiempo, lo que would
- * otorgar el desempate al email alfabéticamente menor de forma no
- * intencional.
+ * En caso de empate a cantidad, gana el desempate la puja registrada primero (fecha más antigua).
  *
- * El resultado es un mapa idCarta -> Array<puja> ordenado de mayor a menor
- * cantidad. La puja ganadora es el primer elemento; las siguientes actúan
- * como suplentes por si el primero no pudiera asumir el coste (ver
- * `resolverPujasMercado`).
  *
  * @param {Array<Object>} pujas - Lista de pujas (mínimo: idCarta, cantidad, fecha).
  * @returns {Object<string, Array<Object>>} - Ranking de pujas por carta.

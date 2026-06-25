@@ -5,6 +5,7 @@ import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import { useToast } from 'primevue/usetoast'
+import { estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioGaraje'
 import { estiloVariante } from '@/utils/variantesPiloto'
 import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
@@ -99,6 +100,14 @@ const cerrarDialogoPuja = () => {
         >
           <i class="pi pi-users text-[8px] text-zinc-300"></i>
           <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
+        </div>
+
+        <div
+          v-if="estaEnPeriodoDeGracia(carta)"
+          class="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-emerald-500/40"
+        >
+          <i class="pi pi-shield text-[8px] text-emerald-400"></i>
+          <span class="text-[10px] font-black text-emerald-400">{{ horasRestantesDeGracia(carta) }}h</span>
         </div>
 
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
