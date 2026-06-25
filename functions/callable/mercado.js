@@ -9,14 +9,12 @@ const { FieldValue } = require('firebase-admin/firestore')
 
 const { db } = require('../middleware/firebase')
 const { exigirEmailAutenticado } = require('../middleware/autenticacion')
-const { cargarCatalogo, cargarPreciosDinamicos, aplicarPreciosDinamicosACatalogo, seleccionarCartasDiarias } = require('../logica/mercado')
+const { cargarCatalogo, seleccionarCartasDiarias } = require('../logica/mercado')
 const { seleccionarPujasGanadoras } = require('../logica/pujas')
 
 const REGION = 'europe-west1'
 const OPCIONES = { region: REGION, enforceAppCheck: true }
-const HISTORIAL_MAX_MUESTRAS = 5
-const FACTOR_DESINTERES = 0.95
-const PRECIO_MINIMO = 5
+const BONO_DIARIO_CIERRE_MERCADO = 1
 
 /**
  * Construye una carta ganada por un participante.
@@ -33,103 +31,155 @@ function construirCartaGanada(cartaCompleta, idCarta, pujaGanadora, cantidad, ti
 }
 
 /**
- * Calcula la fecha del mercado en formato "YYYY-MM-DD".
- * @param {Date} fecha - Fecha a formatear.
- * @returns {string} - Fecha formateada.
- */
-function calcularFechaMercado(fecha) {
-  return fecha.toISOString().split('T')[0]
-}
-
-/**
- * Obtiene la referencia al documento del día del mercado para una liga específica.
+ * Obtiene la referencia al documento único del mercado de una liga. El mercado
+ * es único por liga (sin histórico por día): al rotar, se sobrescribe el mismo
+ * doc con nuevas cartas, evitando estados intermedios pegajosos.
  * @param {string} idLiga - ID de la liga.
- * @param {Date} fecha - Fecha del mercado.
- * @returns {FirebaseFirestore.DocumentReference} - Referencia al documento del día del mercado.
+ * @returns {FirebaseFirestore.DocumentReference} - Referencia al doc del mercado.
  */
-function referenciaDiaMercado(idLiga, fecha) {
-  return db.collection('mercados').doc(idLiga).collection('dias').doc(calcularFechaMercado(fecha))
+function referenciaMercado(idLiga) {
+  return db.collection('mercados').doc(idLiga)
 }
 
 /**
- * Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana.
- * Las perdedoras se descartan sin reembolso: el dinero comprometido nunca se
- * dedujo del presupuesto real, solo se "reservaba" a nivel UI.
+ * Adquiere de manera atómica el estado de cierre de mercado.
+ *
+ * @param {FirebaseFirestore.DocumentReference} mercadoRef - Referencia al mercado del día.
+ * @returns {Promise<boolean>} - true si esta invocación tomó el cierre; false si ya estaba tomado.
+ */
+async function intentarBloquearCierreMercado(mercadoRef) {
+  return db.runTransaction(async (transaccion) => {
+    const snap = await transaccion.get(mercadoRef)
+    if (!snap.exists) return false
+    if (snap.data().estado !== 'abierto') return false
+    transaccion.update(mercadoRef, { estado: 'cerrando' })
+    return true
+  })
+}
+
+/**
+ * Resuelve todas las pujas de un mercado cerrado. La mayor por carta gana; en
+ * caso de empate, la primera registrada. Si el mejor postor no tiene
+ * presupuesto, la carta se cede al siguiente postor del ranking (y así
+ * sucesivamente), evitando perder la carta por falta de saldo del líder.
+ *
+ * Todas las pujas (ganadas y perdedoras) se borran en el MISMO batch atómico
+ * que los fichajes, lo que vuelve la resolución idempotente ante reintentos:
+ * una segunda invocación vería `pujas` vacías y saldría sin duplicar nada.
+ *
  * @param {FirebaseFirestore.DocumentReference} mercadoRef - Referencia al documento del mercado.
  * @returns {Promise<void>}
  */
 async function resolverPujasMercado(mercadoRef) {
   const pujasSnapshot = await mercadoRef.collection('pujas').get()
-  if (pujasSnapshot.empty) return
+  if (pujasSnapshot.empty) return {}
 
   const mercadoSnap = await mercadoRef.get()
   const cartasMercado = mercadoSnap.exists ? mercadoSnap.data().cartas || [] : []
   const mapaCartas = Object.fromEntries(cartasMercado.map((carta) => [carta.id, carta]))
 
-  const pujasPorCarta = seleccionarPujasGanadoras(pujasSnapshot.docs.map((doc) => doc.data()))
+  const pujasParaRanking = pujasSnapshot.docs.map((doc) => ({ ref: doc.ref, ...doc.data() }))
+  const rankPorCarta = seleccionarPujasGanadoras(pujasParaRanking)
 
-  const cartasPorParticipante = {}
-  for (const [idCarta, pujaGanadora] of Object.entries(pujasPorCarta)) {
-    const { idParticipante } = pujaGanadora
-    if (!cartasPorParticipante[idParticipante]) cartasPorParticipante[idParticipante] = []
-    cartasPorParticipante[idParticipante].push({ idCarta, pujaGanadora })
-  }
+  // Procesamos las cartas en orden desc por la cantidad de la puja líder, así
+  // los fichajes más valiosos se honran primero cuando el presupuesto justo
+  // obligue a descartar alguno (determinismo, no dependiente del hash).
+  const cartasOrdenadasPorValor = Object.entries(rankPorCarta).sort(
+    ([, rankingA], [, rankingB]) => rankingB[0].cantidad - rankingA[0].cantidad,
+  )
 
   const batch = db.batch()
+  const estadoParticipantes = {}
 
-  for (const [idParticipante, cartasGanadas] of Object.entries(cartasPorParticipante)) {
-    const participacionRef = db.collection('participaciones').doc(idParticipante)
-    const participacionSnap = await participacionRef.get()
-    if (!participacionSnap.exists) continue
-
-    const participacion = participacionSnap.data()
-    let presupuestoRestante = participacion.presupuesto || 0
+  async function cargarEstadoParticipante(idParticipante) {
+    if (idParticipante in estadoParticipantes) return estadoParticipantes[idParticipante]
+    const ref = db.collection('participaciones').doc(idParticipante)
+    const snap = await ref.get()
+    if (!snap.exists) {
+      estadoParticipantes[idParticipante] = null
+      return null
+    }
+    const participacion = snap.data()
     const garaje = participacion.garaje || { coches: [], pilotos: [], potenciadores: [] }
-
-    // Migración del formato antiguo (coche singular) al nuevo (coches[]).
     if (garaje.coche !== undefined || !garaje.coches) {
       garaje.coches = garaje.coche ? [garaje.coche] : []
       delete garaje.coche
     }
+    const estado = { ref, participacion, presupuestoRestante: participacion.presupuesto || 0, garaje }
+    estadoParticipantes[idParticipante] = estado
+    return estado
+  }
 
-    const emailUsuario = participacion.email_usuario
-    const nombreUsuario = participacion.nombre_usuario || emailUsuario
+  for (const [idCarta, ranking] of cartasOrdenadasPorValor) {
+    for (const puja of ranking) {
+      const { idParticipante, cantidad, tipoCarta } = puja
+      const estado = await cargarEstadoParticipante(idParticipante)
+      if (!estado) continue
+      if (cantidad > estado.presupuestoRestante) continue
 
-    for (const { idCarta, pujaGanadora } of cartasGanadas) {
-      const { cantidad, tipoCarta } = pujaGanadora
-
-      if (cantidad > presupuestoRestante) continue
-
+      estado.presupuestoRestante -= cantidad
       const cartaCompleta = mapaCartas[idCarta]
-      const cartaGanada = construirCartaGanada(cartaCompleta, idCarta, pujaGanadora, cantidad, tipoCarta)
+      const cartaGanada = construirCartaGanada(cartaCompleta, idCarta, puja, cantidad, tipoCarta)
       const cartaEquipable = { ...cartaGanada, equipado: false }
 
-      if (tipoCarta === 'coche') garaje.coches.push(cartaEquipable)
-      else if (tipoCarta === 'piloto') garaje.pilotos = [...(garaje.pilotos || []), cartaEquipable]
-      else if (tipoCarta === 'potenciador') garaje.potenciadores = [...(garaje.potenciadores || []), cartaEquipable]
+      if (tipoCarta === 'coche') estado.garaje.coches.push(cartaEquipable)
+      else if (tipoCarta === 'piloto') estado.garaje.pilotos = [...(estado.garaje.pilotos || []), cartaEquipable]
+      else if (tipoCarta === 'potenciador') estado.garaje.potenciadores = [...(estado.garaje.potenciadores || []), cartaEquipable]
 
-      presupuestoRestante -= cantidad
+      if (!estado.cartasAdjudicadas) estado.cartasAdjudicadas = []
+      estado.cartasAdjudicadas.push({ idCarta, puja })
+      break
+    }
+  }
 
-      const nombreCarta = cartaGanada.nombre || pujaGanadora.nombreCarta
+  for (const estado of Object.values(estadoParticipantes)) {
+    if (!estado || !estado.cartasAdjudicadas) continue
+    const { participacion } = estado
+    const nombreUsuario = participacion.nombre_usuario || participacion.email_usuario
+
+    batch.update(estado.ref, {
+      presupuesto: estado.presupuestoRestante,
+      garaje: estado.garaje,
+    })
+
+    for (const { idCarta, puja } of estado.cartasAdjudicadas) {
+      const cartaCompleta = mapaCartas[idCarta]
+      const nombreCarta = (cartaCompleta && cartaCompleta.nombre) || puja.nombreCarta
       const refEvento = db.collection('actividad').doc(participacion.id_liga).collection('eventos').doc()
       batch.create(refEvento, {
         idLiga: participacion.id_liga,
         nombreUsuario,
         tipo: 'compra',
-        descripcion: `ha ganado la puja por ${tipoCarta} ${nombreCarta} por ${cantidad}M`,
+        descripcion: `ha ganado la puja por ${puja.tipoCarta} ${nombreCarta} por ${puja.cantidad}M`,
         fecha: FieldValue.serverTimestamp(),
       })
     }
-
-    batch.update(participacionRef, {
-      presupuesto: presupuestoRestante,
-      garaje,
-    })
   }
 
-  await batch.commit()
+  // Borramos TODA la subcolección de pujas en el mismo batch: el mercado
+  // está cerrado y los docs ya son histórico. A la vez, vuelve idempotente un
+  // eventual reintento: pujas inexistentes -> return temprano -> sin duplicar.
+  for (const doc of pujasSnapshot.docs) batch.delete(doc.ref)
 
-  await actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta)
+  await batch.commit()
+}
+
+/**
+ * Reparte el bono diario de cierre de mercado a todas las participaciones
+ * de una liga. Se invoca justo después de resolver las pujas del día cerrado,
+ * @param {string} idLiga - ID de la liga cuyo mercado se ha cerrado.
+ * @returns {Promise<number>} - Número de participaciones bonificadas.
+ */
+async function otorgarBonoDiarioCierreMercado(idLiga) {
+  const participacionesSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).get()
+  if (participacionesSnap.empty) return 0
+
+  const batch = db.batch()
+  for (const documento of participacionesSnap.docs) {
+    batch.update(documento.ref, { presupuesto: FieldValue.increment(BONO_DIARIO_CIERRE_MERCADO) })
+  }
+  await batch.commit()
+  return participacionesSnap.size
 }
 
 /**
@@ -167,229 +217,61 @@ async function recopilarCartasFichadasEnLiga(idLiga) {
  * @returns {Promise<Object>} - Resultado de la operación.
  */
 async function ejecutarGeneracionMercadoParaLiga(idLiga) {
+  const ref = referenciaMercado(idLiga)
+  const snap = await ref.get()
 
-  const ahora = new Date()
-  const fechaHoy = calcularFechaMercado(ahora)
-  const refHoy = referenciaDiaMercado(idLiga, ahora)
+  if (snap.exists) {
+    const datos = snap.data()
+    const sigueAbierto = datos.estado === 'abierto' && datos.fechaCierre && new Date(datos.fechaCierre).getTime() > Date.now()
 
-  const mercadoExistente = await refHoy.get()
-  if (mercadoExistente.exists) {
-    return { mensaje: `El mercado ${fechaHoy} ya fue generado previamente.`, idMercado: fechaHoy, omitido: true }
+    if (sigueAbierto) {
+      return { mensaje: 'El mercado actual sigue abierto.', idLiga, omitido: true }
+    }
+
+    // Rotación del mercado. Puede ser rotación normal (abierto con fechaCierre
+    // ya pasada) o recuperación de un cierre interrumpido (estado 'cerrando'
+    // pegado por un crash previo). En ambos casos resolvemos las pujas y
+    // sobrescribimos el doc con cartas nuevas en un único flujo, sin dejar
+    // estados pegajosos.
+    if (datos.estado === 'abierto') {
+      const bloqueado = await intentarBloquearCierreMercado(ref)
+      if (!bloqueado) return { mensaje: 'Otra invocación ya está cerrando el mercado.', idLiga, omitido: true }
+      try {
+        await resolverPujasMercado(ref)
+        await otorgarBonoDiarioCierreMercado(idLiga)
+      } catch (error) {
+        await ref.update({ estado: 'abierto' }).catch(() => {})
+        throw error
+      }
+    } else {
+      // estado === 'cerrando' (recovery): resolverPujasMercado es idempotente
+      // (si el batch previo commitó, las pujas ya no existen y retorna; si no
+      // commitó, las adjudica ahora). Sin lock porque el camino de recovery
+      // solo se alcanza tras un crash previo, no en concurrencia normal.
+      await resolverPujasMercado(ref)
+      await otorgarBonoDiarioCierreMercado(idLiga)
+    }
   }
 
-  // Si el mercado de ayer sigue abierto, lo resuelvo ANTES de crear el de hoy
-  // para cerrar el ciclo pujas ganadoras → garajes → precios dinámicos.
-  const ayer = new Date(ahora)
-  ayer.setUTCDate(ayer.getUTCDate() - 1)
-  const refAyer = referenciaDiaMercado(idLiga, ayer)
-  const mercadoAyer = await refAyer.get()
-
-  if (mercadoAyer.exists && mercadoAyer.data().estado === 'abierto') {
-    await resolverPujasMercado(refAyer)
-    await refAyer.update({ estado: 'cerrado' })
-  }
-
+  // Sobrescribe (rotación) o crea el mercado con cartas frescas y nuevo cierre.
   const catalogoBase = await cargarCatalogo(db)
-  const preciosDinamicos = await cargarPreciosDinamicos(db)
-  const catalogoConPrecios = aplicarPreciosDinamicosACatalogo(catalogoBase, preciosDinamicos)
   const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
-  const cartasDelDia = seleccionarCartasDiarias(catalogoConPrecios, exclusionesLiga)
-  // Día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que el
-  // scheduler lanza la generación). Cierre y apertura del nuevo mercado
-  // ocurren en la misma ejecución del scheduler, sin ventana muerta.
-  const fechaCierre = new Date(ahora)
+  const cartasDelDia = seleccionarCartasDiarias(catalogoBase, exclusionesLiga)
+  // Cierre al día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que
+  // el scheduler lanza la próxima generación). Rotación y apertura ocurren en
+  // la misma ejecución, sin ventana muerta.
+  const fechaCierre = new Date()
   fechaCierre.setUTCDate(fechaCierre.getUTCDate() + 1)
   fechaCierre.setUTCHours(12, 0, 0, 0)
 
-  await refHoy.set({
+  await ref.set({
     idLiga,
     estado: 'abierto',
     fechaCierre: fechaCierre.toISOString(),
     cartas: cartasDelDia,
   })
 
-  return { mensaje: `Mercado generado para liga ${idLiga}.`, idMercado: fechaHoy, totalCartas: cartasDelDia.length, fechaCierre: fechaCierre.toISOString() }
-}
-
-/**
- * Genera la clave única de una carta según su tipo.
- * @param {Object} carta - Carta del mercado.
- * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
- * @returns {string} - Clave única de la carta.
- */
-function claveCartaPorTipo(carta, tipo) {
-  return tipo === 'piloto' ? `${carta.numero}|${carta.variante}` : carta.id
-}
-
-/**
- * Obtiene la colección del garaje según el tipo de carta.
- * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
- * @returns {string} - Nombre de la colección en el garaje.
- */
-function coleccionGaraje(tipo) {
-  if (tipo === 'piloto') return 'pilotos'
-  if (tipo === 'coche') return 'coches'
-  return 'potenciadores'
-}
-
-/**
- * Actualiza los precios de las cartas tras la resolución de un mercado.
- * @param {Array<Object>} cartasMercado - Cartas del mercado.
- * @param {Object} pujasPorCarta - Pujas ganadoras por carta.
- * @returns {Promise<void>}
- */
-async function actualizarPreciosTrasResolucion(cartasMercado, pujasPorCarta) {
-  const refPrecios = db.collection('catalogo').doc('precios')
-  const refHistorial = db.collection('catalogo').doc('historial')
-  const [snapPrecios, snapHistorial] = await Promise.all([refPrecios.get(), refHistorial.get()])
-
-  const preciosActuales = snapPrecios.exists ? snapPrecios.data() : {}
-  const historialActual = snapHistorial.exists ? snapHistorial.data() : {}
-
-  const preciosNuevos = {
-    pilotos: { ...(preciosActuales.pilotos || {}) },
-    coches: { ...(preciosActuales.coches || {}) },
-    potenciadores: { ...(preciosActuales.potenciadores || {}) },
-  }
-  const historialNuevo = {
-    pilotos: { ...(historialActual.pilotos || {}) },
-    coches: { ...(historialActual.coches || {}) },
-    potenciadores: { ...(historialActual.potenciadores || {}) },
-  }
-
-  const deltasPorTipo = { piloto: {}, coche: {}, potenciador: {} }
-  const nuevosAbsolutosPorTipo = { piloto: {}, coche: {}, potenciador: {} }
-
-  for (const tipo of ['piloto', 'coche', 'potenciador']) {
-    const campo = coleccionGaraje(tipo)
-    for (const carta of cartasMercado) {
-      if (carta.tipoCarta !== tipo) continue
-      const clave = claveCartaPorTipo(carta, tipo)
-      if (!clave) continue
-
-      const pujaGanadora = pujasPorCarta[carta.id]
-      const muestra = pujaGanadora
-        ? Number(pujaGanadora.cantidad)
-        : Number(carta.precio) * FACTOR_DESINTERES
-      const previas = historialNuevo[campo][clave] || []
-      const combinadas = [...previas, muestra].slice(-HISTORIAL_MAX_MUESTRAS)
-      historialNuevo[campo][clave] = combinadas
-
-      const media = combinadas.reduce((a, v) => a + v, 0) / combinadas.length
-      const precioNuevo = Math.max(PRECIO_MINIMO, Math.round(media * 10) / 10)
-      const precioAnterior = preciosActuales[campo]?.[clave]
-      preciosNuevos[campo][clave] = precioNuevo
-
-      if (precioAnterior == null) {
-        nuevosAbsolutosPorTipo[tipo][clave] = precioNuevo
-      } else {
-        const delta = Math.round((precioNuevo - precioAnterior) * 10) / 10
-        if (delta !== 0) deltasPorTipo[tipo][clave] = delta
-      }
-    }
-  }
-
-  const fecha = new Date().toISOString()
-  await Promise.all([
-    refPrecios.set({ ...preciosNuevos, fechaActualizacion: fecha }),
-    refHistorial.set({ ...historialNuevo, fechaActualizacion: fecha }),
-  ])
-
-  const tareas = []
-  for (const tipo of ['piloto', 'coche', 'potenciador']) {
-    const coleccion = coleccionGaraje(tipo)
-    if (Object.keys(deltasPorTipo[tipo]).length > 0) {
-      tareas.push(propagarAGarajes(tipo, coleccion, deltasPorTipo[tipo], false))
-      tareas.push(propagarAMercadosAbiertos(tipo, deltasPorTipo[tipo]))
-    }
-    if (Object.keys(nuevosAbsolutosPorTipo[tipo]).length > 0) {
-      tareas.push(propagarAGarajes(tipo, coleccion, nuevosAbsolutosPorTipo[tipo], true))
-    }
-  }
-  if (tareas.length > 0) await Promise.all(tareas)
-}
-
-/**
- * Propaga los cambios de precios a los garajes de los participantes.
- * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
- * @param {string} coleccion - Nombre de la colección en el garaje.
- * @param {Object} cambiosPorClave - Cambios de precios por clave de carta.
- * @param {boolean} esAbsoluto - Indica si los cambios son absolutos o relativos.
- * @returns {Promise<void>}
- */
-async function propagarAGarajes(tipo, coleccion, cambiosPorClave, esAbsoluto) {
-  const snap = await db.collection('participaciones').get()
-  const batch = db.batch()
-  let cambios = 0
-
-  for (const doc of snap.docs) {
-    const garaje = doc.data().garaje
-    const cartas = garaje && garaje[coleccion]
-    if (!Array.isArray(cartas)) continue
-
-    let huboCambio = false
-    const actualizadas = cartas.map((carta) => {
-      if (!carta) return carta
-      const clave = claveCartaPorTipo(carta, tipo)
-      if (!clave || cambiosPorClave[clave] == null) return carta
-      const precio = esAbsoluto
-        ? cambiosPorClave[clave]
-        : Math.max(
-            PRECIO_MINIMO,
-            Math.round((Number(carta.precio || 0) + cambiosPorClave[clave]) * 10) / 10,
-          )
-      huboCambio = true
-      return { ...carta, precio }
-    })
-
-    if (huboCambio) {
-      batch.update(doc.ref, { [`garaje.${coleccion}`]: actualizadas })
-      cambios++
-    }
-  }
-
-  if (cambios > 0) await batch.commit()
-}
-
-
-/**
- * Propaga los cambios de precios a los mercados abiertos.
- * @param {string} tipo - Tipo de carta ('piloto', 'coche', 'potenciador').
- * @param {Object} deltas - Cambios de precios por clave de carta.
- * @returns {Promise<void>}
- */
-async function propagarAMercadosAbiertos(tipo, deltas) {
-  const snap = await db.collectionGroup('dias').where('estado', '==', 'abierto').get()
-  if (snap.empty) return
-
-  const batch = db.batch()
-  let cambios = 0
-
-  for (const doc of snap.docs) {
-    const cartas = doc.data().cartas || []
-    let huboCambio = false
-
-    const actualizadas = cartas.map((carta) => {
-      if (carta.tipoCarta !== tipo) return carta
-      const clave = claveCartaPorTipo(carta, tipo)
-      if (!clave || deltas[clave] == null) return carta
-      huboCambio = true
-      return {
-        ...carta,
-        precio: Math.max(
-          PRECIO_MINIMO,
-          Math.round((Number(carta.precio || 0) + deltas[clave]) * 10) / 10,
-        ),
-      }
-    })
-
-    if (huboCambio) {
-      batch.update(doc.ref, { cartas: actualizadas })
-      cambios++
-    }
-  }
-
-  if (cambios > 0) await batch.commit()
+  return { mensaje: `Mercado generado para liga ${idLiga}.`, idLiga, totalCartas: cartasDelDia.length, fechaCierre: fechaCierre.toISOString() }
 }
 
 /**
@@ -401,8 +283,8 @@ async function propagarAMercadosAbiertos(tipo, deltas) {
  */
 exports.generarMercado = onSchedule(
   {
-    schedule: 'every day 12:00',
-    timeZone: 'UTC',
+    schedule: 'every day 16:00',
+    timeZone: 'Europe/Madrid',
     region: REGION,
     retryCount: 3,
     minBackoffSeconds: 1800,
@@ -452,8 +334,9 @@ async function sumarComprometidoEnMercado(mercadoRef, email, idCartaExcluida) {
  * @returns {Promise<Object|null>} - Documento del mercado abierto o null si no existe.
  */
 async function cargarMercadoAbiertoDeLiga(idLiga) {
-  const snap = await db.collection('mercados').doc(idLiga).collection('dias').where('estado', '==', 'abierto').limit(1).get()
-  return snap.empty ? null : snap.docs[0]
+  const snap = await db.collection('mercados').doc(idLiga).get()
+  if (!snap.exists || snap.data().estado !== 'abierto') return null
+  return snap
 }
 
 /**
@@ -483,7 +366,12 @@ exports.registrarPuja = onCall(OPCIONES, async (request) => {
   if (!mercadoDoc) {
     throw new HttpsError('failed-precondition', 'No hay mercado abierto para esta liga.')
   }
-  const cartas = mercadoDoc.data().cartas || []
+  const datosMercado = mercadoDoc.data()
+  const fechaCierre = datosMercado.fechaCierre ? new Date(datosMercado.fechaCierre).getTime() : null
+  if (fechaCierre !== null && Date.now() >= fechaCierre) {
+    throw new HttpsError('failed-precondition', 'El mercado ya está cerrado, no se aceptan pujas.')
+  }
+  const cartas = datosMercado.cartas || []
   const cartaObjetivo = cartas.find((carta) => carta.id === idCarta)
   if (!cartaObjetivo) {
     throw new HttpsError('not-found', 'La carta no está en el mercado de hoy.')
@@ -563,16 +451,11 @@ exports.eliminarPuja = onCall(OPCIONES, async (request) => {
  */
 async function agregarBorradoPujasUsuario(batch, idLiga, email) {
   const correo = String(email).trim().toLowerCase()
-  const diasSnapshot = await db.collection('mercados').doc(idLiga).collection('dias').get()
-  let pujasEliminadas = 0
-  for (const documentoDia of diasSnapshot.docs) {
-    const pujasSnapshot = await documentoDia.ref.collection('pujas').where('emailUsuario', '==', correo).get()
-    for (const documentoPuja of pujasSnapshot.docs) {
-      batch.delete(documentoPuja.ref)
-      pujasEliminadas += 1
-    }
+  const pujasSnapshot = await db.collection('mercados').doc(idLiga).collection('pujas').where('emailUsuario', '==', correo).get()
+  for (const documentoPuja of pujasSnapshot.docs) {
+    batch.delete(documentoPuja.ref)
   }
-  return pujasEliminadas
+  return pujasSnapshot.size
 }
 
 module.exports.cargarMercadoAbiertoDeLiga = cargarMercadoAbiertoDeLiga

@@ -1,5 +1,6 @@
 export const perfilesPuntuacion = {
   qualy: {
+    resumenPuntuacion: 'Este piloto puntúa en base a su posición en la sesión de clasificación.',
     reglasUsuario: [
       'Puntos según posición en la sesión de clasificación.',
       'P1: 25 / P2: 18 / P3: 15 / P4: 12 / P5: 10.',
@@ -9,6 +10,7 @@ export const perfilesPuntuacion = {
     ],
   },
   carrera: {
+    resumenPuntuacion: 'Este piloto puntúa en base a su posición final en carrera.',
     reglasUsuario: [
       'Puntos según posición final en carrera.',
       'P1: 25 / P2: 18 / P3: 15 / P4: 12 / P5: 10.',
@@ -18,6 +20,8 @@ export const perfilesPuntuacion = {
     ],
   },
   todo_terreno: {
+    resumenPuntuacion:
+      'Este piloto puntúa en base a su posición en carrera, amplificada por el caos de la jornada (lluvia, coches de seguridad y abandonos).',
     reglasUsuario: [
       'Puntos de carrera multiplicados por un factor de caos (rango 0.70 a 1.45).',
       'Factor base: 0.70 (carrera seca y sin incidentes).',
@@ -28,6 +32,7 @@ export const perfilesPuntuacion = {
     ],
   },
   base: {
+    resumenPuntuacion: 'Este piloto puntúa en base a la media entre su posición en clasificación y su posición final en carrera.',
     reglasUsuario: [
       'Media de los puntos de Clasificación y Carrera.',
       '(Puntos Clasificación + Puntos Carrera) / 2.',
@@ -35,6 +40,8 @@ export const perfilesPuntuacion = {
     ],
   },
   remontador: {
+    resumenPuntuacion:
+      'Este piloto puntúa en base al diferencial de adelantamientos (adelantamientos realizados menos veces que fue adelantado).',
     reglasUsuario: [
       'Premia los adelantamientos en pista.',
       'Diferencial = adelantamientos realizados − veces adelantado.',
@@ -45,6 +52,8 @@ export const perfilesPuntuacion = {
     ],
   },
   estratega: {
+    resumenPuntuacion:
+      'Este piloto puntúa en base al tiempo máximo de uso de neumático en una carrera, junto con su número de paradas y su posición final.',
     reglasUsuario: [
       'Suma de tres bonus: paradas, stint más largo y posición final.',
       '1 parada en boxes: +10 / 2 paradas: +5 / 3 o más: 0.',

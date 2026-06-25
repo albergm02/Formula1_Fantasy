@@ -150,5 +150,4 @@ function construirCatalogoCompleto() {
 module.exports = {
   construirCatalogoCompleto,
   pilotosBase,
-  variantesPiloto,
 }

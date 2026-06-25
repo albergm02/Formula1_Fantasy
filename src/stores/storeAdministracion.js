@@ -6,7 +6,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import {
-  cargarListaJornadas,
   cargarListaLigas,
   cargarListaUsuarios,
   eliminarLigaComoAdministrador,
@@ -14,26 +13,24 @@ import {
 } from '@/services/servicioAdministracion'
 
 /**
- * Store para manejar la administración de ligas, usuarios y jornadas.
+ * Store para manejar la administración de ligas y usuarios.
  *
- * @returns {Object} - Contiene las listas de ligas, usuarios y jornadas, y las funciones para cargarlas y eliminarlas.
+ * @returns {Object} - Contiene las listas de ligas y usuarios, y las funciones para cargarlas y eliminarlas.
  */
 export const usarStoreAdministracion = defineStore('administracion', () => {
   const ligas = ref([])
   const usuarios = ref([])
-  const jornadas = ref([])
 
   /**
-   * Carga en paralelo las listas de ligas, usuarios y jornadas.
+   * Carga en paralelo las listas de ligas y usuarios.
    * @function cargarListas
    * @memberof module:StoreAdministracion
    * @returns {Promise<void>}
    */
   async function cargarListas() {
-    const [listaLigas, listaUsuarios, listaJornadas] = await Promise.all([cargarListaLigas(), cargarListaUsuarios(), cargarListaJornadas()])
+    const [listaLigas, listaUsuarios] = await Promise.all([cargarListaLigas(), cargarListaUsuarios()])
     ligas.value = listaLigas
     usuarios.value = listaUsuarios
-    jornadas.value = listaJornadas
   }
   /**
    * Elimina un usuario como administrador.

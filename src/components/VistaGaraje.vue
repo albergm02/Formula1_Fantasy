@@ -10,6 +10,7 @@ import { usarStoreGaraje } from '@/stores/storeGaraje'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
+import Message from 'primevue/message'
 import CartaItem from '@/components/CartaItem.vue'
 
 const props = defineProps({
@@ -38,6 +39,9 @@ const valorTotalGaraje = computed(() => {
 const dialogoProteccion = ref(false)
 const elementoProtegiendo = ref(null)
 const cantidadInversion = ref(1)
+const alineandoCoche = ref(false)
+const alineandoPiloto = ref(false)
+const alineandoPotenciador = ref(false)
 
 const calcularValorReventa = (precio = 0) => Math.round(Number(precio || 0) * 0.9 * 100) / 100
 const formatearValorMercado = (carta) => storeGaraje.obtenerValorMercado(carta).toFixed(2)
@@ -78,9 +82,34 @@ const confirmarVentaPiloto = (piloto) => {
   })
 }
 
-const alternarEquipado = async (instanciaId) => {
-  const resultado = await storeGaraje.alternarEquipado(instanciaId)
-  if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
+const alternarCoche = async (instanciaId) => {
+  alineandoCoche.value = true
+  try {
+    const resultado = await storeGaraje.alternarEquipado(instanciaId)
+    if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
+  } finally {
+    alineandoCoche.value = false
+  }
+}
+
+const alternarPiloto = async (instanciaId) => {
+  alineandoPiloto.value = true
+  try {
+    const resultado = await storeGaraje.alternarEquipado(instanciaId)
+    if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
+  } finally {
+    alineandoPiloto.value = false
+  }
+}
+
+const alternarPotenciador = async (instanciaId) => {
+  alineandoPotenciador.value = true
+  try {
+    const resultado = await storeGaraje.alternarEquipado(instanciaId)
+    if (!resultado.success) notificacion.add({ severity: 'warn', summary: 'Acción denegada', detail: resultado.message, life: 5000 })
+  } finally {
+    alineandoPotenciador.value = false
+  }
 }
 
 const abrirDialogoProteccion = (elemento) => {
@@ -193,8 +222,9 @@ const confirmarEjecucionClausula = (elemento) => {
 
             <div v-if="!modoRival" class="grid grid-cols-3 gap-1.5 w-full">
               <Button
-                :label="coche.equipado ? 'En uso' : 'Usar chasis'"
-                @click="alternarEquipado(coche.instancia_id)"
+                :label="coche.equipado ? 'Alineado' : 'Alinear'"
+                :loading="alineandoCoche"
+                @click="alternarCoche(coche.instancia_id)"
                 size="small"
                 :class="coche.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                 :pt="{
@@ -278,8 +308,9 @@ const confirmarEjecucionClausula = (elemento) => {
 
             <div v-if="!modoRival" class="grid grid-cols-3 gap-1.5">
               <Button
-                :label="piloto.equipado ? 'Titular' : 'Hacer titular'"
-                @click="alternarEquipado(piloto.instancia_id)"
+                :label="piloto.equipado ? 'Alineado' : 'Alinear'"
+                :loading="alineandoPiloto"
+                @click="alternarPiloto(piloto.instancia_id)"
                 size="small"
                 :class="piloto.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
                 :pt="{
@@ -352,8 +383,9 @@ const confirmarEjecucionClausula = (elemento) => {
               <span class="font-black text-[#D4A843]">{{ formatearValorMercado(potenciador) }}M</span>
             </span>
             <Button
-              :label="potenciador.equipado ? 'Instalado' : 'Instalar'"
-              @click="alternarEquipado(potenciador.instancia_id)"
+              :label="potenciador.equipado ? 'Alineado' : 'Alinear'"
+              :loading="alineandoPotenciador"
+              @click="alternarPotenciador(potenciador.instancia_id)"
               size="small"
               class="w-full"
               :class="potenciador.equipado ? '!bg-emerald-900/30 !border-emerald-500/50' : '!bg-[#1A1A1F] !border-zinc-700'"
@@ -378,19 +410,16 @@ const confirmarEjecucionClausula = (elemento) => {
       v-model:visible="dialogoProteccion"
       header="Proteger Carta"
       modal
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-      :contentStyle="{ backgroundColor: '#1A1A1F', padding: '1.5rem' }"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
     >
       <div v-if="elementoProtegiendo" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1">
-          <span class="text-xs font-black uppercase tracking-widest text-white">
-            {{ elementoProtegiendo.nombre }}
-          </span>
-          <span class="text-[10px] text-zinc-400"> Cláusula actual: {{ calcularPrecioClausula(elementoProtegiendo).toFixed(2) }}M </span>
+        <Message severity="info" :closable="false"> Cada millón invertido aumenta la cláusula de rescisión en 2M. </Message>
+        <div class="flex flex-col gap-2">
+          <span class="text-[10px] text-zinc-400 uppercase">Cláusula actual</span>
+          <span class="text-sm font-black text-white"> {{ calcularPrecioClausula(elementoProtegiendo).toFixed(2) }}M </span>
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-[10px] font-black uppercase tracking-widest text-zinc-400"> Invertir (×2 en cláusula) </label>
+          <label class="text-xs text-zinc-400 uppercase">Invertir (M)</label>
           <InputNumber
             v-model="cantidadInversion"
             :min="1"
@@ -398,20 +427,29 @@ const confirmarEjecucionClausula = (elemento) => {
             suffix="M"
             :minFractionDigits="1"
             :maxFractionDigits="1"
-            inputClass="!bg-black !text-white !border-zinc-700 w-full"
+            inputClass="w-full !bg-[#1A1A1F] !border-zinc-700 !text-white"
             class="w-full"
           />
           <span class="text-[10px] text-zinc-500">
             Nueva cláusula: {{ (calcularPrecioClausula(elementoProtegiendo) + cantidadInversion * 2).toFixed(2) }}M
           </span>
         </div>
-        <Button
-          label="CONFIRMAR INVERSIÓN"
-          @click="confirmarInversionClausula"
-          :disabled="cantidadInversion <= 0 || cantidadInversion > storeGaraje.presupuesto"
-          class="w-full !bg-[#D4A843]/10 !border-[#D4A843]/50"
-          :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-widest text-[#D4A843]' }, icon: { class: 'text-[#D4A843]' } }"
-        />
+        <div class="flex justify-end gap-2 mt-2">
+          <Button
+            label="Cancelar"
+            text
+            @click="dialogoProteccion = false"
+            class="!bg-zinc-900 !border-zinc-700 !text-white"
+            :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+          />
+          <Button
+            label="Confirmar inversión"
+            @click="confirmarInversionClausula"
+            :disabled="cantidadInversion <= 0 || cantidadInversion > storeGaraje.presupuesto"
+            class="!bg-[#D4A843] !border-[#D4A843] !text-[#1A1A1F]"
+            :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+          />
+        </div>
       </div>
     </Dialog>
   </div>

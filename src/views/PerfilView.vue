@@ -15,6 +15,9 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Message from 'primevue/message'
 import { useToast } from 'primevue/usetoast'
+import { Form } from '@primevue/forms'
+import { zodResolver } from '@primevue/forms/resolvers/zod'
+import { z } from 'zod'
 
 const router = useRouter()
 const storeAutenticacion = usarStoreAutenticacion()
@@ -25,7 +28,6 @@ const puedeUsarContrasena = storeAutenticacion.tieneSesionConContrasena
 
 const DIAS_BLOQUEO_CAMBIO_CORREO = 7
 const MILISEGUNDOS_POR_DIA = 86_400_000
-const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const fechaUltimoCambioCorreo = ref(null)
 
@@ -36,6 +38,25 @@ function calcularDiasRestantes(fechaUltimoCambio) {
 }
 
 const diasRestantesParaCambiarCorreo = computed(() => calcularDiasRestantes(fechaUltimoCambioCorreo.value))
+
+const valoresInicialesCambioCorreo = ref({ correoNuevo: '', correoNuevoConfirmacion: '', contrasenaActual: '' })
+
+const esquemaCambioCorreo = zodResolver(
+  z
+    .object({
+      correoNuevo: z.string().min(1, 'El correo es obligatorio.').email('Formato de correo inválido.'),
+      correoNuevoConfirmacion: z.string().min(1, 'Confirma el nuevo correo.'),
+      contrasenaActual: z.string().min(1, 'Introduce tu contraseña actual.'),
+    })
+    .refine((datos) => datos.correoNuevo.toLowerCase() === datos.correoNuevoConfirmacion.toLowerCase(), {
+      message: 'Ambos campos deben tener el mismo correo.',
+      path: ['correoNuevoConfirmacion'],
+    })
+    .refine((datos) => datos.correoNuevo.toLowerCase() !== storePerfil.usuarioActual.correoAutenticacion.toLowerCase(), {
+      message: 'Introduce un correo distinto al actual.',
+      path: ['correoNuevo'],
+    }),
+)
 
 async function cargarMetadatosPerfil() {
   fechaUltimoCambioCorreo.value = await storePerfil.cargarFechaCambioCorreo(storePerfil.usuarioActual.uid)
@@ -69,37 +90,14 @@ async function confirmarCambioContrasena() {
 }
 
 const dialogoCorreoAbierto = ref(false)
-const correoNuevo = ref('')
-const correoNuevoConfirmacion = ref('')
-const contrasenaParaCorreo = ref('')
 const enviandoCorreo = ref(false)
 
 function abrirDialogoCorreo() {
-  correoNuevo.value = ''
-  correoNuevoConfirmacion.value = ''
-  contrasenaParaCorreo.value = ''
+  valoresInicialesCambioCorreo.value = { correoNuevo: '', correoNuevoConfirmacion: '', contrasenaActual: '' }
   dialogoCorreoAbierto.value = true
 }
 
-function validarSolicitudCorreo() {
-  const correoLimpio = correoNuevo.value.trim().toLowerCase()
-  const confirmacionLimpia = correoNuevoConfirmacion.value.trim().toLowerCase()
-  if (!FORMATO_CORREO.test(correoLimpio)) {
-    toast.add({ severity: 'warn', summary: 'Correo no válido', detail: 'Introduce un correo con formato correcto.', life: 4000 })
-    return false
-  }
-  if (correoLimpio !== confirmacionLimpia) {
-    toast.add({ severity: 'warn', summary: 'Los correos no coinciden', detail: 'Ambos campos deben tener el mismo correo.', life: 4000 })
-    return false
-  }
-  if (correoLimpio === storePerfil.usuarioActual.correoAutenticacion.toLowerCase()) {
-    toast.add({ severity: 'warn', summary: 'Mismo correo', detail: 'Introduce un correo distinto al actual.', life: 4000 })
-    return false
-  }
-  return true
-}
-
-async function confirmarCambioCorreo() {
+async function confirmarCambioCorreo({ valid, values }) {
   if (diasRestantesParaCambiarCorreo.value > 0) {
     toast.add({
       severity: 'warn',
@@ -109,10 +107,10 @@ async function confirmarCambioCorreo() {
     })
     return
   }
-  if (!validarSolicitudCorreo()) return
+  if (!valid) return
   enviandoCorreo.value = true
   try {
-    await storePerfil.cambiarCorreo(correoNuevo.value, contrasenaParaCorreo.value)
+    await storePerfil.cambiarCorreo(values.correoNuevo.trim(), values.contrasenaActual)
     fechaUltimoCambioCorreo.value = new Date()
     dialogoCorreoAbierto.value = false
     toast.add({
@@ -266,23 +264,48 @@ function mensajeFirebase(error) {
       header="CAMBIAR CORREO"
       :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
     >
-      <div class="flex flex-col gap-3">
+      <Form
+        v-slot="$form"
+        class="flex flex-col gap-3"
+        :initial-values="valoresInicialesCambioCorreo"
+        :resolver="esquemaCambioCorreo"
+        @submit="confirmarCambioCorreo"
+      >
         <Message severity="info" :closable="false">
           Enviaremos un enlace de confirmación al correo nuevo. El cambio no se aplica hasta que lo abras, después tendrás que iniciar
           sesión de nuevo, y no podrás volver a cambiarlo durante 7 días.
         </Message>
         <label class="text-xs text-zinc-400 uppercase">Nuevo correo</label>
-        <InputText v-model="correoNuevo" type="email" placeholder="nombre@ejemplo.com" />
+        <InputText
+          name="correoNuevo"
+          type="email"
+          placeholder="nombre@ejemplo.com"
+          class="w-full !bg-[#1A1A1F] !border-zinc-700 !text-white"
+        />
+        <Message v-if="$form.correoNuevo?.invalid" severity="error" size="small" variant="simple" class="ml-1">
+          {{ $form.correoNuevo.error.message }}
+        </Message>
         <label class="text-xs text-zinc-400 uppercase">Confirma el nuevo correo</label>
-        <InputText v-model="correoNuevoConfirmacion" type="email" placeholder="repite el correo" />
+        <InputText
+          name="correoNuevoConfirmacion"
+          type="email"
+          placeholder="repite el correo"
+          class="w-full !bg-[#1A1A1F] !border-zinc-700 !text-white"
+        />
+        <Message v-if="$form.correoNuevoConfirmacion?.invalid" severity="error" size="small" variant="simple" class="ml-1">
+          {{ $form.correoNuevoConfirmacion.error.message }}
+        </Message>
         <label class="text-xs text-zinc-400 uppercase">Contraseña actual</label>
-        <Password v-model="contrasenaParaCorreo" :feedback="false" toggleMask inputClass="w-full" />
+        <Password name="contrasenaActual" :feedback="false" toggleMask inputClass="w-full !bg-[#1A1A1F] !border-zinc-700 !text-white" />
+        <Message v-if="$form.contrasenaActual?.invalid" severity="error" size="small" variant="simple" class="ml-1">
+          {{ $form.contrasenaActual.error.message }}
+        </Message>
         <p class="text-xs text-zinc-500">Podrás volver a cambiarlo dentro de 7 días.</p>
         <div class="flex justify-end gap-2 mt-2">
           <Button label="Cancelar" text @click="dialogoCorreoAbierto = false" class="!bg-zinc-900 !border-zinc-700 !text-white" />
-          <Button label="Enviar enlace" :loading="enviandoCorreo" @click="confirmarCambioCorreo" class="!bg-[#D4A843] !border-[#D4A843]" />
+          <Button type="submit" label="Enviar enlace" :loading="enviandoCorreo" class="!bg-[#D4A843] !border-[#D4A843]" />
         </div>
-      </div>
+      </Form>
     </Dialog>
 
     <Dialog

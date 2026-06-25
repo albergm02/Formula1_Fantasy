@@ -23,6 +23,12 @@ const esquemaValidacion = zodResolver(
   }),
 )
 
+const esquemaRecuperacion = zodResolver(
+  z.object({
+    email: z.string().min(1, 'El correo es obligatorio.').email('Formato de correo inválido.'),
+  }),
+)
+
 const router = useRouter()
 const notificacion = useToast()
 const cargando = ref(false)
@@ -30,9 +36,9 @@ const cargando = ref(false)
 const storeAuth = usarStoreAutenticacion()
 const errorAuth = ref('')
 const valoresInicialesFormulario = ref({ email: '', password: '' })
+const valoresInicialesRecuperacion = ref({ email: '' })
 
 const modalRecuperacionVisible = ref(false)
-const correoRecuperacion = ref('')
 const cargandoRecuperacion = ref(false)
 
 const handleInicioSesion = async ({ valid, values }) => {
@@ -79,40 +85,18 @@ const handleInicioSesionGoogle = async () => {
 
 // Siempre devuelvo éxito genérico para no revelar si el correo existe
 // (protección anti user enumeration).
-const handleRecuperarContraseña = async () => {
-  const correoAEnviar = correoRecuperacion.value.trim()
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoAEnviar)) {
-    notificacion.add({
-      severity: 'warn',
-      summary: 'Aviso',
-      detail: 'Por favor, introduce un correo válido (ej: piloto@correo.com).',
-      life: 4000,
-    })
-    return
-  }
+const handleRecuperarContraseña = async ({ valid, values }) => {
+  if (!valid) return
 
   cargandoRecuperacion.value = true
   try {
-    await storeAuth.restablecerContrasena(correoAEnviar)
-    notificacion.add({
-      severity: 'success',
-      summary: 'Revisa tu correo',
-      detail: 'Si el correo está registrado, recibirás un enlace de recuperación.',
-      life: 6000,
-    })
+    await storeAuth.restablecerContrasena(values.email.trim())
+    notificarRecuperacionEnviada()
     modalRecuperacionVisible.value = false
-    correoRecuperacion.value = ''
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      notificacion.add({
-        severity: 'success',
-        summary: 'Revisa tu correo',
-        detail: 'Si el correo está registrado, recibirás un enlace de recuperación.',
-        life: 6000,
-      })
+      notificarRecuperacionEnviada()
       modalRecuperacionVisible.value = false
-      correoRecuperacion.value = ''
     } else {
       notificacion.add({
         severity: 'error',
@@ -126,9 +110,13 @@ const handleRecuperarContraseña = async () => {
   }
 }
 
-const alOcultarModalRecuperacion = () => {
-  correoRecuperacion.value = ''
-  cargandoRecuperacion.value = false
+const notificarRecuperacionEnviada = () => {
+  notificacion.add({
+    severity: 'success',
+    summary: 'Revisa tu correo',
+    detail: 'Si el correo está registrado, recibirás un enlace de recuperación.',
+    life: 6000,
+  })
 }
 </script>
 
@@ -227,28 +215,35 @@ const alOcultarModalRecuperacion = () => {
       v-model:visible="modalRecuperacionVisible"
       modal
       header="Recuperar Contraseña"
-      @hide="alOcultarModalRecuperacion"
       :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
     >
-      <div class="flex flex-col gap-4">
+      <Form
+        v-slot="$form"
+        class="flex flex-col gap-4"
+        :initial-values="valoresInicialesRecuperacion"
+        :resolver="esquemaRecuperacion"
+        @submit="handleRecuperarContraseña"
+      >
         <p class="text-sm text-[#F0ECEC]">Introduzca aquí su correo y le enviaremos un enlace de recuperación.</p>
 
         <InputText
-          v-model="correoRecuperacion"
+          name="email"
           type="email"
           placeholder="Escribe aquí tu correo..."
           autocomplete="email"
           class="w-full p-3 !border-zinc-700 text-white !bg-[#1A1A1F]"
-          @keyup.enter="handleRecuperarContraseña"
         />
+        <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
+          {{ $form.email.error.message }}
+        </Message>
 
         <Button
+          type="submit"
           label="ENVIAR CORREO"
           :loading="cargandoRecuperacion"
           class="w-full mt-2 py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#121218]"
-          @click="handleRecuperarContraseña"
         />
-      </div>
+      </Form>
     </Dialog>
   </div>
 </template>

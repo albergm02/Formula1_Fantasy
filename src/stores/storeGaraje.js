@@ -7,7 +7,6 @@ import { defineStore } from 'pinia'
 import { usarStorePerfil } from './storePerfil'
 import { cargarParticipacionDeUsuario } from '@/services/servicioLigas'
 import { calcularPrecioClausula, venderCarta, alternarAlineacion, gestionarClausula, ejecutarClausula } from '@/services/servicioGaraje'
-import { cargarPreciosDinamicosMercado } from '@/services/servicioMercado'
 
 const PRESUPUESTO_INICIAL = 50.0
 
@@ -33,10 +32,9 @@ export const usarStoreGaraje = defineStore('garaje', () => {
   const garaje = ref(crearGarajeVacio())
   const cargandoEquipo = ref(false)
   const ultimaJornada = ref(null)
-  const preciosMercado = ref({ pilotos: {}, coches: {}, potenciadores: {} })
 
   /**
-   * Carga el equipo del usuario para una liga específica, incluyendo participación y precios dinámicos.
+   * Carga el equipo del usuario para una liga específica.
    * @function cargarEquipo
    * @memberof module:StoreGaraje
    * @param {string} idLiga - El ID de la liga.
@@ -48,12 +46,7 @@ export const usarStoreGaraje = defineStore('garaje', () => {
 
     try {
       idLigaActiva.value = idLiga
-      const [participacion, preciosDinamicos] = await Promise.all([
-        cargarParticipacionDeUsuario(idLiga, storePerfil.usuarioActual.correoAutenticacion),
-        cargarPreciosDinamicosMercado(),
-      ])
-
-      preciosMercado.value = preciosDinamicos
+      const participacion = await cargarParticipacionDeUsuario(idLiga, storePerfil.usuarioActual.correoAutenticacion)
 
       if (participacion) {
         idParticipanteActivo.value = participacion.id
@@ -168,22 +161,15 @@ export const usarStoreGaraje = defineStore('garaje', () => {
   }
 
   /**
-   * Obtiene el valor de mercado de una carta.
+   * Obtiene el valor de mercado de una carta. Los precios son estáticos: el
+   * valor es siempre el `precio` de la carta (definido en el catálogo base).
    * @function obtenerValorMercado
    * @memberof module:StoreGaraje
    * @param {Object} carta - La carta cuyo valor de mercado se desea obtener.
    * @returns {number} - Devuelve el valor de mercado de la carta.
    */
   function obtenerValorMercado(carta) {
-    const precioBase = Number(carta?.precio ?? 0)
-    const tipoCarta = carta?.tipo || carta?.tipoCarta
-    if (tipoCarta === 'piloto') {
-      const precioDinamico = preciosMercado.value.pilotos[`${carta.numero}|${carta.variante}`]
-      return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
-    }
-    const mapa = { coche: preciosMercado.value.coches, potenciador: preciosMercado.value.potenciadores }[tipoCarta]
-    const precioDinamico = mapa ? mapa[carta.id] : null
-    return precioDinamico == null ? precioBase : Math.max(0.5, Number(precioDinamico))
+    return Number(carta?.precio ?? 0)
   }
 
   /**

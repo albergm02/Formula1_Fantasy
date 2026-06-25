@@ -3,8 +3,10 @@ import { ref, computed } from 'vue'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
+import Message from 'primevue/message'
 import { useToast } from 'primevue/usetoast'
 import { estiloVariante } from '@/utils/variantesPiloto'
+import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
 const mostrarDetalles = ref(false)
 const mostrarPuja = ref(false)
@@ -28,38 +30,16 @@ const esPotenciador = computed(() => props.tipo === 'potenciador')
 const colorVariante = computed(() => estiloVariante[props.carta.variante]?.color ?? '#a1a1aa')
 const iconoVariante = computed(() => estiloVariante[props.carta.variante]?.icono ?? 'pi-user')
 
-const etiquetaCondicion = computed(() => {
-  if (!esPotenciador.value) return null
-  const mapa = {
-    lluvia: { texto: 'Sólo cuenta si LLUEVE', color: 'text-blue-400', borde: 'border-blue-500/40' },
-    sin_lluvia: { texto: 'Sólo cuenta si la carrera es EN SECO', color: 'text-amber-300', borde: 'border-amber-500/40' },
-    safety_car: { texto: 'Sólo cuenta si hay COCHE DE SEGURIDAD (SC o VSC)', color: 'text-[#D4A843]', borde: 'border-[#D4A843]/40' },
-    carrera_limpia: {
-      texto: 'Sólo cuenta en CARRERA LIMPIA (sin lluvia ni SC)',
-      color: 'text-emerald-400',
-      borde: 'border-emerald-500/40',
-    },
-    caos: { texto: 'Sólo cuenta con 3 o más ABANDONOS', color: 'text-red-400', borde: 'border-red-500/40' },
-    sin_abandonos: { texto: 'Sólo cuenta si NADIE ABANDONA la carrera', color: 'text-sky-400', borde: 'border-sky-500/40' },
-    stint_largo: { texto: 'Sólo cuenta si UN PILOTO TUYO aguanta un STINT LARGO', color: 'text-purple-400', borde: 'border-purple-500/40' },
-    mis_remontadas: {
-      texto: 'Sólo cuenta si UN PILOTO TUYO REMONTA 3+ POSICIONES',
-      color: 'text-orange-400',
-      borde: 'border-orange-500/40',
-    },
-    mis_pilotos_terminan: {
-      texto: 'Sólo cuenta si TODOS TUS PILOTOS TERMINAN la carrera',
-      color: 'text-green-400',
-      borde: 'border-green-500/40',
-    },
-    mi_piloto_punto: {
-      texto: 'Sólo cuenta si UN PILOTO TUYO acaba EN ZONA DE PUNTOS',
-      color: 'text-cyan-400',
-      borde: 'border-cyan-500/40',
-    },
-  }
-  return mapa[props.carta.condicion] || null
-})
+const resumenPuntuacionPiloto = computed(() => perfilesPuntuacion[props.carta.variante]?.resumenPuntuacion ?? null)
+
+const resumenPuntuacionCoche = computed(
+  () =>
+    `Esta carta puntúa ${props.carta.puntuacionBase} puntos fijos en cada gran premio disputado, sin depender del resultado de la carrera.`,
+)
+
+const resumenPuntuacionPotenciador = computed(
+  () => `Esta carta multiplica la puntuación final de tu jornada por ×${props.carta.multiplicador}.`,
+)
 
 const abrirPuja = () => {
   cantidadPuja.value = props.miPuja || props.carta.precio
@@ -154,28 +134,37 @@ const cerrarDialogoPuja = () => {
             </div>
 
             <div v-if="modoMercado" class="flex gap-2">
-              <button
+              <Button
+                icon="pi pi-info-circle"
                 @click="mostrarDetalles = true"
-                class="py-2.5 px-3 flex items-center justify-center gap-1 bg-black/50 border border-white/50"
-              >
-                <i class="pi pi-info-circle text-white text-[10px]"></i>
-                <span class="text-white text-[9px] font-black uppercase">INFO</span>
-              </button>
-              <button @click="abrirPuja" class="flex-1 py-2.5 flex items-center justify-center bg-black/50 border border-white/50">
-                <span class="text-[10px] font-black uppercase tracking-widest" :class="miPuja != null ? 'text-[#D4A843]' : 'text-white'">
-                  {{ miPuja != null ? 'EDITAR PUJA' : `PUJAR (${Number(carta.precio).toFixed(2)}M)` }}
-                </span>
-              </button>
+                size="small"
+                class="!bg-[#1A1A1F] !border-zinc-700"
+                :pt="{
+                  label: { class: 'text-[10px] font-black uppercase tracking-wide text-zinc-300' },
+                  icon: { class: '!text-zinc-300 text-[10px]' },
+                }"
+              />
+              <Button
+                :label="miPuja != null ? 'EDITAR PUJA' : `PUJAR ${Number(carta.precio).toFixed(2)}M`"
+                @click="abrirPuja"
+                size="small"
+                class="flex-1 !bg-[#1A1A1F] !border-[#D4A843]/40"
+                :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-[#D4A843]' } }"
+              />
             </div>
 
-            <button
+            <Button
               v-else
+              label="DETALLES"
+              icon="pi pi-info-circle"
               @click="mostrarDetalles = true"
-              class="w-full py-2.5 flex items-center justify-center gap-1.5 bg-black/50 border border-white/50"
-            >
-              <i class="pi pi-info-circle text-white text-xs"></i>
-              <span class="text-white text-[10px] font-black uppercase tracking-widest">DETALLES</span>
-            </button>
+              size="small"
+              class="w-full !bg-[#1A1A1F] !border-zinc-700"
+              :pt="{
+                label: { class: 'text-[10px] font-black uppercase tracking-wide text-zinc-300' },
+                icon: { class: '!text-zinc-300 text-[10px]' },
+              }"
+            />
           </div>
         </div>
       </div>
@@ -198,6 +187,9 @@ const cerrarDialogoPuja = () => {
               {{ carta.nombreVariante || carta.variante }}
             </span>
           </div>
+          <p v-if="resumenPuntuacionPiloto" class="text-xs text-zinc-300 leading-relaxed">
+            {{ resumenPuntuacionPiloto }}
+          </p>
         </template>
 
         <!-- Coche -->
@@ -206,15 +198,7 @@ const cerrarDialogoPuja = () => {
             <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest">Puntos por jornada</p>
             <span class="text-3xl font-black text-white">{{ carta.puntuacionBase }}</span>
           </div>
-          <div v-if="carta.habilidad">
-            <p class="text-xs font-black text-emerald-400 uppercase tracking-wide mb-1">
-              {{ carta.habilidad.nombre }}
-            </p>
-            <p class="text-xs text-zinc-300 leading-relaxed">
-              Si alineas pilotos del mismo equipo que este chasis, los puntos totales de la jornada se multiplican por
-              <strong class="text-emerald-300">×1.10</strong>.
-            </p>
-          </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">{{ resumenPuntuacionCoche }}</p>
         </template>
 
         <!-- Potenciador -->
@@ -224,6 +208,7 @@ const cerrarDialogoPuja = () => {
             <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Multiplicador</p>
             <span class="text-2xl font-black text-emerald-400">×{{ carta.multiplicador }}</span>
           </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">{{ resumenPuntuacionPotenciador }}</p>
         </template>
       </div>
     </Dialog>
@@ -233,45 +218,43 @@ const cerrarDialogoPuja = () => {
       v-model:visible="mostrarPuja"
       header="Realizar Puja"
       modal
-      :style="{ width: '90vw', maxWidth: '300px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
+      :style="{ width: '90vw', maxWidth: '400px', border: '1px solid #2A2A32', borderRadius: '0.75rem' }"
     >
-      <div class="space-y-4">
-        <div class="text-center">
-          <p class="text-white font-bold text-sm">{{ carta.nombre }}</p>
-          <p class="text-zinc-400 text-xs mt-1">
-            Precio base:
-            <span class="text-emerald-400 font-bold">{{ Number(carta.precio).toFixed(2) }}M</span>
-          </p>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-          <label class="text-zinc-300 text-xs font-bold uppercase">Tu puja (M)</label>
+      <div class="flex flex-col gap-4">
+        <Message severity="info" :closable="false"> Puja mínima: {{ Number(carta.precio).toFixed(2) }}M (precio base). </Message>
+        <div class="flex flex-col gap-2">
+          <label class="text-xs text-zinc-400 uppercase">Tu puja (M)</label>
           <InputNumber
             v-model="cantidadPuja"
             :step="0.1"
             :minFractionDigits="2"
             :maxFractionDigits="2"
-            inputClass="text-center text-white bg-zinc-800 border-zinc-600 w-32"
+            inputClass="w-full !bg-[#1A1A1F] !border-zinc-700 !text-white"
+            class="w-full"
           />
         </div>
-        <Button
-          label="Confirmar puja"
-          @click="confirmarPuja"
-          class="w-full !bg-[#D4A843] !border-[#D4A843] !text-[#1A1A1F]"
-          :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
-        />
-        <Button
-          v-if="miPuja != null"
-          label="Eliminar puja"
-          @click="confirmarEliminarPuja"
-          class="w-full !bg-red-700 !border-red-700 !text-white"
-          :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
-        />
-        <Button
-          label="Cancelar"
-          @click="cerrarDialogoPuja"
-          class="w-full !bg-gray-700 !border-gray-700 !text-white"
-          :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
-        />
+        <div class="flex justify-end gap-2 mt-2">
+          <Button
+            label="Cancelar"
+            text
+            @click="cerrarDialogoPuja"
+            class="!bg-zinc-900 !border-zinc-700 !text-white"
+            :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+          />
+          <Button
+            v-if="miPuja != null"
+            label="Eliminar puja"
+            @click="confirmarEliminarPuja"
+            class="!bg-[#E10600] !border-[#E10600] !text-white"
+            :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+          />
+          <Button
+            label="Confirmar puja"
+            @click="confirmarPuja"
+            class="!bg-[#D4A843] !border-[#D4A843] !text-[#1A1A1F]"
+            :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
+          />
+        </div>
       </div>
     </Dialog>
   </div>

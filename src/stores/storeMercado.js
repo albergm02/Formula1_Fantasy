@@ -23,7 +23,9 @@ export const usarStoreMercado = defineStore('mercado', () => {
   let cancelarListenerMercado = null
   let idLigaActual = null
 
-  const hayMercadoAbierto = computed(() => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto')
+  const hayMercadoAbierto = computed(
+    () => mercadoActivo.value !== null && mercadoActivo.value.estado === 'abierto' && milisegundosRestantes.value > 0,
+  )
 
   const pilotosMercado = computed(() =>
     mercadoActivo.value ? mercadoActivo.value.cartas.filter((carta) => carta.tipoCarta === 'piloto') : [],
@@ -164,6 +166,9 @@ export const usarStoreMercado = defineStore('mercado', () => {
    * @returns {Promise<Object>} - Resultado de la operación.
    */
   async function pujarPorCarta(carta, cantidad) {
+    if (!hayMercadoAbierto.value) {
+      return { success: false, message: 'El mercado está cerrado, no se aceptan pujas.' }
+    }
     const cantidadNum = Number(cantidad)
     const esPujaExistente = misPujas.value[carta.id] !== undefined
 

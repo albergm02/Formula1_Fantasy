@@ -26,12 +26,10 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
   const participacionesSnap = await db.collection('participaciones').where('id_liga', '==', idLiga).get()
   for (const documento of participacionesSnap.docs) batch.delete(documento.ref)
 
-  const mercadosSnap = await db.collection('mercados').doc(idLiga).collection('dias').get()
-  for (const documentoMercado of mercadosSnap.docs) {
-    const pujasSnap = await documentoMercado.ref.collection('pujas').get()
-    for (const documentoPuja of pujasSnap.docs) batch.delete(documentoPuja.ref)
-    batch.delete(documentoMercado.ref)
-  }
+  const mercadoRef = db.collection('mercados').doc(idLiga)
+  const pujasSnap = await mercadoRef.collection('pujas').get()
+  for (const documentoPuja of pujasSnap.docs) batch.delete(documentoPuja.ref)
+  batch.delete(mercadoRef)
 
   const actividadSnap = await db.collection('actividad').doc(idLiga).collection('eventos').get()
   for (const documento of actividadSnap.docs) batch.delete(documento.ref)
@@ -49,7 +47,7 @@ async function borrarLigaEnCascada(idLiga, ligaSnap) {
   return {
     nombreLiga: ligaSnap.data().nombre || idLiga,
     participacionesBorradas: participacionesSnap.size,
-    mercadosBorrados: mercadosSnap.size,
+    mercadosBorrados: 1,
     eventosActividadBorrados: actividadSnap.size,
     usuariosDesvinculados: usuariosSnap.size,
   }

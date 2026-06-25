@@ -2,7 +2,7 @@
  * @module ServicioActividad
  * @description Servicio para manejar la actividad de la liga, incluyendo la carga de eventos recientes.
  */
-import { collection, query, limit, getDocs } from 'firebase/firestore'
+import { collection, query, limit, getDocs, orderBy } from 'firebase/firestore'
 import { db } from './servicioFirebase'
 
 /**
@@ -11,7 +11,7 @@ import { db } from './servicioFirebase'
  * @param {number} [maximo=30]
  */
 export async function cargarActividadLiga(idLiga, maximo = 30) {
-  const consulta = query(collection(db, 'actividad', idLiga, 'eventos'), limit(maximo))
+  const consulta = query(collection(db, 'actividad', idLiga, 'eventos'), orderBy('fecha', 'desc'), limit(maximo))
   const instantanea = await getDocs(consulta)
 
   return instantanea.docs
