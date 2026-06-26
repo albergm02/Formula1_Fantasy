@@ -125,48 +125,32 @@ const notificarRecuperacionEnviada = () => {
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/20 shadow-2xl border border-[#2A2A32] backdrop-blur-sm">
       <template #title>
         <div class="flex flex-col items-center gap-4">
-          <img src="/logo.png" alt="Logo F1" class="w-16 h-16 object-contain" />
+          <img src="/logo.png" alt="Logo P1" class="w-16 h-16 object-contain" />
           <div class="text-center">
-            <h1 class="text-3xl font-black tracking-widest text-[#D4A843]">F1 FANTASY</h1>
+            <h1 class="text-3xl font-black tracking-widest text-[#D4A843]">P1 FANTASY</h1>
+            <p class="text-xs text-zinc-400 mt-2">¡Crea y compite en ligas con tus amigos!</p>
           </div>
         </div>
       </template>
 
       <template #content>
-        <Form
-          v-slot="$form"
-          class="flex flex-col gap-4 mt-4"
-          :initial-values="valoresInicialesFormulario"
-          :resolver="esquemaValidacion"
-          @submit="handleInicioSesion"
-        >
+        <Form v-slot="$form" class="flex flex-col gap-4 mt-4" :initial-values="valoresInicialesFormulario"
+          :resolver="esquemaValidacion" @submit="handleInicioSesion">
           <div class="flex flex-col gap-1">
             <label for="email" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Email</label>
-            <InputText
-              id="email"
-              type="email"
-              name="email"
-              autocomplete="email"
-              placeholder="Escribe aquí tu correo..."
-              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
-            />
+            <InputText id="email" type="email" name="email" autocomplete="email" placeholder="Escribe aquí tu correo..."
+              class="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.email.error.message }}
             </Message>
           </div>
 
           <div class="flex flex-col gap-1">
-            <label for="password" class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
-            <Password
-              inputId="password"
-              name="password"
-              autocomplete="current-password"
-              placeholder="Escribe aquí tu contraseña..."
-              toggle-mask
-              :feedback="false"
-              class="w-full [&>input]:w-full"
-              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]"
-            />
+            <label for="password"
+              class="ml-1 text-xs font-bold uppercase tracking-wider text-[#F0ECEC]">Contraseña</label>
+            <Password inputId="password" name="password" autocomplete="current-password"
+              placeholder="Escribe aquí tu contraseña..." toggle-mask :feedback="false" class="w-full [&>input]:w-full"
+              inputClass="w-full p-3 !bg-[#1A1A1F] !border-[#F0ECEC] !text-[#F0ECEC]" />
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple" class="ml-1">
               {{ $form.password.error.message }}
             </Message>
@@ -177,28 +161,16 @@ const notificarRecuperacionEnviada = () => {
           </Message>
 
           <div class="flex flex-col gap-3 mt-4">
-            <Button
-              type="submit"
-              label="Iniciar sesión"
-              :loading="cargando"
-              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black"
-            />
+            <Button type="submit" label="Iniciar sesión" :loading="cargando"
+              class="w-full py-3 !bg-[#D4A843] !border-none shadow-lg font-black uppercase !text-black" />
 
-            <Button
-              type="button"
-              icon="pi pi-google"
-              label="Entrar con Google"
+            <Button type="button" icon="pi pi-google" label="Entrar con Google"
               class="flex items-center justify-center w-full py-3 gap-2 !bg-white !border-none shadow-lg font-bold uppercase !text-black"
-              @click="handleInicioSesionGoogle"
-            />
+              @click="handleInicioSesionGoogle" />
 
-            <Button
-              type="button"
-              label="¿Olvidaste tu contraseña?"
-              text
+            <Button type="button" label="¿Olvidaste tu contraseña?" text
               class="w-full mt-1 !bg-transparent !border-none font-bold !text-[#D4A843]"
-              @click="modalRecuperacionVisible = true"
-            />
+              @click="modalRecuperacionVisible = true" />
 
             <div class="mt-2 pt-5 pb-2 text-center border-t border-zinc-800">
               <span class="text-xs text-[#F0ECEC]">¿No tienes equipo? </span>
@@ -211,38 +183,20 @@ const notificarRecuperacionEnviada = () => {
       </template>
     </Card>
 
-    <Dialog
-      v-model:visible="modalRecuperacionVisible"
-      modal
-      header="Recuperar Contraseña"
-      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }"
-    >
-      <Form
-        v-slot="$form"
-        class="flex flex-col gap-4"
-        :initial-values="valoresInicialesRecuperacion"
-        :resolver="esquemaRecuperacion"
-        @submit="handleRecuperarContraseña"
-      >
+    <Dialog v-model:visible="modalRecuperacionVisible" modal header="Recuperar Contraseña"
+      :headerStyle="{ backgroundColor: '#1A1A1F', color: 'white', borderBottom: '1px solid #2A2A32' }">
+      <Form v-slot="$form" class="flex flex-col gap-4" :initial-values="valoresInicialesRecuperacion"
+        :resolver="esquemaRecuperacion" @submit="handleRecuperarContraseña">
         <p class="text-sm text-[#F0ECEC]">Introduzca aquí su correo y le enviaremos un enlace de recuperación.</p>
 
-        <InputText
-          name="email"
-          type="email"
-          placeholder="Escribe aquí tu correo..."
-          autocomplete="email"
-          class="w-full p-3 !border-zinc-700 text-white !bg-[#1A1A1F]"
-        />
+        <InputText name="email" type="email" placeholder="Escribe aquí tu correo..." autocomplete="email"
+          class="w-full p-3 !border-zinc-700 text-white !bg-[#1A1A1F]" />
         <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple" class="ml-1">
           {{ $form.email.error.message }}
         </Message>
 
-        <Button
-          type="submit"
-          label="ENVIAR CORREO"
-          :loading="cargandoRecuperacion"
-          class="w-full mt-2 py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#121218]"
-        />
+        <Button type="submit" label="ENVIAR CORREO" :loading="cargandoRecuperacion"
+          class="w-full mt-2 py-3 !bg-[#D4A843] !border-none font-black tracking-widest !text-[#121218]" />
       </Form>
     </Dialog>
   </div>

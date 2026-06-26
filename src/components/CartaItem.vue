@@ -1,11 +1,10 @@
 ﻿<script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import { useToast } from 'primevue/usetoast'
-import { estaEnPeriodoDeGracia, horasRestantesDeGracia } from '@/services/servicioGaraje'
 import { estiloVariante } from '@/utils/variantesPiloto'
 import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 
@@ -19,6 +18,7 @@ const props = defineProps({
   modoMercado: { type: Boolean, default: false },
   miPuja: { type: Number, default: null },
   totalPujas: { type: Number, default: 0 },
+  cargando: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['pujar', 'eliminarPuja'])
@@ -58,17 +58,25 @@ const confirmarPuja = () => {
     return
   }
   emit('pujar', { carta: props.carta, cantidad: cantidadPuja.value })
-  mostrarPuja.value = false
 }
 
 const confirmarEliminarPuja = () => {
   emit('eliminarPuja', props.carta)
-  mostrarPuja.value = false
 }
 
 const cerrarDialogoPuja = () => {
+  if (props.cargando) return
   mostrarPuja.value = false
 }
+
+watch(
+  () => props.cargando,
+  (estaCargando, estabaCargando) => {
+    if (estabaCargando && !estaCargando) {
+      mostrarPuja.value = false
+    }
+  },
+)
 </script>
 
 <template>
@@ -100,14 +108,6 @@ const cerrarDialogoPuja = () => {
         >
           <i class="pi pi-users text-[8px] text-zinc-300"></i>
           <span class="text-[10px] font-black text-zinc-300">{{ totalPujas }}</span>
-        </div>
-
-        <div
-          v-if="estaEnPeriodoDeGracia(carta)"
-          class="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 bg-black/70 border border-emerald-500/40"
-        >
-          <i class="pi pi-shield text-[8px] text-emerald-400"></i>
-          <span class="text-[10px] font-black text-emerald-400">{{ horasRestantesDeGracia(carta) }}h</span>
         </div>
 
         <div class="absolute inset-y-0 right-0 w-[55%] flex flex-col justify-between p-3">
@@ -156,6 +156,8 @@ const cerrarDialogoPuja = () => {
               <Button
                 :label="miPuja != null ? 'EDITAR PUJA' : `PUJAR ${Number(carta.precio).toFixed(2)}M`"
                 @click="abrirPuja"
+                :disabled="cargando"
+                :loading="cargando"
                 size="small"
                 class="flex-1 !bg-[#1A1A1F] !border-[#D4A843]/40"
                 :pt="{ label: { class: 'text-[10px] font-black uppercase tracking-wide text-[#D4A843]' } }"
@@ -247,6 +249,7 @@ const cerrarDialogoPuja = () => {
             label="Cancelar"
             text
             @click="cerrarDialogoPuja"
+            :disabled="cargando"
             class="!bg-zinc-900 !border-zinc-700 !text-white"
             :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
           />
@@ -254,12 +257,14 @@ const cerrarDialogoPuja = () => {
             v-if="miPuja != null"
             label="Eliminar puja"
             @click="confirmarEliminarPuja"
+            :loading="cargando"
             class="!bg-[#E10600] !border-[#E10600] !text-white"
             :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
           />
           <Button
             label="Confirmar puja"
             @click="confirmarPuja"
+            :loading="cargando"
             class="!bg-[#D4A843] !border-[#D4A843] !text-[#1A1A1F]"
             :pt="{ label: { class: 'text-xs font-black uppercase tracking-widest' } }"
           />

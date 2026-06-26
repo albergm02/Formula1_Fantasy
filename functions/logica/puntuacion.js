@@ -152,15 +152,16 @@ function puntosBase(actuacion) {
  */
 function calcularMultiplicadorPotenciadores(potenciadores = []) {
   const aplicados = []
-  let multiplicador = 1
+  let bonusAcumulado = 0
 
   for (const potenciador of potenciadores) {
     if (!potenciador.equipado) continue
-    // Multiplicadores 
-    multiplicador *= potenciador.multiplicador || 1
+
+    bonusAcumulado += (potenciador.multiplicador || 1) - 1
     aplicados.push({ id: potenciador.id, nombre: potenciador.nombre, multiplicador: potenciador.multiplicador })
   }
 
+const multiplicador = 1 + bonusAcumulado
   return { multiplicador: Math.round(multiplicador * 100) / 100, aplicados }
 }
 

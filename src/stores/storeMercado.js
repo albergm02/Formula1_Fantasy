@@ -15,6 +15,7 @@ import { usarStorePerfil } from '@/stores/storePerfil'
 export const usarStoreMercado = defineStore('mercado', () => {
   const mercadoActivo = ref(null)
   const cargandoMercado = ref(false)
+  const idCartaEnProceso = ref(null)
   const milisegundosRestantes = ref(0)
   const misPujas = ref({})
   const resumenPujas = ref({})
@@ -175,10 +176,13 @@ export const usarStoreMercado = defineStore('mercado', () => {
     const cantidadNum = Number(cantidad)
     const esPujaExistente = misPujas.value[carta.id] !== undefined
 
+    idCartaEnProceso.value = carta.id
     try {
       await registrarPuja(mercadoActivo.value.idLiga, carta.id, cantidadNum)
     } catch (error) {
       return { success: false, message: error?.message || 'No se pudo registrar la puja.' }
+    } finally {
+      idCartaEnProceso.value = null
     }
 
     misPujas.value = { ...misPujas.value, [carta.id]: cantidadNum }
@@ -199,10 +203,13 @@ export const usarStoreMercado = defineStore('mercado', () => {
    * @returns {Promise<Object>} - Resultado de la operación.
    */
   async function eliminarPujaCarta(carta) {
+    idCartaEnProceso.value = carta.id
     try {
       await eliminarPuja(mercadoActivo.value.idLiga, carta.id)
     } catch (error) {
       return { success: false, message: error?.message || 'No se pudo eliminar la puja.' }
+    } finally {
+      idCartaEnProceso.value = null
     }
 
     const { [carta.id]: _, ...restoPujas } = misPujas.value
@@ -216,6 +223,7 @@ export const usarStoreMercado = defineStore('mercado', () => {
 
   return {
     cargandoMercado,
+    idCartaEnProceso,
     misPujas,
     resumenPujas,
     hayMercadoAbierto,

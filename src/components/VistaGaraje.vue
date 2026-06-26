@@ -212,11 +212,9 @@ const confirmarEjecucionClausula = (elemento) => {
                 Cláusula:
                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(coche).toFixed(1) }}M</span>
               </span>
-              <span
-                v-if="estaEnPeriodoDeGracia(coche)"
-                class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400"
-              >
-                Protegido {{ horasRestantesDeGracia(coche) }}h
+              <span v-if="estaEnPeriodoDeGracia(coche)" class="text-zinc-400">
+                Protección:
+                <span class="font-bold text-emerald-400">{{ horasRestantesDeGracia(coche) }}h</span>
               </span>
             </div>
 
@@ -252,13 +250,11 @@ const confirmarEjecucionClausula = (elemento) => {
             <div v-else class="w-full">
               <Button
                 :label="`FICHAR ${calcularPrecioClausula(coche).toFixed(1)}M`"
-                icon="pi pi-shield"
                 @click="confirmarEjecucionClausula(coche)"
                 :disabled="esFichajeDeshabilitado(coche)"
                 class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors"
                 :pt="{
                   label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-                  icon: { class: '!text-[#D4A843]' },
                 }"
               />
             </div>
@@ -298,11 +294,9 @@ const confirmarEjecucionClausula = (elemento) => {
                 Cláusula de rescisión:
                 <span class="font-black text-[#D4A843]">{{ calcularPrecioClausula(piloto).toFixed(1) }}M</span>
               </span>
-              <span
-                v-if="estaEnPeriodoDeGracia(piloto)"
-                class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400"
-              >
-                Protegido {{ horasRestantesDeGracia(piloto) }}h
+              <span v-if="estaEnPeriodoDeGracia(piloto)" class="text-zinc-400">
+                Protección:
+                <span class="font-bold text-emerald-400">{{ horasRestantesDeGracia(piloto) }}h</span>
               </span>
             </div>
 
@@ -338,13 +332,11 @@ const confirmarEjecucionClausula = (elemento) => {
             <div v-else>
               <Button
                 :label="`FICHAR ${calcularPrecioClausula(piloto).toFixed(1)}M`"
-                icon="pi pi-shield"
                 @click="confirmarEjecucionClausula(piloto)"
                 :disabled="esFichajeDeshabilitado(piloto)"
                 class="w-full !bg-[#121218] !border-zinc-800 shadow-lg transition-colors"
                 :pt="{
                   label: { class: 'text-[10px] font-black uppercase tracking-widest text-zinc-400' },
-                  icon: { class: '!text-[#D4A843]' },
                 }"
               />
             </div>

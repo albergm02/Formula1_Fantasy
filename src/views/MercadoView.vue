@@ -75,6 +75,7 @@ const handleEliminarPuja = async (carta) => {
             :modoMercado="true"
             :miPuja="storeMercado.misPujas[coche.id] || null"
             :totalPujas="storeMercado.resumenPujas[coche.id] || 0"
+            :cargando="storeMercado.idCartaEnProceso === coche.id"
             @pujar="handlePuja"
             @eliminarPuja="handleEliminarPuja"
           />
@@ -93,6 +94,7 @@ const handleEliminarPuja = async (carta) => {
             :modoMercado="true"
             :miPuja="storeMercado.misPujas[piloto.id] || null"
             :totalPujas="storeMercado.resumenPujas[piloto.id] || 0"
+            :cargando="storeMercado.idCartaEnProceso === piloto.id"
             @pujar="handlePuja"
             @eliminarPuja="handleEliminarPuja"
           />
@@ -111,6 +113,7 @@ const handleEliminarPuja = async (carta) => {
             :modoMercado="true"
             :miPuja="storeMercado.misPujas[potenciador.id] || null"
             :totalPujas="storeMercado.resumenPujas[potenciador.id] || 0"
+            :cargando="storeMercado.idCartaEnProceso === potenciador.id"
             @pujar="handlePuja"
             @eliminarPuja="handleEliminarPuja"
           />
