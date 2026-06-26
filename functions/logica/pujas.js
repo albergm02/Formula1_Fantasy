@@ -14,10 +14,12 @@
 function seleccionarPujasGanadoras(pujas) {
   const pujasPorCarta = {}
   for (const puja of pujas) {
+    // Agrupo las pujas por carta
     if (!pujasPorCarta[puja.idCarta]) pujasPorCarta[puja.idCarta] = []
     pujasPorCarta[puja.idCarta].push(puja)
   }
 
+  // Ordeno las pujas de cada carta por cantidad descendente y fecha ascendente con getTime
   for (const idCarta of Object.keys(pujasPorCarta)) {
     pujasPorCarta[idCarta].sort((primera, segunda) => {
       if (segunda.cantidad !== primera.cantidad) return segunda.cantidad - primera.cantidad

@@ -205,10 +205,11 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
   }
 
   // Para cada piloto calculo:
-  // - numeroPitStops: número de stints - 1 (cada stint nuevo = 1 pit stop)
-  // - porcentajeStintMaximo: qué porcentaje del total de vueltas representó el stint más largo
+  // numeroPitStops: número de stints - 1 (cada stint nuevo = 1 pit stop)
+  // porcentajeStintMaximo: qué porcentaje del total de vueltas representó el stint más largo
   const resultado = {}
   for (const numero in stintsPorPiloto) {
+    // Aseguro que la propiedad exista en el objeto antes de procesarla
     if (!Object.prototype.hasOwnProperty.call(stintsPorPiloto, numero)) continue
     
     const stintsDelPiloto = stintsPorPiloto[numero]
@@ -223,7 +224,7 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
       vueltasTotalPiloto += vueltasStint
     }
     
-    // Si no hay vueltas (caso raro), uso 0.5 como valor por defecto
+    // Si no hay vueltas, uso 0.5 como valor por defecto
     const porcentajeStintMaximo = vueltasTotalPiloto > 0 
       ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 
       : 0.5

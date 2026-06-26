@@ -4,6 +4,12 @@ const { obtenerMeetingKeyEnJuego, SESION_EN_DIRECTO } = require('../infraestruct
 
 const TEMPORADA_ACTUAL = 2026
 
+/**
+ * Exige que la jornada actual esté procesada antes de permitir modificaciones en el equipo del usuario.
+ * Si hay un Gran Premio en directo, lanza un error indicando que no se puede modificar el equipo.
+ * Si la jornada actual no está procesada, lanza un error indicando que no se puede modificar el equipo.
+ * @returns {Promise<void>} - Promesa que se resuelve si la jornada está procesada, o lanza un error si no lo está.
+ */
 async function exigirJornadaProcesada() {
   let meetingKey
   try {
