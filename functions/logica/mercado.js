@@ -71,22 +71,22 @@ function mezclarArray(array) {
  * @returns {Array} - Cartas seleccionadas para el día.
  */
 function seleccionarCartasDiarias(catalogo, exclusiones = {}) {
-  const clavesBloqueadas = exclusiones.clavesPilotoBloqueadas || []
-  const idsBloqueados = exclusiones.idsCartas || []
+  const clavesBloqueadas = exclusiones.clavesPilotoBloqueadas || new Set()
+  const idsBloqueados = exclusiones.idsCartas || new Set()
 
   // Selecciono los pilotos disponibles filtrando por clave única (numero|variante)
   const pilotosDisponibles = catalogo.pilotos.filter((carta) =>
-    !clavesBloqueadas.includes(construirClavePiloto(carta)))
+    !clavesBloqueadas.has(construirClavePiloto(carta)))
   const pilotosDelDia = mezclarArray([...pilotosDisponibles]).slice(0, CARTAS_POR_DIA.pilotos)
 
   // Selecciono los coches disponibles filtrando por id exacto
   const cochesDisponibles = catalogo.coches.filter((c) =>
-    !idsBloqueados.includes(c.id))
+    !idsBloqueados.has(c.id))
   const cochesDelDia = mezclarArray([...cochesDisponibles]).slice(0, CARTAS_POR_DIA.coches)
 
   // Selecciono los potenciadores disponibles filtrando por id exacto
   const potenciadoresDisponibles = catalogo.potenciadores.filter((p) =>
-    !idsBloqueados.includes(p.id))
+    !idsBloqueados.has(p.id))
   const potenciadoresDelDia = mezclarArray([...potenciadoresDisponibles]).slice(0, CARTAS_POR_DIA.potenciadores)
 
   // Devuelvo la combinación de pilotos, coches y potenciadores seleccionados para el día

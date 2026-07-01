@@ -56,9 +56,9 @@ function explicarPiloto(piloto) {
     const signo = diferencial >= 0 ? '+' : ''
     lineas.push(`${adelantos} adelantamientos, ${recibidos} recibidos (${signo}${diferencial} neto).`)
   } else if (piloto.variante === 'estratega') {
-    const paradas = actuacion.numeroPitStops ?? 'N/A'
+    const paradas = actuacion.numeroPitStops ?? 0
     const stint = Math.round((actuacion.porcentajeStintMaximo || 0) * 100)
-    lineas.push(`P${actuacion.posicionCarrera ?? '?'}, ${paradas} paradas, stint máximo ${stint}%.`)
+    lineas.push(`P${actuacion.posicionCarrera ?? '?'}, ${paradas} paradas, stint ${stint}%.`)
   }
 
   if (piloto.multiplicador && piloto.multiplicador !== 1) {

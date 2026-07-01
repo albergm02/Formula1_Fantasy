@@ -93,10 +93,10 @@ export function calcularPuntosVariante(variante, actuacion, condiciones) {
  * @returns {number} - Factor de caos calculado.
  */
 export function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroVirtualSafetyCarActivos = 0, numeroDNFs = 0 } = {}) {
-  let factor = 0.7
-  if (llovio) factor += 0.3
+  let factor = 0.75
+  if (llovio) factor += 0.1
   factor += Math.min(3, numeroSafetyCarActivos + numeroVirtualSafetyCarActivos) * 0.05
-  if (numeroDNFs >= 5) factor += 0.3
+  factor += Math.min(numeroDNFs, 5) * 0.05
   return Math.round(factor * 100) / 100
 }
 
@@ -109,14 +109,39 @@ function sinActuacionValida(actuacion) {
   return Boolean(actuacion?.dnf || actuacion?.dns || actuacion?.dsq || actuacion?.noClasificado)
 }
 
-const PUNTOS_FIA_POR_POSICION = { 1: 25, 2: 18, 3: 15, 4: 12, 5: 10, 6: 8, 7: 6, 8: 4, 9: 2, 10: 1 }
+const PUNTOS_POR_POSICION = {
+  1: 25,
+  2: 20,
+  3: 18,
+  4: 17,
+  5: 16,
+  6: 15,
+  7: 14,
+  8: 13,
+  9: 12,
+  10: 11,
+  11: 10,
+  12: 9,
+  13: 8,
+  14: 7,
+  15: 6,
+  16: 5,
+  17: 4,
+  18: 3,
+  19: 2,
+  20: 1,
+}
 /**
- * Calcula los puntos por posición.
+ * Calcula los puntos por posición con una escala decreciente y continua:
+ * P1 = 25, P2 = 20, P3 = 18 y baja 1 punto por plaza hasta P20 = 1.
+ * A partir de P20 se mantiene el suelo de 1 punto, de modo que siempre se puntúa.
  * @param {number} posicion - Posición del piloto.
  * @returns {number} - Puntos calculados.
  */
 function puntosPorPosicion(posicion) {
-  return PUNTOS_FIA_POR_POSICION[posicion] || 0
+  if (!Number.isInteger(posicion) || posicion < 1) return 0
+  if (posicion > 20) return 1
+  return PUNTOS_POR_POSICION[posicion] ?? 0
 }
 
 /**
@@ -145,49 +170,40 @@ function puntosRemontador({ numeroAdelantos = 0, numeroVecesAdelantado = 0 }) {
   return PUNTOS_REMONTADOR_POR_DIFERENCIAL[indice]
 }
 
+const FACTOR_ESTRATEGA_BASE = 0.75
+const BONUS_PARADAS_ESTRATEGA = 0.25
+const BONUS_STINT_ESTRATEGA = 0.25
+const UMBRAL_STINT_ESTRATEGA = 0.5
+
+/**
+ * Calcula el factor del estratega según el número de paradas y el stint más largo.
+ * Base 0.75, +0.25 si menos de 3 paradas, +0.25 si el stint supera el 50%. Tope: 1.25.
+ * @param {number} numeroPitStops - Número de paradas en boxes.
+ * @param {number} porcentajeStintMaximo - Fracción del stint más largo (0 a 1).
+ * @returns {number} - Factor del estratega.
+ */
+function calcularFactorEstratega(numeroPitStops, porcentajeStintMaximo) {
+  let factor = FACTOR_ESTRATEGA_BASE
+  if (numeroPitStops < 3) factor += BONUS_PARADAS_ESTRATEGA
+  if (porcentajeStintMaximo > UMBRAL_STINT_ESTRATEGA) factor += BONUS_STINT_ESTRATEGA
+  return factor
+}
+
 /**
  * Calcula los puntos para la variante "estratega".
+ * Los puntos por posición se multiplican por un factor que premia la estrategia:
+ * pocas paradas y stint largo aumentan el factor (tope x1.25), muchas paradas y stint corto lo reducen (base x0.75).
+ * Si el piloto no ha realizado ninguna parada, se anula la puntuación (0 paradas suele indicar abandono).
  * @param {Object} actuacion - Actuación del piloto.
  * @param {number} actuacion.posicionCarrera - Posición final en la carrera.
  * @param {number} actuacion.numeroPitStops - Número de paradas en boxes.
- * @param {number} actuacion.porcentajeStintMaximo - Porcentaje del stint más largo.
- * @returns {number} - Puntos calculados.
+ * @param {number} actuacion.porcentajeStintMaximo - Fracción del stint más largo sobre el total de vueltas (0 a 1).
+ * @returns {number} - Puntos: puntosPorPosicion(posicion) × factorEstratega.
  */
 function puntosEstratega({ posicionCarrera = 20, numeroPitStops = 0, porcentajeStintMaximo = 0 }) {
   if (numeroPitStops === 0) return 0
-  return bonusParadas(numeroPitStops) + bonusStint(porcentajeStintMaximo) + bonusPosicionEstratega(posicionCarrera)
-}
-
-/**
- * Calcula el bonus por número de paradas en boxes.
- * @param {number} numeroPitStops - Número de paradas en boxes.
- * @returns {number} - Bonus calculado.
- */
-function bonusParadas(numeroPitStops) {
-  if (numeroPitStops === 1) return 10
-  if (numeroPitStops === 2) return 5
-  return 0
-}
-
-/**
- * Calcula el bonus por porcentaje del stint más largo.
- * @param {number} porcentajeStintMaximo - Porcentaje del stint más largo.
- * @returns {number} - Bonus calculado.
- */
-function bonusStint(porcentajeStintMaximo) {
-  return Math.round((porcentajeStintMaximo || 0) * 10)
-}
-
-/**
- * Calcula el bonus por posición en la variante "estratega".
- * @param {number} posicion - Posición final en la carrera.
- * @returns {number} - Bonus calculado.
- */
-function bonusPosicionEstratega(posicion) {
-  if (posicion <= 3) return 10
-  if (posicion <= 6) return 7
-  if (posicion <= 10) return 4
-  return 0
+  const factor = calcularFactorEstratega(numeroPitStops, porcentajeStintMaximo)
+  return redondear(puntosPorPosicion(posicionCarrera) * factor)
 }
 
 /**

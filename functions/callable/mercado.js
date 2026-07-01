@@ -257,12 +257,12 @@ async function ejecutarGeneracionMercadoParaLiga(idLiga) {
   const catalogoBase = await cargarCatalogo(db)
   const exclusionesLiga = await recopilarCartasFichadasEnLiga(idLiga)
   const cartasDelDia = seleccionarCartasDiarias(catalogoBase, exclusionesLiga)
-  // Cierre al día siguiente a las 12:00 UTC (= 14:00 hora España, hora en que
+  // Cierre al día siguiente a las 14:00 UTC (= 16:00 hora España, hora en que
   // el scheduler lanza la próxima generación). Rotación y apertura ocurren en
   // la misma ejecución, sin ventana muerta.
   const fechaCierre = new Date()
   fechaCierre.setUTCDate(fechaCierre.getUTCDate() + 1)
-  fechaCierre.setUTCHours(12, 0, 0, 0)
+  fechaCierre.setUTCHours(14, 0, 0, 0)
 
   await ref.set({
     idLiga,
@@ -297,6 +297,7 @@ exports.generarMercado = onSchedule(
       try {
         await ejecutarGeneracionMercadoParaLiga(docLiga.id)
       } catch (error) {
+        console.error(`[Mercado Diario] Error en liga ${docLiga.id}:`, error) // ← añade esto
         ligasFallidas.push(docLiga.id)
       }
     }

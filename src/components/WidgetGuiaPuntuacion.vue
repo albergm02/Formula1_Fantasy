@@ -14,9 +14,9 @@ const EJEMPLOS_VARIANTE = {
     calculo: 'P1 → 25 pts. Si termina P3 → 15 pts. Si abandona (ABN / DESC / N/S) → 0 pts.',
   },
   todo_terreno: {
-    escenario: 'P1 en carrera con lluvia y 2 Coches de Seguridad (0 abandonos).',
+    escenario: 'P1 en carrera con lluvia, 2 Coches de Seguridad y 3 abandonos.',
     calculo:
-      'Factor = 0.50 + 0.40 (lluvia) + 0.10 (2 SC × 0.05) = 1.00 → 25 × 1.00 = 25 pts. En seco y limpio el mismo P1 da 25 × 0.50 = 12.5 pts.',
+      'Factor = 0.75 + 0.10 (lluvia) + 0.10 (2 SC × 0.05) + 0.15 (3 DNF × 0.05) = 1.10 → 25 × 1.10 = 27.5 pts. En seco y limpio: 25 × 0.75 = 18.75 pts.',
   },
   base: {
     escenario: 'Piloto con pole (P1 qualy) y victoria (P1 carrera).',
@@ -28,8 +28,9 @@ const EJEMPLOS_VARIANTE = {
       'Diferencial = 4 − 1 = 3 → 12 pts. Con diferencial 5 o más alcanzaría el tope de 25 pts. Si pierde más adelantamientos de los que hace, 0 pts.',
   },
   estratega: {
-    escenario: 'P1 con 1 parada en boxes y stint más largo del 55%.',
-    calculo: '10 (1 parada) + 6 (stint 0.55 × 10) + 10 (P1) = 26 pts. Con 0 paradas → 0 pts totales.',
+    escenario: 'P1 en carrera con 1 parada y stint más largo del 80%.',
+    calculo:
+      'Factor = 0.75 + 0.25 (< 3 paradas) + 0.25 (stint > 50%) = 1.25 → 25 × 1.25 = 31.25 pts. Con 3 paradas y stint corto: 25 × 0.75 = 18.75 pts.',
   },
 }
 

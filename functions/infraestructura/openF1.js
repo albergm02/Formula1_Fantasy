@@ -287,13 +287,13 @@ async function recopilarDatosGranPremio(meetingKey) {
     const noClasificado = fila.dnf !== true && fila.dns !== true && fila.dsq !== true
     const stintsPiloto = datosStints[numeroPiloto] || { porcentajeStintMaximo: 0 }
     actuacionesPorPiloto[numeroPiloto] = {
-      posicionQualy: resultadosQualy[numeroPiloto],
+      posicionQualy: resultadosQualy[numeroPiloto] || 20,
       posicionCarrera: 99,
-      posicionSalida: parrillaSalida[numeroPiloto],
-      numeroAdelantos: adelantamientos[numeroPiloto]?.realizados,
-      numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos,
-      numeroPitStops: paradasPorPiloto[numeroPiloto],
-      porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
+      posicionSalida: parrillaSalida[numeroPiloto] || 20, 
+      numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
+      numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
+      numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
+      porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo || 0,
       dnf: fila.dnf === true,
       dns: fila.dns === true,
       dsq: fila.dsq === true,

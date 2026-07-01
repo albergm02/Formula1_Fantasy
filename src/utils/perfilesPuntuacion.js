@@ -23,11 +23,11 @@ export const perfilesPuntuacion = {
     resumenPuntuacion:
       'Este piloto puntúa en base a su posición en carrera, amplificada por el caos de la jornada (lluvia, coches de seguridad y abandonos).',
     reglasUsuario: [
-      'Puntos de carrera multiplicados por un factor de caos (rango 0.70 a 1.45).',
-      'Factor base: 0.70 (carrera seca y sin incidentes).',
-      'Si llovió: +0.30.',
+      'Puntos de carrera multiplicados por un factor de caos (rango 0.75 a 1.25).',
+      'Factor base: 0.75 (carrera seca y sin incidentes).',
+      'Si llovió: +0.10.',
       'Cada Coche de Seguridad (real o virtual cuentan por igual): +0.05, hasta un máximo de 3 (tope +0.15).',
-      'Si hubo 5 o más abandonos en la carrera: +0.30.',
+      'Cada abandonado (DNF): +0.05, hasta un máximo de 5 (tope +0.25).',
       'Si el piloto no termina: 0 puntos (el factor no aplica).',
     ],
   },
@@ -53,12 +53,14 @@ export const perfilesPuntuacion = {
   },
   estratega: {
     resumenPuntuacion:
-      'Este piloto puntúa en base al tiempo máximo de uso de neumático en una carrera, junto con su número de paradas y su posición final.',
+      'Este piloto puntúa en base a su posición en carrera, modulada por la calidad de su estrategia: pocas paradas y stint largo suman, muchas paradas y stint corto restan.',
     reglasUsuario: [
-      'Suma de tres bonus: paradas, stint más largo y posición final.',
-      '1 parada en boxes: +10 / 2 paradas: +5 / 3 o más: 0.',
-      'Bonus stint = porcentaje del stint más largo × 10 puntos.',
-      'P1 a P3: +10 / P4 a P6: +7 / P7 a P10: +4 / fuera del 10: 0.',
+      'Puntos de carrera multiplicados por un factor de estrategia (rango 0.75 a 1.25).',
+      'Factor base: 0.75.',
+      'Si hizo menos de 3 paradas en boxes: +0.25 (factor 1.0).',
+      'Si el stint más largo supera el 50% de la carrera: +0.25 (factor 1.25 si además hizo pocas paradas).',
+      'Puntos por posición: escala estándar (P1: 25, P2: 20, P3: 18 ... bajando hasta P20: 1).',
+      'Si el piloto no ha realizado ninguna parada: 0 puntos.',
       'Si el piloto no termina: 0 puntos.',
     ],
   },

@@ -65,7 +65,7 @@ const cancelarRegistroConGoogle = async () => {
     <Card class="w-full max-w-md p-2 lg:p-4 !bg-black/20 backdrop-blur-md border border-zinc-800">
       <template #title>
         <div class="flex flex-col items-center gap-4">
-          <img src="/logo.png" alt="Logo P1" class="w-16 h-16 object-contain" />
+          <img src="/logo.png" alt="Logo F1 Fantasy" class="w-16 h-16 object-contain" />
           <div class="text-center">
             <h1 class="text-2xl font-black uppercase tracking-widest text-[#D4A843]">Completa tu perfil</h1>
           </div>

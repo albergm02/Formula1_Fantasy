@@ -16,8 +16,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo.png'],
       manifest: {
-        name: 'P1 Fantasy',
-        short_name: 'P1 Fantasy',
+        name: 'F1 Fantasy',
+        short_name: 'F1 Fantasy',
         description:
           'Juego fantasy de Fórmula 1 con ligas privadas, mercado diario y puntuación basada en datos reales.',
         lang: 'es',

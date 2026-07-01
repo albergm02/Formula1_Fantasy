@@ -7,9 +7,9 @@ const { construirPuntosPorPiloto } = cargarModulo('../functions/logica/jornada.j
 const ejemplo = cargarModulo('./ejemplo.json')
 
 // =====================================================================
-// 1. Tabla FIA: Qualy y Carrera comparten escala (techo P1 = 25)
+// 1. Escala continua de puntos por posición (Qualy y Carrera comparten escala)
 // =====================================================================
-describe('1. Sistema FIA de puntos por posición', () => {
+describe('1. Escala continua de puntos por posición', () => {
   const condicionesSecas = { llovio: false, numeroDNFs: 0, numeroSafetyCarActivos: 0, numeroVirtualSafetyCarActivos: 0 }
 
   it('asigna 25 puntos al ganador de la carrera', () => {
@@ -20,9 +20,15 @@ describe('1. Sistema FIA de puntos por posición', () => {
     expect(calcularPuntosVariante('qualy', { posicionQualy: 1 }, condicionesSecas)).toBe(25)
   })
 
-  it('asigna 1 punto al P10 y 0 puntos a quien acaba fuera del top 10', () => {
-    expect(calcularPuntosVariante('carrera', { posicionCarrera: 10 }, condicionesSecas)).toBe(1)
-    expect(calcularPuntosVariante('carrera', { posicionCarrera: 11 }, condicionesSecas)).toBe(0)
+  it('la escala es decreciente y continua: P2=20, P3=18 y baja 1 punto hasta P20=1', () => {
+    expect(calcularPuntosVariante('carrera', { posicionCarrera: 2 }, condicionesSecas)).toBe(20)
+    expect(calcularPuntosVariante('carrera', { posicionCarrera: 3 }, condicionesSecas)).toBe(18)
+    expect(calcularPuntosVariante('carrera', { posicionCarrera: 10 }, condicionesSecas)).toBe(11)
+    expect(calcularPuntosVariante('carrera', { posicionCarrera: 20 }, condicionesSecas)).toBe(1)
+  })
+
+  it('a partir de P20 se mantiene el suelo de 1 punto, siempre se puntúa', () => {
+    expect(calcularPuntosVariante('carrera', { posicionCarrera: 25 }, condicionesSecas)).toBe(1)
   })
 })
 
@@ -34,10 +40,10 @@ describe('2. Variantes contextuales', () => {
     const seco = { llovio: false, numeroSafetyCarActivos: 0, numeroVirtualSafetyCarActivos: 0, numeroDNFs: 0 }
     const apocaliptico = { llovio: true, numeroSafetyCarActivos: 2, numeroVirtualSafetyCarActivos: 1, numeroDNFs: 6 }
 
-    // 25 (P1) × 0.7 (factor mínimo, carrera seca limpia) = 17.5
-    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, seco)).toBe(17.5)
-    // 25 (P1) × (0.7 + 0.3 lluvia + 0.15 SC + 0.30 DNFs) = 25 × 1.45 = 36.25
-    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, apocaliptico)).toBe(36.25)
+    // 25 (P1) × 0.75 (factor mínimo, carrera seca limpia) = 18.75
+    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, seco)).toBe(18.75)
+    // 25 (P1) × (0.75 + 0.10 lluvia + 0.15 SC + 0.25 DNFs) = 25 × 1.25 = 31.25
+    expect(calcularPuntosVariante('todo_terreno', { posicionCarrera: 1 }, apocaliptico)).toBe(31.25)
   })
 
   it('Remontador: tabla por diferencial neto de adelantamientos', () => {
@@ -49,10 +55,30 @@ describe('2. Variantes contextuales', () => {
     expect(calcularPuntosVariante('remontador', { numeroAdelantos: 1, numeroVecesAdelantado: 3 }, {})).toBe(0)
   })
 
-  it('Estratega: suma bonus por paradas, stint largo y posición', () => {
-    // 1 parada (10) + stint 55% (round(5.5)=6) + P1-P3 (10) = 26 puntos
-    const actuacion = { posicionCarrera: 1, numeroPitStops: 1, porcentajeStintMaximo: 0.55 }
-    expect(calcularPuntosVariante('estratega', actuacion, {})).toBe(26)
+  it('Estratega: el factor de estrategia modula los puntos por posición', () => {
+    // P1 (25) × 1.25 (1 parada < 3 + stint 80% > 50%) = 31.25
+    const buenaEstrategia = { posicionCarrera: 1, numeroPitStops: 1, porcentajeStintMaximo: 0.8 }
+    expect(calcularPuntosVariante('estratega', buenaEstrategia, {})).toBe(31.25)
+
+    // P1 (25) × 1.0 (1 parada < 3, stint 30% ≤ 50%) = 25
+    const stintCorto = { posicionCarrera: 1, numeroPitStops: 1, porcentajeStintMaximo: 0.3 }
+    expect(calcularPuntosVariante('estratega', stintCorto, {})).toBe(25)
+
+    // P1 (25) × 1.0 (3 paradas ≥ 3, stint 80% > 50%) = 25
+    const muchasParadas = { posicionCarrera: 1, numeroPitStops: 3, porcentajeStintMaximo: 0.8 }
+    expect(calcularPuntosVariante('estratega', muchasParadas, {})).toBe(25)
+
+    // P1 (25) × 0.75 (3 paradas ≥ 3, stint 30% ≤ 50%) = 18.75
+    const peorCaso = { posicionCarrera: 1, numeroPitStops: 3, porcentajeStintMaximo: 0.3 }
+    expect(calcularPuntosVariante('estratega', peorCaso, {})).toBe(18.75)
+
+    // P10 (11) × 1.25 (1 parada + stint 55%) = 13.75
+    const enrichmentP10 = { posicionCarrera: 10, numeroPitStops: 1, porcentajeStintMaximo: 0.55 }
+    expect(calcularPuntosVariante('estratega', enrichmentP10, {})).toBe(13.75)
+  })
+
+  it('Estratega: 0 paradas en boxes anula toda la puntuación', () => {
+    expect(calcularPuntosVariante('estratega', { posicionCarrera: 1, numeroPitStops: 0, porcentajeStintMaximo: 1 }, {})).toBe(0)
   })
 })
 
