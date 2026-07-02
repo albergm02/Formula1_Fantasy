@@ -78,56 +78,80 @@ function calcularFactorCaos({ llovio, numeroSafetyCarActivos = 0, numeroVirtualS
 }
 
 
-const PUNTOS_REMONTADOR_POR_DIFERENCIAL = [0, 3, 7, 12, 18, 25]
+const PUNTOS_SUELO_REMONTADOR = 1
+const PUNTOS_TOPE_REMONTADOR = 25
+const PUNTOS_REMONTADOR_POR_DIFERENCIAL = {
+  [-4]: 2, [-3]: 3, [-2]: 4, [-1]: 5,
+  [0]: 7, [1]: 10, [2]: 13, [3]: 16, [4]: 19, [5]: 22,
+}
 
 /**
- * Calcula los puntos de un piloto con la variante "remontador" según su actuación.
+ * Calcula los puntos de un piloto con la variante "remontador" según el diferencial
+ * neto de adelantamientos (adelantamientos realizados − veces adelantado).
+ *
+ * El diferencial negativo ya no anula la puntuación: aplica una tabla de consolación
+ * descendente hasta un suelo de 1 punto (como el resto de variantes). El lado positivo
+ * escala con pendiente +3 desde el 0 (7 pts) hasta el tope de 25 en diferencial +6.
+ *
  * @param {Object} actuacion - Actuación del piloto.
  * @param {number} actuacion.numeroAdelantos - Número de adelantamientos realizados por el piloto.
  * @param {number} actuacion.numeroVecesAdelantado - Número de veces que el piloto fue adelantado.
  * @returns {number} - Puntos calculados para la variante "remontador".
  */
 function puntosRemontador({ numeroAdelantos = 0, numeroVecesAdelantado = 0 }) {
-  const adelantamientosNetos = numeroAdelantos - numeroVecesAdelantado
-  if (adelantamientosNetos <= 0) return 0
-  const indice = Math.min(adelantamientosNetos, PUNTOS_REMONTADOR_POR_DIFERENCIAL.length - 1)
-  return PUNTOS_REMONTADOR_POR_DIFERENCIAL[indice]
+  const diferencial = numeroAdelantos - numeroVecesAdelantado
+  if (diferencial <= -5) return PUNTOS_SUELO_REMONTADOR
+  if (diferencial >= 6) return PUNTOS_TOPE_REMONTADOR
+  return PUNTOS_REMONTADOR_POR_DIFERENCIAL[diferencial]
 }
 
-const FACTOR_ESTRATEGA_BASE = 0.75
-const BONUS_PARADAS_ESTRATEGA = 0.25
-const BONUS_STINT_ESTRATEGA = 0.25
-const UMBRAL_STINT_ESTRATEGA = 0.5
+const UMBRAL_STINT_DESCARTADO = 1.0
 
 /**
- * Calcula el factor del estratega según el número de paradas y el stint más largo.
- * Base 0.75, +0.25 si menos de 3 paradas, +0.25 si el stint supera el 50%. Tope: 1.25.
- * @param {number} numeroPitStops - Número de paradas en boxes.
- * @param {number} porcentajeStintMaximo - Fracción del stint más largo (0 a 1).
- * @returns {number} - Factor del estratega.
+ * Construye un ranking de stints a partir de las actuaciones de toda la parrilla.
+ * Ordena por porcentaje de stint máximo (descendente) y desempata por posición
+ * de carrera (ascendente). Descarta los stint del 100% (1.0) porque suelen ser
+ * fallos de la API, y excluye a los pilotos que no terminaron (DNF, DNS, DSQ, NC)
+ * para que no ocupen puestos del ranking.
+ * @param {Object} actuacionesPorPiloto - Actuaciones de toda la parrilla.
+ * @returns {Object} - Mapa { numeroPiloto: posicionEnRanking }.
  */
-function calcularFactorEstratega(numeroPitStops, porcentajeStintMaximo) {
-  let factor = FACTOR_ESTRATEGA_BASE
-  if (numeroPitStops < 3) factor += BONUS_PARADAS_ESTRATEGA
-  if (porcentajeStintMaximo > UMBRAL_STINT_ESTRATEGA) factor += BONUS_STINT_ESTRATEGA
-  return factor
+function construirRankingStints(actuacionesPorPiloto = {}) {
+  const entradas = Object.entries(actuacionesPorPiloto)
+    // Filtro las actuaciones devolviendo el número del stint obtenido y comprobando que no sea un 100%
+    .filter(([, actuacion]) => {
+      const stint = actuacion?.porcentajeStintMaximo
+      return Number.isFinite(stint) && stint > 0 && stint < UMBRAL_STINT_DESCARTADO && !sinActuacionValida(actuacion)
+    })
+    // Lo mapeo por número
+    .map(([numero, actuacion]) => ({
+      numero,
+      stint: actuacion.porcentajeStintMaximo,
+      posicionCarrera: actuacion.posicionCarrera ?? 99,
+    }))
+    // Lo ordeno por stint y por posición de carrera
+    .sort((a, b) => {
+      if (b.stint !== a.stint) return b.stint - a.stint
+      return a.posicionCarrera - b.posicionCarrera
+    })
+  // Lo paso a un array ranking
+  const ranking = {}
+  entradas.forEach((entrada, indice) => {
+    ranking[entrada.numero] = indice + 1
+  })
+  return ranking
 }
 
 /**
  * Calcula los puntos de un piloto con la variante "estratega".
- * Los puntos por posición se multiplican por un factor que premia la estrategia:
- * pocas paradas y stint largo aumentan el factor (tope x1.25), muchas paradas y stint corto lo reducen (base x0.75).
- * Si el piloto no ha realizado ninguna parada, se anula la puntuación (0 paradas suele indicar abandono).
+ * Puntúa según la posición del piloto en el ranking de stints de la carrera,
+ * usando la misma escala que Qualy y Carrera (P1 = 25, P2 = 20, ...).
  * @param {Object} actuacion - Actuación del piloto.
- * @param {number} actuacion.posicionCarrera - Posición final en carrera.
- * @param {number} actuacion.numeroPitStops - Número de paradas en boxes.
- * @param {number} actuacion.porcentajeStintMaximo - Fracción del stint más largo sobre el total de vueltas (0 a 1).
- * @returns {number} - Puntos calculados: puntosPorPosicion(posicion) × factorEstratega.
+ * @param {number} actuacion.posicionStint - Posición en el ranking de stints.
+ * @returns {number} - Puntos según la posición del stint.
  */
-function puntosEstratega({ posicionCarrera = 20, numeroPitStops = 0, porcentajeStintMaximo = 0 }) {
-  if (numeroPitStops === 0) return 0
-  const factor = calcularFactorEstratega(numeroPitStops, porcentajeStintMaximo)
-  return redondear(puntosPorPosicion(posicionCarrera) * factor)
+function puntosEstratega(actuacion = {}) {
+  return puntosPorPosicion(actuacion.posicionStint ?? 20)
 }
 
 /**
@@ -210,9 +234,10 @@ function calcularPuntuacionGaraje(garaje, contextoJornada = {}) {
 }
 
 // Redondeo general
-function redondear(valor) {
-  return Math.round(valor * 100) / 100
+function redondear(valor, decimales = 2) {
+  const factor = Math.pow(10, decimales)
+  return Math.round(valor * factor) / factor
 }
 
-module.exports = { calcularPuntosVariante, calcularPuntuacionGaraje, calcularMultiplicadorPotenciadores, calcularFactorCaos }
+module.exports = { calcularPuntosVariante, calcularPuntuacionGaraje, calcularMultiplicadorPotenciadores, calcularFactorCaos, construirRankingStints }
 

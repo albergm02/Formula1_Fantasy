@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createRequire } from 'node:module'
 
 const cargarModulo = createRequire(import.meta.url)
-const { calcularPuntosVariante, calcularPuntuacionGaraje } = cargarModulo('../functions/logica/puntuacion.js')
+const { calcularPuntosVariante, calcularPuntuacionGaraje, construirRankingStints } = cargarModulo('../functions/logica/puntuacion.js')
 const { construirPuntosPorPiloto } = cargarModulo('../functions/logica/jornada.js')
 const ejemplo = cargarModulo('./ejemplo.json')
 
@@ -47,38 +47,68 @@ describe('2. Variantes contextuales', () => {
   })
 
   it('Remontador: tabla por diferencial neto de adelantamientos', () => {
-    // 4 adelantamientos, 1 recibido: diferencial 3 → 12 puntos
-    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 4, numeroVecesAdelantado: 1 }, {})).toBe(12)
+    // 4 adelantamientos, 1 recibido: diferencial 3 → 16 puntos (7 + 3×3)
+    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 4, numeroVecesAdelantado: 1 }, {})).toBe(16)
     // 7 adelantamientos, 0 recibidos: diferencial 7, acotado al tope de 25
     expect(calcularPuntosVariante('remontador', { numeroAdelantos: 7, numeroVecesAdelantado: 0 }, {})).toBe(25)
-    // Adelanta 1 y recibe 3: diferencial negativo, 0 puntos
-    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 1, numeroVecesAdelantado: 3 }, {})).toBe(0)
+    // Adelanta 1 y recibe 3: diferencial −2 → 4 pts (consolación, ya no se anula)
+    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 1, numeroVecesAdelantado: 3 }, {})).toBe(4)
+    // Diferencial 0 → 7 pts (sin ganar ni perder plazas netas)
+    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 2, numeroVecesAdelantado: 2 }, {})).toBe(7)
+    // Diferencial −1 → 5 pts
+    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 0, numeroVecesAdelantado: 1 }, {})).toBe(5)
+    // Diferencial −6: suelo de 1 pt
+    expect(calcularPuntosVariante('remontador', { numeroAdelantos: 0, numeroVecesAdelantado: 6 }, {})).toBe(1)
   })
 
-  it('Estratega: el factor de estrategia modula los puntos por posición', () => {
-    // P1 (25) × 1.25 (1 parada < 3 + stint 80% > 50%) = 31.25
-    const buenaEstrategia = { posicionCarrera: 1, numeroPitStops: 1, porcentajeStintMaximo: 0.8 }
-    expect(calcularPuntosVariante('estratega', buenaEstrategia, {})).toBe(31.25)
+  it('Estratega: puntúa por posición en el ranking de stints (escala base)', () => {
+    // Posición 1 → 25 pts (igual que P1 en carrera)
+    expect(calcularPuntosVariante('estratega', { posicionStint: 1 }, {})).toBe(25)
 
-    // P1 (25) × 1.0 (1 parada < 3, stint 30% ≤ 50%) = 25
-    const stintCorto = { posicionCarrera: 1, numeroPitStops: 1, porcentajeStintMaximo: 0.3 }
-    expect(calcularPuntosVariante('estratega', stintCorto, {})).toBe(25)
+    // Posición 3 → 18 pts
+    expect(calcularPuntosVariante('estratega', { posicionStint: 3 }, {})).toBe(18)
 
-    // P1 (25) × 1.0 (3 paradas ≥ 3, stint 80% > 50%) = 25
-    const muchasParadas = { posicionCarrera: 1, numeroPitStops: 3, porcentajeStintMaximo: 0.8 }
-    expect(calcularPuntosVariante('estratega', muchasParadas, {})).toBe(25)
+    // Posición 20 → 1 pt
+    expect(calcularPuntosVariante('estratega', { posicionStint: 20 }, {})).toBe(1)
 
-    // P1 (25) × 0.75 (3 paradas ≥ 3, stint 30% ≤ 50%) = 18.75
-    const peorCaso = { posicionCarrera: 1, numeroPitStops: 3, porcentajeStintMaximo: 0.3 }
-    expect(calcularPuntosVariante('estratega', peorCaso, {})).toBe(18.75)
-
-    // P10 (11) × 1.25 (1 parada + stint 55%) = 13.75
-    const enrichmentP10 = { posicionCarrera: 10, numeroPitStops: 1, porcentajeStintMaximo: 0.55 }
-    expect(calcularPuntosVariante('estratega', enrichmentP10, {})).toBe(13.75)
+    // Sin posicionStint → suelo de 1 pt (posición 20 por defecto)
+    expect(calcularPuntosVariante('estratega', {}, {})).toBe(1)
   })
 
-  it('Estratega: 0 paradas en boxes anula toda la puntuación', () => {
-    expect(calcularPuntosVariante('estratega', { posicionCarrera: 1, numeroPitStops: 0, porcentajeStintMaximo: 1 }, {})).toBe(0)
+  it('Estratega: construirRankingStints ordena por stint (desc) y desempata por posición de carrera', () => {
+    const actuaciones = {
+      1: { porcentajeStintMaximo: 0.8, posicionCarrera: 3 },
+      2: { porcentajeStintMaximo: 0.8, posicionCarrera: 1 },
+      3: { porcentajeStintMaximo: 0.6, posicionCarrera: 2 },
+      4: { porcentajeStintMaximo: 0 },
+      5: {},
+      6: { porcentajeStintMaximo: 1.0, posicionCarrera: 5 },
+    }
+    const ranking = construirRankingStints(actuaciones)
+    expect(ranking[2]).toBe(1)
+    expect(ranking[1]).toBe(2)
+    expect(ranking[3]).toBe(3)
+    expect(ranking[4]).toBeUndefined()
+    expect(ranking[5]).toBeUndefined()
+    expect(ranking[6]).toBeUndefined()
+  })
+
+  it('Estratega: construirRankingStints devuelve {} si todos son 100% o inválidos', () => {
+    expect(construirRankingStints({ 1: { porcentajeStintMaximo: 1.0 }, 2: { porcentajeStintMaximo: 1.0 } })).toEqual({})
+  })
+
+  it('Estratega: construirRankingStints excluye a los pilotos que no terminaron (DNF, DSQ, DNS, NC)', () => {
+    const actuaciones = {
+      1: { porcentajeStintMaximo: 0.8, posicionCarrera: 99, dnf: true },
+      2: { porcentajeStintMaximo: 0.7, posicionCarrera: 99, dsq: true },
+      3: { porcentajeStintMaximo: 0.6, posicionCarrera: 1 },
+      4: { porcentajeStintMaximo: 0.5, posicionCarrera: 2 },
+    }
+    const ranking = construirRankingStints(actuaciones)
+    expect(ranking[1]).toBeUndefined()
+    expect(ranking[2]).toBeUndefined()
+    expect(ranking[3]).toBe(1)
+    expect(ranking[4]).toBe(2)
   })
 })
 

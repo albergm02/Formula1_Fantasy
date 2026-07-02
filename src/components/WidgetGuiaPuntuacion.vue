@@ -7,11 +7,11 @@ import { perfilesPuntuacion } from '@/utils/perfilesPuntuacion'
 const EJEMPLOS_VARIANTE = {
   qualy: {
     escenario: 'Piloto que clasifica en pole position.',
-    calculo: 'P1 → 25 pts directos. Si clasifica P10 → 1 pt. Fuera del top 10 → 0 pts.',
+    calculo: 'P1 → 25 pts. P10 → 11 pts. P20 o peor → 1 pt. Siempre puntúa.',
   },
   carrera: {
     escenario: 'Piloto que gana la carrera.',
-    calculo: 'P1 → 25 pts. Si termina P3 → 15 pts. Si abandona (ABN / DESC / N/S) → 0 pts.',
+    calculo: 'P1 → 25 pts. P3 → 18 pts. P20 o peor → 1 pt. Si abandona (ABN / DESC / N/S) → 0 pts.',
   },
   todo_terreno: {
     escenario: 'P1 en carrera con lluvia, 2 Coches de Seguridad y 3 abandonos.',
@@ -25,14 +25,17 @@ const EJEMPLOS_VARIANTE = {
   remontador: {
     escenario: 'Piloto que adelanta a 4 rivales y solo recibe 1 adelantamiento.',
     calculo:
-      'Diferencial = 4 − 1 = 3 → 12 pts. Con diferencial 5 o más alcanzaría el tope de 25 pts. Si pierde más adelantamientos de los que hace, 0 pts.',
+      'Diferencial = 4 − 1 = 3 → 16 pts. Con diferencial 6 o más se alcanza el tope de 25 pts. Incluso con diferencial negativo hay puntos de consolación (−1: 5 pts, bajando hasta un suelo de 1 pt).',
   },
   estratega: {
-    escenario: 'P1 en carrera con 1 parada y stint más largo del 80%.',
+    escenario: 'El piloto con el stint más largo de la carrera queda 1.º en el ranking.',
     calculo:
-      'Factor = 0.75 + 0.25 (< 3 paradas) + 0.25 (stint > 50%) = 1.25 → 25 × 1.25 = 31.25 pts. Con 3 paradas y stint corto: 25 × 0.75 = 18.75 pts.',
+      'Se ordenan todos los pilotos por su stint más largo (descendente). Empates se desempatan por posición de carrera. La posición resultante usa la escala base: P1 = 25, P2 = 20, P3 = 18… igual que Qualy y Carrera.',
   },
 }
+
+const ESCALA_BASE =
+  'P1: 25 / P2: 20 / P3: 18 / P4: 17 / P5: 16 / P6: 15 / P7: 14 / P8: 13 / P9: 12 / P10: 11 / P11: 10 / P12: 9 / P13: 8 / P14: 7 / P15: 6 / P16: 5 / P17: 4 / P18: 3 / P19: 2 / P20: 1 - a partir de P20 se mantiene 1 punto.'
 
 const guiaAbierta = ref(false)
 const varianteExpandida = ref(null)
@@ -60,12 +63,16 @@ function alternarVariante(id) {
       <i class="pi text-zinc-500 text-xs" :class="guiaAbierta ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
     </button>
 
-    <div v-if="guiaAbierta" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-2">
+    <div v-if="guiaAbierta" class="px-4 pb-4 pt-2 border-t border-zinc-800 flex flex-col gap-3">
       <p class="text-[11px] text-zinc-400">
-        Cada variante calcula sus puntos directamente del rendimiento real del piloto en este Gran Premio (datos de OpenF1). La posición de
-        qualy, la posición de carrera, las paradas y las posiciones ganadas son las únicas variables. Los potenciadores actúan después como
+        Los puntos salen del rendimiento real del piloto en cada Gran Premio (datos de OpenF1). Los potenciadores actúan después como
         multiplicador global de la jornada.
       </p>
+
+      <div class="bg-[#121218] border border-zinc-800 p-2.5 flex flex-col gap-1">
+        <span class="text-[9px] font-black uppercase tracking-widest text-zinc-500"> Escala base de puntos </span>
+        <span class="text-[11px] text-zinc-300">{{ ESCALA_BASE }}</span>
+      </div>
 
       <div v-for="variante in VARIANTES" :key="variante.id" class="bg-[#121218] border border-zinc-800 overflow-hidden">
         <button

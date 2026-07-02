@@ -15,13 +15,15 @@ const { calcularPuntosVariante } = require('./puntuacion')
 function construirPuntosPorPiloto(pilotos, actuacionesPorPiloto, condiciones) {
   const puntos = {}
   const detalles = {}
+  const rankingStint = condiciones.rankingStint || {}
 
   // Para cada piloto, calculo sus puntos según su variante y actuación
   for (const piloto of pilotos) {
     const partes = piloto.id.split('_')
     const numero = partes[0]
     const variante = partes.slice(1).join('_')
-    const actuacion = actuacionesPorPiloto[numero] || { posicionQualy: 20, posicionCarrera: 20, posicionSalida: 20 }
+    const actuacionBase = actuacionesPorPiloto[numero] || { posicionQualy: 20, posicionCarrera: 20, posicionSalida: 20 }
+    const actuacion = { ...actuacionBase, posicionStint: rankingStint[numero] ?? 20 }
     // Calculo los puntos del piloto según su variante y actuación
     puntos[piloto.id] = calcularPuntosVariante(variante, actuacion, condiciones)
     detalles[piloto.id] = { variante, actuacion }

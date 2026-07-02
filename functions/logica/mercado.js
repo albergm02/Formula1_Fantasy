@@ -5,7 +5,7 @@
 
 const { construirCatalogoCompleto } = require('../infraestructura/catalogoBase')
 
-const CARTAS_POR_DIA = { pilotos: 4, coches: 1, potenciadores: 3 }
+const CARTAS_POR_DIA = { pilotos: 1, coches: 1, potenciadores: 1 }
 
 let catalogoEnMemoria = null
 

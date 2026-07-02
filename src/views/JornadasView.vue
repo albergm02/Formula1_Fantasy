@@ -10,7 +10,7 @@ import BarraNavegacion from '@/components/BarraNavegacion.vue'
 
 import { usarStoreJornada } from '@/stores/storeJornada'
 import { VARIANTES } from '@/utils/variantesPiloto'
-import { calcularPuntosVariante, calcularFactorCaos } from '@/services/servicioJornada'
+import { calcularPuntosVariante, calcularFactorCaos, construirRankingStints } from '@/services/servicioJornada'
 
 const storeJornada = usarStoreJornada()
 const { historial, catalogoPilotos, ultimoGranPremioPendiente } = storeToRefs(storeJornada)
@@ -109,7 +109,6 @@ const CELDAS_OPENF1 = [
   { etiqueta: 'Posición carrera', campo: (a) => a.posicionCarrera, esResultado: true },
   { etiqueta: 'Adelantamientos', campo: (a) => a.numeroAdelantos ?? 0 },
   { etiqueta: 'Veces adelantado', campo: (a) => a.numeroVecesAdelantado ?? 0 },
-  { etiqueta: 'Paradas en boxes', campo: (a) => a.numeroPitStops ?? 0 },
   {
     etiqueta: 'Stint más largo',
     campo: (a) => formatearPorcentaje(a.porcentajeStintMaximo),
@@ -118,10 +117,20 @@ const CELDAS_OPENF1 = [
   },
 ]
 
-function obtenerSimulacionVariantes(piloto) {
+const condicionesCompletas = computed(() => {
+  if (!jornada.value) return {}
   const condiciones = jornada.value.condiciones || {}
+  if (condiciones.rankingStint) return condiciones
+  const actuaciones = jornada.value.actuacionesPorPiloto || {}
+  return { ...condiciones, rankingStint: construirRankingStints(actuaciones) }
+})
+
+function obtenerSimulacionVariantes(piloto) {
+  const condiciones = condicionesCompletas.value
+  const rankingStint = condiciones.rankingStint || {}
+  const actuacion = { ...piloto.actuacion, posicionStint: rankingStint[piloto.numero] ?? 20 }
   return VARIANTES.map((variante) => {
-    const puntos = calcularPuntosVariante(variante.id, piloto.actuacion, condiciones)
+    const puntos = calcularPuntosVariante(variante.id, actuacion, condiciones)
     return { ...variante, puntos }
   })
 }

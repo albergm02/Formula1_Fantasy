@@ -205,16 +205,14 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
   }
 
   // Para cada piloto calculo:
-  // numeroPitStops: número de stints - 1 (cada stint nuevo = 1 pit stop)
   // porcentajeStintMaximo: qué porcentaje del total de vueltas representó el stint más largo
   const resultado = {}
   for (const numero in stintsPorPiloto) {
     // Aseguro que la propiedad exista en el objeto antes de procesarla
     if (!Object.prototype.hasOwnProperty.call(stintsPorPiloto, numero)) continue
-    
+
     const stintsDelPiloto = stintsPorPiloto[numero]
-    const numeroPitStops = Math.max(0, stintsDelPiloto.length - 1)
-    
+
     // Calculo las vueltas de cada stint
     let vueltasMaxStint = 0
     let vueltasTotalPiloto = 0
@@ -229,29 +227,10 @@ async function obtenerDatosStintsPorPiloto(sessionKey) {
       ? Math.round((vueltasMaxStint / vueltasTotalPiloto) * 100) / 100 
       : 0.5
     
-    resultado[numero] = { numeroPitStops, porcentajeStintMaximo }
+    resultado[numero] = { porcentajeStintMaximo }
   }
 
   return resultado
-}
-
-/**
- * Obtiene las paradas en boxes de una sesión específica por piloto, necesario para la variante "estratega".
- * @param {string} sessionKey - Clave de la sesión.
- * @returns {Promise<Object>} - Número de paradas por número de piloto.
- */
-async function obtenerParadasPorPiloto(sessionKey) {
-  const paradas = await consultarOpenF1(`/pit?session_key=${sessionKey}`)
-  const conteo = {}
-
-  for (const parada of paradas) {
-    const numero = parada.driver_number
-    if (numero == null) continue
-    if (parada.pit_duration == null) continue
-    conteo[numero] = (conteo[numero] || 0) + 1
-  }
-
-  return conteo
 }
 
 /**
@@ -275,7 +254,6 @@ async function recopilarDatosGranPremio(meetingKey) {
   const condiciones = await obtenerCondicionesCarrera(sesionCarrera.session_key)
   const adelantamientos = await obtenerAdelantamientosPorPiloto(sesionCarrera.session_key)
   const datosStints = await obtenerDatosStintsPorPiloto(sesionCarrera.session_key)
-  const paradasPorPiloto = await obtenerParadasPorPiloto(sesionCarrera.session_key)
 
   const actuacionesPorPiloto = {}
 
@@ -292,7 +270,6 @@ async function recopilarDatosGranPremio(meetingKey) {
       posicionSalida: parrillaSalida[numeroPiloto] || 20, 
       numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
       numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
-      numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
       porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo || 0,
       dnf: fila.dnf === true,
       dns: fila.dns === true,
@@ -312,7 +289,6 @@ async function recopilarDatosGranPremio(meetingKey) {
         posicionSalida: parrillaSalida[numeroPiloto] || resultadosCarrera[numeroPiloto],
         numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
         numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
-        numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
         porcentajeStintMaximo: stintsPiloto.porcentajeStintMaximo,
         dnf: false,
         dns: false,
@@ -332,7 +308,6 @@ async function recopilarDatosGranPremio(meetingKey) {
       posicionSalida: parrillaSalida[numeroPiloto] || resultadosQualy[numeroPiloto] || 20,
       numeroAdelantos: adelantamientos[numeroPiloto]?.realizados || 0,
       numeroVecesAdelantado: adelantamientos[numeroPiloto]?.recibidos || 0,
-      numeroPitStops: paradasPorPiloto[numeroPiloto] || 0,
       porcentajeStintMaximo: 0,
       dnf: true,
       dns: false,

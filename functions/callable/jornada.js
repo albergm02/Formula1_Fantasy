@@ -7,7 +7,7 @@ const { onSchedule } = require('firebase-functions/v2/scheduler')
 
 const { db } = require('../middleware/firebase')
 const { recopilarDatosGranPremio, obtenerGranPremiosFinalizados } = require('../infraestructura/openF1')
-const { calcularPuntuacionGaraje } = require('../logica/puntuacion')
+const { calcularPuntuacionGaraje, construirRankingStints } = require('../logica/puntuacion')
 const { construirPuntosPorPiloto } = require('../logica/jornada')
 
 const REGION = 'europe-west1'
@@ -49,6 +49,11 @@ async function ejecutarProcesarJornada() {
   if (!granPremio) return { ok: false, motivo: 'sin_datos_openf1', omitidos }
 
   const idJornada = `gp_${granPremio.meeting_key}`
+
+  condiciones = {
+    ...condiciones,
+    rankingStint: construirRankingStints(actuacionesPorPiloto),
+  }
 
   const todasParticipaciones = await db.collection('participaciones').get()
   const batch = db.batch()
@@ -109,14 +114,14 @@ async function ejecutarProcesarJornada() {
 
 /**
  * Programa el procesamiento automático de la jornada mediante una Cloud Function (Scheduler).
- * Se ejecuta automáticamente los lunes a las 19:00 (Europe/Madrid).
+ * Se ejecuta automáticamente los lunes a las 12:00 (Europe/Madrid).
  *
  * @function procesarJornada
  * @returns {Promise<void>}
  */
 exports.procesarJornada = onSchedule(
   {
-    schedule: 'every monday 19:00',
+    schedule: 'every monday 12:00',
     timeZone: 'Europe/Madrid',
     region: REGION,
     retryCount: 3,
