@@ -1,8 +1,21 @@
-# F1 Fantasy - Guia de instalacion y comandos
+# 🏎️ F1 Fantasy
 
-Creado por: Alberto Garcia Martin - Proyecto de Fin de Grado de Ingenieria Informatica.
+Plataforma web interactiva tipo *Fantasy* basada en el campeonato de Fórmula 1:
+crea tu equipo, compite y sigue las puntuaciones con datos reales de cada carrera.
+Proyecto de Fin de Grado de Ingeniería Informática.
 
-El siguiente manual muestra como instalar las dependencias y los comandos necesarios para la correcta compilacion y ejecucion de la aplicacion.
+**Creado por:** Alberto García Martín
+
+> 📸 _(Añade aquí una captura o un GIF de la app en funcionamiento)_
+
+🔗 **Producción:** https://formula1-fantasy-ba348.web.app/
+
+---
+
+## Guía de instalación y comandos
+
+Este manual explica cómo instalar las dependencias y los comandos necesarios para
+la correcta compilación y ejecución de la aplicación.
 
 ---
 
@@ -10,15 +23,13 @@ El siguiente manual muestra como instalar las dependencias y los comandos necesa
 
 Instalar una sola vez:
 
-- **Node.js 22 LTS** -> https://nodejs.org (para frontend y Cloud Functions)
-- **npm** -> incluido con Node.js
-- **Firebase CLI** -> necesario para emuladores y despliegue. Instalar con:
+- **Node.js 22 LTS** → https://nodejs.org (para el frontend y las Cloud Functions)
+- **npm** → incluido con Node.js
+- **Firebase CLI** → necesario para los emuladores y el despliegue. Instalar con:
 
 ```sh
-npm install -g firebase-tools
+  npm install -g firebase-tools
 ```
-
-- **Cuenta de Google + Proyecto Firebase** -> el archivo `.env.local` viene incluido en el paquete, ya rellenado con las credenciales de Firebase. Este archivo es delicado y esta estrictamente prohibido compartirlo, ya que contiene datos secretos de la aplicacion web.
 
 ---
 
@@ -27,7 +38,6 @@ npm install -g firebase-tools
 El paquete del proyecto contiene:
 
 - Todo el codigo fuente (raiz y `functions/`).
-- `.env.local`: credenciales de Firebase ya rellenadas.
 - `package.json` y `package-lock.json` (raiz del proyecto).
 - `functions/package.json` y `functions/package-lock.json`.
 - Sin `node_modules/` (se instalan con los comandos siguientes).
