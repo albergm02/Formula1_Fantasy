@@ -6,8 +6,6 @@ Proyecto de Fin de Grado de Ingeniería Informática.
 
 **Creado por:** Alberto García Martín
 
-> 📸 _(Añade aquí una captura o un GIF de la app en funcionamiento)_
-
 🔗 **Producción:** https://formula1-fantasy-ba348.web.app/
 
 ---
